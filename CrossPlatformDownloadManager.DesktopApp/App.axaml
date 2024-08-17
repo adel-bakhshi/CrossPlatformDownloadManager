@@ -11,7 +11,8 @@
 
     <Application.Styles>
         <SimpleTheme />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Simple.xaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Simple.xaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/WindowStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ExpanderStyle.axaml" />
@@ -21,19 +22,16 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/GridCheckBoxStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridProgressBarStyle.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/TabItemToggleButtonStyle.axaml" />
     </Application.Styles>
 
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Fonts.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Colors.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Fonts.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Colors.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -1,0 +1,25 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Window">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="FontSize"
+                Value="{DynamicResource DefaultFontSize}" />
+        <Setter Property="FontFamily"
+                Value="{DynamicResource Asap}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TextColor}" />
+        <Setter Property="Background"
+                Value="{DynamicResource PrimaryColor}" />
+        <Setter Property="WindowStartupLocation"
+                Value="CenterScreen" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+    </Style>
+</Styles>

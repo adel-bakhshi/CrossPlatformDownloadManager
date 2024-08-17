@@ -1,0 +1,122 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadStatusView"
+             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
+          ColumnDefinitions="Auto, *"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch">
+        <!-- Url -->
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   Text="Url"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="0"
+                   Grid.Column="1"
+                   Text="{Binding Url}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Name -->
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   Text="Name"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding FileName}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Save Location -->
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   Text="Save Location"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="2"
+                   Grid.Column="1"
+                   Text="{Binding SaveLocation}"
+                   Cursor="Hand"
+                   Name="TxbSaveLocation"
+                   Tapped="TxbSaveLocation_OnTapped"
+                   Margin="0, 0, 0, 10">
+            <TextBlock.Styles>
+                <Style Selector="TextBlock:pointerover">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryItemHoverColor}" />
+                </Style>
+            </TextBlock.Styles>
+        </TextBlock>
+
+        <!-- Size -->
+        <TextBlock Grid.Row="3"
+                   Grid.Column="0"
+                   Text="Size"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="3"
+                   Grid.Column="1"
+                   Text="{Binding FileSize}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Downloaded -->
+        <TextBlock Grid.Row="4"
+                   Grid.Column="0"
+                   Text="Downloaded"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="4"
+                   Grid.Column="1"
+                   Text="{Binding Downloaded}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Speed -->
+        <TextBlock Grid.Row="5"
+                   Grid.Column="0"
+                   Text="Speed"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="5"
+                   Grid.Column="1"
+                   Text="{Binding Speed}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Elapsed Time -->
+        <TextBlock Grid.Row="6"
+                   Grid.Column="0"
+                   Text="Elapsed Time"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="6"
+                   Grid.Column="1"
+                   Text="{Binding ElapsedTime}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Time Left -->
+        <TextBlock Grid.Row="7"
+                   Grid.Column="0"
+                   Text="Time Left"
+                   Margin="0, 0, 15, 10" />
+
+        <TextBlock Grid.Row="7"
+                   Grid.Column="1"
+                   Text="{Binding TimeLeft}"
+                   Margin="0, 0, 0, 10" />
+
+        <!-- Resume Capability -->
+        <TextBlock Grid.Row="8"
+                   Grid.Column="0"
+                   Text="Resume Capability"
+                   Margin="0, 0, 15, 0" />
+
+        <TextBlock Grid.Row="8"
+                   Grid.Column="1"
+                   Text="{Binding ResumeCapability}" />
+    </Grid>
+</UserControl>

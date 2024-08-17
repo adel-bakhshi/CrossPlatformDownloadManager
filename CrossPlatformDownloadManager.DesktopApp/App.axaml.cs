@@ -19,10 +19,12 @@ public partial class App : Application
     {
         var serviceProvider = this.GetServiceProvider();
         var mainWindowViewModel = serviceProvider.GetService<MainWindowViewModel>();
+        var downloadWindowViewModel = serviceProvider.GetService<DownloadWindowViewModel>();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow(mainWindowViewModel ?? new MainWindowViewModel())
+            desktop.MainWindow = new MainWindow(mainWindowViewModel ?? new MainWindowViewModel(),
+                downloadWindowViewModel ?? new DownloadWindowViewModel())
             {
                 DataContext = mainWindowViewModel,
             };

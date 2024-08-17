@@ -19,7 +19,11 @@ sealed class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
-            .UseDependencyInjection(services => { services.AddTransient<MainWindowViewModel>(); })
+            .UseDependencyInjection(services =>
+            {
+                services.AddSingleton<MainWindowViewModel>();
+                services.AddTransient<DownloadWindowViewModel>();
+            })
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()

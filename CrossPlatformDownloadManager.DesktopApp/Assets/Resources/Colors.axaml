@@ -66,7 +66,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="DataGridItemGradientBrush"
+    <LinearGradientBrush x:Key="DataGridRowGradientBrush"
                          StartPoint="0%, 50%"
                          EndPoint="100%, 50%">
         <LinearGradientBrush.GradientStops>

@@ -1,0 +1,74 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
+        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="600"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DownloadWindow"
+        x:DataType="vm:DownloadWindowViewModel"
+        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:DownloadWindowViewModel}}"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Download"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0">
+    <Border Padding="20">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
+            <!-- Tab Items -->
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        Margin="0, 0, 0, 15">
+                <ToggleButton Classes="tabItemToggleButton"
+                              IsChecked="{Binding ShowStatusView}"
+                              Command="{Binding ChangeViewCommand}"
+                              CommandParameter="{Binding $self}"
+                              Name="BtnStatus">
+                    <TextBlock Text="Status" />
+                </ToggleButton>
+                <ToggleButton Classes="tabItemToggleButton"
+                              IsChecked="{Binding ShowSpeedLimiterView}"
+                              Command="{Binding ChangeViewCommand}"
+                              CommandParameter="{Binding $self}"
+                              Name="BtnSpeedLimiter">
+                    <TextBlock Text="Speed Limiter" />
+                </ToggleButton>
+                <ToggleButton Classes="tabItemToggleButton"
+                              IsChecked="{Binding ShowOptionsView}"
+                              Command="{Binding ChangeViewCommand}"
+                              CommandParameter="{Binding $self}"
+                              Name="BtnOptions">
+                    <TextBlock Text="Options" />
+                </ToggleButton>
+            </StackPanel>
+
+            <!-- Selected View -->
+            <Border Grid.Row="1"
+                    Padding="15"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource SecondaryColor}"
+                    MinHeight="254"
+                    Margin="0, 0, 0, 10">
+                <uc:DownloadStatusView DataContext="{Binding $self}"
+                                       IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowStatusView, FallbackValue=False, TargetNullValue=False}"
+                                       Url="https://dl2.soft98.ir/soft/f/Figma.124.3.1.0.rar?1723883935"
+                                       FileName="Figma.124.3.1.0.rar"
+                                       SaveLocation="D:\Downloads\Compressed"
+                                       FileSize="110.23 MB"
+                                       Downloaded="23.78 MB (21.50%)"
+                                       Speed="6.84 Mbps"
+                                       ElapsedTime="00 : 01 : 12"
+                                       TimeLeft="00 : 05 : 54"
+                                       ResumeCapability="Yes" />
+            </Border>
+        </Grid>
+    </Border>
+</Window>

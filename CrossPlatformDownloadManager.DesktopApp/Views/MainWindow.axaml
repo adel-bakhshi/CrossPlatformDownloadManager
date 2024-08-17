@@ -7,22 +7,15 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         mc:Ignorable="d"
-        d:DesignWidth="800"
-        d:DesignHeight="450"
+        d:DesignWidth="1280"
+        d:DesignHeight="720"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:MainWindowViewModel}}"
         Icon="/Assets/avalonia-logo.ico"
         Title="CDM"
-        UseLayoutRounding="True"
-        FontSize="{DynamicResource DefaultFontSize}"
-        FontFamily="{DynamicResource Asap}"
-        Foreground="{DynamicResource TextColor}"
-        WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource PrimaryColor}"
         Width="1280"
-        Height="720"
-        CornerRadius="{DynamicResource DefaultCornerRadius}">
+        Height="720">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />

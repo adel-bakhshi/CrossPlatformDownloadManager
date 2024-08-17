@@ -71,7 +71,7 @@
                 <Setter Property="IsVisible"
                         Value="False" />
                 <Setter Property="Fill"
-                        Value="{DynamicResource DataGridItemGradientBrush}" />
+                        Value="{DynamicResource DataGridRowGradientBrush}" />
                 <Setter Property="RadiusX"
                         Value="8" />
                 <Setter Property="RadiusY"

@@ -1,0 +1,79 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Colors -->
+    <Color x:Key="PrimaryColor">#131213</Color>
+    <Color x:Key="SecondaryColor">#201E21</Color>
+    <Color x:Key="TertiaryColor">#727272</Color>
+    <Color x:Key="TextColor">#FFF</Color>
+    <Color x:Key="CategoryItemHoverColor">#25E6C9</Color>
+    <Color x:Key="TransparentColor">#00000000</Color>
+    <Color x:Key="MenuBgColor">#1C1420</Color>
+    <Color x:Key="MenuItemBgOnHoverColor">#201824</Color>
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="SuccessGradientBrush"
+                         StartPoint="0%, 0%"
+                         EndPoint="100%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#0F8814"
+                          Offset="0" />
+            <GradientStop Color="#5CA813"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="InfoGradientBrush"
+                         StartPoint="0%, 0%"
+                         EndPoint="100%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#2C3DC1"
+                          Offset="0" />
+            <GradientStop Color="#3A8ACC"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="DangerGradientBrush"
+                         StartPoint="0%, 0%"
+                         EndPoint="100%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#980C0C"
+                          Offset="0" />
+            <GradientStop Color="#9E165C"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="WarningGradientBrush"
+                         StartPoint="0%, 0%"
+                         EndPoint="100%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#D22700"
+                          Offset="0" />
+            <GradientStop Color="#B76834"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ProgressBarGradientBrush"
+                         StartPoint="0%, 50%"
+                         EndPoint="100%, 50%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#00DBDE"
+                          Offset="0" />
+            <GradientStop Color="#FC00FF"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="DataGridItemGradientBrush"
+                         StartPoint="0%, 50%"
+                         EndPoint="100%, 50%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#14041C"
+                          Offset="0" />
+            <GradientStop Color="#00372B2B"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+</ResourceDictionary>

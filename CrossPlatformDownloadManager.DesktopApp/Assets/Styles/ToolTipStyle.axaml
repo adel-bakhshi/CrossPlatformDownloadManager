@@ -1,0 +1,19 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="ToolTip">
+        <Setter Property="Background"
+                Value="{DynamicResource MenuBgColor}" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="Padding"
+                Value="12, 10" />
+    </Style>
+</Styles>

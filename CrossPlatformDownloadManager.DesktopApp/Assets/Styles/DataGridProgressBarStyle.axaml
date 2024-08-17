@@ -1,0 +1,35 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="ProgressBar.dataGridProgressBar">
+        <Setter Property="Height"
+                Value="6" />
+        <Setter Property="MinHeight"
+                Value="6" />
+        <Setter Property="CornerRadius"
+                Value="3" />
+        <Setter Property="Background"
+                Value="{DynamicResource SecondaryColor}" />
+        <Setter Property="Minimum"
+                Value="0" />
+        <Setter Property="Maximum"
+                Value="100" />
+        <Setter Property="Orientation"
+                Value="Horizontal" />
+
+        <Style Selector="^ /template/ Border#PART_Indicator">
+            <Setter Property="CornerRadius"
+                    Value="3" />
+        </Style>
+
+        <Style Selector="^ /template/ Border#PART_IndeterminateIndicator">
+            <Setter Property="CornerRadius"
+                    Value="3" />
+        </Style>
+    </Style>
+</Styles>

@@ -1,0 +1,112 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="DataGrid">
+        <Setter Property="AutoGenerateColumns"
+                Value="False" />
+        <Setter Property="IsReadOnly"
+                Value="True" />
+        <Setter Property="GridLinesVisibility"
+                Value="None" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="HorizontalAlignment"
+                Value="Stretch" />
+        <Setter Property="VerticalAlignment"
+                Value="Stretch" />
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="SelectionMode"
+                Value="Extended" />
+        <Setter Property="CanUserResizeColumns"
+                Value="True" />
+        <Setter Property="CanUserReorderColumns"
+                Value="False" />
+        <Setter Property="CanUserSortColumns"
+                Value="True" />
+
+        <Style Selector="^ DataGridColumnHeader">
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TextColor}" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Left" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+            <Setter Property="AreSeparatorsVisible"
+                    Value="False" />
+            <Setter Property="SeparatorBrush"
+                    Value="{DynamicResource TertiaryColor}" />
+            <Setter Property="Padding"
+                    Value="10, 15" />
+            <Setter Property="Background"
+                    Value="{DynamicResource SecondaryColor}" />
+
+            <Style Selector="^:nth-child(1)">
+                <Setter Property="CornerRadius"
+                        Value="8, 0, 0, 8" />
+            </Style>
+
+            <Style Selector="^:nth-last-child(1)">
+                <Setter Property="CornerRadius"
+                        Value="0, 8, 8, 0" />
+            </Style>
+        </Style>
+
+        <Style Selector="^ DataGridRow">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="False" />
+                <Setter Property="Fill"
+                        Value="{DynamicResource DataGridItemGradientBrush}" />
+                <Setter Property="RadiusX"
+                        Value="8" />
+                <Setter Property="RadiusY"
+                        Value="8" />
+                <Setter Property="Margin"
+                        Value="-10, -15" />
+            </Style>
+
+            <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="0.5" />
+            </Style>
+
+            <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="1" />
+            </Style>
+
+            <Style Selector="^:selected">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource TextColor}" />
+            </Style>
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Padding"
+                        Value="10, 15" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="CornerRadius"
+                        Value="{DynamicResource DefaultCornerRadius}" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>

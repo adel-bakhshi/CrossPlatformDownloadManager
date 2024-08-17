@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.ActionButton"
+             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+    <Button Classes="actionButtonStyle"
+            Command="{Binding Command}"
+            ToolTip.Tip="{Binding Text}">
+        <StackPanel Spacing="5">
+            <PathIcon Data="{Binding IconData}"
+                      Width="{DynamicResource MediumIconSize}"
+                      Height="{DynamicResource MediumIconSize}"
+                      Foreground="{Binding IconColor}"
+                      HorizontalAlignment="Center" />
+
+            <TextBlock Text="{Binding Text}"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+    </Button>
+</UserControl>

@@ -1,0 +1,405 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:MainWindowViewModel}}"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM"
+        UseLayoutRounding="True"
+        FontSize="{DynamicResource DefaultFontSize}"
+        FontFamily="{DynamicResource Asap}"
+        Foreground="{DynamicResource TextColor}"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource PrimaryColor}"
+        Width="1280"
+        Height="720"
+        CornerRadius="{DynamicResource DefaultCornerRadius}">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto, *, Auto">
+        <!-- Top bar -->
+        <Border Grid.Row="0"
+                Padding="20, 20, 20, 0">
+            <Grid RowDefinitions="*, Auto"
+                  ColumnDefinitions="*, Auto">
+                <!-- Menu -->
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Spacing="50"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                    <!-- Logo -->
+                    <Grid VerticalAlignment="Center">
+                        <Ellipse Width="36"
+                                 Height="36"
+                                 Fill="{DynamicResource DangerGradientBrush}"
+                                 VerticalAlignment="Center"
+                                 HorizontalAlignment="Center" />
+
+                        <TextBlock Text="CDM"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Menu Items -->
+                    <Menu VerticalAlignment="Center">
+                        <!-- Task -->
+                        <MenuItem Header="Task"
+                                  Classes="header">
+                            <MenuItem Header="Add Url"
+                                      Classes="listItem">
+                            </MenuItem>
+                            <MenuItem Header="Add Url from clipboard"
+                                      Classes="listItem">
+                            </MenuItem>
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+                            <MenuItem Header="Export"
+                                      Classes="listItem">
+                            </MenuItem>
+                            <MenuItem Header="Import"
+                                      Classes="listItem">
+                            </MenuItem>
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+                            <MenuItem Header="Exit"
+                                      Classes="listItem">
+                            </MenuItem>
+                        </MenuItem>
+
+                        <!-- File -->
+                        <MenuItem Header="File"
+                                  Classes="header">
+                        </MenuItem>
+
+                        <!-- Downloads -->
+                        <MenuItem Header="Downloads"
+                                  Classes="header">
+                        </MenuItem>
+
+                        <!-- View -->
+                        <MenuItem Header="View"
+                                  Classes="header">
+                        </MenuItem>
+
+                        <!-- Help -->
+                        <MenuItem Header="Help"
+                                  Classes="header">
+                        </MenuItem>
+                    </Menu>
+                </StackPanel>
+
+                <!-- Search box -->
+                <cc:CustomTextBox Grid.Row="0"
+                                  Grid.Column="1"
+                                  Width="240"
+                                  Background="{DynamicResource SecondaryColor}"
+                                  Placeholder="Search in the list"
+                                  PlaceholderColor="{DynamicResource TertiaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource Search}"
+                                  IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryColor}" />
+
+                <!-- Separator -->
+                <Separator Grid.Row="1"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           HorizontalAlignment="Stretch"
+                           Height="1"
+                           Background="{DynamicResource SecondaryColor}"
+                           Margin="0, 20" />
+            </Grid>
+        </Border>
+
+        <!-- Main content -->
+        <Border Grid.Row="1"
+                Padding="20, 0">
+            <Grid ColumnDefinitions="Auto, *">
+                <!-- Category tree view -->
+                <Border Grid.Column="0"
+                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Background="{DynamicResource SecondaryColor}"
+                        Padding="20"
+                        Width="250">
+                    <ListBox ItemsSource="{Binding Categories}"
+                             Classes="categoryList"
+                             SelectedItem="{Binding SelectedCategory}"
+                             Name="LstCategories" />
+                </Border>
+
+                <!-- Actions buttons and Download list -->
+                <Grid Grid.Column="1"
+                      RowDefinitions="Auto, *"
+                      Margin="20, 0, 0, 0">
+                    <!-- Action buttons -->
+                    <Grid Grid.Row="0"
+                          RowDefinitions="Auto, Auto">
+                        <StackPanel Grid.Row="0"
+                                    Orientation="Horizontal"
+                                    Spacing="10">
+                            <!-- Add Url -->
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="5">
+                                <uc:ActionButton Text="Add Url"
+                                                 IconData="{DynamicResource AddUrl}"
+                                                 IconColor="{DynamicResource SuccessGradientBrush}" />
+                            </StackPanel>
+
+                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                                       Width="1"
+                                       VerticalAlignment="Stretch" />
+
+                            <!-- Resume, Stop and Stop All -->
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="5">
+                                <uc:ActionButton Text="Resume"
+                                                 IconData="{DynamicResource Resume}"
+                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+
+                                <uc:ActionButton Text="Stop"
+                                                 IconData="{DynamicResource Stop}"
+                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+
+                                <uc:ActionButton Text="Stop All"
+                                                 IconData="{DynamicResource StopAll}"
+                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+                            </StackPanel>
+
+                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                                       Width="1"
+                                       VerticalAlignment="Stretch" />
+
+                            <!-- Delete and Delete Completed -->
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="5">
+                                <uc:ActionButton Text="Delete"
+                                                 IconData="{DynamicResource Delete}"
+                                                 IconColor="{DynamicResource DangerGradientBrush}" />
+
+                                <uc:ActionButton Text="Delete Completed"
+                                                 IconData="{DynamicResource DeleteCompleted}"
+                                                 IconColor="{DynamicResource DangerGradientBrush}" />
+                            </StackPanel>
+
+                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                                       Width="1"
+                                       VerticalAlignment="Stretch" />
+
+                            <!-- Settings, Schedule, Queues and Share -->
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="5">
+                                <uc:ActionButton Text="Settings"
+                                                 IconData="{DynamicResource Settings}"
+                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+
+                                <uc:ActionButton Text="Schedule"
+                                                 IconData="{DynamicResource Schedule}"
+                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+
+                                <uc:ActionButton Text="Queues"
+                                                 IconData="{DynamicResource Queues}"
+                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+
+                                <uc:ActionButton Text="Share"
+                                                 IconData="{DynamicResource Share}"
+                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Separator Grid.Row="1"
+                                   HorizontalAlignment="Stretch"
+                                   Background="{DynamicResource SecondaryColor}"
+                                   Margin="0, 20, 0, 10" />
+                    </Grid>
+
+                    <!-- Download list -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding DownloadFiles}">
+                        <DataGrid.Columns>
+                            <!-- Checkbox for selecting rows -->
+                            <DataGridTemplateColumn MinWidth="50">
+                                <DataGridTemplateColumn.Header>
+                                    <CheckBox IsChecked="{Binding SelectAllDownloadFiles}"
+                                              Classes="dataGridCheckBox"
+                                              Command="{Binding SelectAllRowsCommand}"
+                                              CommandParameter="{Binding $parent[DataGrid]}" />
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Classes="dataGridCheckBox"
+                                                  IsChecked="{Binding $parent[DataGridRow].IsSelected}"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Top" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- File Name and File Type -->
+                            <DataGridTemplateColumn Header="Name"
+                                                    MinWidth="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding FileName}" />
+                                            <TextBlock Text="{Binding FileType}"
+                                                       Foreground="{DynamicResource TertiaryColor}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Queue Name -->
+                            <DataGridTextColumn Header="Queue"
+                                                MinWidth="150"
+                                                Binding="{Binding QueueName}" />
+
+                            <!-- File Size -->
+                            <DataGridTextColumn Header="Size"
+                                                MinWidth="150"
+                                                Binding="{Binding Size}" />
+
+                            <!-- Download Status -->
+                            <DataGridTemplateColumn Header="Status"
+                                                    MinWidth="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Completed"
+                                                       Foreground="{DynamicResource SuccessGradientBrush}"
+                                                       IsVisible="{Binding IsCompleted}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Stretch" />
+
+                                            <StackPanel VerticalAlignment="Center"
+                                                        HorizontalAlignment="Stretch"
+                                                        Margin="5, 0"
+                                                        IsVisible="{Binding IsDownloading}">
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:##.00}%}" />
+                                                <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                                             Value="{Binding DownloadProgress}"
+                                                             Classes="dataGridProgressBar" />
+                                            </StackPanel>
+
+                                            <StackPanel VerticalAlignment="Center"
+                                                        HorizontalAlignment="Stretch"
+                                                        Margin="5, 0"
+                                                        IsVisible="{Binding IsPaused}">
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgress, StringFormat={}Paused - {0:##.00}%}"
+                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
+                                                             Value="{Binding DownloadProgress}"
+                                                             Classes="dataGridProgressBar" />
+                                            </StackPanel>
+
+                                            <StackPanel VerticalAlignment="Center"
+                                                        HorizontalAlignment="Stretch"
+                                                        Margin="5, 0"
+                                                        IsVisible="{Binding IsError}">
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgress, StringFormat={}Error - {0:##.00}%}"
+                                                    Foreground="{DynamicResource DangerGradientBrush}" />
+                                                <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
+                                                             Value="{Binding DownloadProgress}"
+                                                             Classes="dataGridProgressBar" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Time Left -->
+                            <DataGridTextColumn Header="Time Left"
+                                                MinWidth="150"
+                                                Binding="{Binding TimeLeft}" />
+
+                            <!-- Transfer Rate -->
+                            <DataGridTextColumn Header="Transfer Rate"
+                                                MinWidth="150"
+                                                Binding="{Binding TransferRate}" />
+
+                            <!-- Last Try Date -->
+                            <DataGridTextColumn Header="Last Try Date"
+                                                MinWidth="250"
+                                                Binding="{Binding LastTryDate}" />
+
+                            <!-- Date Added -->
+                            <DataGridTextColumn Header="Date Added"
+                                                MinWidth="250"
+                                                Binding="{Binding DateAdded}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource SecondaryColor}"
+                Padding="20, 10"
+                Margin="0, 20, 0, 0">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="20"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <!-- Size and Active Queue -->
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10"
+                            VerticalAlignment="Center">
+                    <PathIcon Data="{DynamicResource ActiveQueue}"
+                              Foreground="{DynamicResource TertiaryColor}"
+                              Width="16"
+                              Height="16" />
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="5"
+                                VerticalAlignment="Center">
+                        <PathIcon Data="{DynamicResource Size}"
+                                  Foreground="{DynamicResource TertiaryColor}"
+                                  Width="16"
+                                  Height="16" />
+                        <TextBlock Text="2.4 GB"
+                                   Foreground="{DynamicResource TertiaryColor}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Download speed -->
+                <StackPanel Orientation="Horizontal"
+                            Spacing="5"
+                            VerticalAlignment="Center">
+                    <PathIcon Data="{DynamicResource Download}"
+                              Foreground="{DynamicResource SuccessGradientBrush}"
+                              Width="16"
+                              Height="16"
+                              VerticalAlignment="Center" />
+                    <TextBlock Text="16.2 Mbps"
+                               Foreground="{DynamicResource SuccessGradientBrush}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

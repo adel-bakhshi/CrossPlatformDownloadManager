@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Corner Radius -->
+    <CornerRadius x:Key="DefaultCornerRadius">8</CornerRadius>
+
+    <!-- Font size -->
+    <x:Double x:Key="DefaultFontSize">14</x:Double>
+
+    <!-- Icon size -->
+    <x:Double x:Key="SmallIconSize">16</x:Double>
+    <x:Double x:Key="MediumIconSize">32</x:Double>
+</ResourceDictionary>

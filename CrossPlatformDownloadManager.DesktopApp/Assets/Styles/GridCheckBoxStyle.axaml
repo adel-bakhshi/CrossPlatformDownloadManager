@@ -1,0 +1,115 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+
+    <Style Selector="CheckBox.dataGridCheckBox">
+        <Setter Property="Foreground"
+                Value="{DynamicResource ThemeForegroundBrush}" />
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource TertiaryColor}" />
+        <Setter Property="BorderThickness"
+                Value="1" />
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="VerticalContentAlignment"
+                Value="Center" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="Left" />
+        <Setter Property="CornerRadius"
+                Value="5" />
+        <Setter Property="Width"
+                Value="14" />
+        <Setter Property="Height"
+                Value="14" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Name="border"
+                            Width="14"
+                            Height="14"
+                            VerticalAlignment="Center"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <Panel>
+                            <PathIcon Name="checkMark"
+                                      Width="10"
+                                      Height="10"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Data="{DynamicResource Finished}"
+                                      Foreground="{DynamicResource TextColor}"
+                                      FlowDirection="LeftToRight" />
+                            <Rectangle Name="indeterminateMark"
+                                       Width="10"
+                                       Height="10"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Fill="{DynamicResource HighlightBrush}"
+                                       Stretch="Uniform" />
+                        </Panel>
+                    </Border>
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Grid.Column="1"
+                                      Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      IsVisible="{TemplateBinding Content,
+                                                        Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      RecognizesAccessKey="True"
+                                      TextElement.Foreground="{TemplateBinding Foreground}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:pointerover /template/ Border#border">
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TertiaryColor}" />
+        </Style>
+
+        <Style Selector="^:checked /template/ Border#border">
+            <Setter Property="BorderThickness"
+                    Value="0" />
+        </Style>
+
+        <Style Selector="^ /template/ PathIcon#checkMark">
+            <Setter Property="IsVisible"
+                    Value="False" />
+        </Style>
+
+        <Style Selector="^ /template/ Rectangle#indeterminateMark">
+            <Setter Property="IsVisible"
+                    Value="False" />
+        </Style>
+
+        <Style Selector="^:checked /template/ PathIcon#checkMark">
+            <Setter Property="IsVisible"
+                    Value="True" />
+        </Style>
+
+        <Style Selector="^:checked">
+            <Setter Property="Background"
+                    Value="{DynamicResource ProgressBarGradientBrush}" />
+        </Style>
+
+        <Style Selector="^:indeterminate /template/ Rectangle#indeterminateMark">
+            <Setter Property="IsVisible"
+                    Value="True" />
+        </Style>
+
+        <Style Selector="^:disabled /template/ Border#border">
+            <Setter Property="Opacity"
+                    Value="{DynamicResource ThemeDisabledOpacity}" />
+        </Style>
+    </Style>
+</Styles>

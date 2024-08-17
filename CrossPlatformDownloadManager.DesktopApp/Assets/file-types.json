@@ -1,0 +1,260 @@
+﻿[
+  {
+    "fileType": "Compressed",
+    "typeExtensions": [
+      {
+        "extension": ".zip",
+        "alias": "ZIP Archive"
+      },
+      {
+        "extension": ".rar",
+        "alias": "RAR Archive"
+      },
+      {
+        "extension": ".gz",
+        "alias": "GZIP Archive"
+      },
+      {
+        "extension": ".7z",
+        "alias": "7Z Archive"
+      },
+      {
+        "extension": ".s7z",
+        "alias": "S7Z Archive"
+      },
+      {
+        "extension": ".arj",
+        "alias": "ARJ Archive"
+      },
+      {
+        "extension": ".bz2",
+        "alias": "BZ2 Archive"
+      }
+    ]
+  },
+  {
+    "fileType": "Documents",
+    "typeExtensions": [
+      {
+        "extension": ".doc",
+        "alias": "Microsoft Word"
+      },
+      {
+        "extension": ".docx",
+        "alias": "Microsoft Word"
+      },
+      {
+        "extension": ".pdf",
+        "alias": "PDF"
+      },
+      {
+        "extension": ".ppt",
+        "alias": "Microsoft PowerPoint"
+      },
+      {
+        "extension": ".pps",
+        "alias": "Microsoft PowerPoint"
+      },
+      {
+        "extension": ".pptx",
+        "alias": "Microsoft PowerPoint"
+      }
+    ]
+  },
+  {
+    "fileType": "Images",
+    "typeExtensions": [
+      {
+        "extension": ".png",
+        "alias": "PNG Image"
+      },
+      {
+        "extension": ".jpeg",
+        "alias": "JPEG Image"
+      },
+      {
+        "extension": ".jpg",
+        "alias": "JPG Image"
+      },
+      {
+        "extension": ".gif",
+        "alias": "GIF Image"
+      },
+      {
+        "extension": ".tiff",
+        "alias": "TIFF Image"
+      },
+      {
+        "extension": ".psd",
+        "alias": "Photoshop Document"
+      },
+      {
+        "extension": ".eps",
+        "alias": "Encapsulated Postscript"
+      },
+      {
+        "extension": ".ai",
+        "alias": "Adobe Illustrator Document"
+      },
+      {
+        "extension": ".indd",
+        "alias": "Adobe Indesign Document"
+      },
+      {
+        "extension": ".svg",
+        "alias": "SVG Image"
+      },
+      {
+        "extension": ".webp",
+        "alias": "Web Picture"
+      },
+      {
+        "extension": ".bmp",
+        "alias": "BMP Image"
+      }
+    ]
+  },
+  {
+    "fileType": "Musics",
+    "typeExtensions": [
+      {
+        "extension": ".mp3",
+        "alias": "MP3 Audio"
+      },
+      {
+        "extension": ".wav",
+        "alias": "WAV Audio"
+      },
+      {
+        "extension": ".wma",
+        "alias": "WMA Audio"
+      },
+      {
+        "extension": ".mpa",
+        "alias": "MPA Audio"
+      },
+      {
+        "extension": ".ram",
+        "alias": "RAM Audio"
+      },
+      {
+        "extension": ".ra",
+        "alias": "RA Audio"
+      },
+      {
+        "extension": ".aac",
+        "alias": "AAC Audio"
+      },
+      {
+        "extension": ".aif",
+        "alias": "AIF Audio"
+      },
+      {
+        "extension": ".m4a",
+        "alias": "M4A Audio"
+      },
+      {
+        "extension": ".tsa",
+        "alias": "TSA Audio"
+      },
+      {
+        "extension": ".flac",
+        "alias": "FLAC Audio"
+      }
+    ]
+  },
+  {
+    "fileType": "Programs",
+    "typeExtensions": [
+      {
+        "extension": ".exe",
+        "alias": "Application"
+      },
+      {
+        "extension": ".msi",
+        "alias": "Application"
+      },
+      {
+        "extension": ".apk",
+        "alias": "Android Application"
+      }
+    ]
+  },
+  {
+    "fileType": "Videos",
+    "typeExtensions": [
+      {
+        "extension": ".avi",
+        "alias": "AVI Video"
+      },
+      {
+        "extension": ".mpg",
+        "alias": "MPG Video"
+      },
+      {
+        "extension": ".mpe",
+        "alias": "MPE Video"
+      },
+      {
+        "extension": ".mpeg",
+        "alias": "MPEG Video"
+      },
+      {
+        "extension": ".asf",
+        "alias": "ASF Video"
+      },
+      {
+        "extension": ".wmv",
+        "alias": "WMV Video"
+      },
+      {
+        "extension": ".mov",
+        "alias": "MOV Video"
+      },
+      {
+        "extension": ".qt",
+        "alias": "QT Video"
+      },
+      {
+        "extension": ".rm",
+        "alias": "RM Video"
+      },
+      {
+        "extension": ".mp4",
+        "alias": "MP4 Video"
+      },
+      {
+        "extension": ".flv",
+        "alias": "FLV Video"
+      },
+      {
+        "extension": ".m4v",
+        "alias": "M4V Video"
+      },
+      {
+        "extension": ".webm",
+        "alias": "WEBM Video"
+      },
+      {
+        "extension": ".ogv",
+        "alias": "OGV Video"
+      },
+      {
+        "extension": ".ogg",
+        "alias": "OGG Video"
+      },
+      {
+        "extension": ".mkv",
+        "alias": "MKV Video"
+      },
+      {
+        "extension": ".ts",
+        "alias": "TS Video"
+      },
+      {
+        "extension": ".tsv",
+        "alias": "TSV Video"
+      }
+    ]
+  }
+]

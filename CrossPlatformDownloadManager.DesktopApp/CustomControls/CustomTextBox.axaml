@@ -1,0 +1,100 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.CustomControls">
+    <Design.PreviewWith>
+        <controls:CustomTextBox CornerRadius="8"
+                                Padding="12, 10"
+                                Background="#201E21"
+                                IconData="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"
+                                IconColor="Orange"
+                                IconSize="24"
+                                FontSize="24"
+                                FontFamily="Asap"
+                                Foreground="DodgerBlue"
+                                Placeholder="What are you looking for?"
+                                PlaceholderColor="#727272" />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|CustomTextBox">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Duration="0:0:0.3"
+                                 Property="BorderBrush" />
+            </Transitions>
+        </Setter>
+        
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        Margin="{TemplateBinding Margin}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        Background="{TemplateBinding Background}"
+                        Transitions="{TemplateBinding Transitions}"
+                        Name="Root">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <PathIcon Grid.Column="0"
+                                  Data="{TemplateBinding IconData}"
+                                  Foreground="{TemplateBinding IconColor}"
+                                  Width="{TemplateBinding IconSize}"
+                                  Height="{TemplateBinding IconSize}"
+                                  Classes.hasIcon="{TemplateBinding IconData, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <PathIcon.Styles>
+                                <Style Selector="PathIcon">
+                                    <Setter Property="Margin"
+                                            Value="0" />
+                                    <Setter Property="IsVisible"
+                                            Value="False" />
+                                </Style>
+
+                                <Style Selector="PathIcon.hasIcon">
+                                    <Setter Property="Margin"
+                                            Value="0, 0, 10, 0" />
+                                    <Setter Property="IsVisible"
+                                            Value="True" />
+                                </Style>
+                            </PathIcon.Styles>
+                        </PathIcon>
+
+                        <TextBox Grid.Column="1"
+                                 Margin="0"
+                                 Padding="0"
+                                 VerticalAlignment="Center"
+                                 HorizontalAlignment="Stretch"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Name="InputTextBox" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{TemplateBinding Placeholder}"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   IsHitTestVisible="False"
+                                   Foreground="{TemplateBinding PlaceholderColor}"
+                                   IsVisible="{Binding #InputTextBox.Text, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|CustomTextBox:focus /template/ Border#Root">
+        <Setter Property="BorderBrush"
+                Value="{Binding $parent[controls:CustomTextBox].OnFocusBorderColor}" />
+    </Style>
+
+    <Style Selector="controls|CustomTextBox:focus-visible /template/ Border#Root">
+        <Setter Property="BorderBrush"
+                Value="{Binding $parent[controls:CustomTextBox].OnFocusBorderColor}" />
+    </Style>
+
+    <Style Selector="controls|CustomTextBox:focus-within /template/ Border#Root">
+        <Setter Property="BorderBrush"
+                Value="{Binding $parent[controls:CustomTextBox].OnFocusBorderColor}" />
+    </Style>
+
+    <Style Selector="controls|CustomTextBox:pointerover /template/ Border#Root">
+        <Setter Property="BorderBrush"
+                Value="{Binding $parent[controls:CustomTextBox].OnHoverBorderColor}" />
+    </Style>
+</Styles>

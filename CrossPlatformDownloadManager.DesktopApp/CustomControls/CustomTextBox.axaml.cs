@@ -72,4 +72,13 @@ public class CustomTextBox : TemplatedControl
         get => GetValue(OnHoverBorderColorProperty);
         set => SetValue(OnHoverBorderColorProperty, value);
     }
+
+    public static readonly StyledProperty<string?> TextProperty = AvaloniaProperty.Register<CustomTextBox, string?>(
+        "Text");
+
+    public string? Text
+    {
+        get => GetValue(TextProperty);
+        set => SetValue(TextProperty, value);
+    }
 }

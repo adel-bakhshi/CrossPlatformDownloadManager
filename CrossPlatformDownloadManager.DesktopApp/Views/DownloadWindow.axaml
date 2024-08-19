@@ -57,17 +57,25 @@
                     Background="{DynamicResource SecondaryColor}"
                     MinHeight="254"
                     Margin="0, 0, 0, 10">
-                <uc:DownloadStatusView DataContext="{Binding $self}"
-                                       IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowStatusView, FallbackValue=False, TargetNullValue=False}"
-                                       Url="https://dl2.soft98.ir/soft/f/Figma.124.3.1.0.rar?1723883935"
-                                       FileName="Figma.124.3.1.0.rar"
-                                       SaveLocation="D:\Downloads\Compressed"
-                                       FileSize="110.23 MB"
-                                       Downloaded="23.78 MB (21.50%)"
-                                       Speed="6.84 Mbps"
-                                       ElapsedTime="00 : 01 : 12"
-                                       TimeLeft="00 : 05 : 54"
-                                       ResumeCapability="Yes" />
+                <Grid>
+                    <!-- Download Status View -->
+                    <uc:DownloadStatusView DataContext="{Binding $self}"
+                                           IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowStatusView, FallbackValue=False, TargetNullValue=False}"
+                                           Url="https://dl2.soft98.ir/soft/f/Figma.124.3.1.0.rar?1723883935"
+                                           FileName="Figma.124.3.1.0.rar"
+                                           SaveLocation="D:\Downloads\Compressed"
+                                           FileSize="110.23 MB"
+                                           Downloaded="23.78 MB (21.50%)"
+                                           Speed="6.84 Mbps"
+                                           ElapsedTime="00 : 01 : 12"
+                                           TimeLeft="00 : 05 : 54"
+                                           ResumeCapability="Yes" />
+
+                    <!-- Download Speed Limiter View  -->
+                    <uc:DownloadSpeedLimiterView DataContext="{Binding $self}"
+                                                 IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowSpeedLimiterView, FallbackValue=False, TargetNullValue=False}"
+                                                 SpeedLimiterEnabled="False" />
+                </Grid>
             </Border>
         </Grid>
     </Border>

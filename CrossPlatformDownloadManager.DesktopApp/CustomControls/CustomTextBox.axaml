@@ -22,7 +22,7 @@
                                  Property="BorderBrush" />
             </Transitions>
         </Setter>
-        
+
         <Setter Property="Template">
             <ControlTemplate>
                 <Border CornerRadius="{TemplateBinding CornerRadius}"
@@ -64,6 +64,7 @@
                                  HorizontalAlignment="Stretch"
                                  Background="Transparent"
                                  BorderThickness="0"
+                                 Text="{Binding $parent[controls:CustomTextBox].Text, Mode=TwoWay}"
                                  Name="InputTextBox" />
                         <TextBlock Grid.Column="1"
                                    Text="{TemplateBinding Placeholder}"

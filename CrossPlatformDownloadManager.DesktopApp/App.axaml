@@ -23,6 +23,7 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/GridCheckBoxStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridProgressBarStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/TabItemToggleButtonStyle.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ButtonsStyle.axaml" />
     </Application.Styles>
 
     <Application.Resources>

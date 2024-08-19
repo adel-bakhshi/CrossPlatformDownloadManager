@@ -3,7 +3,10 @@
         xmlns:vm="using:CrossPlatformDownloadManager.Test.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:uc="using:CrossPlatformDownloadManager.Test.Views.UserControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.Test.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -12,9 +15,34 @@
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid>
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <!-- <ComboBox Width="300" FontSize="14" MinHeight="60"> -->
+            <!--     <ComboBoxItem> -->
+            <!--         <TextBlock Text="KB" -->
+            <!--                    Margin="12, 0" /> -->
+            <!--     </ComboBoxItem> -->
+            <!--     <ComboBoxItem> -->
+            <!--         <TextBlock Text="MB" -->
+            <!--                    Margin="12, 0" /> -->
+            <!--     </ComboBoxItem> -->
+            <!--     <ComboBoxItem> -->
+            <!--         <TextBlock Text="GB" -->
+            <!--                    Margin="12, 0" /> -->
+            <!--     </ComboBoxItem> -->
+            <!--     <ComboBoxItem> -->
+            <!--         <TextBlock Text="TB" -->
+            <!--                    Margin="12, 0" /> -->
+            <!--     </ComboBoxItem> -->
+            <!-- </ComboBox> -->
 
+            <TextBox Watermark="Hello"
+                     Text=""
+                     Width="300" />
+        </StackPanel>
+    </Grid>
 </Window>

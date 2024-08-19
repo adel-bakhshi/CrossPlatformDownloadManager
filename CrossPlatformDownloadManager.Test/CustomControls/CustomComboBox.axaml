@@ -1,0 +1,244 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CrossPlatformDownloadManager.Test.CustomControls">
+    <Design.PreviewWith>
+        <Grid Width="300"
+              Height="300">
+            <StackPanel Spacing="10"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Center">
+                <controls:CustomComboBox PlaceholderText="Unit"
+                                         PlaceholderForeground="Gray"
+                                         FontFamily="Asap"
+                                         FontSize="14"
+                                         Background="Black"
+                                         BorderThickness="0"
+                                         Padding="12, 10"
+                                         CornerRadius="8"
+                                         UseLayoutRounding="True"
+                                         Foreground="White"
+                                         IsDropDownOpen="False"
+                                         Width="200"
+                                         HorizontalContentAlignment="Left"
+                                         VerticalContentAlignment="Center">
+                    <ComboBoxItem>
+                        <TextBlock Text="KB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <TextBlock Text="MB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <TextBlock Text="GB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <TextBlock Text="TB" />
+                    </ComboBoxItem>
+                </controls:CustomComboBox>
+
+                <ComboBox>
+                    <ComboBoxItem Padding="12, 2">
+                        <TextBlock Text="KB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="12, 2">
+                        <TextBlock Text="MB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="12, 2">
+                        <TextBlock Text="GB" />
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="12, 2">
+                        <TextBlock Text="TB" />
+                    </ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+        </Grid>
+    </Design.PreviewWith>
+
+    <Style Selector="controls|CustomComboBox ComboBoxItem">
+        <Setter Property="Background"
+                Value="Transparent" />
+        <Setter Property="Padding"
+                Value="15, 5" />
+        <Setter Property="HorizontalAlignment"
+                Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="Left" />
+        
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Padding="{TemplateBinding Padding}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  CornerRadius="{TemplateBinding CornerRadius}" />
+            </ControlTemplate>
+        </Setter>
+        
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeControlHighlightMidBrush}" />
+        </Style>
+        
+        <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeAccentBrush4}" />
+        </Style>
+        
+        <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeAccentBrush3}" />
+        </Style>
+        
+        <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeAccentBrush3}" />
+        </Style>
+        
+        <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeAccentBrush2}" />
+        </Style>
+    </Style>
+
+    <Style Selector="controls|CustomComboBox">
+        <Setter Property="Background"
+                Value="Transparent" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource ThemeForegroundBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource ThemeBorderMidBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource ThemeBorderThickness}" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="Stretch" />
+        <Setter Property="VerticalContentAlignment"
+                Value="Center" />
+        <Setter Property="Padding"
+                Value="4" />
+        <Setter Property="MinHeight"
+                Value="0" />
+        <Setter Property="PlaceholderForeground"
+                Value="{DynamicResource ThemeForegroundBrush}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Hidden" />
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <PathIcon Grid.Column="0"
+                                  Data="{TemplateBinding IconData}"
+                                  Foreground="{TemplateBinding IconColor}"
+                                  Width="{TemplateBinding IconSize}"
+                                  Height="{TemplateBinding IconSize}"
+                                  IsVisible="{TemplateBinding IconData, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  Classes.hasIconData="{Binding $self.IsVisible}">
+                            <PathIcon.Styles>
+                                <Style Selector="PathIcon">
+                                    <Setter Property="Margin"
+                                            Value="0" />
+
+                                    <Style Selector="^.hasIconData">
+                                        <Setter Property="Margin"
+                                                Value="0, 0, 10, 0" />
+                                    </Style>
+                                </Style>
+                            </PathIcon.Styles>
+                        </PathIcon>
+
+                        <TextBlock Name="PlaceholderTextBlock"
+                                   Grid.Column="1"
+                                   Margin="{TemplateBinding Padding}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                   Foreground="{TemplateBinding PlaceholderForeground}"
+                                   IsVisible="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}"
+                                   Text="{TemplateBinding PlaceholderText}" />
+                        <ContentControl Grid.Column="1"
+                                        Margin="{TemplateBinding Padding}"
+                                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        Content="{TemplateBinding SelectionBoxItem}"
+                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}">
+                        </ContentControl>
+                        <ToggleButton Name="toggle"
+                                      Grid.Column="2"
+                                      BorderThickness="0"
+                                      ClickMode="Press"
+                                      Focusable="False"
+                                      IsChecked="{TemplateBinding IsDropDownOpen, Mode=TwoWay}">
+                            <ToggleButton.Styles>
+                                <Style Selector="ToggleButton">
+                                    <Setter Property="Background"
+                                            Value="Transparent" />
+
+                                    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="Transparent" />
+                                    </Style>
+
+                                    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="Transparent" />
+                                    </Style>
+                                </Style>
+                            </ToggleButton.Styles>
+
+                            <PathIcon Width="16"
+                                      Height="16"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z"
+                                      Foreground="White"
+                                      Margin="10, 0, 0, 0" />
+                        </ToggleButton>
+
+                        <Popup Grid.Column="0"
+                               Name="PART_Popup"
+                               MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                               MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                               IsLightDismissEnabled="True"
+                               IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                               PlacementTarget="{TemplateBinding}"
+                               InheritsTransform="True">
+                            <Border Background="Purple"
+                                    BorderBrush="{DynamicResource ThemeBorderMidBrush}"
+                                    BorderThickness="0"
+                                    CornerRadius="8"
+                                    Padding="0, 8"
+                                    Margin="0, 5, 0, 0">
+                                <ScrollViewer
+                                    HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                    VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                    IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}">
+                                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:pointerover /template/ Border#border">
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource ThemeBorderHighBrush}" />
+        </Style>
+
+        <Style Selector="^:disabled /template/ Border#border">
+            <Setter Property="Opacity"
+                    Value="0.8" />
+        </Style>
+    </Style>
+</Styles>

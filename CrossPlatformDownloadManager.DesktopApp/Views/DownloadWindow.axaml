@@ -55,7 +55,7 @@
                     Padding="15"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Background="{DynamicResource SecondaryColor}"
-                    MinHeight="254"
+                    Height="254"
                     Margin="0, 0, 0, 10">
                 <Grid>
                     <!-- Download Status View -->
@@ -74,7 +74,9 @@
                     <!-- Download Speed Limiter View  -->
                     <uc:DownloadSpeedLimiterView DataContext="{Binding $self}"
                                                  IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowSpeedLimiterView, FallbackValue=False, TargetNullValue=False}"
-                                                 SpeedLimiterEnabled="False" />
+                                                 UnitsDropDownItemsSource="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterUnits}"
+                                                 SpeedLimiterEnabled="False"
+                                                 SpeedLimiterStateChangedCommand="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterStateChangedCommand}" />
                 </Grid>
             </Border>
         </Grid>

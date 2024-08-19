@@ -40,9 +40,11 @@
             </StackPanel>
 
             <!-- Enable/Disable Speed limiter -->
-            <Button Classes="button"
+            <Button Name="BtnEnableOrDisableSpeedLimiter"
+                    Classes="button"
                     Classes.danger="{Binding SpeedLimiterEnabled}"
-                    Classes.success="{Binding !SpeedLimiterEnabled}">
+                    Classes.success="{Binding !SpeedLimiterEnabled}"
+                    Click="BtnEnableOrDisableSpeedLimiter_OnClick">
                 <TextBlock Classes.speedLimiterEnabled="{Binding SpeedLimiterEnabled}">
                     <TextBlock.Styles>
                         <Style Selector="TextBlock">
@@ -62,31 +64,32 @@
         <!-- Speed limiter TextBox and ComboBox -->
         <StackPanel Orientation="Horizontal"
                     Spacing="10">
-            <cc:CustomTextBox Placeholder="Speed"
+            <cc:CustomTextBox Name="TxtSpeedLimiterValue"
+                              Watermark="Speed"
+                              WatermarkColor="{DynamicResource TertiaryColor}"
                               Padding="12, 10"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               Background="{DynamicResource PrimaryColor}"
-                              Width="80" />
+                              Width="80"
+                              BorderThickness="0"
+                              IsEnabled="{Binding SpeedLimiterEnabled}"
+                              TextChanged="TxtSpeedLimiterValue_OnTextChanged" />
 
-            <ComboBox PlaceholderText="Unit"
-                      Width="70"
-                      Background="{DynamicResource PrimaryColor}"
-                      BorderThickness="0"
-                      Padding="12, 10"
-                      CornerRadius="{DynamicResource DefaultCornerRadius}">
-                <ComboBoxItem>
-                    <TextBlock Text="KB" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="MB" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="GB" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="TB" />
-                </ComboBoxItem>
-            </ComboBox>
+            <cc:CustomComboBox Name="CboSpeedLimiterUnit"
+                               PlaceholderText="Unit"
+                               MinWidth="70"
+                               Background="{DynamicResource PrimaryColor}"
+                               ToggleIconColor="{DynamicResource TertiaryColor}"
+                               ToggleIconOnHoverColor="{DynamicResource TextColor}"
+                               ItemsSource="{Binding UnitsDropDownItemsSource}"
+                               IsEnabled="{Binding SpeedLimiterEnabled}"
+                               SelectionChanged="CboSpeedLimiterUnit_OnSelectionChanged">
+                <cc:CustomComboBox.ItemTemplate>
+                    <DataTemplate DataType="x:String">
+                        <TextBlock Text="{Binding}" />
+                    </DataTemplate>
+                </cc:CustomComboBox.ItemTemplate>
+            </cc:CustomComboBox>
         </StackPanel>
     </StackPanel>
 </UserControl>

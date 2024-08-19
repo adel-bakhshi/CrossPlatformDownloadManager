@@ -1,8 +1,20 @@
-﻿namespace CrossPlatformDownloadManager.Test.ViewModels;
+﻿using System.Collections.ObjectModel;
+using ReactiveUI;
+
+namespace CrossPlatformDownloadManager.Test.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-#pragma warning disable CA1822 // Mark members as static
-    public string Greeting => "Welcome to Avalonia!";
-#pragma warning restore CA1822 // Mark members as static
+    private ObservableCollection<string> _comboBoxData;
+
+    public ObservableCollection<string> ComboBoxData
+    {
+        get => _comboBoxData;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxData, value);
+    }
+
+    public MainWindowViewModel()
+    {
+        ComboBoxData = new ObservableCollection<string> { "KB", "MB", "GB", "TB" };
+    }
 }

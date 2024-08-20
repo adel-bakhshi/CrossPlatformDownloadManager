@@ -9,4 +9,5 @@
     <!-- Icon size -->
     <x:Double x:Key="SmallIconSize">16</x:Double>
     <x:Double x:Key="MediumIconSize">32</x:Double>
+    <x:Double x:Key="LargeIconSize">64</x:Double>
 </ResourceDictionary>

@@ -76,4 +76,15 @@
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="ChunkProgressGradientBrush"
+                         StartPoint="0%, 50%"
+                         EndPoint="100%, 50%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#0F8814"
+                          Offset="0" />
+            <GradientStop Color="#5CA813"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
 </ResourceDictionary>

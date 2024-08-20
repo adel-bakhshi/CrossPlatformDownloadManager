@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadOptionsView"
+             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+    <StackPanel Orientation="Vertical"
+                Spacing="10">
+        <!-- Open folder after download finished -->
+        <Border Padding="12, 8"
+                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Background="{DynamicResource PrimaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           Text="Open folder after download finished"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           TextAlignment="Left" />
+
+                <ToggleSwitch Name="OpenFolderToggleSwitch"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsCheckedChanged="OpenFolderToggleSwitch_OnIsCheckedChanged" />
+            </Grid>
+        </Border>
+
+        <Separator HorizontalAlignment="Stretch"
+                   Height="1"
+                   Background="{DynamicResource TertiaryColor}"
+                   Margin="0, 5" />
+
+        <!-- Exit program after download finished -->
+        <Border Padding="12, 8"
+                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Background="{DynamicResource PrimaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           Text="Exit program after download finished"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           TextAlignment="Left" />
+
+                <ToggleSwitch Name="ExitProgramToggleSwitch"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsCheckedChanged="ExitProgramToggleSwitch_OnIsCheckedChanged" />
+            </Grid>
+        </Border>
+
+        <!-- Turn off computer after download finished -->
+        <Border Padding="12, 8"
+                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Background="{DynamicResource PrimaryColor}">
+            <Grid ColumnDefinitions="*, Auto"
+                  RowDefinitions="Auto, Auto">
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Turn off computer after download finished"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           TextAlignment="Left" />
+
+                <ToggleSwitch Name="TurnOffComputerToggleSwitch"
+                              Grid.Row="0"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsCheckedChanged="TurnOffComputerToggleSwitch_OnIsCheckedChanged" />
+
+                <cc:CustomComboBox Name="TurnOffModesComboBox"
+                                   Grid.Row="1"
+                                   Grid.Column="1"
+                                   MinWidth="133"
+                                   PlaceholderText="Turn Off Mode"
+                                   Background="{DynamicResource SecondaryColor}"
+                                   ToggleIconColor="{DynamicResource TertiaryColor}"
+                                   OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                   ItemsSource="{Binding TurnOffModesDropDownItemsSource}"
+                                   IsEnabled="{Binding #TurnOffComputerToggleSwitch.IsChecked}"
+                                   Margin="0, 10, 0, 0"
+                                   SelectionChanged="TurnOffModesComboBox_OnSelectionChanged">
+                    <cc:CustomComboBox.ItemTemplate>
+                        <DataTemplate DataType="x:String">
+                            <TextBlock Text="{Binding}" />
+                        </DataTemplate>
+                    </cc:CustomComboBox.ItemTemplate>
+                </cc:CustomComboBox>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

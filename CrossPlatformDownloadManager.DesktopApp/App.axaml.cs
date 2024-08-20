@@ -23,8 +23,7 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow(mainWindowViewModel ?? new MainWindowViewModel(),
-                downloadWindowViewModel ?? new DownloadWindowViewModel())
+            desktop.MainWindow = new MainWindow(mainWindowViewModel ?? new MainWindowViewModel())
             {
                 DataContext = mainWindowViewModel,
             };

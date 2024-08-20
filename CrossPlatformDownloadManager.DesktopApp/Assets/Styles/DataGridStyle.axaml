@@ -109,4 +109,117 @@
             </Style>
         </Style>
     </Style>
+
+    <Style Selector="DataGrid.chunksDataGrid">
+        <Setter Property="AutoGenerateColumns"
+                Value="False" />
+        <Setter Property="IsReadOnly"
+                Value="True" />
+        <Setter Property="GridLinesVisibility"
+                Value="None" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="HorizontalAlignment"
+                Value="Stretch" />
+        <Setter Property="VerticalAlignment"
+                Value="Stretch" />
+        <Setter Property="Background"
+                Value="{DynamicResource MenuItemBgOnHoverColor}" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="SelectionMode"
+                Value="Single" />
+        <Setter Property="CanUserResizeColumns"
+                Value="True" />
+        <Setter Property="CanUserReorderColumns"
+                Value="False" />
+        <Setter Property="CanUserSortColumns"
+                Value="False" />
+        <Setter Property="ClipToBounds"
+                Value="True" />
+        <Setter Property="VerticalScrollBarVisibility"
+                Value="Hidden" />
+
+        <Style Selector="^ DataGridColumnHeader">
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TextColor}" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Left" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+            <Setter Property="AreSeparatorsVisible"
+                    Value="False" />
+            <Setter Property="SeparatorBrush"
+                    Value="{DynamicResource TertiaryColor}" />
+            <Setter Property="Padding"
+                    Value="10, 9" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+        </Style>
+
+        <Style Selector="^ DataGridRow">
+            <Style Selector="^:nth-child(2n)">
+                    <Setter Property="Background"
+                            Value="{DynamicResource MenuItemBgOnHoverColor}" />
+            </Style>
+
+            <Style Selector="^:nth-child(2n + 1)">
+                    <Setter Property="Background"
+                            Value="{DynamicResource MenuBgColor}" />
+            </Style>
+
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="False" />
+                <Setter Property="RadiusX"
+                        Value="0" />
+                <Setter Property="RadiusY"
+                        Value="0" />
+                <Setter Property="Margin"
+                        Value="-10, -9" />
+            </Style>
+
+            <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill"
+                        Value="{DynamicResource MenuItemBgOnHoverColor}" />
+            </Style>
+
+            <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill"
+                        Value="{DynamicResource MenuBgColor}" />
+            </Style>
+
+            <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="0.5" />
+            </Style>
+
+            <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="1" />
+            </Style>
+
+            <Style Selector="^:selected">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource TextColor}" />
+            </Style>
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Padding"
+                        Value="10, 4" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="CornerRadius"
+                        Value="0" />
+            </Style>
+        </Style>
+    </Style>
 </Styles>

@@ -6,7 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using CrossPlatformDownloadManager.Data.ViewModels.EventArgs;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
@@ -45,7 +45,7 @@ public partial class DownloadSpeedLimiterView : UserControl
 
     #region Events
 
-    public event EventHandler<SpeedLimiterEventArgs> SpeedLimiterStateChanged;
+    public event EventHandler<DownloadSpeedLimiterViewEventArgs> SpeedLimiterStateChanged;
 
     #endregion
 
@@ -121,7 +121,7 @@ public partial class DownloadSpeedLimiterView : UserControl
         if (unit.IsNullOrEmpty())
             return;
 
-        var eventArgs = new SpeedLimiterEventArgs
+        var eventArgs = new DownloadSpeedLimiterViewEventArgs
         {
             Enabled = value,
             Speed = speed,

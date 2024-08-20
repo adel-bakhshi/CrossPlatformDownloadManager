@@ -55,13 +55,13 @@ public class CustomComboBox : ComboBox
         set => SetValue(ToggleIconColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> ToggleIconOnHoverColorProperty =
+    public static readonly StyledProperty<IBrush?> OnHoverToggleIconColorProperty =
         AvaloniaProperty.Register<CustomComboBox, IBrush?>(
-            "ToggleIconOnHoverColor");
+            "OnHoverToggleIconColor");
 
-    public IBrush? ToggleIconOnHoverColor
+    public IBrush? OnHoverToggleIconColor
     {
-        get => GetValue(ToggleIconOnHoverColorProperty);
-        set => SetValue(ToggleIconOnHoverColorProperty, value);
+        get => GetValue(OnHoverToggleIconColorProperty);
+        set => SetValue(OnHoverToggleIconColorProperty, value);
     }
 }

@@ -293,31 +293,29 @@
                                                 <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:##.00}%}" />
                                                 <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
-                                                             Classes="dataGridProgressBar" />
+                                                             Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
                                             <StackPanel VerticalAlignment="Center"
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
                                                         IsVisible="{Binding IsPaused}">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgress, StringFormat={}Paused - {0:##.00}%}"
-                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Paused - {0:##.00}%}"
+                                                           Foreground="{DynamicResource WarningGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
-                                                             Classes="dataGridProgressBar" />
+                                                             Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
                                             <StackPanel VerticalAlignment="Center"
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
                                                         IsVisible="{Binding IsError}">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgress, StringFormat={}Error - {0:##.00}%}"
-                                                    Foreground="{DynamicResource DangerGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Error - {0:##.00}%}"
+                                                           Foreground="{DynamicResource DangerGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
-                                                             Classes="dataGridProgressBar" />
+                                                             Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>

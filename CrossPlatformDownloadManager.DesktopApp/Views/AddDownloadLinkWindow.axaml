@@ -1,0 +1,224 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="570"
+        d:DesignHeight="270"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLinkWindow"
+        x:DataType="vm:DownloadWindowViewModel"
+        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:DownloadWindowViewModel}}"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Add Download Link"
+        Width="570"
+        Height="270"
+        MinWidth="570"
+        MinHeight="270"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <Flyout x:Key="DownloadLaterContentFlyout"
+                    Placement="TopEdgeAlignedLeft"
+                    ShowMode="Transient"
+                    VerticalOffset="-10">
+                <StackPanel Width="241"
+                            Margin="10"
+                            Spacing="10">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <cc:CustomComboBox Grid.Column="0"
+                                           PlaceholderText="Queue"
+                                           Background="{DynamicResource SecondaryColor}"
+                                           ToggleIconColor="{DynamicResource TertiaryColor}"
+                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           IconData="{DynamicResource Queue}"
+                                           IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                           IconSize="{DynamicResource SmallIconSize}"
+                                           BorderThickness="0"
+                                           MaxDropDownHeight="120">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+
+                        <Button Grid.Column="1"
+                                Classes="button success"
+                                Height="{Binding $parent[Grid].Height}"
+                                Width="{Binding $parent[Grid].Height}"
+                                Margin="10, 0, 0, 0">
+                            <PathIcon Data="{DynamicResource Plus}"
+                                      Foreground="{DynamicResource TextColor}"
+                                      Width="{DynamicResource SmallIconSize}"
+                                      Height="{DynamicResource SmallIconSize}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                        </Button>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Start Queue"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center" />
+
+                        <ToggleSwitch Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Remember My Choice"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center" />
+
+                        <ToggleSwitch Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40" />
+                    </Grid>
+
+                    <Button Classes="button success">Add To Queue</Button>
+                </StackPanel>
+            </Flyout>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid RowDefinitions="*, Auto">
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="*, Auto">
+                <!-- Inputs -->
+                <StackPanel Grid.Column="0"
+                            Orientation="Vertical"
+                            Spacing="10"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top">
+                    <cc:CustomTextBox IconData="{DynamicResource AddUrl}"
+                                      IconSize="{DynamicResource SmallIconSize}"
+                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      Watermark="Url"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      VerticalContentAlignment="Center"
+                                      Padding="12, 10"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      BorderThickness="0" />
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <cc:CustomComboBox Grid.Column="0"
+                                           PlaceholderText="Category"
+                                           Background="{DynamicResource SecondaryColor}"
+                                           ToggleIconColor="{DynamicResource TertiaryColor}"
+                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           IconData="{DynamicResource Category}"
+                                           IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                           IconSize="{DynamicResource SmallIconSize}"
+                                           BorderThickness="0">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+
+                        <Button Grid.Column="1"
+                                Classes="button success"
+                                Height="{Binding $parent[Grid].Height}"
+                                Width="{Binding $parent[Grid].Height}"
+                                Margin="10, 0, 0, 0">
+                            <PathIcon Data="{DynamicResource Plus}"
+                                      Foreground="{DynamicResource TextColor}"
+                                      Width="{DynamicResource SmallIconSize}"
+                                      Height="{DynamicResource SmallIconSize}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                        </Button>
+                    </Grid>
+
+                    <cc:CustomTextBox IconData="{DynamicResource FileName}"
+                                      IconSize="{DynamicResource SmallIconSize}"
+                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      Watermark="Name"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      VerticalContentAlignment="Center"
+                                      Padding="12, 10"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      BorderThickness="0" />
+
+                    <cc:CustomTextBox IconData="{DynamicResource Description}"
+                                      IconSize="{DynamicResource SmallIconSize}"
+                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      Watermark="Description"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      VerticalContentAlignment="Center"
+                                      Padding="12, 10"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      BorderThickness="0" />
+                </StackPanel>
+
+                <!-- File Details -->
+                <Border Grid.Column="1"
+                        Width="132"
+                        Height="132"
+                        Margin="20, 0, 0, 0"
+                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Background="{DynamicResource SecondaryColor}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Vertical"
+                                Spacing="10">
+                        <PathIcon Width="{DynamicResource LargeIconSize}"
+                                  Height="{DynamicResource LargeIconSize}"
+                                  Data="{DynamicResource Compressed}"
+                                  Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                  HorizontalAlignment="Center" />
+
+                        <TextBlock Text="110.23 MB"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="1"
+                        HorizontalAlignment="Right"
+                        Margin="0, 20, 0, 0"
+                        Orientation="Horizontal"
+                        Spacing="10">
+                <Button Classes="button info"
+                        Flyout="{StaticResource DownloadLaterContentFlyout}">
+                    Download Later
+                </Button>
+                <Button Classes="button success">Start Download</Button>
+                <Button Classes="button danger">Cancel</Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

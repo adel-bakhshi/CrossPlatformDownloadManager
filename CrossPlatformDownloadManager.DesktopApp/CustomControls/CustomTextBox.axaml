@@ -126,13 +126,6 @@
         <Setter Property="ScrollViewer.IsScrollChainingEnabled"
                 Value="True" />
 
-        <Setter Property="Transitions">
-            <Transitions>
-                <BrushTransition Property="BorderBrush"
-                                 Duration="00:00:00.3" />
-            </Transitions>
-        </Setter>
-
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Name="border"
@@ -179,7 +172,9 @@
                                                       Foreground="{TemplateBinding IconColor}"
                                                       Width="{TemplateBinding IconSize}"
                                                       Height="{Binding $self.Width}"
-                                                      Classes.hasIcon="{TemplateBinding IconData, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                                      Classes.hasIcon="{TemplateBinding IconData, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                      HorizontalAlignment="Center">
                                                 <PathIcon.Styles>
                                                     <Style Selector="PathIcon">
                                                         <Setter Property="Margin"
@@ -253,6 +248,15 @@
                 </Border>
             </ControlTemplate>
         </Setter>
+
+        <Style Selector="^ /template/ Border#border">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush"
+                                     Duration="00:00:00.3" />
+                </Transitions>
+            </Setter>
+        </Style>
 
         <Style Selector="^:pointerover /template/ Border#border">
             <Setter Property="BorderBrush"

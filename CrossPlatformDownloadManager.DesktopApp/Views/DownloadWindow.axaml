@@ -77,8 +77,72 @@
                                                  UnitsDropDownItemsSource="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterUnits}"
                                                  SpeedLimiterEnabled="False"
                                                  SpeedLimiterStateChangedCommand="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterStateChangedCommand}" />
+
+                    <!-- Download Options View -->
+                    <uc:DownloadOptionsView DataContext="{Binding $self}"
+                                            IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowOptionsView, FallbackValue=False, TargetNullValue=False}"
+                                            TurnOffModesDropDownItemsSource="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).OptionsTurnOffModes}"
+                                            OptionsStateChangedCommand="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).OptionsStateChangedCommand}" />
                 </Grid>
             </Border>
+
+            <!-- Download progress bar -->
+            <ProgressBar Grid.Row="2"
+                         Classes="customProgressBar"
+                         Foreground="{DynamicResource ProgressBarGradientBrush}"
+                         Value="21.5"
+                         Margin="0, 0, 0, 10" />
+
+            <!-- Action buttons -->
+            <Grid Grid.Row="3"
+                  Margin="0, 0, 0, 15">
+                <Button Classes="button info"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+                    Hide Details
+                </Button>
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <Button Classes="button warning">
+                        Pause
+                    </Button>
+
+                    <Button Classes="button danger">
+                        Cancel
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Chunks progress bars -->
+            <Border Grid.Row="4"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource MenuItemBgOnHoverColor}"
+                    ClipToBounds="True"
+                    HorizontalAlignment="Stretch"
+                    Height="24"
+                    Margin="0, 0, 0, 15">
+                <Canvas Name="ChunksProgressBarsCanvas"></Canvas>
+            </Border>
+
+            <!-- Chunks DataGrid -->
+            <DataGrid Grid.Row="5"
+                      ItemsSource="{Binding ChunksData}"
+                      Classes="chunksDataGrid">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#"
+                                        Binding="{Binding RowIndex}"
+                                        MinWidth="50" />
+                    <DataGridTextColumn Header="Downloaded"
+                                        Binding="{Binding DownloadedSizeAsFileSize}"
+                                        MinWidth="180" />
+                    <DataGridTextColumn Header="Info"
+                                        Binding="{Binding Info}"
+                                        MinWidth="180" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
     </Border>
 </Window>

@@ -5,18 +5,27 @@
       <map>
         <entry key="CrossPlatformDownloadManager.DesktopApp/App.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Colors.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ActionButtonStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ButtonsStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CategoryListStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ComboBoxStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridProgressBarStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ProgressBarStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/TabItemToggleButtonStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ToggleSwitchStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/WindowStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomComboBox.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddDownloadLinkWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/DownloadWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/MainWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/ActionButton.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadOptionsView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadSpeedLimiterView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadStatusView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.Test/CustomControls/CustomComboBox.axaml" value="CrossPlatformDownloadManager.Test/CrossPlatformDownloadManager.Test.csproj" />

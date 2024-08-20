@@ -87,7 +87,7 @@
                 Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="ToggleIconColor"
                 Value="{DynamicResource TertiaryColor}" />
-        <Setter Property="ToggleIconOnHoverColor"
+        <Setter Property="OnHoverToggleIconColor"
                 Value="{DynamicResource TextColor}" />
 
         <Setter Property="Template">
@@ -220,12 +220,12 @@
 
         <Style Selector="^:pointerover /template/ PathIcon#TogglePathIcon">
             <Setter Property="Foreground"
-                    Value="{Binding $parent[controls:CustomComboBox].ToggleIconOnHoverColor}" />
+                    Value="{Binding $parent[controls:CustomComboBox].OnHoverToggleIconColor}" />
         </Style>
 
         <Style Selector="^[IsDropDownOpen=True] /template/ PathIcon#TogglePathIcon">
             <Setter Property="Foreground"
-                    Value="{Binding $parent[controls:CustomComboBox].ToggleIconOnHoverColor}" />
+                    Value="{Binding $parent[controls:CustomComboBox].OnHoverToggleIconColor}" />
         </Style>
     </Style>
 </Styles>

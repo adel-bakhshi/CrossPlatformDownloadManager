@@ -80,7 +80,7 @@
                                MinWidth="70"
                                Background="{DynamicResource PrimaryColor}"
                                ToggleIconColor="{DynamicResource TertiaryColor}"
-                               ToggleIconOnHoverColor="{DynamicResource TextColor}"
+                               OnHoverToggleIconColor="{DynamicResource TextColor}"
                                ItemsSource="{Binding UnitsDropDownItemsSource}"
                                IsEnabled="{Binding SpeedLimiterEnabled}"
                                SelectionChanged="CboSpeedLimiterUnit_OnSelectionChanged">

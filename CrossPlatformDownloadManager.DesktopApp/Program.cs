@@ -23,6 +23,7 @@ sealed class Program
             {
                 services.AddSingleton<MainWindowViewModel>();
                 services.AddTransient<DownloadWindowViewModel>();
+                services.AddTransient<AddDownloadLinkWindowViewModel>();
             })
             .UsePlatformDetect()
             .WithInterFont()

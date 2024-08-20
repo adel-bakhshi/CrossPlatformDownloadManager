@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 
@@ -21,9 +23,14 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UseDependencyInjection(services =>
             {
+                // Add UnitOfWork to services
+                services.AddTransient<IUnitOfWork, UnitOfWork>();
+                
+                // Add ViewModels to services
                 services.AddSingleton<MainWindowViewModel>();
-                services.AddTransient<DownloadWindowViewModel>();
-                services.AddTransient<AddDownloadLinkWindowViewModel>();
+                
+                // Add Windows to services
+                services.AddSingleton<MainWindow>();
             })
             .UsePlatformDetect()
             .WithInterFont()

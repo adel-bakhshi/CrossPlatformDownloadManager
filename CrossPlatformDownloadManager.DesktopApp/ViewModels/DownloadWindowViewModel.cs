@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls.Primitives;
+using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
@@ -74,7 +75,7 @@ public class DownloadWindowViewModel : ViewModelBase
 
     #endregion
 
-    public DownloadWindowViewModel()
+    public DownloadWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
         ShowStatusView = true;
         SpeedLimiterUnits = new ObservableCollection<string> { "KB", "MB" };
@@ -91,11 +92,16 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         return new ObservableCollection<ChunkDataViewModel>
         {
-            new ChunkDataViewModel { ChunkIndex = 0, TotalSize = 409600, DownloadedSize = 112230.4, Info = "Receiving..." },
-            new ChunkDataViewModel { ChunkIndex = 1, TotalSize = 409600, DownloadedSize = 130252.8, Info = "Receiving..." },
-            new ChunkDataViewModel { ChunkIndex = 2, TotalSize = 409600, DownloadedSize = 67174.4, Info = "Receiving..." },
-            new ChunkDataViewModel { ChunkIndex = 3, TotalSize = 409600, DownloadedSize = 200704, Info = "Receiving..." },
-            new ChunkDataViewModel { ChunkIndex = 4, TotalSize = 409600, DownloadedSize = 90931.2, Info = "Receiving..." },
+            new ChunkDataViewModel
+                { ChunkIndex = 0, TotalSize = 409600, DownloadedSize = 112230.4, Info = "Receiving..." },
+            new ChunkDataViewModel
+                { ChunkIndex = 1, TotalSize = 409600, DownloadedSize = 130252.8, Info = "Receiving..." },
+            new ChunkDataViewModel
+                { ChunkIndex = 2, TotalSize = 409600, DownloadedSize = 67174.4, Info = "Receiving..." },
+            new ChunkDataViewModel
+                { ChunkIndex = 3, TotalSize = 409600, DownloadedSize = 200704, Info = "Receiving..." },
+            new ChunkDataViewModel
+                { ChunkIndex = 4, TotalSize = 409600, DownloadedSize = 90931.2, Info = "Receiving..." },
         };
     }
 

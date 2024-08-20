@@ -18,15 +18,13 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var serviceProvider = this.GetServiceProvider();
-        var mainWindowViewModel = serviceProvider.GetService<MainWindowViewModel>();
-        var downloadWindowViewModel = serviceProvider.GetService<DownloadWindowViewModel>();
+        var mainWindow = serviceProvider.GetService<MainWindow>();
+        var viewModel = serviceProvider.GetService<MainWindowViewModel>();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow(mainWindowViewModel ?? new MainWindowViewModel())
-            {
-                DataContext = mainWindowViewModel,
-            };
+            mainWindow!.DataContext = viewModel;
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();

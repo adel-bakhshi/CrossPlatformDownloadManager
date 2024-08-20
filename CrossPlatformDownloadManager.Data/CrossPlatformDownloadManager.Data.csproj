@@ -10,4 +10,8 @@
       <ProjectReference Include="..\CrossPlatformDownloadManager.Utils\CrossPlatformDownloadManager.Utils.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    </ItemGroup>
+
 </Project>

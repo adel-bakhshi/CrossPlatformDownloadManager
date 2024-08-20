@@ -3,14 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
-        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
+        xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLinkWindow"
-        x:DataType="vm:DownloadWindowViewModel"
-        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:DownloadWindowViewModel}}"
+        x:DataType="vm:AddDownloadLinkWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CDM - Add Download Link"
         Width="570"
@@ -24,6 +24,7 @@
     <!-- Resources -->
     <Window.Resources>
         <ResourceDictionary>
+            <!-- Download later content -->
             <Flyout x:Key="DownloadLaterContentFlyout"
                     Placement="TopEdgeAlignedLeft"
                     ShowMode="Transient"
@@ -41,10 +42,11 @@
                                            IconColor="{DynamicResource ProgressBarGradientBrush}"
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
-                                           MaxDropDownHeight="120">
+                                           MaxDropDownHeight="120"
+                                           ItemsSource="{Binding Queues}">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="x:String">
-                                    <TextBlock Text="{Binding}" />
+                                <DataTemplate DataType="models:Queue">
+                                    <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>
                         </cc:CustomComboBox>
@@ -115,7 +117,9 @@
                             Spacing="10"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Top">
-                    <cc:CustomTextBox IconData="{DynamicResource AddUrl}"
+                    <!-- Url -->
+                    <cc:CustomTextBox Name="UrlTextBox"
+                                      IconData="{DynamicResource AddUrl}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
                                       Watermark="Url"
@@ -124,8 +128,11 @@
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
-                                      BorderThickness="0" />
+                                      BorderThickness="0"
+                                      Text="{Binding Url}"
+                                      TextChanged="UrlTextBox_OnTextChanged" />
 
+                    <!-- Category -->
                     <Grid ColumnDefinitions="*, Auto">
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"
@@ -135,10 +142,13 @@
                                            IconData="{DynamicResource Category}"
                                            IconColor="{DynamicResource ProgressBarGradientBrush}"
                                            IconSize="{DynamicResource SmallIconSize}"
-                                           BorderThickness="0">
+                                           BorderThickness="0"
+                                           SelectedItem="{Binding SelectedCategory}"
+                                           ItemsSource="{Binding Categories}"
+                                           MaxDropDownHeight="150">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="x:String">
-                                    <TextBlock Text="{Binding}" />
+                                <DataTemplate DataType="models:CategoryItem">
+                                    <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>
                         </cc:CustomComboBox>
@@ -157,6 +167,7 @@
                         </Button>
                     </Grid>
 
+                    <!-- File Name -->
                     <cc:CustomTextBox IconData="{DynamicResource FileName}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
@@ -166,8 +177,10 @@
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
-                                      BorderThickness="0" />
+                                      BorderThickness="0"
+                                      Text="{Binding FileName}" />
 
+                    <!-- Description -->
                     <cc:CustomTextBox IconData="{DynamicResource Description}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
@@ -177,7 +190,8 @@
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
-                                      BorderThickness="0" />
+                                      BorderThickness="0"
+                                      Text="{Binding Description}" />
                 </StackPanel>
 
                 <!-- File Details -->
@@ -189,20 +203,30 @@
                         Background="{DynamicResource SecondaryColor}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top">
-                    <StackPanel HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Orientation="Vertical"
-                                Spacing="10">
-                        <PathIcon Width="{DynamicResource LargeIconSize}"
-                                  Height="{DynamicResource LargeIconSize}"
-                                  Data="{DynamicResource Compressed}"
-                                  Foreground="{DynamicResource ProgressBarGradientBrush}"
-                                  HorizontalAlignment="Center" />
+                    <Grid>
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Vertical"
+                                    Spacing="10"
+                                    IsVisible="{Binding !IsLoadingUrl}">
+                            <PathIcon Width="{DynamicResource LargeIconSize}"
+                                      Height="{DynamicResource LargeIconSize}"
+                                      Data="{Binding FileTypeIcon}"
+                                      Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                      HorizontalAlignment="Center" />
 
-                        <TextBlock Text="110.23 MB"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center" />
-                    </StackPanel>
+                            <TextBlock Text="{Binding FileSize}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <uc:LoadingControl IsVisible="{Binding IsLoadingUrl}"
+                                           Width="64"
+                                           Height="64"
+                                           Duration="0:0:2"
+                                           Delay="0:0:0.5"
+                                           Fill="{DynamicResource LoadingColor}" />
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -212,12 +236,21 @@
                         Margin="0, 20, 0, 0"
                         Orientation="Horizontal"
                         Spacing="10">
+                <!-- Download later button -->
                 <Button Classes="button info"
                         Flyout="{StaticResource DownloadLaterContentFlyout}">
                     Download Later
                 </Button>
+
+                <!-- Start download button -->
                 <Button Classes="button success">Start Download</Button>
-                <Button Classes="button danger">Cancel</Button>
+
+                <!-- Cancel button -->
+                <Button Name="CancelButton"
+                        Classes="button danger"
+                        Click="CancelButton_OnClick">
+                    Cancel
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>

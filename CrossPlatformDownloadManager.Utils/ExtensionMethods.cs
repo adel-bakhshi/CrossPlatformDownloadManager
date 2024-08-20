@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Avalonia.Platform;
 using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Utils;
@@ -53,5 +54,24 @@ public static class ExtensionMethods
             return $"{kb:N2} KB";
 
         return $"{bytes:N2} Byte" + (bytes > 1 ? "s" : "");
+    }
+
+    public static bool CheckUrlValidation(this string? url)
+    {
+        if (url.IsNullOrEmpty())
+            return false;
+
+        return Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute);
+    }
+
+    public static T? OpenJsonAsset<T>(this Uri? uri)
+    {
+        if (uri == null)
+            return default;
+        
+        using var stream = AssetLoader.Open(uri);
+        using var reader = new StreamReader(stream);
+        var json = reader.ReadToEnd();
+        return json.DeserializeJson<T>();
     }
 }

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Platform;
+using CrossPlatformDownloadManager.Data.Models;
+using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CategoryViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.FileTypeViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
@@ -16,21 +15,27 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    #region Private Fields
+
+    private readonly MainWindow _mainWindow;
+
+    #endregion
+
     #region Properties
 
     // Categories list data
-    private ObservableCollection<CategoryViewModel> _categories;
+    private ObservableCollection<Category> _categories;
 
-    public ObservableCollection<CategoryViewModel> Categories
+    public ObservableCollection<Category> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
 
     // Selected category
-    private CategoryViewModel? _selectedCategory = null;
+    private Category? _selectedCategory = null;
 
-    public CategoryViewModel? SelectedCategory
+    public Category? SelectedCategory
     {
         get => _selectedCategory;
         set
@@ -44,9 +49,9 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Selected category item
-    private CategoryItemViewModel? _selectedCategoryItem = null;
+    private CategoryItem? _selectedCategoryItem = null;
 
-    public CategoryItemViewModel? SelectedCategoryItem
+    public CategoryItem? SelectedCategoryItem
     {
         get => _selectedCategoryItem;
         set
@@ -79,15 +84,44 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand SelectAllRowsCommand { get; }
 
+    public ICommand AddNewLinkCommand { get; }
+
     #endregion
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(MainWindow mainWindow, IUnitOfWork unitOfWork) : base(unitOfWork)
     {
+        _mainWindow = mainWindow;
+
         Categories = LoadCategories();
         SelectedCategory = Categories.FirstOrDefault();
         DownloadFiles = GetDownloadList();
 
         SelectAllRowsCommand = ReactiveCommand.Create<object>(SelectAllRows);
+        AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
+    }
+
+    private async void AddNewLink()
+    {
+        try
+        {
+            var url = string.Empty;
+            if (_mainWindow.Clipboard != null)
+                url = await _mainWindow.Clipboard.GetTextAsync();
+
+            var urlIsValid = url.CheckUrlValidation();
+            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork)
+            {
+                Url = urlIsValid ? url : null,
+                IsLoadingUrl = urlIsValid
+            };
+
+            var window = new AddDownloadLinkWindow { DataContext = vm };
+            await window.ShowDialog(_mainWindow);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void SelectAllRows(object? obj)
@@ -102,21 +136,28 @@ public class MainWindowViewModel : ViewModelBase
             grd!.SelectAll();
     }
 
-    private ObservableCollection<CategoryViewModel> LoadCategories()
+    private ObservableCollection<Category> LoadCategories()
     {
         try
         {
-            var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/categories.json";
-            var assetsUri = new Uri(assetName);
-            using var stream = AssetLoader.Open(assetsUri);
-            using var reader = new StreamReader(stream);
-            var json = reader.ReadToEnd();
-            var categories = json.DeserializeJson<List<CategoryViewModel>>();
-            return new ObservableCollection<CategoryViewModel>(categories ?? new List<CategoryViewModel>());
+            UnitOfWork.CreateCategories();
+
+            var categories = UnitOfWork.CategoryRepository.GetAll();
+            var categoryItems = UnitOfWork.CategoryItemRepository.GetAll();
+
+            categories = categories
+                .Select(c =>
+                {
+                    c.CategoryItems = categoryItems;
+                    return c;
+                })
+                .ToList();
+
+            return categories.ToObservableCollection();
         }
         catch
         {
-            return new ObservableCollection<CategoryViewModel>();
+            return new ObservableCollection<Category>();
         }
     }
 
@@ -128,13 +169,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/file-types.json";
-            var assetsUri = new Uri(assetName);
-            using var stream = AssetLoader.Open(assetsUri);
-            using var reader = new StreamReader(stream);
-            var json = reader.ReadToEnd();
-            var fileTypes = json.DeserializeJson<List<FileTypeViewModel>>();
-
             var downloadFiles = new List<DownloadFileViewModel>();
             for (int i = 0; i < 5; i++)
             {
@@ -142,11 +176,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     Id = i + 1,
                     FileName = $"File name {i + 1}.exe",
-                    FileType = fileTypes
-                        .Where(f => f.FileType.Equals("Programs"))
-                        .SelectMany(f => f.TypeExtensions)
-                        .FirstOrDefault(f => f.Extension.Equals(".exe"))?
-                        .Alias ?? "General",
+                    FileType = "General",
                     QueueName = "Main Queue",
                     Size = 15099494.4.ToFileSize(),
                     IsCompleted = i == 0,
@@ -161,7 +191,7 @@ public class MainWindowViewModel : ViewModelBase
                 });
             }
 
-            return new ObservableCollection<DownloadFileViewModel>(downloadFiles);
+            return downloadFiles.ToObservableCollection();
         }
         catch
         {

@@ -3,7 +3,6 @@
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         mc:Ignorable="d"
@@ -11,16 +10,12 @@
         d:DesignHeight="720"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:MainWindowViewModel}}"
         Icon="/Assets/avalonia-logo.ico"
         Title="CDM"
         Width="1280"
-        Height="720">
-
-    <Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-
+        Height="720"
+        MinWidth="1280"
+        MinHeight="720">
     <Grid RowDefinitions="Auto, *, Auto">
         <!-- Top bar -->
         <Border Grid.Row="0"
@@ -156,7 +151,8 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Add Url"
                                                  IconData="{DynamicResource AddUrl}"
-                                                 IconColor="{DynamicResource SuccessGradientBrush}" />
+                                                 IconColor="{DynamicResource SuccessGradientBrush}"
+                                                 Command="{Binding AddNewLinkCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryColor}"

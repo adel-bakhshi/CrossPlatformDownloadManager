@@ -7,6 +7,8 @@ namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
 
 public partial class ActionButton : UserControl
 {
+    #region Properties
+
     public static readonly StyledProperty<Geometry?> IconDataProperty =
         AvaloniaProperty.Register<ActionButton, Geometry?>(
             "IconData", defaultValue: null);
@@ -26,6 +28,19 @@ public partial class ActionButton : UserControl
         set => SetValue(TextProperty, value);
     }
 
+    public static readonly StyledProperty<IBrush?> IconColorProperty = AvaloniaProperty.Register<ActionButton, IBrush?>(
+        "IconColor", SolidColorBrush.Parse("#FFF"));
+
+    public IBrush? IconColor
+    {
+        get => GetValue(IconColorProperty);
+        set => SetValue(IconColorProperty, value);
+    }
+
+    #endregion
+
+    #region Commands
+
     public static readonly StyledProperty<ICommand?> CommandProperty = AvaloniaProperty.Register<ActionButton, ICommand?>(
         "Command", defaultValue: null);
 
@@ -35,14 +50,16 @@ public partial class ActionButton : UserControl
         set => SetValue(CommandProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> IconColorProperty = AvaloniaProperty.Register<ActionButton, IBrush?>(
-        "IconColor", SolidColorBrush.Parse("#FFF"));
+    public static readonly StyledProperty<object?> CommandParameterProperty = AvaloniaProperty.Register<ActionButton, object?>(
+        "CommandParameter");
 
-    public IBrush? IconColor
+    public object? CommandParameter
     {
-        get => GetValue(IconColorProperty);
-        set => SetValue(IconColorProperty, value);
+        get => GetValue(CommandParameterProperty);
+        set => SetValue(CommandParameterProperty, value);
     }
+
+    #endregion
 
     public ActionButton()
     {

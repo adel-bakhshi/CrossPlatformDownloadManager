@@ -1,0 +1,264 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddNewCategoryWindow"
+        x:DataType="vm:AddNewCategoryWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Add New Category"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+    <!-- Resources -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <!-- AddFileTypeFlyout -->
+            <Flyout x:Key="AddFileTypeFlyout"
+                    Placement="BottomEdgeAlignedRight"
+                    ShowMode="TransientWithDismissOnPointerMoveAway"
+                    VerticalOffset="10">
+                <StackPanel Orientation="Vertical"
+                            Width="241"
+                            Margin="10"
+                            Spacing="5">
+                    <cc:CustomTextBox Padding="12, 10"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Watermark="Extension"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      BorderThickness="0"
+                                      HorizontalAlignment="Stretch"
+                                      Text="{Binding NewFileExtension.Extension}" />
+
+                    <cc:CustomTextBox Padding="12, 10"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Watermark="Alias"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      BorderThickness="0"
+                                      HorizontalAlignment="Stretch"
+                                      Text="{Binding NewFileExtension.Alias}" />
+
+                    <Button Classes="button success"
+                            Margin="0, 5, 0, 0"
+                            Command="{Binding AddNewFileExtensionCommand}">
+                        Add
+                    </Button>
+                </StackPanel>
+            </Flyout>
+
+            <!-- AddSiteFlyout -->
+            <Flyout x:Key="AddSiteFlyout"
+                    Placement="BottomEdgeAlignedRight"
+                    ShowMode="TransientWithDismissOnPointerMoveAway"
+                    VerticalOffset="10">
+                <StackPanel Orientation="Vertical"
+                            Width="241"
+                            Margin="10"
+                            Spacing="5">
+                    <cc:CustomTextBox Padding="12, 10"
+                                      Background="{DynamicResource SecondaryColor}"
+                                      CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                      Watermark="Site Address"
+                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      BorderThickness="0"
+                                      HorizontalAlignment="Stretch"
+                                      Text="{Binding SiteAddress}" />
+
+                    <Button Classes="button success"
+                            Margin="0, 5, 0, 0"
+                            Command="{Binding AddNewSiteAddressCommand}">
+                        Add
+                    </Button>
+                </StackPanel>
+            </Flyout>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid RowDefinitions="*, Auto"
+          Margin="20">
+        <!-- Main content -->
+        <ScrollViewer Grid.Row="0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical"
+                        Spacing="15">
+                <!-- Must have 20px margin bottom. 15px spacing + 5px margin bottom -->
+                <cc:CustomTextBox Padding="12, 10"
+                                  Background="{DynamicResource SecondaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource Category}"
+                                  IconSize="16"
+                                  IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                  Watermark="Category Title"
+                                  WatermarkColor="{DynamicResource TertiaryColor}"
+                                  Margin="0, 0, 0, 5"
+                                  HorizontalAlignment="Stretch"
+                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  Text="{Binding CategoryTitle}" />
+
+                <!-- File types section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryColor}">
+                    <Grid RowDefinitions="Auto, Auto">
+                        <!-- Title bar -->
+                        <Grid Grid.Row="0"
+                              ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Text="File Types"
+                                       FontWeight="Bold" />
+
+                            <Button Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Classes="button success"
+                                    Flyout="{StaticResource AddFileTypeFlyout}">
+                                Add File Type
+                            </Button>
+                        </Grid>
+
+                        <!-- Content -->
+                        <ListBox Grid.Row="1"
+                                 Classes="wrapListBox"
+                                 ItemsSource="{Binding FileExtensions}" />
+                    </Grid>
+                </Border>
+
+                <!-- Auto add links to category section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryColor}">
+                    <Grid RowDefinitions="Auto, Auto">
+                        <!-- Title bar -->
+                        <Grid Grid.Row="0"
+                              ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Text="Automatically Add Links To This Category From Following Sites"
+                                       FontWeight="Bold" />
+
+                            <Button Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Classes="button success"
+                                    Flyout="{StaticResource AddSiteFlyout}">
+                                Add Site
+                            </Button>
+                        </Grid>
+
+                        <!-- Content -->
+                        <ListBox Grid.Row="1"
+                                 Classes="wrapListBox"
+                                 ItemsSource="{Binding SiteAddresses}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                            Padding="10"
+                                            Background="{DynamicResource PrimaryColor}">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding}"
+                                                       VerticalAlignment="Center" />
+
+                                            <Button Grid.Column="1"
+                                                    Margin="10, 0, 0, 0"
+                                                    Classes="button none"
+                                                    Padding="0"
+                                                    BorderThickness="0"
+                                                    CornerRadius="0"
+                                                    Command="{Binding $parent[Window].((vm:AddNewCategoryWindowViewModel)DataContext).DeleteSiteAddressCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="{DynamicResource TransparentColor}">
+                                                <PathIcon Width="16"
+                                                          Height="16"
+                                                          Data="{DynamicResource XMark}"
+                                                          Foreground="{DynamicResource DangerGradientBrush}"
+                                                          VerticalAlignment="Center" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Save directory section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryColor}">
+                    <Grid RowDefinitions="Auto, Auto">
+                        <!-- Title bar -->
+                        <Grid Grid.Row="0"
+                              ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Text="Save Directory"
+                                       FontWeight="Bold" />
+
+                            <Button Name="BrowseButton"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Classes="button success"
+                                    Click="BrowseButton_OnClick">
+                                Browse
+                            </Button>
+                        </Grid>
+
+                        <cc:CustomTextBox Grid.Row="1"
+                                          Padding="12, 10"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          Watermark="Save Directory"
+                                          WatermarkColor="{DynamicResource TertiaryColor}"
+                                          HorizontalAlignment="Stretch"
+                                          BorderThickness="0"
+                                          Text="{Binding SaveDirectory}"
+                                          IsReadOnly="True"
+                                          Margin="0, 10, 0, 0" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Save
+            </Button>
+
+            <Button Name="CancelButton"
+                    Classes="button danger"
+                    Click="CancelButton_OnClick">
+                Cancel
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

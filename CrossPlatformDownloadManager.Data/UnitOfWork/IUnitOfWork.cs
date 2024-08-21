@@ -9,6 +9,7 @@ public interface IUnitOfWork : IDisposable
     ICategoryItemRepository CategoryItemRepository { get; }
     ICategoryItemFileExtensionRepository CategoryItemFileExtensionRepository { get; }
     IQueueRepository QueueRepository { get; }
+    ICategoryItemSaveDirectoryRepository CategoryItemSaveDirectoryRepository { get; }
 
     void CreateCategories();
 }

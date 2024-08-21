@@ -10,7 +10,7 @@ public class DownloadFile
 
     [NotNull] public DownloadFileType FileType { get; set; }
 
-    public int? QueueId { get; set; }
+    [Indexed] public int? QueueId { get; set; }
 
     [NotNull] public double Size { get; set; }
 

@@ -12,19 +12,17 @@ public static class ExtensionMethods
         return string.IsNullOrEmpty(value);
     }
 
-    public static T? DeserializeJson<T>(this string? json)
+    public static T? ConvertFromJson<T>(this string? json)
     {
-        try
-        {
-            if (json.IsNullOrEmpty())
-                return default;
-
-            return JsonConvert.DeserializeObject<T>(json!);
-        }
-        catch
-        {
+        if (json.IsNullOrEmpty())
             return default;
-        }
+
+        return JsonConvert.DeserializeObject<T>(json!);
+    }
+
+    public static string? ConvertToJson(this object? value)
+    {
+        return JsonConvert.SerializeObject(value);
     }
 
     public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T>? items)
@@ -68,10 +66,10 @@ public static class ExtensionMethods
     {
         if (uri == null)
             return default;
-        
+
         using var stream = AssetLoader.Open(uri);
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
-        return json.DeserializeJson<T>();
+        return json.ConvertFromJson<T>();
     }
 }

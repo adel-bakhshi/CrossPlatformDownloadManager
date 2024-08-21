@@ -20,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
     public ICategoryItemRepository CategoryItemRepository { get; }
     public ICategoryItemFileExtensionRepository CategoryItemFileExtensionRepository { get; }
     public IQueueRepository QueueRepository { get; }
+    public ICategoryItemSaveDirectoryRepository CategoryItemSaveDirectoryRepository { get; }
 
     #endregion
 
@@ -31,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
         CategoryItemRepository = new CategoryItemRepository(_connection);
         CategoryItemFileExtensionRepository = new CategoryItemFileExtensionRepository(_connection);
         QueueRepository = new QueueRepository(_connection);
+        CategoryItemSaveDirectoryRepository = new CategoryItemSaveDirectoryRepository(_connection);
     }
 
     private SQLiteConnection CreateSqLiteConnection()
@@ -69,14 +71,21 @@ public class UnitOfWork : IUnitOfWork
             if (categoryItems == null || !categoryItems.Any())
                 throw new Exception("Can't find category items for import.");
 
+            CreateSaveDirectory(null);
+
             foreach (var categoryItem in categoryItems)
             {
                 CategoryItemRepository.Add(categoryItem);
                 CreateFileTypes(categoryItem);
+                CreateSaveDirectory(categoryItem);
             }
         }
     }
 
+    /// <summary>
+    /// Each category has one or more file types that must be created for each
+    /// </summary>
+    /// <param name="categoryItem">CategoryItem, whose types of files are supposed to be created</param>
     private void CreateFileTypes(CategoryItem categoryItem)
     {
         var fileExtensions = CategoryItemFileExtensionRepository
@@ -95,6 +104,32 @@ public class UnitOfWork : IUnitOfWork
 
             CategoryItemFileExtensionRepository.AddRange(fileExtensions);
         }
+    }
+
+    /// <summary>
+    /// Define default download directories for each category. If category is null, It's create General directory path
+    /// </summary>
+    /// <param name="categoryItem">CategoryItem whose directory path is to be created</param>
+    private void CreateSaveDirectory(CategoryItem? categoryItem)
+    {
+        var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var savePath = categoryItem != null
+            ? Path.Join(downloadFolderPath, "Downloads", "CDM", categoryItem.Title)
+            : Path.Join(downloadFolderPath, "Downloads", "CDM");
+
+        var saveDirectory = new CategoryItemSaveDirectory
+        {
+            CategoryItemId = categoryItem?.Id,
+            SaveDirectory = savePath,
+        };
+
+        CategoryItemSaveDirectoryRepository.Add(saveDirectory);
+
+        if (categoryItem == null)
+            return;
+
+        categoryItem.CategoryItemSaveDirectoryId = saveDirectory.Id;
+        CategoryItemRepository.Update(categoryItem);
     }
 
     public void Dispose()

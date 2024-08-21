@@ -3,8 +3,11 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
@@ -96,11 +99,48 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     #endregion
 
+    #region Commands
+
+    public ICommand AddNewCategoryCommand { get; }
+
+    public ICommand AddNewQueueCommand { get; }
+
+    #endregion
 
     public AddDownloadLinkWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
         Categories = GetCategories();
         Queues = GetQueues();
+
+        AddNewCategoryCommand = ReactiveCommand.Create<Window?>(AddNewCategory);
+        AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
+    }
+
+    private async void AddNewCategory(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                return;
+
+            var vm = new AddNewCategoryWindowViewModel(UnitOfWork);
+            var window = new AddNewCategoryWindow { DataContext = vm };
+            var result = await window.ShowDialog<bool>(owner);
+            if (!result)
+                return;
+            
+            Categories = GetCategories();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void AddNewQueue(Window? owner)
+    {
+        // TODO: Show AddNewQueueWindow
+        throw new NotImplementedException();
     }
 
     private ObservableCollection<Queue> GetQueues()
@@ -122,6 +162,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             var categories = UnitOfWork.CategoryItemRepository.GetAll();
+            categories.Insert(0, new CategoryItem { Title = "General" });
             return categories.ToObservableCollection();
         }
         catch (Exception ex)
@@ -134,7 +175,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     public async Task GetUrlInfoAsync()
     {
         IsLoadingUrl = true;
-        
+
         try
         {
             if (!Url.CheckUrlValidation())
@@ -168,7 +209,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                     var uri = new Uri(Url!);
                     fileName = Path.GetFileName(uri.LocalPath);
                 }
-            
+
                 // Get the content length
                 fileSize = response.Content.Headers.ContentLength ?? 0;
             }

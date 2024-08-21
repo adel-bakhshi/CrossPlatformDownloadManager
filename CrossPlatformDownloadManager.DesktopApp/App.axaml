@@ -20,7 +20,7 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/WindowStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ExpanderStyle.axaml" />
-        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CategoryListStyle.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ListBoxStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ActionButtonStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ToolTipStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridStyle.axaml" />

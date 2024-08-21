@@ -16,33 +16,33 @@
                    Grid.Column="0"
                    Text="Url"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="0"
                    Grid.Column="1"
                    Text="{Binding Url}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Name -->
         <TextBlock Grid.Row="1"
                    Grid.Column="0"
                    Text="Name"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
                    Text="{Binding FileName}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Save Location -->
         <TextBlock Grid.Row="2"
                    Grid.Column="0"
                    Text="Save Location"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="2"
                    Grid.Column="1"
@@ -51,7 +51,7 @@
                    Name="TxbSaveLocation"
                    Tapped="TxbSaveLocation_OnTapped"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}">
+                   LineHeight="16">
             <TextBlock.Styles>
                 <Style Selector="TextBlock:pointerover">
                     <Setter Property="Foreground"
@@ -65,76 +65,76 @@
                    Grid.Column="0"
                    Text="Size"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="3"
                    Grid.Column="1"
                    Text="{Binding FileSize}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Downloaded -->
         <TextBlock Grid.Row="4"
                    Grid.Column="0"
                    Text="Downloaded"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="4"
                    Grid.Column="1"
                    Text="{Binding Downloaded}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Speed -->
         <TextBlock Grid.Row="5"
                    Grid.Column="0"
                    Text="Speed"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="5"
                    Grid.Column="1"
                    Text="{Binding Speed}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Elapsed Time -->
         <TextBlock Grid.Row="6"
                    Grid.Column="0"
                    Text="Elapsed Time"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="6"
                    Grid.Column="1"
                    Text="{Binding ElapsedTime}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Time Left -->
         <TextBlock Grid.Row="7"
                    Grid.Column="0"
                    Text="Time Left"
                    Margin="0, 0, 15, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="7"
                    Grid.Column="1"
                    Text="{Binding TimeLeft}"
                    Margin="0, 0, 0, 10"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <!-- Resume Capability -->
         <TextBlock Grid.Row="8"
                    Grid.Column="0"
                    Text="Resume Capability"
                    Margin="0, 0, 15, 0"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
 
         <TextBlock Grid.Row="8"
                    Grid.Column="1"
                    Text="{Binding ResumeCapability}"
-                   LineHeight="{Binding $self.FontSize}" />
+                   LineHeight="16" />
     </Grid>
 </UserControl>

@@ -198,7 +198,7 @@
                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                    Text="{TemplateBinding Watermark}"
-                                                   Foreground="{TemplateBinding WatermarkColor}"
+                                                   Foreground="{TemplateBinding WatermarkForeground}"
                                                    TextAlignment="{TemplateBinding TextAlignment}"
                                                    TextWrapping="{TemplateBinding TextWrapping}">
                                             <TextBlock.IsVisible>

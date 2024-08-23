@@ -24,18 +24,18 @@ public class MainWindowViewModel : ViewModelBase
     #region Properties
 
     // Categories list data
-    private ObservableCollection<Category> _categories;
+    private ObservableCollection<CategoryHeader> _categories;
 
-    public ObservableCollection<Category> Categories
+    public ObservableCollection<CategoryHeader> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
 
     // Selected category
-    private Category? _selectedCategory = null;
+    private CategoryHeader? _selectedCategory = null;
 
-    public Category? SelectedCategory
+    public CategoryHeader? SelectedCategory
     {
         get => _selectedCategory;
         set
@@ -49,9 +49,9 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Selected category item
-    private CategoryItem? _selectedCategoryItem = null;
+    private Category? _selectedCategoryItem = null;
 
-    public CategoryItem? SelectedCategoryItem
+    public Category? SelectedCategoryItem
     {
         get => _selectedCategoryItem;
         set
@@ -136,19 +136,19 @@ public class MainWindowViewModel : ViewModelBase
             grd!.SelectAll();
     }
 
-    private ObservableCollection<Category> LoadCategories()
+    private ObservableCollection<CategoryHeader> LoadCategories()
     {
         try
         {
             UnitOfWork.CreateCategories();
 
-            var categories = UnitOfWork.CategoryRepository.GetAll();
-            var categoryItems = UnitOfWork.CategoryItemRepository.GetAll();
+            var categories = UnitOfWork.CategoryHeaderRepository.GetAll();
+            var categoryItems = UnitOfWork.CategoryRepository.GetAll();
 
             categories = categories
                 .Select(c =>
                 {
-                    c.CategoryItems = categoryItems;
+                    c.Categories = categoryItems;
                     return c;
                 })
                 .ToList();
@@ -157,7 +157,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch
         {
-            return new ObservableCollection<Category>();
+            return new ObservableCollection<CategoryHeader>();
         }
     }
 

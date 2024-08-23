@@ -5,11 +5,11 @@ namespace CrossPlatformDownloadManager.Data.UnitOfWork;
 
 public interface IUnitOfWork : IDisposable
 {
+    ICategoryHeaderRepository CategoryHeaderRepository { get; }
     ICategoryRepository CategoryRepository { get; }
-    ICategoryItemRepository CategoryItemRepository { get; }
-    ICategoryItemFileExtensionRepository CategoryItemFileExtensionRepository { get; }
-    IQueueRepository QueueRepository { get; }
-    ICategoryItemSaveDirectoryRepository CategoryItemSaveDirectoryRepository { get; }
+    ICategoryFileExtensionRepository CategoryFileExtensionRepository { get; }
+    IDownloadQueueRepository DownloadQueueRepository { get; }
+    ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
 
     void CreateCategories();
 }

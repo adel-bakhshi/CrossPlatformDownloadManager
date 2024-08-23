@@ -4,9 +4,9 @@ using SQLite;
 
 namespace CrossPlatformDownloadManager.Data.Repository.Services;
 
-public class QueueRepository : RepositoryBase<Queue>, IQueueRepository
+public class CategoryHeaderRepository : RepositoryBase<CategoryHeader>, ICategoryHeaderRepository
 {
-    public QueueRepository(SQLiteConnection connection) : base(connection)
+    public CategoryHeaderRepository(SQLiteConnection connection) : base(connection)
     {
     }
 }

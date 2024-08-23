@@ -3,8 +3,8 @@ using SQLite;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-[Table("CategoryItemFileExtensions")]
-public class CategoryItemFileExtension
+[Table("CategoryFileExtensions")]
+public class CategoryFileExtension
 {
     [PrimaryKey, AutoIncrement] public int Id { get; set; }
 
@@ -12,5 +12,7 @@ public class CategoryItemFileExtension
 
     [NotNull] [JsonProperty("alias")] public string Alias { get; set; } = string.Empty;
 
-    [Indexed] public int? CategoryItemId { get; set; }
+    [Indexed] public int? CategoryId { get; set; }
+    
+    [Ignore] public Category? Category { get; set; }
 }

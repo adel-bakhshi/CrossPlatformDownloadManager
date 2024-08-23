@@ -16,11 +16,11 @@ public class UnitOfWork : IUnitOfWork
 
     #region Properties
 
+    public ICategoryHeaderRepository CategoryHeaderRepository { get; }
     public ICategoryRepository CategoryRepository { get; }
-    public ICategoryItemRepository CategoryItemRepository { get; }
-    public ICategoryItemFileExtensionRepository CategoryItemFileExtensionRepository { get; }
-    public IQueueRepository QueueRepository { get; }
-    public ICategoryItemSaveDirectoryRepository CategoryItemSaveDirectoryRepository { get; }
+    public ICategoryFileExtensionRepository CategoryFileExtensionRepository { get; }
+    public IDownloadQueueRepository DownloadQueueRepository { get; }
+    public ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
 
     #endregion
 
@@ -28,11 +28,11 @@ public class UnitOfWork : IUnitOfWork
     {
         _connection ??= CreateSqLiteConnection();
 
+        CategoryHeaderRepository = new CategoryHeaderRepository(_connection);
         CategoryRepository = new CategoryRepository(_connection);
-        CategoryItemRepository = new CategoryItemRepository(_connection);
-        CategoryItemFileExtensionRepository = new CategoryItemFileExtensionRepository(_connection);
-        QueueRepository = new QueueRepository(_connection);
-        CategoryItemSaveDirectoryRepository = new CategoryItemSaveDirectoryRepository(_connection);
+        CategoryFileExtensionRepository = new CategoryFileExtensionRepository(_connection);
+        CategorySaveDirectoryRepository = new CategorySaveDirectoryRepository(_connection);
+        DownloadQueueRepository = new DownloadQueueRepository(_connection);
     }
 
     private SQLiteConnection CreateSqLiteConnection()
@@ -47,26 +47,26 @@ public class UnitOfWork : IUnitOfWork
     /// <exception cref="Exception">If the json files is empty</exception>
     public void CreateCategories()
     {
-        var categories = CategoryRepository.GetAll();
-        var categoryItems = CategoryItemRepository.GetAll();
+        var categories = CategoryHeaderRepository.GetAll();
+        var categoryItems = CategoryRepository.GetAll();
 
         if (categories.Count == 0)
         {
             var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/categories.json";
             var assetsUri = new Uri(assetName);
-            categories = assetsUri.OpenJsonAsset<List<Category>>();
+            categories = assetsUri.OpenJsonAsset<List<CategoryHeader>>();
 
             if (categories == null || !categories.Any())
                 throw new Exception("Can't find categories for import.");
 
-            CategoryRepository.AddRange(categories);
+            CategoryHeaderRepository.AddRange(categories);
         }
 
         if (categoryItems.Count == 0)
         {
             var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/category-items.json";
             var assetsUri = new Uri(assetName);
-            categoryItems = assetsUri.OpenJsonAsset<List<CategoryItem>>();
+            categoryItems = assetsUri.OpenJsonAsset<List<Category>>();
 
             if (categoryItems == null || !categoryItems.Any())
                 throw new Exception("Can't find category items for import.");
@@ -75,7 +75,7 @@ public class UnitOfWork : IUnitOfWork
 
             foreach (var categoryItem in categoryItems)
             {
-                CategoryItemRepository.Add(categoryItem);
+                CategoryRepository.Add(categoryItem);
                 CreateFileTypes(categoryItem);
                 CreateSaveDirectory(categoryItem);
             }
@@ -85,24 +85,24 @@ public class UnitOfWork : IUnitOfWork
     /// <summary>
     /// Each category has one or more file types that must be created for each
     /// </summary>
-    /// <param name="categoryItem">CategoryItem, whose types of files are supposed to be created</param>
-    private void CreateFileTypes(CategoryItem categoryItem)
+    /// <param name="category">CategoryItem, whose types of files are supposed to be created</param>
+    private void CreateFileTypes(Category category)
     {
-        var fileExtensions = CategoryItemFileExtensionRepository
-            .GetAll(where: fe => fe.CategoryItemId == categoryItem.Id);
+        var fileExtensions = CategoryFileExtensionRepository
+            .GetAll(where: fe => fe.CategoryId == category.Id);
 
         if (fileExtensions.Count == 0)
         {
-            fileExtensions = categoryItem
+            fileExtensions = category
                 .FileExtensions
                 .Select(fe =>
                 {
-                    fe.CategoryItemId = categoryItem.Id;
+                    fe.CategoryId = category.Id;
                     return fe;
                 })
                 .ToList();
 
-            CategoryItemFileExtensionRepository.AddRange(fileExtensions);
+            CategoryFileExtensionRepository.AddRange(fileExtensions);
         }
     }
 
@@ -110,26 +110,26 @@ public class UnitOfWork : IUnitOfWork
     /// Define default download directories for each category. If category is null, It's create General directory path
     /// </summary>
     /// <param name="categoryItem">CategoryItem whose directory path is to be created</param>
-    private void CreateSaveDirectory(CategoryItem? categoryItem)
+    private void CreateSaveDirectory(Category? categoryItem)
     {
         var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var savePath = categoryItem != null
             ? Path.Join(downloadFolderPath, "Downloads", "CDM", categoryItem.Title)
             : Path.Join(downloadFolderPath, "Downloads", "CDM");
 
-        var saveDirectory = new CategoryItemSaveDirectory
+        var saveDirectory = new CategorySaveDirectory
         {
-            CategoryItemId = categoryItem?.Id,
+            CategoryId = categoryItem?.Id,
             SaveDirectory = savePath,
         };
 
-        CategoryItemSaveDirectoryRepository.Add(saveDirectory);
+        CategorySaveDirectoryRepository.Add(saveDirectory);
 
         if (categoryItem == null)
             return;
 
         categoryItem.CategoryItemSaveDirectoryId = saveDirectory.Id;
-        CategoryItemRepository.Update(categoryItem);
+        CategoryRepository.Update(categoryItem);
     }
 
     public void Dispose()

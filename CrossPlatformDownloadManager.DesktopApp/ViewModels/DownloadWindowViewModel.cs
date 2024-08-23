@@ -78,8 +78,8 @@ public class DownloadWindowViewModel : ViewModelBase
     public DownloadWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
         ShowStatusView = true;
-        SpeedLimiterUnits = new ObservableCollection<string> { "KB", "MB" };
-        OptionsTurnOffModes = new ObservableCollection<string> { "Shut down", "Sleep", "Hibernate" };
+        SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
+        OptionsTurnOffModes = Constants.TurnOffComputerModes.ToObservableCollection();
         ChunksData = GetChunksData();
 
         ChangeViewCommand = ReactiveCommand.Create<object?>(ChangeView);

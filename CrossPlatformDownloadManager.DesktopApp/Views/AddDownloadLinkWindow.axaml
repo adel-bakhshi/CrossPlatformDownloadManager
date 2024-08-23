@@ -45,7 +45,7 @@
                                            MaxDropDownHeight="120"
                                            ItemsSource="{Binding Queues}">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="models:Queue">
+                                <DataTemplate DataType="models:DownloadQueue">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>
@@ -125,7 +125,7 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
                                       Watermark="Url"
-                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
@@ -149,7 +149,7 @@
                                            ItemsSource="{Binding Categories}"
                                            MaxDropDownHeight="150">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="models:CategoryItem">
+                                <DataTemplate DataType="models:Category">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>
@@ -176,7 +176,7 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
                                       Watermark="Name"
-                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
@@ -189,7 +189,7 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource ProgressBarGradientBrush}"
                                       Watermark="Description"
-                                      WatermarkColor="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"

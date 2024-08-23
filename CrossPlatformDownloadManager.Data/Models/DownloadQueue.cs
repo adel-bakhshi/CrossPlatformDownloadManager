@@ -1,8 +1,10 @@
-﻿using SQLite;
+﻿using CrossPlatformDownloadManager.Utils.Enums;
+using SQLite;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class Queue
+[Table("DownloadQueues")]
+public class DownloadQueue
 {
     [PrimaryKey, AutoIncrement] public int Id { get; set; }
 
@@ -24,9 +26,11 @@ public class Queue
 
     [NotNull] public int RetryCount { get; set; } = 3;
 
-    public bool? ExitProgramWhenQueueFinish { get; set; }
+    public bool? ShowAlarmWhenDone { get; set; }
+    
+    public bool? ExitProgramWhenDone { get; set; }
 
-    public bool? TurnOffComputerWhenQueueFinish { get; set; }
+    public bool? TurnOffComputerWhenDone { get; set; }
 
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
 

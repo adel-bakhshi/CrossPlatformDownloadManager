@@ -4,9 +4,9 @@ using SQLite;
 
 namespace CrossPlatformDownloadManager.Data.Repository.Services;
 
-public class CategoryItemRepository : RepositoryBase<CategoryItem>, ICategoryItemRepository
+public class DownloadQueueRepository : RepositoryBase<DownloadQueue>, IDownloadQueueRepository
 {
-    public CategoryItemRepository(SQLiteConnection connection) : base(connection)
+    public DownloadQueueRepository(SQLiteConnection connection) : base(connection)
     {
     }
 }

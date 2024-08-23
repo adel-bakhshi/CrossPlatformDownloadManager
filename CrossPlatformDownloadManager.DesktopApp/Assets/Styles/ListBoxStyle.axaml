@@ -13,7 +13,7 @@
         <converters:StringToGeometryConverter x:Key="StringToGeometryConverter" />
         <converters:StringToUpperConverter x:Key="StringToUpperConverter" />
 
-        <DataTemplate DataType="models:CategoryItem"
+        <DataTemplate DataType="models:Category"
                       x:Key="CategoryListItemDataTemplate">
             <StackPanel Orientation="Horizontal"
                         Spacing="5">
@@ -62,19 +62,19 @@
             </Setter>
 
             <Setter Property="ItemTemplate">
-                <DataTemplate DataType="models:Category">
+                <DataTemplate DataType="models:CategoryHeader">
                     <Expander IsExpanded="{Binding $parent[ListBoxItem].IsSelected}">
                         <Expander.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="5">
                                     <PathIcon
-                                        Data="{Binding $parent[ListBoxItem].((models:Category)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
+                                        Data="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
                                         Width="16"
                                         Height="16"
                                         Foreground="{Binding $parent[Expander].Foreground}" />
 
-                                    <TextBlock Text="{Binding $parent[ListBoxItem].((models:Category)DataContext).Title, FallbackValue='', TargetNullValue=''}"
+                                    <TextBlock Text="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Title, FallbackValue='', TargetNullValue=''}"
                                                FontWeight="Bold" />
                                 </StackPanel>
                             </DataTemplate>
@@ -84,7 +84,7 @@
                                  Padding="20, 10, 20, 0"
                                  BorderThickness="0"
                                  Background="{DynamicResource TransparentColor}"
-                                 ItemsSource="{Binding $parent[ListBoxItem].((models:Category)DataContext).CategoryItems, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                 ItemsSource="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Categories, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                  ItemTemplate="{StaticResource CategoryListItemDataTemplate}"
                                  ItemsPanel="{StaticResource CategoryListItemItemsPanelTemplate}"
                                  SelectionMode="Single"
@@ -162,7 +162,7 @@
             </Setter>
 
             <Setter Property="ItemTemplate">
-                <DataTemplate DataType="models:CategoryItemFileExtension">
+                <DataTemplate DataType="models:CategoryFileExtension">
                     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                             Padding="10"
                             Background="{DynamicResource PrimaryColor}">

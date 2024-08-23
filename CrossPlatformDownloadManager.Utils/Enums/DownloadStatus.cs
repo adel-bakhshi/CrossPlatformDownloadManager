@@ -1,4 +1,4 @@
-﻿namespace CrossPlatformDownloadManager.Data.Models;
+namespace CrossPlatformDownloadManager.Utils.Enums;
 
 public enum DownloadStatus : byte
 {

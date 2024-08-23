@@ -1,7 +1,9 @@
-﻿using SQLite;
+﻿using CrossPlatformDownloadManager.Utils.Enums;
+using SQLite;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
+[Table("DownloadFiles")]
 public class DownloadFile
 {
     [PrimaryKey, AutoIncrement] public int Id { get; set; }

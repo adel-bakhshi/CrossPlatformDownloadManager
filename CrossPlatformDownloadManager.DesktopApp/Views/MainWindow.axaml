@@ -97,7 +97,7 @@
                                   Width="240"
                                   Background="{DynamicResource SecondaryColor}"
                                   Watermark="Search in the list"
-                                  WatermarkColor="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource TertiaryColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource Search}"
                                   IconColor="{DynamicResource ProgressBarGradientBrush}"

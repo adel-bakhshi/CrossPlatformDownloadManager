@@ -66,7 +66,7 @@
                     Spacing="10">
             <cc:CustomTextBox Name="TxtSpeedLimiterValue"
                               Watermark="Speed"
-                              WatermarkColor="{DynamicResource TertiaryColor}"
+                              WatermarkForeground="{DynamicResource TertiaryColor}"
                               Padding="12, 10"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               Background="{DynamicResource PrimaryColor}"

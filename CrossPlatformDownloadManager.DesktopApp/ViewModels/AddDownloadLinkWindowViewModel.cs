@@ -25,17 +25,17 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _url, value?.Trim());
     }
 
-    private ObservableCollection<CategoryItem> _categories;
+    private ObservableCollection<Category> _categories;
 
-    public ObservableCollection<CategoryItem> Categories
+    public ObservableCollection<Category> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
 
-    private CategoryItem? _selectedCategory;
+    private Category? _selectedCategory;
 
-    public CategoryItem? SelectedCategory
+    public Category? SelectedCategory
     {
         get => _selectedCategory;
         set => this.RaiseAndSetIfChanged(ref _selectedCategory, value);
@@ -81,17 +81,17 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isLoadingUrl, value);
     }
 
-    private ObservableCollection<Queue> _queues;
+    private ObservableCollection<DownloadQueue> _queues;
 
-    public ObservableCollection<Queue> Queues
+    public ObservableCollection<DownloadQueue> Queues
     {
         get => _queues;
         set => this.RaiseAndSetIfChanged(ref _queues, value);
     }
 
-    private Queue? _selectedQueue;
+    private DownloadQueue? _selectedQueue;
 
-    public Queue? SelectedQueue
+    public DownloadQueue? SelectedQueue
     {
         get => _selectedQueue;
         set => this.RaiseAndSetIfChanged(ref _selectedQueue, value);
@@ -137,38 +137,53 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddNewQueue(Window? owner)
-    {
-        // TODO: Show AddNewQueueWindow
-        throw new NotImplementedException();
-    }
-
-    private ObservableCollection<Queue> GetQueues()
+    private async void AddNewQueue(Window? owner)
     {
         try
         {
-            var queues = UnitOfWork.QueueRepository.GetAll();
+            if (owner == null)
+                return;
+
+            var vm = new AddNewQueueWindowViewModel(UnitOfWork);
+            var window = new AddNewQueueWindow { DataContext = vm };
+            var result = await window.ShowDialog<bool>(owner);
+            if (!result)
+                return;
+            
+            Queues = GetQueues();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private ObservableCollection<DownloadQueue> GetQueues()
+    {
+        try
+        {
+            var queues = UnitOfWork.DownloadQueueRepository.GetAll();
             return queues.ToObservableCollection();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return new ObservableCollection<Queue>();
+            return new ObservableCollection<DownloadQueue>();
         }
     }
 
-    private ObservableCollection<CategoryItem> GetCategories()
+    private ObservableCollection<Category> GetCategories()
     {
         try
         {
-            var categories = UnitOfWork.CategoryItemRepository.GetAll();
-            categories.Insert(0, new CategoryItem { Title = "General" });
+            var categories = UnitOfWork.CategoryRepository.GetAll();
+            categories.Insert(0, new Category { Title = "General" });
             return categories.ToObservableCollection();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return new ObservableCollection<CategoryItem>();
+            return new ObservableCollection<Category>();
         }
     }
 
@@ -220,13 +235,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             // find category item by file extension
             var ext = Path.GetExtension(FileName);
-            var fileExtension = UnitOfWork.CategoryItemFileExtensionRepository
+            var fileExtension = UnitOfWork.CategoryFileExtensionRepository
                 .Get(where: fe => fe.Extension.ToLower() == ext.ToLower());
 
             if (fileExtension != null)
             {
-                var categoryItem = UnitOfWork.CategoryItemRepository
-                    .Get(where: ci => ci.Id == fileExtension.CategoryItemId);
+                var categoryItem = UnitOfWork.CategoryRepository
+                    .Get(where: ci => ci.Id == fileExtension.CategoryId);
 
                 FileTypeIcon = categoryItem?.Icon;
                 SelectedCategory = categoryItem;

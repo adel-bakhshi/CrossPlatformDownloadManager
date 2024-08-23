@@ -12,5 +12,13 @@ public class Category
 
     [NotNull] [JsonProperty("icon")] public string Icon { get; set; } = "";
 
-    [Ignore] public ICollection<CategoryItem> CategoryItems { get; set; } = new List<CategoryItem>();
+    public string? AutoAddLinkFromSites { get; set; }
+
+    [Indexed] public int? CategoryItemSaveDirectoryId { get; set; }
+
+    [Ignore]
+    [JsonProperty("fileExtensions")]
+    public ICollection<CategoryFileExtension> FileExtensions { get; set; } = new List<CategoryFileExtension>();
+
+    [Ignore] public CategorySaveDirectory? CategorySaveDirectory { get; set; }
 }

@@ -1,0 +1,65 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.CustomControls">
+    <Design.PreviewWith>
+        <controls:CustomNumericUpDown />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|CustomNumericUpDown">
+        <Setter Property="Background"
+                Value="{DynamicResource ThemeBackgroundBrush}" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource ThemeBorderMidBrush}" />
+        <Setter Property="BorderThickness"
+                Value="{DynamicResource ThemeBorderThickness}" />
+        <Setter Property="Padding"
+                Value="4" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DataValidationErrors>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="0"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ClipToBounds="{TemplateBinding ClipToBounds}">
+                        <ButtonSpinner Name="PART_Spinner"
+                                       HorizontalContentAlignment="Stretch"
+                                       VerticalContentAlignment="Stretch"
+                                       IsTabStop="False"
+                                       Padding="0"
+                                       Margin="{TemplateBinding Padding}"
+                                       MinWidth="0"
+                                       AllowSpin="{TemplateBinding AllowSpin}"
+                                       Background="{DynamicResource TransparentColor}"
+                                       BorderBrush="{DynamicResource TransparentColor}"
+                                       BorderThickness="0"
+                                       ButtonSpinnerLocation="{TemplateBinding ButtonSpinnerLocation}"
+                                       CornerRadius="0"
+                                       ShowButtonSpinner="{TemplateBinding ShowButtonSpinner}">
+                            <local:CustomTextBox Name="PART_TextBox"
+                                                 MinWidth="0"
+                                                 Margin="0"
+                                                 Padding="0"
+                                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                                 HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                 VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                 AcceptsReturn="False"
+                                                 Background="{DynamicResource TransparentColor}"
+                                                 BorderThickness="0"
+                                                 IsReadOnly="{TemplateBinding IsReadOnly}"
+                                                 Text="{TemplateBinding Text}"
+                                                 TextAlignment="{TemplateBinding TextAlignment}"
+                                                 TextWrapping="NoWrap"
+                                                 Watermark="{TemplateBinding Watermark}"
+                                                 WatermarkForeground="{TemplateBinding WatermarkForeground}"
+                                                 InnerLeftContent="{Binding InnerLeftContent, RelativeSource={RelativeSource TemplatedParent}}"
+                                                 InnerRightContent="{Binding InnerRightContent, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </ButtonSpinner>
+                    </Border>
+                </DataValidationErrors>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

@@ -6,6 +6,7 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
@@ -24,11 +25,15 @@
     <!-- Resources -->
     <Window.Resources>
         <ResourceDictionary>
+            <!-- Converters -->
+            <converters:ToFileSizeConverter x:Key="ToFileSizeConverter" />
+
             <!-- Download later content -->
             <Flyout x:Key="DownloadLaterContentFlyout"
                     Placement="TopEdgeAlignedLeft"
                     ShowMode="Transient"
-                    VerticalOffset="-10">
+                    VerticalOffset="-10"
+                    IsOpen="{Binding !DefaultQueueIsExist}">
                 <StackPanel Width="241"
                             Margin="10"
                             Spacing="10">
@@ -43,7 +48,9 @@
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
                                            MaxDropDownHeight="120"
-                                           ItemsSource="{Binding Queues}">
+                                           ItemsSource="{Binding Queues}"
+                                           SelectedItem="{Binding SelectedQueue}"
+                                           PopupBackground="{DynamicResource SecondaryColor}">
                             <cc:CustomComboBox.ItemTemplate>
                                 <DataTemplate DataType="models:DownloadQueue">
                                     <TextBlock Text="{Binding Title}" />
@@ -82,7 +89,8 @@
                                       HorizontalAlignment="Right"
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
-                                      Width="40" />
+                                      Width="40"
+                                      IsChecked="{Binding StartQueue}" />
                     </Grid>
 
                     <Grid ColumnDefinitions="*, Auto">
@@ -100,10 +108,15 @@
                                       HorizontalAlignment="Right"
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
-                                      Width="40" />
+                                      Width="40"
+                                      IsChecked="{Binding RememberMyChoice}" />
                     </Grid>
 
-                    <Button Classes="button success">Add To Queue</Button>
+                    <Button Classes="button success"
+                            Command="{Binding AddFileToQueueCommand}"
+                            CommandParameter="{Binding $parent[Window]}">
+                        Add To Queue
+                    </Button>
                 </StackPanel>
             </Flyout>
         </ResourceDictionary>
@@ -219,7 +232,7 @@
                                       Foreground="{DynamicResource ProgressBarGradientBrush}"
                                       HorizontalAlignment="Center" />
 
-                            <TextBlock Text="{Binding FileSize}"
+                            <TextBlock Text="{Binding FileSize, Converter={StaticResource ToFileSizeConverter}}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -242,7 +255,9 @@
                         Spacing="10">
                 <!-- Download later button -->
                 <Button Classes="button info"
-                        Flyout="{StaticResource DownloadLaterContentFlyout}">
+                        Flyout="{StaticResource DownloadLaterContentFlyout}"
+                        Command="{Binding AddToDefaultQueueCommand}"
+                        CommandParameter="{Binding $parent[Window]}">
                     Download Later
                 </Button>
 

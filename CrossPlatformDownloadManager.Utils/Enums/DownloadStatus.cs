@@ -2,7 +2,8 @@ namespace CrossPlatformDownloadManager.Utils.Enums;
 
 public enum DownloadStatus : byte
 {
-    Completed = 0,
+    None = 0,
+    Completed,
     Downloading,
     Pause,
     Error,

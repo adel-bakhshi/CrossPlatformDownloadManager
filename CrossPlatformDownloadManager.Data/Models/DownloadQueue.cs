@@ -27,12 +27,14 @@ public class DownloadQueue
     [NotNull] public int RetryCount { get; set; } = 3;
 
     public bool? ShowAlarmWhenDone { get; set; }
-    
+
     public bool? ExitProgramWhenDone { get; set; }
 
     public bool? TurnOffComputerWhenDone { get; set; }
 
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
+
+    [NotNull] public bool IsDefault { get; set; }
 
     [Ignore] public ICollection<DownloadFile> DownloadFiles { get; set; } = new List<DownloadFile>();
 }

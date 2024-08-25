@@ -21,7 +21,12 @@ public static class Constants
         })
         .ToList();
 
+    // Speed limiter units
     public static readonly List<string> SpeedLimiterUnits = ["KB", "MB"];
     
+    // Times of day
     public static readonly List<string> TimesOfDay = ["AM", "PM"];
+    
+    // General category title
+    public const string GeneralCategoryTitle = "General";
 }

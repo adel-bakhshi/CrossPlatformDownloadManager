@@ -327,6 +327,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
                 ExitProgramWhenDone = ExitProgramWhenDone,
                 TurnOffComputerWhenDone = TurnOffComputerWhenDone,
                 TurnOffComputerMode = turnOffComputerMode,
+                IsDefault = false,
             };
             
             UnitOfWork.DownloadQueueRepository.Add(downloadQueue);

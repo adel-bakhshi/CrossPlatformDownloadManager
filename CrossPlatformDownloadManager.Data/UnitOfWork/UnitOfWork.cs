@@ -21,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
     public ICategoryFileExtensionRepository CategoryFileExtensionRepository { get; }
     public IDownloadQueueRepository DownloadQueueRepository { get; }
     public ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
+    public IDownloadFileRepository DownloadFileRepository { get; }
 
     #endregion
 
@@ -33,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
         CategoryFileExtensionRepository = new CategoryFileExtensionRepository(_connection);
         CategorySaveDirectoryRepository = new CategorySaveDirectoryRepository(_connection);
         DownloadQueueRepository = new DownloadQueueRepository(_connection);
+        DownloadFileRepository = new DownloadFileRepository(_connection);
     }
 
     private SQLiteConnection CreateSqLiteConnection()
@@ -47,37 +49,38 @@ public class UnitOfWork : IUnitOfWork
     /// <exception cref="Exception">If the json files is empty</exception>
     public void CreateCategories()
     {
-        var categories = CategoryHeaderRepository.GetAll();
-        var categoryItems = CategoryRepository.GetAll();
+        var categoryHeaders = CategoryHeaderRepository.GetAll();
+        var categories = CategoryRepository.GetAll();
+
+        if (categoryHeaders.Count == 0)
+        {
+            var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/category-headers.json";
+            var assetsUri = new Uri(assetName);
+            categoryHeaders = assetsUri.OpenJsonAsset<List<CategoryHeader>>();
+
+            if (categoryHeaders == null || !categoryHeaders.Any())
+                throw new Exception("Can't find categories for import.");
+
+            CategoryHeaderRepository.AddRange(categoryHeaders);
+        }
 
         if (categories.Count == 0)
         {
             var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/categories.json";
             var assetsUri = new Uri(assetName);
-            categories = assetsUri.OpenJsonAsset<List<CategoryHeader>>();
+            categories = assetsUri.OpenJsonAsset<List<Category>>();
 
             if (categories == null || !categories.Any())
-                throw new Exception("Can't find categories for import.");
-
-            CategoryHeaderRepository.AddRange(categories);
-        }
-
-        if (categoryItems.Count == 0)
-        {
-            var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/category-items.json";
-            var assetsUri = new Uri(assetName);
-            categoryItems = assetsUri.OpenJsonAsset<List<Category>>();
-
-            if (categoryItems == null || !categoryItems.Any())
                 throw new Exception("Can't find category items for import.");
 
+            // Create root directory for General category
             CreateSaveDirectory(null);
 
-            foreach (var categoryItem in categoryItems)
+            foreach (var category in categories)
             {
-                CategoryRepository.Add(categoryItem);
-                CreateFileTypes(categoryItem);
-                CreateSaveDirectory(categoryItem);
+                CategoryRepository.Add(category);
+                CreateFileTypes(category);
+                CreateSaveDirectory(category);
             }
         }
     }
@@ -128,7 +131,7 @@ public class UnitOfWork : IUnitOfWork
         if (categoryItem == null)
             return;
 
-        categoryItem.CategoryItemSaveDirectoryId = saveDirectory.Id;
+        categoryItem.CategorySaveDirectoryId = saveDirectory.Id;
         CategoryRepository.Update(categoryItem);
     }
 

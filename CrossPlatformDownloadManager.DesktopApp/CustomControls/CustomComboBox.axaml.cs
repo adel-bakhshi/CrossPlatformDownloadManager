@@ -6,6 +6,8 @@ namespace CrossPlatformDownloadManager.DesktopApp.CustomControls;
 
 public class CustomComboBox : ComboBox
 {
+    #region Properties
+
     public static readonly StyledProperty<Geometry?> IconDataProperty =
         AvaloniaProperty.Register<CustomComboBox, Geometry?>(
             "IconData");
@@ -64,4 +66,15 @@ public class CustomComboBox : ComboBox
         get => GetValue(OnHoverToggleIconColorProperty);
         set => SetValue(OnHoverToggleIconColorProperty, value);
     }
+
+    public static readonly StyledProperty<IBrush?> PopupBackgroundProperty = AvaloniaProperty.Register<CustomComboBox, IBrush?>(
+        "PopupBackground");
+
+    public IBrush? PopupBackground
+    {
+        get => GetValue(PopupBackgroundProperty);
+        set => SetValue(PopupBackgroundProperty, value);
+    }
+
+    #endregion
 }

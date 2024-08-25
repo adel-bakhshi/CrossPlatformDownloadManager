@@ -89,6 +89,8 @@
                 Value="{DynamicResource TertiaryColor}" />
         <Setter Property="OnHoverToggleIconColor"
                 Value="{DynamicResource TextColor}" />
+        <Setter Property="PopupBackground"
+                Value="{DynamicResource MenuBgColor}" />
 
         <Setter Property="Template">
             <ControlTemplate>
@@ -178,7 +180,7 @@
                                IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
                                PlacementTarget="{TemplateBinding}"
                                InheritsTransform="True">
-                            <Border Background="{DynamicResource MenuBgColor}"
+                            <Border Background="{TemplateBinding PopupBackground}"
                                     BorderBrush="{DynamicResource ThemeBorderMidBrush}"
                                     BorderThickness="0"
                                     CornerRadius="{DynamicResource DefaultCornerRadius}"

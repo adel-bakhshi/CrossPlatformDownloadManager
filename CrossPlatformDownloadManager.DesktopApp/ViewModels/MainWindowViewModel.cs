@@ -142,18 +142,18 @@ public class MainWindowViewModel : ViewModelBase
         {
             UnitOfWork.CreateCategories();
 
-            var categories = UnitOfWork.CategoryHeaderRepository.GetAll();
-            var categoryItems = UnitOfWork.CategoryRepository.GetAll();
+            var categoryHeaders = UnitOfWork.CategoryHeaderRepository.GetAll();
+            var categories = UnitOfWork.CategoryRepository.GetAll();
 
-            categories = categories
+            categoryHeaders = categoryHeaders
                 .Select(c =>
                 {
-                    c.Categories = categoryItems;
+                    c.Categories = categories;
                     return c;
                 })
                 .ToList();
 
-            return categories.ToObservableCollection();
+            return categoryHeaders.ToObservableCollection();
         }
         catch
         {
@@ -163,6 +163,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void FilterDownloadList()
     {
+        // TODO: Complete this method
     }
 
     private ObservableCollection<DownloadFileViewModel> GetDownloadList()

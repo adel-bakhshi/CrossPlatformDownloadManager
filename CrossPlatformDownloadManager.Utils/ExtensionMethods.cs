@@ -54,12 +54,21 @@ public static class ExtensionMethods
         return $"{bytes:N2} Byte" + (bytes > 1 ? "s" : "");
     }
 
+    public static string ToFileSize(this double? bytes)
+    {
+        if (bytes == null)
+            return string.Empty;
+
+        return bytes.Value.ToFileSize();
+    }
+
     public static bool CheckUrlValidation(this string? url)
     {
         if (url.IsNullOrEmpty())
             return false;
 
-        return Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute);
+        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) &&
+               (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
     public static T? OpenJsonAsset<T>(this Uri? uri)
@@ -71,5 +80,13 @@ public static class ExtensionMethods
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
         return json.ConvertFromJson<T>();
+    }
+
+    public static bool HasFileExtension(this string? fileName)
+    {
+        if (fileName.IsNullOrEmpty())
+            return false;
+
+        return !Path.GetExtension(fileName!).IsNullOrEmpty();
     }
 }

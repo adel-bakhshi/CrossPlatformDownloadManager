@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -9,6 +10,7 @@ using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -65,9 +67,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _fileTypeIcon, value);
     }
 
-    private string? _fileSize;
+    private double _fileSize;
 
-    public string? FileSize
+    public double FileSize
     {
         get => _fileSize;
         set => this.RaiseAndSetIfChanged(ref _fileSize, value);
@@ -97,6 +99,30 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedQueue, value);
     }
 
+    private bool _rememberMyChoice;
+
+    public bool RememberMyChoice
+    {
+        get => _rememberMyChoice;
+        set => this.RaiseAndSetIfChanged(ref _rememberMyChoice, value);
+    }
+
+    private bool _startQueue;
+
+    public bool StartQueue
+    {
+        get => _startQueue;
+        set => this.RaiseAndSetIfChanged(ref _startQueue, value);
+    }
+
+    private bool _defaultQueueIsExist;
+
+    public bool DefaultQueueIsExist
+    {
+        get => _defaultQueueIsExist;
+        set => this.RaiseAndSetIfChanged(ref _defaultQueueIsExist, value);
+    }
+
     #endregion
 
     #region Commands
@@ -104,6 +130,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     public ICommand AddNewCategoryCommand { get; }
 
     public ICommand AddNewQueueCommand { get; }
+
+    public ICommand AddFileToQueueCommand { get; }
+
+    public ICommand AddToDefaultQueueCommand { get; }
 
     #endregion
 
@@ -114,6 +144,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
         AddNewCategoryCommand = ReactiveCommand.Create<Window?>(AddNewCategory);
         AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
+        AddFileToQueueCommand = ReactiveCommand.Create<Window?>(AddFileToQueue);
+        AddToDefaultQueueCommand = ReactiveCommand.Create<Window?>(AddToDefaultQueue);
     }
 
     private async void AddNewCategory(Window? owner)
@@ -128,7 +160,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             var result = await window.ShowDialog<bool>(owner);
             if (!result)
                 return;
-            
+
             Categories = GetCategories();
         }
         catch (Exception ex)
@@ -149,13 +181,149 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             var result = await window.ShowDialog<bool>(owner);
             if (!result)
                 return;
-            
+
             Queues = GetQueues();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
+    }
+
+    private void AddFileToQueue(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                return;
+
+            if (!ValidateDownloadFile())
+                return;
+
+            // TODO: Show message box
+            if (SelectedQueue == null)
+                return;
+
+            var downloadQueue = UnitOfWork.DownloadQueueRepository
+                .Get(where: dq => dq.Id == SelectedQueue.Id);
+
+            if (downloadQueue == null)
+                return;
+
+            AddDownloadFileToDownloadQueue(downloadQueue);
+
+            if (RememberMyChoice)
+            {
+                var downloadQueues = UnitOfWork.DownloadQueueRepository
+                    .GetAll(where: dq => dq.IsDefault)
+                    .Select(dq =>
+                    {
+                        dq.IsDefault = false;
+                        return dq;
+                    })
+                    .ToList();
+
+                UnitOfWork.DownloadQueueRepository.UpdateAll(downloadQueues);
+
+                downloadQueue.IsDefault = true;
+                UnitOfWork.DownloadQueueRepository.Update(downloadQueue);
+            }
+
+            // TODO: If user choose Start Queue, then start it
+
+            owner.Close(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void AddToDefaultQueue(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                return;
+            
+            var defaultDownloadQueue = UnitOfWork.DownloadQueueRepository
+                .Get(where: dq => dq.IsDefault);
+
+            if (defaultDownloadQueue == null)
+            {
+                DefaultQueueIsExist = false;
+                return;
+            }
+
+            DefaultQueueIsExist = true;
+
+            AddDownloadFileToDownloadQueue(defaultDownloadQueue);
+            
+            owner.Close(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void AddDownloadFileToDownloadQueue(DownloadQueue downloadQueue)
+    {
+        var downloadFilesForSelectedQueue = UnitOfWork.DownloadFileRepository
+            .GetAll(where: df => df.DownloadQueueId == downloadQueue.Id);
+
+        var ext = Path.GetExtension(FileName!);
+        var fileExtensions = UnitOfWork.CategoryFileExtensionRepository
+            .GetAll(where: fe => fe.Extension.ToLower() == ext.ToLower());
+
+        foreach (var fileExtension in fileExtensions)
+        {
+            fileExtension.Category = UnitOfWork.CategoryRepository
+                .Get(where: c => c.Id == fileExtension.CategoryId);
+        }
+
+        var category = fileExtensions.FirstOrDefault(fe => fe.Category != null && !fe.Category.IsDefault)?.Category
+                       ?? fileExtensions.FirstOrDefault()?.Category;
+
+        if (category == null)
+            return;
+
+        var downloadFile = new DownloadFile
+        {
+            Url = Url!,
+            FileName = FileName!,
+            DownloadQueueId = downloadQueue.Id,
+            Size = FileSize,
+            Description = Description,
+            Status = DownloadStatus.None,
+            LastTryDate = null,
+            DateAdded = DateTime.Now,
+            QueuePriority = (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1,
+            CategoryId = category.Id,
+        };
+
+        UnitOfWork.DownloadFileRepository.Add(downloadFile);
+    }
+
+    private bool ValidateDownloadFile()
+    {
+        // TODO: Show message to user
+        var result = false;
+
+        if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
+            return result;
+
+        if (SelectedCategory == null)
+            return result;
+
+        if (FileName.IsNullOrEmpty())
+            return result;
+
+        if (!FileName.HasFileExtension())
+            return result;
+
+        result = true;
+        return result;
     }
 
     private ObservableCollection<DownloadQueue> GetQueues()
@@ -177,7 +345,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             var categories = UnitOfWork.CategoryRepository.GetAll();
-            categories.Insert(0, new Category { Title = "General" });
+            categories.Insert(0, new Category { Title = Constants.GeneralCategoryTitle });
             return categories.ToObservableCollection();
         }
         catch (Exception ex)
@@ -195,6 +363,16 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         {
             if (!Url.CheckUrlValidation())
             {
+                IsLoadingUrl = false;
+                return;
+            }
+
+            var downloadFileWithSameUrl = UnitOfWork.DownloadFileRepository
+                .Get(where: df => df.Url == Url);
+
+            if (downloadFileWithSameUrl != null)
+            {
+                // TODO: Show message box
                 IsLoadingUrl = false;
                 return;
             }
@@ -231,20 +409,54 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             // Set file name, file size, file icon and category
             FileName = fileName;
-            FileSize = fileSize.ToFileSize();
+            FileSize = fileSize;
 
             // find category item by file extension
             var ext = Path.GetExtension(FileName);
-            var fileExtension = UnitOfWork.CategoryFileExtensionRepository
-                .Get(where: fe => fe.Extension.ToLower() == ext.ToLower());
+
+            var defaultCategories = UnitOfWork.CategoryRepository
+                .GetAll(where: c => !c.IsDefault);
+
+            foreach (var category in defaultCategories)
+            {
+                var fileExtensions = UnitOfWork.CategoryFileExtensionRepository
+                    .GetAll(where: fe => fe.CategoryId == category.Id);
+
+                category.FileExtensions = fileExtensions;
+            }
+
+            CategoryFileExtension? fileExtension = null;
+            var defaultCategory = defaultCategories
+                .FirstOrDefault(c => c.FileExtensions
+                    .Any(fe => fe.Extension.ToLower() == ext.ToLower()));
+
+            if (defaultCategory != null)
+            {
+                fileExtension = defaultCategory.FileExtensions
+                    .FirstOrDefault(fe => fe.Extension.ToLower() == ext.ToLower());
+            }
+            else
+            {
+                fileExtension = UnitOfWork.CategoryFileExtensionRepository
+                    .Get(where: fe => fe.Extension.ToLower() == ext.ToLower());
+            }
 
             if (fileExtension != null)
             {
-                var categoryItem = UnitOfWork.CategoryRepository
-                    .Get(where: ci => ci.Id == fileExtension.CategoryId);
+                var category = defaultCategory ?? UnitOfWork.CategoryRepository
+                    .Get(where: c => c.Id == fileExtension.CategoryId);
 
-                FileTypeIcon = categoryItem?.Icon;
-                SelectedCategory = categoryItem;
+                if (category != null)
+                {
+                    FileTypeIcon = category.Icon;
+                    SelectedCategory = Categories.FirstOrDefault(c => c.Id == category.Id);
+                }
+                else
+                {
+                    SelectedCategory =
+                        Categories.FirstOrDefault(c =>
+                            c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
+                }
             }
         }
         catch (Exception ex)

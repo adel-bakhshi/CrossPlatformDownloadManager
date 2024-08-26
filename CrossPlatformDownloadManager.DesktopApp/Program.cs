@@ -19,21 +19,20 @@ sealed class Program
         .StartWithClassicDesktopLifetime(args);
 
     // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UseDependencyInjection(services =>
-            {
-                // Add UnitOfWork to services
-                services.AddTransient<IUnitOfWork, UnitOfWork>();
-                
-                // Add ViewModels to services
-                services.AddSingleton<MainWindowViewModel>();
-                
-                // Add Windows to services
-                services.AddSingleton<MainWindow>();
-            })
-            .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace()
-            .UseReactiveUI();
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
+        .UseDependencyInjection(services =>
+        {
+            // Add UnitOfWork to services
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+            // Add ViewModels to services
+            services.AddSingleton<MainWindowViewModel>();
+
+            // Add Windows to services
+            services.AddSingleton<MainWindow>();
+        })
+        .UsePlatformDetect()
+        .WithInterFont()
+        .LogToTrace()
+        .UseReactiveUI();
 }

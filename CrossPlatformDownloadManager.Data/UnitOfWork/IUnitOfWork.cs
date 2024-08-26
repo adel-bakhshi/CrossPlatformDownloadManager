@@ -12,5 +12,5 @@ public interface IUnitOfWork : IDisposable
     ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
     IDownloadFileRepository DownloadFileRepository { get; }
 
-    void CreateCategories();
+    Task CreateCategoriesAsync();
 }

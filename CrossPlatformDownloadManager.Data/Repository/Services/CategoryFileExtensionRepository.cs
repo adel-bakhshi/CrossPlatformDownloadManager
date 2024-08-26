@@ -7,7 +7,7 @@ namespace CrossPlatformDownloadManager.Data.Repository.Services;
 public class CategoryFileExtensionRepository : RepositoryBase<CategoryFileExtension>,
     ICategoryFileExtensionRepository
 {
-    public CategoryFileExtensionRepository(SQLiteConnection connection) : base(connection)
+    public CategoryFileExtensionRepository(SQLiteAsyncConnection connection) : base(connection)
     {
     }
 }

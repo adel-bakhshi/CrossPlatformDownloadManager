@@ -6,7 +6,7 @@ namespace CrossPlatformDownloadManager.Data.Repository.Services;
 
 public class DownloadQueueRepository : RepositoryBase<DownloadQueue>, IDownloadQueueRepository
 {
-    public DownloadQueueRepository(SQLiteConnection connection) : base(connection)
+    public DownloadQueueRepository(SQLiteAsyncConnection connection) : base(connection)
     {
     }
 }

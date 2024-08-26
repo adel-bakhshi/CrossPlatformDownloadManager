@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -139,8 +140,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public AddDownloadLinkWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
-        Categories = GetCategories();
-        Queues = GetQueues();
+        Categories = GetCategoriesAsync().Result;
+        Queues = GetQueuesAsync().Result;
 
         AddNewCategoryCommand = ReactiveCommand.Create<Window?>(AddNewCategory);
         AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
@@ -161,7 +162,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (!result)
                 return;
 
-            Categories = GetCategories();
+            Categories = await GetCategoriesAsync();
         }
         catch (Exception ex)
         {
@@ -182,7 +183,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (!result)
                 return;
 
-            Queues = GetQueues();
+            Queues = await GetQueuesAsync();
         }
         catch (Exception ex)
         {
@@ -190,7 +191,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddFileToQueue(Window? owner)
+    private async void AddFileToQueue(Window? owner)
     {
         try
         {
@@ -204,18 +205,18 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (SelectedQueue == null)
                 return;
 
-            var downloadQueue = UnitOfWork.DownloadQueueRepository
-                .Get(where: dq => dq.Id == SelectedQueue.Id);
+            var downloadQueue = await UnitOfWork.DownloadQueueRepository
+                .GetAsync(where: dq => dq.Id == SelectedQueue.Id);
 
             if (downloadQueue == null)
                 return;
 
-            AddDownloadFileToDownloadQueue(downloadQueue);
+            await AddDownloadFileToDownloadQueueAsync(downloadQueue);
 
             if (RememberMyChoice)
             {
-                var downloadQueues = UnitOfWork.DownloadQueueRepository
-                    .GetAll(where: dq => dq.IsDefault)
+                var downloadQueues = (await UnitOfWork.DownloadQueueRepository
+                        .GetAllAsync(where: dq => dq.IsDefault))
                     .Select(dq =>
                     {
                         dq.IsDefault = false;
@@ -223,10 +224,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                     })
                     .ToList();
 
-                UnitOfWork.DownloadQueueRepository.UpdateAll(downloadQueues);
+                await UnitOfWork.DownloadQueueRepository.UpdateAllAsync(downloadQueues);
 
                 downloadQueue.IsDefault = true;
-                UnitOfWork.DownloadQueueRepository.Update(downloadQueue);
+                await UnitOfWork.DownloadQueueRepository.UpdateAsync(downloadQueue);
             }
 
             // TODO: If user choose Start Queue, then start it
@@ -239,15 +240,15 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddToDefaultQueue(Window? owner)
+    private async void AddToDefaultQueue(Window? owner)
     {
         try
         {
             if (owner == null)
                 return;
-            
-            var defaultDownloadQueue = UnitOfWork.DownloadQueueRepository
-                .Get(where: dq => dq.IsDefault);
+
+            var defaultDownloadQueue = await UnitOfWork.DownloadQueueRepository
+                .GetAsync(where: dq => dq.IsDefault);
 
             if (defaultDownloadQueue == null)
             {
@@ -257,8 +258,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             DefaultQueueIsExist = true;
 
-            AddDownloadFileToDownloadQueue(defaultDownloadQueue);
-            
+            await AddDownloadFileToDownloadQueueAsync(defaultDownloadQueue);
+
             owner.Close(true);
         }
         catch (Exception ex)
@@ -267,20 +268,31 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddDownloadFileToDownloadQueue(DownloadQueue downloadQueue)
+    private async Task AddDownloadFileToDownloadQueueAsync(DownloadQueue downloadQueue)
     {
-        var downloadFilesForSelectedQueue = UnitOfWork.DownloadFileRepository
-            .GetAll(where: df => df.DownloadQueueId == downloadQueue.Id);
+        var downloadFilesForSelectedQueue = await UnitOfWork.DownloadFileRepository
+            .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id);
 
         var ext = Path.GetExtension(FileName!);
-        var fileExtensions = UnitOfWork.CategoryFileExtensionRepository
-            .GetAll(where: fe => fe.Extension.ToLower() == ext.ToLower());
+        var fileExtensions = await UnitOfWork.CategoryFileExtensionRepository
+            .GetAllAsync(where: fe => fe.Extension.ToLower() == ext.ToLower());
 
-        foreach (var fileExtension in fileExtensions)
-        {
-            fileExtension.Category = UnitOfWork.CategoryRepository
-                .Get(where: c => c.Id == fileExtension.CategoryId);
-        }
+        var primaryKeys = fileExtensions
+            .Where(fe => fe.CategoryId != null)
+            .Select(fe => fe.CategoryId)
+            .Distinct()
+            .ToList();
+
+        var categories = await UnitOfWork.CategoryRepository
+            .GetAllAsync(where: c => primaryKeys.Contains(c.Id));
+
+        fileExtensions = fileExtensions
+            .Select(fe =>
+            {
+                fe.Category = categories.FirstOrDefault(c => c.Id == fe.CategoryId);
+                return fe;
+            })
+            .ToList();
 
         var category = fileExtensions.FirstOrDefault(fe => fe.Category != null && !fe.Category.IsDefault)?.Category
                        ?? fileExtensions.FirstOrDefault()?.Category;
@@ -300,9 +312,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             DateAdded = DateTime.Now,
             QueuePriority = (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1,
             CategoryId = category.Id,
+            IsDownloading = false,
         };
 
-        UnitOfWork.DownloadFileRepository.Add(downloadFile);
+        await UnitOfWork.DownloadFileRepository.AddAsync(downloadFile);
     }
 
     private bool ValidateDownloadFile()
@@ -326,11 +339,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         return result;
     }
 
-    private ObservableCollection<DownloadQueue> GetQueues()
+    private async Task<ObservableCollection<DownloadQueue>> GetQueuesAsync()
     {
         try
         {
-            var queues = UnitOfWork.DownloadQueueRepository.GetAll();
+            var queues = await UnitOfWork.DownloadQueueRepository.GetAllAsync();
             return queues.ToObservableCollection();
         }
         catch (Exception ex)
@@ -340,11 +353,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private ObservableCollection<Category> GetCategories()
+    private async Task<ObservableCollection<Category>> GetCategoriesAsync()
     {
         try
         {
-            var categories = UnitOfWork.CategoryRepository.GetAll();
+            var categories = await UnitOfWork.CategoryRepository.GetAllAsync();
             categories.Insert(0, new Category { Title = Constants.GeneralCategoryTitle });
             return categories.ToObservableCollection();
         }
@@ -367,8 +380,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 return;
             }
 
-            var downloadFileWithSameUrl = UnitOfWork.DownloadFileRepository
-                .Get(where: df => df.Url == Url);
+            var downloadFileWithSameUrl = await UnitOfWork.DownloadFileRepository
+                .GetAsync(where: df => df.Url == Url);
 
             if (downloadFileWithSameUrl != null)
             {
@@ -397,7 +410,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                     fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('\"') ?? string.Empty;
 
                 // Fallback to using the URL to guess the file name if Content-Disposition is not present
-                if (string.IsNullOrEmpty(fileName))
+                if (fileName.IsNullOrEmpty())
                 {
                     var uri = new Uri(Url!);
                     fileName = Path.GetFileName(uri.LocalPath);
@@ -414,16 +427,27 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // find category item by file extension
             var ext = Path.GetExtension(FileName);
 
-            var defaultCategories = UnitOfWork.CategoryRepository
-                .GetAll(where: c => !c.IsDefault);
+            var defaultCategories = await UnitOfWork.CategoryRepository
+                .GetAllAsync(where: c => !c.IsDefault);
 
-            foreach (var category in defaultCategories)
-            {
-                var fileExtensions = UnitOfWork.CategoryFileExtensionRepository
-                    .GetAll(where: fe => fe.CategoryId == category.Id);
+            var primaryKeys = defaultCategories
+                .Select(c => c.Id)
+                .Distinct()
+                .ToList();
 
-                category.FileExtensions = fileExtensions;
-            }
+            var fileExtensions = await UnitOfWork.CategoryFileExtensionRepository
+                .GetAllAsync(where: fe => fe.CategoryId != null && primaryKeys.Contains(fe.CategoryId.Value));
+
+            defaultCategories = defaultCategories
+                .Select(c =>
+                {
+                    c.FileExtensions = fileExtensions
+                        .Where(fe => fe.CategoryId == c.Id)
+                        .ToList();
+                    
+                    return c;
+                })
+                .ToList();
 
             CategoryFileExtension? fileExtension = null;
             var defaultCategory = defaultCategories
@@ -437,14 +461,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             }
             else
             {
-                fileExtension = UnitOfWork.CategoryFileExtensionRepository
-                    .Get(where: fe => fe.Extension.ToLower() == ext.ToLower());
+                fileExtension = await UnitOfWork.CategoryFileExtensionRepository
+                    .GetAsync(where: fe => fe.Extension.ToLower() == ext.ToLower());
             }
 
             if (fileExtension != null)
             {
-                var category = defaultCategory ?? UnitOfWork.CategoryRepository
-                    .Get(where: c => c.Id == fileExtension.CategoryId);
+                var category = defaultCategory ?? await UnitOfWork.CategoryRepository
+                    .GetAsync(where: c => c.Id == fileExtension.CategoryId);
 
                 if (category != null)
                 {

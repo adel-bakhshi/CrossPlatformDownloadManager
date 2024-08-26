@@ -1,0 +1,161 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow.FilesView">
+    <Grid RowDefinitions="Auto, *">
+        <!-- DataGrid Actions -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*, Auto"
+              Margin="0, 0, 0, 10">
+            <!-- Download count at the same time  -->
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Left">
+                <TextBlock Text="How Many Files Can be Downloaded at the Same Time?"
+                           VerticalAlignment="Center" />
+
+                <cc:CustomNumericUpDown Padding="12, 10"
+                                        Background="{DynamicResource SecondaryColor}"
+                                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                        Watermark="Count"
+                                        WatermarkForeground="{DynamicResource TertiaryColor}"
+                                        BorderThickness="0"
+                                        Value="{Binding $parent[local:FilesView].DownloadFilesCountAtTheSameTime, Mode=TwoWay}"
+                                        VerticalAlignment="Center"
+                                        MinWidth="80"
+                                        ShowButtonSpinner="False"
+                                        Increment="1"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        ClipValueToMinMax="True" />
+            </StackPanel>
+
+            <!-- Action buttons -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Right">
+                <Button Name="ChangePriorityToHigherLevelButton"
+                        Classes="button info"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        Click="ChangePriorityToHigherLevelButton_OnClick">
+                    <PathIcon Data="{DynamicResource LongArrowUp}"
+                              Foreground="{DynamicResource TextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <Button Name="ChangePriorityToLowerLevelButton"
+                        Classes="button info"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        Click="ChangePriorityToLowerLevelButton_OnClick">
+                    <PathIcon Data="{DynamicResource LongArrowDown}"
+                              Foreground="{DynamicResource TextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <Button Name="DeleteItemFromDataGridButton"
+                        Classes="button danger"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        Click="DeleteItemFromDataGridButton_OnClick">
+                    <PathIcon Data="{DynamicResource XMark}"
+                              Foreground="{DynamicResource TextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <Button Name="AddItemToDataGridButton"
+                        Classes="button success"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        Click="AddItemToDataGridButton_OnClick">
+                    <PathIcon Data="{DynamicResource Plus}"
+                              Foreground="{DynamicResource TextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Files DataGrid -->
+        <DataGrid Name="FilesDataGrid"
+                  Grid.Row="1"
+                  DataContext="{Binding $parent[local:FilesView]}"
+                  ItemsSource="{Binding $parent[local:FilesView].FilesItemsSource, Mode=TwoWay}"
+                  Classes="chunksDataGrid"
+                  Background="{DynamicResource SecondaryColor}"
+                  SelectionMode="Extended"
+                  PropertyChanged="FilesDataGrid_OnPropertyChanged">
+            <DataGrid.Styles>
+                <Style Selector="DataGrid DataGridRow">
+                    <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource SecondaryColor}" />
+                        <Setter Property="IsVisible"
+                                Value="True" />
+                        <Setter Property="Opacity"
+                                Value="1" />
+                    </Style>
+
+                    <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource PrimaryColor}" />
+                        <Setter Property="IsVisible"
+                                Value="True" />
+                        <Setter Property="Opacity"
+                                Value="1" />
+                    </Style>
+
+                    <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource PrimaryColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.5" />
+                    </Style>
+
+                    <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource MenuBgColor}" />
+                    </Style>
+                </Style>
+            </DataGrid.Styles>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="File Name"
+                                    Binding="{Binding FileName}"
+                                    MinWidth="200" />
+
+                <DataGridTextColumn Header="Size"
+                                    Binding="{Binding Size}"
+                                    MinWidth="100" />
+
+                <DataGridTextColumn Header="Status"
+                                    MinWidth="150"
+                                    Binding="{Binding DownloadProgress, StringFormat={}{0:##.00}%, FallbackValue='', TargetNullValue=''}" />
+
+                <DataGridTextColumn Header="Time Left"
+                                    Binding="{Binding TimeLeft}"
+                                    MinWidth="100" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

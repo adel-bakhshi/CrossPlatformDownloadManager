@@ -10,7 +10,7 @@ public class UnitOfWork : IUnitOfWork
 {
     #region Private Fields
 
-    private readonly SQLiteConnection? _connection;
+    private readonly SQLiteAsyncConnection? _connection;
 
     #endregion
 
@@ -37,20 +37,20 @@ public class UnitOfWork : IUnitOfWork
         DownloadFileRepository = new DownloadFileRepository(_connection);
     }
 
-    private SQLiteConnection CreateSqLiteConnection()
+    private SQLiteAsyncConnection CreateSqLiteConnection()
     {
         var dbPath = Path.Join(Environment.CurrentDirectory, "ApplicationData.db");
-        return new SQLiteConnection(dbPath);
+        return new SQLiteAsyncConnection(dbPath);
     }
 
     /// <summary>
     /// It adds the categories that are in the categories.json and category-item.json files to the database. Check CrossPlatformDownloadManager.DesktopApp/Assets folder
     /// </summary>
     /// <exception cref="Exception">If the json files is empty</exception>
-    public void CreateCategories()
+    public async Task CreateCategoriesAsync()
     {
-        var categoryHeaders = CategoryHeaderRepository.GetAll();
-        var categories = CategoryRepository.GetAll();
+        var categoryHeaders = await CategoryHeaderRepository.GetAllAsync();
+        var categories = await CategoryRepository.GetAllAsync();
 
         if (categoryHeaders.Count == 0)
         {
@@ -61,7 +61,7 @@ public class UnitOfWork : IUnitOfWork
             if (categoryHeaders == null || !categoryHeaders.Any())
                 throw new Exception("Can't find categories for import.");
 
-            CategoryHeaderRepository.AddRange(categoryHeaders);
+            await CategoryHeaderRepository.AddRangeAsync(categoryHeaders);
         }
 
         if (categories.Count == 0)
@@ -74,13 +74,13 @@ public class UnitOfWork : IUnitOfWork
                 throw new Exception("Can't find category items for import.");
 
             // Create root directory for General category
-            CreateSaveDirectory(null);
+            await CreateSaveDirectoryAsync(null);
 
             foreach (var category in categories)
             {
-                CategoryRepository.Add(category);
-                CreateFileTypes(category);
-                CreateSaveDirectory(category);
+                await CategoryRepository.AddAsync(category);
+                await CreateFileTypesAsync(category);
+                await CreateSaveDirectoryAsync(category);
             }
         }
     }
@@ -89,10 +89,10 @@ public class UnitOfWork : IUnitOfWork
     /// Each category has one or more file types that must be created for each
     /// </summary>
     /// <param name="category">CategoryItem, whose types of files are supposed to be created</param>
-    private void CreateFileTypes(Category category)
+    private async Task CreateFileTypesAsync(Category category)
     {
-        var fileExtensions = CategoryFileExtensionRepository
-            .GetAll(where: fe => fe.CategoryId == category.Id);
+        var fileExtensions = await CategoryFileExtensionRepository
+            .GetAllAsync(where: fe => fe.CategoryId == category.Id);
 
         if (fileExtensions.Count == 0)
         {
@@ -105,7 +105,7 @@ public class UnitOfWork : IUnitOfWork
                 })
                 .ToList();
 
-            CategoryFileExtensionRepository.AddRange(fileExtensions);
+            await CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
         }
     }
 
@@ -113,7 +113,7 @@ public class UnitOfWork : IUnitOfWork
     /// Define default download directories for each category. If category is null, It's create General directory path
     /// </summary>
     /// <param name="categoryItem">CategoryItem whose directory path is to be created</param>
-    private void CreateSaveDirectory(Category? categoryItem)
+    private async Task CreateSaveDirectoryAsync(Category? categoryItem)
     {
         var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var savePath = categoryItem != null
@@ -126,17 +126,17 @@ public class UnitOfWork : IUnitOfWork
             SaveDirectory = savePath,
         };
 
-        CategorySaveDirectoryRepository.Add(saveDirectory);
+        await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
 
         if (categoryItem == null)
             return;
 
         categoryItem.CategorySaveDirectoryId = saveDirectory.Id;
-        CategoryRepository.Update(categoryItem);
+        await CategoryRepository.UpdateAsync(categoryItem);
     }
 
     public void Dispose()
     {
-        _connection?.Dispose();
+        _connection?.CloseAsync();
     }
 }

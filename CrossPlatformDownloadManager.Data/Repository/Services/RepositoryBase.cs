@@ -8,151 +8,155 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
 {
     #region Private Fields
 
-    private readonly SQLiteConnection _connection;
+    private readonly SQLiteAsyncConnection _connection;
 
     #endregion
 
-    public RepositoryBase(SQLiteConnection connection)
+    public RepositoryBase(SQLiteAsyncConnection connection)
     {
         _connection = connection;
-        _connection.CreateTable<T>();
+        _connection.CreateTableAsync<T>().GetAwaiter().GetResult();
     }
 
-    public void Add(T? entity)
+    public async Task AddAsync(T? entity)
     {
         if (entity == null)
             return;
 
-        _connection.Insert(entity);
+        await _connection.InsertAsync(entity);
     }
 
-    public void AddRange(IEnumerable<T>? entities)
+    public async Task AddRangeAsync(IEnumerable<T>? entities)
     {
         var objects = entities?.ToList() ?? [];
         if (!objects.Any())
             return;
 
-        _connection.InsertAll(objects);
+        await _connection.InsertAllAsync(objects);
     }
 
-    public T? Get(Expression<Func<T, bool>>? where = null)
+    public async Task<T?> GetAsync(Expression<Func<T, bool>>? where = null)
     {
-        return GetEntities<T>(where).FirstOrDefault();
+        return (await GetEntitiesAsync<T>(where)).FirstOrDefault();
     }
 
-    public T? Get<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null)
+    public async Task<T?> GetAsync<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null)
     {
-        return GetEntities(where, orderBy).FirstOrDefault();
+        return (await GetEntitiesAsync(where, orderBy)).FirstOrDefault();
     }
 
-    public TR? Get<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null)
+    public async Task<TR?> GetAsync<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null)
     {
         if (select == null)
             return default;
 
-        return GetEntities<T>(where)
+        return (await GetEntitiesAsync<T>(where))
             .Select(select)
             .FirstOrDefault();
     }
 
-    public TR? Get<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
+    public async Task<TR?> GetAsync<TU, TR>(Expression<Func<T, bool>>? where = null,
+        Expression<Func<T, TU>>? orderBy = null,
         Func<T, TR>? select = null)
     {
         if (select == null)
             return default;
 
-        return GetEntities(where, orderBy)
+        return (await GetEntitiesAsync(where, orderBy))
             .Select(select)
             .FirstOrDefault();
     }
 
-    public List<T> GetAll(Expression<Func<T, bool>>? where = null)
+    public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null)
     {
-        return GetEntities<T>(where);
+        return await GetEntitiesAsync<T>(where);
     }
 
-    public List<T> GetAll<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null)
+    public async Task<List<T>> GetAllAsync<TU>(Expression<Func<T, bool>>? where = null,
+        Expression<Func<T, TU>>? orderBy = null)
     {
-        return GetEntities(where, orderBy);
+        return await GetEntitiesAsync(where, orderBy);
     }
 
-    public List<TR> GetAll<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null)
+    public async Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null)
     {
         if (select == null)
             return [];
 
-        return GetEntities<T>(where)
+        return (await GetEntitiesAsync<T>(where))
             .Select(select)
             .ToList();
     }
 
-    public List<TR> GetAll<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
+    public async Task<List<TR>> GetAllAsync<TU, TR>(Expression<Func<T, bool>>? where = null,
+        Expression<Func<T, TU>>? orderBy = null,
         Func<T, TR>? select = null)
     {
         if (select == null)
             return [];
 
-        return GetEntities(where, orderBy)
+        return (await GetEntitiesAsync(where, orderBy))
             .Select(select)
             .ToList();
     }
 
-    public void Update(T? entity)
+    public async Task UpdateAsync(T? entity)
     {
         if (entity == null)
             return;
 
-        _connection.Update(entity);
+        await _connection.UpdateAsync(entity);
     }
 
-    public void UpdateAll(IEnumerable<T>? entities, bool runInTransaction = false)
+    public async Task UpdateAllAsync(IEnumerable<T>? entities, bool runInTransaction = false)
     {
         var objects = entities?.ToList() ?? [];
         if (!objects.Any())
             return;
 
-        _connection.UpdateAll(objects, runInTransaction);
+        await _connection.UpdateAllAsync(objects, runInTransaction);
     }
 
-    public void Delete(T? entity)
+    public async Task DeleteAsync(T? entity)
     {
         if (entity == null)
             return;
 
-        _connection.Delete(entity);
+        await _connection.DeleteAsync(entity);
     }
 
-    public void Delete(object? primaryKey)
+    public async Task DeleteAsync(object? primaryKey)
     {
         if (primaryKey == null)
             return;
 
-        _connection.Delete<T>(primaryKey);
+        await _connection.DeleteAsync<T>(primaryKey);
     }
 
-    public void DeleteAll(IEnumerable<T>? entities)
+    public async Task DeleteAllAsync(IEnumerable<T>? entities)
     {
         var objects = entities?.ToList() ?? [];
         if (!objects.Any())
             return;
 
         foreach (var obj in objects)
-            Delete(obj);
+            await DeleteAsync(obj);
     }
 
-    public void DeleteAll(IEnumerable<object>? primaryKeys)
+    public async Task DeleteAllAsync(IEnumerable<object>? primaryKeys)
     {
         var objects = primaryKeys?.ToList() ?? [];
         if (!objects.Any())
             return;
 
         foreach (var obj in objects)
-            Delete(obj);
+            await DeleteAsync(obj);
     }
 
     #region Helpers
 
-    private List<T> GetEntities<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null)
+    private async Task<List<T>> GetEntitiesAsync<TU>(Expression<Func<T, bool>>? where = null,
+        Expression<Func<T, TU>>? orderBy = null)
     {
         var table = _connection.Table<T>();
 
@@ -162,7 +166,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (orderBy != null)
             table = table.OrderBy(orderBy);
 
-        return table.ToList();
+        return await table.ToListAsync();
     }
 
     #endregion

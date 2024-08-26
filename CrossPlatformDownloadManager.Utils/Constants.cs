@@ -29,4 +29,7 @@ public static class Constants
     
     // General category title
     public const string GeneralCategoryTitle = "General";
+    
+    // Unknown file type
+    public const string UnknownFileType = "Unknown";
 }

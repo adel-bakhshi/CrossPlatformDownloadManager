@@ -6,7 +6,7 @@ namespace CrossPlatformDownloadManager.Data.Repository.Services;
 
 public class DownloadFileRepository : RepositoryBase<DownloadFile>, IDownloadFileRepository
 {
-    public DownloadFileRepository(SQLiteConnection connection) : base(connection)
+    public DownloadFileRepository(SQLiteAsyncConnection connection) : base(connection)
     {
     }
 }

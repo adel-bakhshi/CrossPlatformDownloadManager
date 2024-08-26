@@ -7,7 +7,7 @@ namespace CrossPlatformDownloadManager.Data.Repository.Services;
 public class CategorySaveDirectoryRepository : RepositoryBase<CategorySaveDirectory>,
     ICategorySaveDirectoryRepository
 {
-    public CategorySaveDirectoryRepository(SQLiteConnection connection) : base(connection)
+    public CategorySaveDirectoryRepository(SQLiteAsyncConnection connection) : base(connection)
     {
     }
 }

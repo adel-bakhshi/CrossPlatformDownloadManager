@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -194,6 +195,14 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showFilesView, value);
     }
 
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles;
+
+    public ObservableCollection<DownloadFileViewModel> DownloadFiles
+    {
+        get => _downloadFiles;
+        set => this.RaiseAndSetIfChanged(ref _downloadFiles, value);
+    }
+
     #endregion
 
     #region Commands
@@ -201,7 +210,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
     public ICommand SaveCommand { get; }
 
     public ICommand ChangeStartDownloadDateCommand { get; }
-    
+
     public ICommand ChangeViewCommand { get; }
 
     #endregion
@@ -215,10 +224,29 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         SelectedTurnOffComputerMode = TurnOffComputerModes.FirstOrDefault();
         DaysOfWeek = new DaysOfWeekViewModel();
         ShowOptionsView = true;
+        DownloadFiles = GetDownloadFilesAsync().Result;
 
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
         ChangeStartDownloadDateCommand = ReactiveCommand.Create<string?>(ChangeStartDownloadDate);
         ChangeViewCommand = ReactiveCommand.Create<ToggleButton?>(ChangeView);
+    }
+
+    private async Task<ObservableCollection<DownloadFileViewModel>> GetDownloadFilesAsync()
+    {
+        // TODO: Only files depend on current queue
+        var downloadFiles = (await UnitOfWork.DownloadFileRepository
+                .GetAllAsync(select: df => new DownloadFileViewModel
+                {
+                    Id = df.Id,
+                    FileName = df.FileName,
+                    Size = df.Size.ToFileSize(),
+                    IsDownloading = true,
+                    DownloadProgress = 12.5,
+                    TimeLeft = "18 : 41"
+                }))
+            .ToObservableCollection();
+
+        return downloadFiles;
     }
 
     private void ChangeView(ToggleButton? button)
@@ -250,7 +278,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         IsDailyDownload = value!.Equals("Daily");
     }
 
-    private void Save(Window? owner)
+    private async void Save(Window? owner)
     {
         try
         {
@@ -283,7 +311,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
 
             if (RetryOnDownloadFailed && NumberOfRetries == null)
                 return;
-            
+
             TurnOffComputerMode? turnOffComputerMode = null;
             if (TurnOffComputerWhenDone)
             {
@@ -297,13 +325,13 @@ public class AddNewQueueWindowViewModel : ViewModelBase
                         turnOffComputerMode = TurnOffComputerMode.Shutdown;
                         break;
                     }
-                    
+
                     case "Sleep":
                     {
                         turnOffComputerMode = TurnOffComputerMode.Sleep;
                         break;
                     }
-                    
+
                     case "Hibernate":
                     {
                         turnOffComputerMode = TurnOffComputerMode.Hibernate;
@@ -329,8 +357,8 @@ public class AddNewQueueWindowViewModel : ViewModelBase
                 TurnOffComputerMode = turnOffComputerMode,
                 IsDefault = false,
             };
-            
-            UnitOfWork.DownloadQueueRepository.Add(downloadQueue);
+
+            await UnitOfWork.DownloadQueueRepository.AddAsync(downloadQueue);
 
             owner.Close(true);
         }

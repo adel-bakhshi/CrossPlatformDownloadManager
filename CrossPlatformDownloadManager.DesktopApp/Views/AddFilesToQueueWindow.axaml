@@ -1,0 +1,102 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddFilesToQueueWindow"
+        x:DataType="vm:AddFilesToQueueWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Add Files to Queue"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+    <Grid RowDefinitions="Auto, *">
+        <!-- Files DataGrid -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding DownloadFiles, Mode=TwoWay}"
+                  Classes="chunksDataGrid"
+                  Background="{DynamicResource SecondaryColor}"
+                  SelectionMode="Extended">
+            <DataGrid.Styles>
+                <Style Selector="DataGrid DataGridRow">
+                    <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource SecondaryColor}" />
+                        <Setter Property="IsVisible"
+                                Value="True" />
+                        <Setter Property="Opacity"
+                                Value="1" />
+                    </Style>
+
+                    <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource PrimaryColor}" />
+                        <Setter Property="IsVisible"
+                                Value="True" />
+                        <Setter Property="Opacity"
+                                Value="1" />
+                    </Style>
+
+                    <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource PrimaryColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.5" />
+                    </Style>
+
+                    <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                        <Setter Property="Fill"
+                                Value="{DynamicResource MenuBgColor}" />
+                    </Style>
+                </Style>
+            </DataGrid.Styles>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="File Name"
+                                    Binding="{Binding FileName}"
+                                    MinWidth="200" />
+
+                <DataGridTextColumn Header="Size"
+                                    Binding="{Binding Size}"
+                                    MinWidth="100" />
+
+                <DataGridTextColumn Header="Status"
+                                    MinWidth="150"
+                                    Binding="{Binding DownloadProgress, StringFormat={}{0:##.00}%, FallbackValue='', TargetNullValue=''}" />
+
+                <DataGridTextColumn Header="Time Left"
+                                    Binding="{Binding TimeLeft}"
+                                    MinWidth="100" />
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 15, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Save
+            </Button>
+
+            <Button Name="CancelButton"
+                    Classes="button danger"
+                    Click="CancelButton_OnClick">
+                Cancel
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -147,6 +147,8 @@
         <Style Selector="^ DataGridColumnHeader">
             <Setter Property="Foreground"
                     Value="{DynamicResource TextColor}" />
+            <Setter Property="FontWeight"
+                    Value="Bold" />
             <Setter Property="HorizontalContentAlignment"
                     Value="Left" />
             <Setter Property="VerticalContentAlignment"
@@ -162,16 +164,6 @@
         </Style>
 
         <Style Selector="^ DataGridRow">
-            <Style Selector="^:nth-child(2n)">
-                    <Setter Property="Background"
-                            Value="{DynamicResource MenuItemBgOnHoverColor}" />
-            </Style>
-
-            <Style Selector="^:nth-child(2n + 1)">
-                    <Setter Property="Background"
-                            Value="{DynamicResource MenuBgColor}" />
-            </Style>
-
             <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
                 <Setter Property="IsVisible"
                         Value="False" />
@@ -194,6 +186,8 @@
             </Style>
 
             <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill"
+                        Value="{DynamicResource MenuBgColor}" />
                 <Setter Property="IsVisible"
                         Value="True" />
                 <Setter Property="Opacity"
@@ -201,6 +195,8 @@
             </Style>
 
             <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill"
+                        Value="{DynamicResource MenuBgColor}" />
                 <Setter Property="IsVisible"
                         Value="True" />
                 <Setter Property="Opacity"

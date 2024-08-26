@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
@@ -82,7 +83,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
     {
         FileExtensions = new ObservableCollection<CategoryFileExtension>();
         SiteAddresses = new ObservableCollection<string>();
-        SaveDirectory = GetGeneralDirectory();
+        SaveDirectory = GetGeneralDirectoryAsync().Result;
 
         AddNewFileExtensionCommand = ReactiveCommand.Create(AddNewFileExtension);
         DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtension?>(DeleteFileExtension);
@@ -91,7 +92,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
     }
 
-    private void Save(Window? owner)
+    private async void Save(Window? owner)
     {
         try
         {
@@ -108,7 +109,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
                 IsDefault = false,
             };
 
-            UnitOfWork.CategoryRepository.Add(category);
+            await UnitOfWork.CategoryRepository.AddAsync(category);
 
             var fileExtensions = FileExtensions
                 .Select(fe =>
@@ -119,7 +120,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
                 })
                 .ToList();
 
-            UnitOfWork.CategoryFileExtensionRepository.AddRange(fileExtensions);
+            await UnitOfWork.CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
 
             var saveDirectory = new CategorySaveDirectory
             {
@@ -127,7 +128,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
                 CategoryId = category.Id,
             };
 
-            UnitOfWork.CategorySaveDirectoryRepository.Add(saveDirectory);
+            await UnitOfWork.CategorySaveDirectoryRepository.AddAsync(saveDirectory);
             owner.Close(true);
         }
         catch (Exception ex)
@@ -136,11 +137,21 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
         }
     }
 
-    private string? GetGeneralDirectory()
+    private async Task<string?> GetGeneralDirectoryAsync()
     {
-        return UnitOfWork.CategorySaveDirectoryRepository
-            .Get(where: sd => sd.CategoryId == null)?
-            .SaveDirectory;
+        try
+        {
+            var saveDirectory = (await UnitOfWork.CategorySaveDirectoryRepository
+                    .GetAsync(where: sd => sd.CategoryId == null))?
+                .SaveDirectory;
+
+            return saveDirectory;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return string.Empty;
+        }
     }
 
     private void DeleteSiteAddress(string? siteAddress)

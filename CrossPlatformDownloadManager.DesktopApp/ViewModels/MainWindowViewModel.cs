@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
@@ -92,7 +94,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         _mainWindow = mainWindow;
 
-        Categories = LoadCategories();
+        Categories = LoadCategoriesAsync().Result;
         SelectedCategory = Categories.FirstOrDefault();
         DownloadFiles = GetDownloadList();
 
@@ -116,7 +118,9 @@ public class MainWindowViewModel : ViewModelBase
             };
 
             var window = new AddDownloadLinkWindow { DataContext = vm };
-            await window.ShowDialog(_mainWindow);
+            var result = await window.ShowDialog<bool>(_mainWindow);
+
+            // TODO: Refresh List
         }
         catch (Exception ex)
         {
@@ -136,14 +140,14 @@ public class MainWindowViewModel : ViewModelBase
             grd!.SelectAll();
     }
 
-    private ObservableCollection<CategoryHeader> LoadCategories()
+    private async Task<ObservableCollection<CategoryHeader>> LoadCategoriesAsync()
     {
         try
         {
-            UnitOfWork.CreateCategories();
+            await UnitOfWork.CreateCategoriesAsync();
 
-            var categoryHeaders = UnitOfWork.CategoryHeaderRepository.GetAll();
-            var categories = UnitOfWork.CategoryRepository.GetAll();
+            var categoryHeaders = await UnitOfWork.CategoryHeaderRepository.GetAllAsync();
+            var categories = await UnitOfWork.CategoryRepository.GetAllAsync();
 
             categoryHeaders = categoryHeaders
                 .Select(c =>
@@ -193,6 +197,31 @@ public class MainWindowViewModel : ViewModelBase
             }
 
             return downloadFiles.ToObservableCollection();
+
+            // var result = new List<DownloadFileViewModel>();
+            // var downloadFiles = UnitOfWork.DownloadFileRepository.GetAll();
+            // foreach (var downloadFile in downloadFiles)
+            // {
+            //     var fileExtension = UnitOfWork.CategoryFileExtensionRepository
+            //         .Get(where: fe =>
+            //             fe.CategoryId == downloadFile.CategoryId && fe.Extension.ToLower() ==
+            //             Path.GetExtension(downloadFile.FileName).ToLower());
+            //
+            //     var downloadQueue = UnitOfWork.DownloadQueueRepository
+            //         .Get(where: dq => dq.Id == downloadFile.DownloadQueueId);
+            //     
+            //     result.Add(new DownloadFileViewModel
+            //     {
+            //         Id = downloadFile.Id,
+            //         FileName = downloadFile.FileName,
+            //         FileType = fileExtension?.Alias ?? Constants.UnknownFileType,
+            //         QueueName = downloadQueue?.Title ?? string.Empty,
+            //         Size = downloadFile.Size.ToFileSize(),
+            //         IsCompleted = (int)Math.Floor(downloadFile.DownloadProgress) == 100,
+            //     });
+            // }
+            //
+            // return result.ToObservableCollection();
         }
         catch
         {

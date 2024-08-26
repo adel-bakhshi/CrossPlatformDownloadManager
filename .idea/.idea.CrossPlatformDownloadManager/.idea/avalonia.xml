@@ -31,6 +31,7 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/DownloadWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/MainWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/ActionButton.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/AddNewQueueWindow/FilesView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadOptionsView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadSpeedLimiterView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/DownloadStatusView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />

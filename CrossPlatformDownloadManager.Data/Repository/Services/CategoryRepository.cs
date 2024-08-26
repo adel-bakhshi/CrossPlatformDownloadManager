@@ -6,7 +6,7 @@ namespace CrossPlatformDownloadManager.Data.Repository.Services;
 
 public class CategoryRepository : RepositoryBase<Category>, ICategoryRepository
 {
-    public CategoryRepository(SQLiteConnection connection) : base(connection)
+    public CategoryRepository(SQLiteAsyncConnection connection) : base(connection)
     {
     }
 }

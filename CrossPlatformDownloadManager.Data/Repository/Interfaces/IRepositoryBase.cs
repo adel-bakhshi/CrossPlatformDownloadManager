@@ -4,37 +4,37 @@ namespace CrossPlatformDownloadManager.Data.Repository.Interfaces;
 
 public interface IRepositoryBase<T> where T : class, new()
 {
-    void Add(T? entity);
+    Task AddAsync(T? entity);
 
-    void AddRange(IEnumerable<T>? entities);
+    Task AddRangeAsync(IEnumerable<T>? entities);
 
-    T? Get(Expression<Func<T, bool>>? where = null);
+    Task<T?> GetAsync(Expression<Func<T, bool>>? where = null);
 
-    T? Get<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null);
+    Task<T?> GetAsync<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null);
 
-    TR? Get<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null);
+    Task<TR?> GetAsync<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null);
 
-    TR? Get<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
+    Task<TR?> GetAsync<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
         Func<T, TR>? select = null);
 
-    List<T> GetAll(Expression<Func<T, bool>>? where = null);
+    Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null);
 
-    List<T> GetAll<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null);
+    Task<List<T>> GetAllAsync<TU>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null);
 
-    List<TR> GetAll<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null);
+    Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null, Func<T, TR>? select = null);
 
-    List<TR> GetAll<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
+    Task<List<TR>> GetAllAsync<TU, TR>(Expression<Func<T, bool>>? where = null, Expression<Func<T, TU>>? orderBy = null,
         Func<T, TR>? select = null);
 
-    void Update(T? entity);
+    Task UpdateAsync(T? entity);
 
-    void UpdateAll(IEnumerable<T>? entities, bool runInTransaction = false);
+    Task UpdateAllAsync(IEnumerable<T>? entities, bool runInTransaction = false);
 
-    void Delete(T? entity);
+    Task DeleteAsync(T? entity);
 
-    void Delete(object? primaryKey);
+    Task DeleteAsync(object? primaryKey);
 
-    void DeleteAll(IEnumerable<T>? entities);
+    Task DeleteAllAsync(IEnumerable<T>? entities);
 
-    void DeleteAll(IEnumerable<object>? primaryKeys);
+    Task DeleteAllAsync(IEnumerable<object>? primaryKeys);
 }

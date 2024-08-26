@@ -27,6 +27,10 @@ public class DownloadFile
     public int? QueuePriority { get; set; }
 
     [Indexed] [NotNull] public int CategoryId { get; set; }
+    
+    [NotNull] public bool IsDownloading { get; set; }
+
+    [NotNull] public double DownloadProgress { get; set; } = 0.0;
 
     [Ignore] public TimeSpan? TimeLeft { get; set; }
 

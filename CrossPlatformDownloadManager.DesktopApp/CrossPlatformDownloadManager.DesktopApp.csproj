@@ -34,4 +34,8 @@
     <ItemGroup>
       <ProjectReference Include="..\CrossPlatformDownloadManager.Data\CrossPlatformDownloadManager.Data.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
+    </ItemGroup>
 </Project>

@@ -62,6 +62,32 @@ public static class ExtensionMethods
         return bytes.Value.ToFileSize();
     }
 
+    public static string ToFileSize(this long bytes)
+    {
+        return ((double)bytes).ToFileSize();
+    }
+
+    public static string ToFileSize(this long? bytes)
+    {
+        if (bytes == null)
+            return string.Empty;
+
+        return bytes.Value.ToFileSize();
+    }
+
+    public static string ToFileSize(this float bytes)
+    {
+        return ((double)bytes).ToFileSize();
+    }
+
+    public static string ToFileSize(this float? bytes)
+    {
+        if (bytes == null)
+            return string.Empty;
+
+        return bytes.Value.ToFileSize();
+    }
+
     public static bool CheckUrlValidation(this string? url)
     {
         if (url.IsNullOrEmpty())
@@ -88,5 +114,26 @@ public static class ExtensionMethods
             return false;
 
         return !Path.GetExtension(fileName!).IsNullOrEmpty();
+    }
+
+    public static string GetShortTime(this TimeSpan time)
+    {
+        var seconds = time.TotalSeconds;
+
+        var hours = seconds / 3600;
+        seconds = seconds % 3600;
+
+        var minutes = seconds / 60;
+        seconds = seconds % 60;
+
+        return hours > 1 ? $"{hours:N0:##} : {minutes:N0:##} : {seconds:N0:##}" : $"{minutes:N0:##} : {seconds:N0:##}";
+    }
+
+    public static string GetShortTime(this TimeSpan? time)
+    {
+        if (time == null)
+            return string.Empty;
+
+        return time.Value.GetShortTime();
     }
 }

@@ -506,6 +506,7 @@
         <uc:FilesView Grid.Row="1"
                       IsVisible="{Binding ShowFilesView}"
                       FilesItemsSource="{Binding DownloadFiles}"
+                      DownloadQueueId="{Binding DownloadQueueId}"
                       DownloadQueueListPriorityChanged="FilesView_OnDownloadQueueListPriorityChanged"/>
 
         <!-- Action buttons -->

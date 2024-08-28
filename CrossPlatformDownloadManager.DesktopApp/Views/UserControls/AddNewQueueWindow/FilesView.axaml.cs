@@ -5,8 +5,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
+using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using RolandK.AvaloniaExtensions.DependencyInjection;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow;
 
@@ -45,6 +50,15 @@ public partial class FilesView : UserControl
     {
         get => GetValue(DownloadFilesCountAtTheSameTimeProperty);
         set => SetValue(DownloadFilesCountAtTheSameTimeProperty, value);
+    }
+
+    public static readonly StyledProperty<int?> DownloadQueueIdProperty = AvaloniaProperty.Register<FilesView, int?>(
+        "DownloadQueueId");
+
+    public int? DownloadQueueId
+    {
+        get => GetValue(DownloadQueueIdProperty);
+        set => SetValue(DownloadQueueIdProperty, value);
     }
 
     #endregion
@@ -108,9 +122,58 @@ public partial class FilesView : UserControl
         DownloadQueueListPriorityChanged?.Invoke(this, eventArgs);
     }
 
-    private void AddItemToDataGridButton_OnClick(object? sender, RoutedEventArgs e)
+    private async void AddItemToDataGridButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        // TODO: Show message box if error occurred
+        try
+        {
+            var serviceProvider = this.GetServiceProvider();
+            var unitOfWork = serviceProvider.GetService<IUnitOfWork>();
+            var downloadFileService = serviceProvider.GetService<IDownloadFileService>();
+            if (unitOfWork == null || downloadFileService == null)
+                return;
+            
+            var vm = new AddFilesToQueueWindowViewModel(unitOfWork, downloadFileService)
+            {
+                DownloadQueueId = GetValue(DownloadQueueIdProperty),
+            };
+
+            var window = new AddFilesToQueueWindow { DataContext = vm };
+            var parent = this.Parent;
+            if (parent == null)
+                return;
+
+            while (parent.GetType() != typeof(Views.AddNewQueueWindow))
+            {
+                parent = parent.Parent;
+                if (parent == null)
+                    return;
+            }
+
+            var owner = parent as Window;
+            if (owner == null)
+                return;
+            
+            var result = await window.ShowDialog<List<DownloadFileViewModel>>(owner);
+            if (!result.Any())
+                return;
+            
+            var list = GetValue(FilesItemsSourceProperty).ToList();
+            var primaryKeys = result.Select(df => df.Id).Distinct().ToList();
+            list = list.Where(df => !primaryKeys.Contains(df.Id)).ToList();
+            list.AddRange(result);
+            
+            var eventArgs = new DownloadQueueListPriorityChangedEventArgs
+            {
+                NewList = list,
+            };
+
+            DownloadQueueListPriorityChanged?.Invoke(this, eventArgs);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     #region Helpers

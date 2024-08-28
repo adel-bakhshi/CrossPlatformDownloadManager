@@ -1,30 +1,33 @@
-﻿using CrossPlatformDownloadManager.Utils.Enums;
-using SQLite;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-[Table("DownloadQueues")]
 public class DownloadQueue
 {
-    [PrimaryKey, AutoIncrement] public int Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [NotNull] public string Title { get; set; } = "";
+    [Required] [MaxLength(100)] public string Title { get; set; } = "";
 
-    [NotNull] public bool StartOnApplicationStartup { get; set; }
+    [Required] public bool StartOnApplicationStartup { get; set; }
 
     public TimeSpan? StartDownloadSchedule { get; set; }
 
     public TimeSpan? StopDownloadSchedule { get; set; }
 
-    [NotNull] public bool IsDaily { get; set; }
+    [Required] public bool IsDaily { get; set; }
 
     public DateTime? JustForDate { get; set; }
 
+    [MaxLength(500)]
     public string? DaysOfWeek { get; set; }
 
-    [NotNull] public bool RetryOnDownloadingFailed { get; set; }
+    [Required] public bool RetryOnDownloadingFailed { get; set; }
 
-    [NotNull] public int RetryCount { get; set; } = 3;
+    [Required] public int RetryCount { get; set; } = 3;
 
     public bool? ShowAlarmWhenDone { get; set; }
 
@@ -34,7 +37,7 @@ public class DownloadQueue
 
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
 
-    [NotNull] public bool IsDefault { get; set; }
+    [Required] public bool IsDefault { get; set; }
 
-    [Ignore] public ICollection<DownloadFile> DownloadFiles { get; set; } = new List<DownloadFile>();
+    public ICollection<DownloadFile> DownloadFiles { get; set; } = new List<DownloadFile>();
 }

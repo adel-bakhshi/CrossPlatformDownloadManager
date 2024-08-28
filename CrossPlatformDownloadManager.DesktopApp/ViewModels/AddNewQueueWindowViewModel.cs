@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using CrossPlatformDownloadManager.Data.Models;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
@@ -18,6 +19,18 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class AddNewQueueWindowViewModel : ViewModelBase
 {
     #region Properties
+
+    private int? _downloadQueueId;
+
+    public int? DownloadQueueId
+    {
+        get => _downloadQueueId;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadQueueId, value);
+            DownloadFiles = GetDownloadFiles();
+        }
+    }
 
     private string? _queueTitle;
 
@@ -59,7 +72,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _stopDownloadMinute, value);
     }
 
-    private ObservableCollection<string> _timesOfDay;
+    private ObservableCollection<string> _timesOfDay = [];
 
     public ObservableCollection<string> TimesOfDay
     {
@@ -99,7 +112,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _numberOfRetries, value);
     }
 
-    private ObservableCollection<string> _turnOffComputerModes;
+    private ObservableCollection<string> _turnOffComputerModes = [];
 
     public ObservableCollection<string> TurnOffComputerModes
     {
@@ -139,7 +152,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _stopDownloadScheduleEnabled, value);
     }
 
-    private DaysOfWeekViewModel _daysOfWeek;
+    private DaysOfWeekViewModel _daysOfWeek = new();
 
     public DaysOfWeekViewModel DaysOfWeek
     {
@@ -179,7 +192,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _turnOffComputerWhenDone, value);
     }
 
-    private bool _showOptionsView;
+    private bool _showOptionsView = true;
 
     public bool ShowOptionsView
     {
@@ -195,7 +208,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showFilesView, value);
     }
 
-    private ObservableCollection<DownloadFileViewModel> _downloadFiles;
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
@@ -215,38 +228,28 @@ public class AddNewQueueWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddNewQueueWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
+    public AddNewQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(
+        unitOfWork, downloadFileService)
     {
         TimesOfDay = Constants.TimesOfDay.ToObservableCollection();
-        SelectedStartTimeOfDay = TimesOfDay.FirstOrDefault();
-        SelectedStopTimeOfDay = TimesOfDay.FirstOrDefault();
+        SelectedStartTimeOfDay = SelectedStopTimeOfDay = TimesOfDay.FirstOrDefault();
         TurnOffComputerModes = Constants.TurnOffComputerModes.ToObservableCollection();
         SelectedTurnOffComputerMode = TurnOffComputerModes.FirstOrDefault();
-        DaysOfWeek = new DaysOfWeekViewModel();
-        ShowOptionsView = true;
-        DownloadFiles = GetDownloadFilesAsync().Result;
+        DownloadFiles = GetDownloadFiles();
 
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
         ChangeStartDownloadDateCommand = ReactiveCommand.Create<string?>(ChangeStartDownloadDate);
         ChangeViewCommand = ReactiveCommand.Create<ToggleButton?>(ChangeView);
     }
 
-    private async Task<ObservableCollection<DownloadFileViewModel>> GetDownloadFilesAsync()
+    private ObservableCollection<DownloadFileViewModel> GetDownloadFiles()
     {
-        // TODO: Only files depend on current queue
-        var downloadFiles = (await UnitOfWork.DownloadFileRepository
-                .GetAllAsync(select: df => new DownloadFileViewModel
-                {
-                    Id = df.Id,
-                    FileName = df.FileName,
-                    Size = df.Size.ToFileSize(),
-                    IsDownloading = true,
-                    DownloadProgress = 12.5,
-                    TimeLeft = "18 : 41"
-                }))
-            .ToObservableCollection();
+        if (DownloadQueueId == null)
+            return [];
 
-        return downloadFiles;
+        return DownloadFileService.DownloadFiles
+            .Where(df => df.QueueId == DownloadQueueId)
+            .ToObservableCollection();
     }
 
     private void ChangeView(ToggleButton? button)
@@ -359,7 +362,23 @@ public class AddNewQueueWindowViewModel : ViewModelBase
             };
 
             await UnitOfWork.DownloadQueueRepository.AddAsync(downloadQueue);
+            await UnitOfWork.SaveAsync();
 
+            var primaryKeys = DownloadFiles.Select(df => df.Id).Distinct().ToList();
+            var downloadFiles = await UnitOfWork.DownloadFileRepository
+                .GetAllAsync(where: df => primaryKeys.Contains(df.Id));
+            
+            var maxQueuePriority = (await UnitOfWork.DownloadFileRepository
+                    .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id, select: df => df.QueuePriority))
+                .Max() ?? 0;
+
+            for (int i = 0; i < downloadFiles.Count; i++)
+            {
+                downloadFiles[i].DownloadQueueId = downloadQueue.Id;
+                downloadFiles[i].QueuePriority = maxQueuePriority + 1 + i;
+            }
+
+            await DownloadFileService.UpdateFilesAsync(downloadFiles);
             owner.Close(true);
         }
         catch (Exception ex)

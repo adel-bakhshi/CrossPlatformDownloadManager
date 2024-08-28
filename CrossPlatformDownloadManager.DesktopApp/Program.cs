@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -24,6 +25,8 @@ sealed class Program
         {
             // Add UnitOfWork to services
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            // Add DownloadFileService to services
+            services.AddSingleton<IDownloadFileService, DownloadFileService>();
 
             // Add ViewModels to services
             services.AddSingleton<MainWindowViewModel>();

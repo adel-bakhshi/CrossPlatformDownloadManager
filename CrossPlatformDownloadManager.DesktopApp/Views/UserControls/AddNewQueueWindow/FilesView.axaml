@@ -46,6 +46,7 @@
                         Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
                         Click="ChangePriorityToHigherLevelButton_OnClick">
                     <PathIcon Data="{DynamicResource LongArrowUp}"
                               Foreground="{DynamicResource TextColor}"
@@ -59,6 +60,7 @@
                         Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
                         Click="ChangePriorityToLowerLevelButton_OnClick">
                     <PathIcon Data="{DynamicResource LongArrowDown}"
                               Foreground="{DynamicResource TextColor}"
@@ -72,6 +74,7 @@
                         Classes="button danger"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
                         Click="DeleteItemFromDataGridButton_OnClick">
                     <PathIcon Data="{DynamicResource XMark}"
                               Foreground="{DynamicResource TextColor}"
@@ -85,6 +88,7 @@
                         Classes="button success"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
                         Click="AddItemToDataGridButton_OnClick">
                     <PathIcon Data="{DynamicResource Plus}"
                               Foreground="{DynamicResource TextColor}"
@@ -145,7 +149,7 @@
                                     MinWidth="200" />
 
                 <DataGridTextColumn Header="Size"
-                                    Binding="{Binding Size}"
+                                    Binding="{Binding SizeAsString}"
                                     MinWidth="100" />
 
                 <DataGridTextColumn Header="Status"

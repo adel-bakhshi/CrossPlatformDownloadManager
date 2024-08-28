@@ -1,16 +1,17 @@
-using SQLite;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-[Table("CategorySaveDirectories")]
 public class CategorySaveDirectory
 {
-    [PrimaryKey, AutoIncrement] public int Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [Indexed] public int? CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
-    [NotNull] public string SaveDirectory { get; set; } = "";
-    
-    [Ignore]
-    public Category? Category { get; set; }
+    [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
+
+    [MaxLength(300)] public string SaveDirectory { get; set; } = "";
 }

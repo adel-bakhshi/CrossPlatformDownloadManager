@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -26,7 +27,7 @@ public class MainWindowViewModel : ViewModelBase
     #region Properties
 
     // Categories list data
-    private ObservableCollection<CategoryHeader> _categories;
+    private ObservableCollection<CategoryHeader> _categories = [];
 
     public ObservableCollection<CategoryHeader> Categories
     {
@@ -64,7 +65,7 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Download list items
-    private ObservableCollection<DownloadFileViewModel> _downloadFiles;
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
@@ -90,13 +91,17 @@ public class MainWindowViewModel : ViewModelBase
 
     #endregion
 
-    public MainWindowViewModel(MainWindow mainWindow, IUnitOfWork unitOfWork) : base(unitOfWork)
+    public MainWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, MainWindow mainWindow)
+        : base(unitOfWork, downloadFileService)
     {
         _mainWindow = mainWindow;
 
-        Categories = LoadCategoriesAsync().Result;
+        // Create basic data before application startup
+        UnitOfWork.CreateCategoriesAsync().GetAwaiter().GetResult();
+
+        LoadCategoriesAsync().GetAwaiter().GetResult();
         SelectedCategory = Categories.FirstOrDefault();
-        DownloadFiles = GetDownloadList();
+        UpdateDownloadList();
 
         SelectAllRowsCommand = ReactiveCommand.Create<object>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
@@ -111,7 +116,7 @@ public class MainWindowViewModel : ViewModelBase
                 url = await _mainWindow.Clipboard.GetTextAsync();
 
             var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork)
+            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService)
             {
                 Url = urlIsValid ? url : null,
                 IsLoadingUrl = urlIsValid
@@ -119,8 +124,11 @@ public class MainWindowViewModel : ViewModelBase
 
             var window = new AddDownloadLinkWindow { DataContext = vm };
             var result = await window.ShowDialog<bool>(_mainWindow);
+            if (!result)
+                return;
 
-            // TODO: Refresh List
+            // UpdateDownloadList();
+            await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
@@ -140,12 +148,10 @@ public class MainWindowViewModel : ViewModelBase
             grd!.SelectAll();
     }
 
-    private async Task<ObservableCollection<CategoryHeader>> LoadCategoriesAsync()
+    private async Task LoadCategoriesAsync()
     {
         try
         {
-            await UnitOfWork.CreateCategoriesAsync();
-
             var categoryHeaders = await UnitOfWork.CategoryHeaderRepository.GetAllAsync();
             var categories = await UnitOfWork.CategoryRepository.GetAllAsync();
 
@@ -157,11 +163,11 @@ public class MainWindowViewModel : ViewModelBase
                 })
                 .ToList();
 
-            return categoryHeaders.ToObservableCollection();
+            Categories = categoryHeaders.ToObservableCollection();
         }
         catch
         {
-            return new ObservableCollection<CategoryHeader>();
+            Categories = new ObservableCollection<CategoryHeader>();
         }
     }
 
@@ -170,62 +176,13 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Complete this method
     }
 
-    private ObservableCollection<DownloadFileViewModel> GetDownloadList()
+    private void UpdateDownloadList()
     {
-        try
-        {
-            var downloadFiles = new List<DownloadFileViewModel>();
-            for (int i = 0; i < 5; i++)
-            {
-                downloadFiles.Add(new DownloadFileViewModel
-                {
-                    Id = i + 1,
-                    FileName = $"File name {i + 1}.exe",
-                    FileType = "General",
-                    QueueName = "Main Queue",
-                    Size = 15099494.4.ToFileSize(),
-                    IsCompleted = i == 0,
-                    IsDownloading = i == 1,
-                    IsPaused = i == 2,
-                    IsError = i == 3,
-                    DownloadProgress = i == 1 ? 49.21 : i == 2 ? 78.64 : i == 3 ? 8.44 : null,
-                    TimeLeft = "24 min, 41 sec",
-                    TransferRate = "6.8 Mbps",
-                    LastTryDate = DateTime.Now.ToString("yyyy/MM/dd - hh:mm tt"),
-                    DateAdded = DateTime.Now.ToString("yyyy/MM/dd - hh:mm tt"),
-                });
-            }
+        DownloadFiles = DownloadFileService.DownloadFiles;
+    }
 
-            return downloadFiles.ToObservableCollection();
-
-            // var result = new List<DownloadFileViewModel>();
-            // var downloadFiles = UnitOfWork.DownloadFileRepository.GetAll();
-            // foreach (var downloadFile in downloadFiles)
-            // {
-            //     var fileExtension = UnitOfWork.CategoryFileExtensionRepository
-            //         .Get(where: fe =>
-            //             fe.CategoryId == downloadFile.CategoryId && fe.Extension.ToLower() ==
-            //             Path.GetExtension(downloadFile.FileName).ToLower());
-            //
-            //     var downloadQueue = UnitOfWork.DownloadQueueRepository
-            //         .Get(where: dq => dq.Id == downloadFile.DownloadQueueId);
-            //     
-            //     result.Add(new DownloadFileViewModel
-            //     {
-            //         Id = downloadFile.Id,
-            //         FileName = downloadFile.FileName,
-            //         FileType = fileExtension?.Alias ?? Constants.UnknownFileType,
-            //         QueueName = downloadQueue?.Title ?? string.Empty,
-            //         Size = downloadFile.Size.ToFileSize(),
-            //         IsCompleted = (int)Math.Floor(downloadFile.DownloadProgress) == 100,
-            //     });
-            // }
-            //
-            // return result.ToObservableCollection();
-        }
-        catch
-        {
-            return new ObservableCollection<DownloadFileViewModel>();
-        }
+    protected override void DownloadFileServiceDataChanged(List<DownloadFileViewModel> downloadFiles)
+    {
+        DownloadFiles = downloadFiles.ToObservableCollection();
     }
 }

@@ -20,13 +20,16 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
         CanResize="False">
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="*, Auto"
+          Margin="20">
         <!-- Files DataGrid -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding DownloadFiles, Mode=TwoWay}"
+        <DataGrid Name="FilesDataGrid"
+                  Grid.Row="0"
+                  ItemsSource="{Binding DownloadFiles}"
                   Classes="chunksDataGrid"
                   Background="{DynamicResource SecondaryColor}"
-                  SelectionMode="Extended">
+                  SelectionMode="Extended"
+                  SelectionChanged="FilesDataGrid_OnSelectionChanged">
             <DataGrid.Styles>
                 <Style Selector="DataGrid DataGridRow">
                     <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
@@ -63,23 +66,27 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="File Name"
-                                    Binding="{Binding FileName}"
+                                    Binding="{Binding FileName, FallbackValue='', TargetNullValue=''}"
                                     MinWidth="200" />
 
+                <DataGridTextColumn Header="Queue"
+                                    Binding="{Binding QueueName, FallbackValue='', TargetNullValue=''}"
+                                    MinWidth="150" />
+
                 <DataGridTextColumn Header="Size"
-                                    Binding="{Binding Size}"
+                                    Binding="{Binding SizeAsString, FallbackValue='', TargetNullValue=''}"
                                     MinWidth="100" />
 
                 <DataGridTextColumn Header="Status"
                                     MinWidth="150"
-                                    Binding="{Binding DownloadProgress, StringFormat={}{0:##.00}%, FallbackValue='', TargetNullValue=''}" />
+                                    Binding="{Binding DownloadProgress, StringFormat={}{0:N2}%, FallbackValue='', TargetNullValue=''}" />
 
                 <DataGridTextColumn Header="Time Left"
-                                    Binding="{Binding TimeLeft}"
+                                    Binding="{Binding TimeLeft, FallbackValue='', TargetNullValue=''}"
                                     MinWidth="100" />
             </DataGrid.Columns>
         </DataGrid>
-        
+
         <!-- Action buttons -->
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal"

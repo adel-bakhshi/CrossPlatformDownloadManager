@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls.Primitives;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
@@ -39,7 +40,7 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _showOptionsView, value);
     }
 
-    private ObservableCollection<string> _speedLimiterUnits;
+    private ObservableCollection<string> _speedLimiterUnits = [];
 
     public ObservableCollection<string> SpeedLimiterUnits
     {
@@ -47,7 +48,7 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _speedLimiterUnits, value);
     }
 
-    private ObservableCollection<string> _optionsTurnOffModes;
+    private ObservableCollection<string> _optionsTurnOffModes = [];
 
     public ObservableCollection<string> OptionsTurnOffModes
     {
@@ -55,7 +56,7 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _optionsTurnOffModes, value);
     }
 
-    private ObservableCollection<ChunkDataViewModel> _chunksData;
+    private ObservableCollection<ChunkDataViewModel> _chunksData = [];
 
     public ObservableCollection<ChunkDataViewModel> ChunksData
     {
@@ -71,11 +72,12 @@ public class DownloadWindowViewModel : ViewModelBase
 
     public ICommand SpeedLimiterStateChangedCommand { get; }
 
-    public ICommand? OptionsStateChangedCommand { get; set; }
+    public ICommand OptionsStateChangedCommand { get; set; }
 
     #endregion
 
-    public DownloadWindowViewModel(IUnitOfWork unitOfWork) : base(unitOfWork)
+    public DownloadWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork,
+        downloadFileService)
     {
         ShowStatusView = true;
         SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();

@@ -1,42 +1,46 @@
-﻿using CrossPlatformDownloadManager.Utils.Enums;
-using SQLite;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-[Table("DownloadFiles")]
 public class DownloadFile
 {
-    [PrimaryKey, AutoIncrement] public int Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [NotNull] [Indexed] public string Url { get; set; } = "";
+    [Required] [MaxLength(300)] public string Url { get; set; } = "";
 
-    [NotNull] public string FileName { get; set; } = "";
+    [Required] [MaxLength(300)] public string FileName { get; set; } = "";
 
-    [Indexed] public int? DownloadQueueId { get; set; }
+    public int? DownloadQueueId { get; set; }
 
-    [NotNull] public double Size { get; set; }
-    
-    public string? Description { get; set; }
+    [ForeignKey(nameof(DownloadQueueId))] public DownloadQueue? DownloadQueue { get; set; }
+
+    [Required] public double Size { get; set; }
+
+    [MaxLength(300)] public string? Description { get; set; }
 
     public DownloadStatus? Status { get; set; }
 
     public DateTime? LastTryDate { get; set; }
 
-    [NotNull] public DateTime DateAdded { get; set; }
+    [Required] public DateTime DateAdded { get; set; }
 
     public int? QueuePriority { get; set; }
 
-    [Indexed] [NotNull] public int CategoryId { get; set; }
-    
-    [NotNull] public bool IsDownloading { get; set; }
+    [Required] public int? CategoryId { get; set; }
 
-    [NotNull] public double DownloadProgress { get; set; } = 0.0;
+    [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
 
-    [Ignore] public TimeSpan? TimeLeft { get; set; }
+    [Required] public bool IsPaused { get; set; } = false;
 
-    [Ignore] public double? TransferRate { get; set; }
-    
-    [Ignore] public DownloadQueue? DownloadQueue { get; set; }
-    
-    [Ignore] public Category? Category { get; set; }
+    [Required] public bool IsError { get; set; } = false;
+
+    [Required] public float DownloadProgress { get; set; } = 0.0f;
+
+    public TimeSpan? TimeLeft { get; set; }
+
+    public float? TransferRate { get; set; }
 }

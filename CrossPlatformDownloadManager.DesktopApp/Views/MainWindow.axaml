@@ -268,7 +268,7 @@
                             <!-- File Size -->
                             <DataGridTextColumn Header="Size"
                                                 MinWidth="150"
-                                                Binding="{Binding Size}" />
+                                                Binding="{Binding SizeAsString}" />
 
                             <!-- Download Status -->
                             <DataGridTemplateColumn Header="Status"

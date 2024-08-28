@@ -1,5 +1,4 @@
-using CrossPlatformDownloadManager.Data.Repository.Interfaces;
-using SQLite;
+using CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 
 namespace CrossPlatformDownloadManager.Data.UnitOfWork;
 
@@ -11,6 +10,8 @@ public interface IUnitOfWork : IDisposable
     IDownloadQueueRepository DownloadQueueRepository { get; }
     ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
     IDownloadFileRepository DownloadFileRepository { get; }
+
+    Task SaveAsync();
 
     Task CreateCategoriesAsync();
 }

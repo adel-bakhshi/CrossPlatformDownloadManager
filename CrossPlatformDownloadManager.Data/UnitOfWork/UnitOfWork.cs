@@ -1,8 +1,9 @@
+using CrossPlatformDownloadManager.Data.DbContext;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Repository.Interfaces;
-using CrossPlatformDownloadManager.Data.Repository.Services;
+using CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
+using CrossPlatformDownloadManager.Data.Services.Repository.Services;
 using CrossPlatformDownloadManager.Utils;
-using SQLite;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrossPlatformDownloadManager.Data.UnitOfWork;
 
@@ -10,7 +11,7 @@ public class UnitOfWork : IUnitOfWork
 {
     #region Private Fields
 
-    private readonly SQLiteAsyncConnection? _connection;
+    private readonly DownloadManagerDbContext? _dbContext;
 
     #endregion
 
@@ -27,26 +28,17 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork()
     {
-        _connection ??= CreateSqLiteConnection();
+        _dbContext = new DownloadManagerDbContext();
+        CreateDatabaseAsync().GetAwaiter().GetResult();
 
-        CategoryHeaderRepository = new CategoryHeaderRepository(_connection);
-        CategoryRepository = new CategoryRepository(_connection);
-        CategoryFileExtensionRepository = new CategoryFileExtensionRepository(_connection);
-        CategorySaveDirectoryRepository = new CategorySaveDirectoryRepository(_connection);
-        DownloadQueueRepository = new DownloadQueueRepository(_connection);
-        DownloadFileRepository = new DownloadFileRepository(_connection);
+        CategoryHeaderRepository = new CategoryHeaderRepository(_dbContext!);
+        CategoryRepository = new CategoryRepository(_dbContext!);
+        CategoryFileExtensionRepository = new CategoryFileExtensionRepository(_dbContext!);
+        CategorySaveDirectoryRepository = new CategorySaveDirectoryRepository(_dbContext!);
+        DownloadQueueRepository = new DownloadQueueRepository(_dbContext!);
+        DownloadFileRepository = new DownloadFileRepository(_dbContext!);
     }
 
-    private SQLiteAsyncConnection CreateSqLiteConnection()
-    {
-        var dbPath = Path.Join(Environment.CurrentDirectory, "ApplicationData.db");
-        return new SQLiteAsyncConnection(dbPath);
-    }
-
-    /// <summary>
-    /// It adds the categories that are in the categories.json and category-item.json files to the database. Check CrossPlatformDownloadManager.DesktopApp/Assets folder
-    /// </summary>
-    /// <exception cref="Exception">If the json files is empty</exception>
     public async Task CreateCategoriesAsync()
     {
         var categoryHeaders = await CategoryHeaderRepository.GetAllAsync();
@@ -62,6 +54,7 @@ public class UnitOfWork : IUnitOfWork
                 throw new Exception("Can't find categories for import.");
 
             await CategoryHeaderRepository.AddRangeAsync(categoryHeaders);
+            await SaveAsync();
         }
 
         if (categories.Count == 0)
@@ -75,68 +68,94 @@ public class UnitOfWork : IUnitOfWork
 
             // Create root directory for General category
             await CreateSaveDirectoryAsync(null);
+            await SaveAsync();
 
             foreach (var category in categories)
             {
+                var fileExtensions = category.FileExtensions.ToList();
+                category.FileExtensions.Clear();
+                
                 await CategoryRepository.AddAsync(category);
-                await CreateFileTypesAsync(category);
+                await SaveAsync();
+                
+                await CreateFileTypesAsync(category.Id, fileExtensions);
                 await CreateSaveDirectoryAsync(category);
             }
         }
     }
 
-    /// <summary>
-    /// Each category has one or more file types that must be created for each
-    /// </summary>
-    /// <param name="category">CategoryItem, whose types of files are supposed to be created</param>
-    private async Task CreateFileTypesAsync(Category category)
+    public async Task SaveAsync()
+    {
+        if (_dbContext == null)
+            return;
+        
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public void Dispose()
+    {
+        _dbContext?.Dispose();
+    }
+
+    private async Task CreateFileTypesAsync(int categoryId, List<CategoryFileExtension> extensions)
     {
         var fileExtensions = await CategoryFileExtensionRepository
-            .GetAllAsync(where: fe => fe.CategoryId == category.Id);
+            .GetAllAsync(where: fe => fe.CategoryId == categoryId);
 
         if (fileExtensions.Count == 0)
         {
-            fileExtensions = category
-                .FileExtensions
+            fileExtensions = extensions
                 .Select(fe =>
                 {
-                    fe.CategoryId = category.Id;
+                    fe.CategoryId = categoryId;
                     return fe;
                 })
                 .ToList();
 
             await CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
+            await SaveAsync();
         }
     }
 
-    /// <summary>
-    /// Define default download directories for each category. If category is null, It's create General directory path
-    /// </summary>
-    /// <param name="categoryItem">CategoryItem whose directory path is to be created</param>
-    private async Task CreateSaveDirectoryAsync(Category? categoryItem)
+    private async Task CreateSaveDirectoryAsync(Category? category)
     {
         var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var savePath = categoryItem != null
-            ? Path.Join(downloadFolderPath, "Downloads", "CDM", categoryItem.Title)
+        var savePath = category != null
+            ? Path.Join(downloadFolderPath, "Downloads", "CDM", category.Title)
             : Path.Join(downloadFolderPath, "Downloads", "CDM");
 
         var saveDirectory = new CategorySaveDirectory
         {
-            CategoryId = categoryItem?.Id,
+            CategoryId = category?.Id,
             SaveDirectory = savePath,
         };
 
         await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
+        await SaveAsync();
 
-        if (categoryItem == null)
+        if (category == null)
             return;
 
-        categoryItem.CategorySaveDirectoryId = saveDirectory.Id;
-        await CategoryRepository.UpdateAsync(categoryItem);
+        category.CategorySaveDirectoryId = saveDirectory.Id;
+        await CategoryRepository.UpdateAsync(category);
+        await SaveAsync();
     }
 
-    public void Dispose()
+    private async Task CreateDatabaseAsync()
     {
-        _connection?.CloseAsync();
+        try
+        {
+            if (_dbContext == null)
+                return;
+
+            // await _dbContext.Database.EnsureCreatedAsync();
+            var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
+            if (migrations.Any())
+                await _dbContext.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

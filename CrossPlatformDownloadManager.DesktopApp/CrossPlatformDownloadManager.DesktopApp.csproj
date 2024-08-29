@@ -38,6 +38,18 @@
       <Compile Update="CustomControls\CustomTextBox.axaml.cs">
         <DependentUpon>CustomTextBox.axaml</DependentUpon>
       </Compile>
+      <Compile Update="Views\UserControls\DownloadWindowControls\DownloadOptionsView.axaml.cs">
+        <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\DownloadWindowControls\DownloadSpeedLimiterView.axaml.cs">
+        <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\UserControls\DownloadWindowControls\DownloadStatusView.axaml.cs">
+        <DependentUpon>DownloadStatusView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

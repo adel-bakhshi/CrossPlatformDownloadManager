@@ -9,7 +9,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls;
 
 public partial class DownloadSpeedLimiterView : UserControl
 {
@@ -49,20 +49,6 @@ public partial class DownloadSpeedLimiterView : UserControl
 
     #endregion
 
-    #region Commands
-
-    public static readonly StyledProperty<ICommand?> SpeedLimiterStateChangedCommandProperty =
-        AvaloniaProperty.Register<DownloadSpeedLimiterView, ICommand?>(
-            "SpeedLimiterStateChangedCommand");
-
-    public ICommand? SpeedLimiterStateChangedCommand
-    {
-        get => GetValue(SpeedLimiterStateChangedCommandProperty);
-        set => SetValue(SpeedLimiterStateChangedCommandProperty, value);
-    }
-
-    #endregion
-
     public DownloadSpeedLimiterView()
     {
         InitializeComponent();
@@ -76,7 +62,7 @@ public partial class DownloadSpeedLimiterView : UserControl
 
     private void DownloadSpeedLimiterViewOnLoaded(object? sender, RoutedEventArgs e)
     {
-        CboSpeedLimiterUnit.SelectedItem = CboSpeedLimiterUnit.Items.FirstOrDefault();
+        CboSpeedLimiterUnit.SelectedItem = Enumerable.FirstOrDefault<object?>(CboSpeedLimiterUnit.Items);
     }
 
     private void BtnEnableOrDisableSpeedLimiter_OnClick(object? sender, RoutedEventArgs e)
@@ -110,10 +96,10 @@ public partial class DownloadSpeedLimiterView : UserControl
             this.SetValue(SpeedLimiterEnabledProperty, value);
         }
 
-        if (TxtSpeedLimiterValue.Text.IsNullOrEmpty() || CboSpeedLimiterUnit.SelectedItem == null)
+        if (ExtensionMethods.IsNullOrEmpty(TxtSpeedLimiterValue.Text) || CboSpeedLimiterUnit.SelectedItem == null)
             return;
 
-        var isValid = double.TryParse(TxtSpeedLimiterValue.Text, out var speed);
+        var isValid = double.TryParse((string?)TxtSpeedLimiterValue.Text, out var speed);
         if (!isValid)
             return;
 
@@ -128,9 +114,6 @@ public partial class DownloadSpeedLimiterView : UserControl
             Unit = unit,
         };
 
-        this.SpeedLimiterStateChanged?.Invoke(this, eventArgs);
-
-        var command = this.GetValue(SpeedLimiterStateChangedCommandProperty);
-        command?.Execute(eventArgs);
+        SpeedLimiterStateChanged?.Invoke(this, eventArgs);
     }
 }

@@ -262,7 +262,11 @@
                 </Button>
 
                 <!-- Start download button -->
-                <Button Classes="button success">Start Download</Button>
+                <Button Classes="button success"
+                        Command="{Binding StartDownloadCommand}"
+                        CommandParameter="{Binding $parent[Window]}">
+                    Start Download
+                </Button>
 
                 <!-- Cancel button -->
                 <Button Name="CancelButton"

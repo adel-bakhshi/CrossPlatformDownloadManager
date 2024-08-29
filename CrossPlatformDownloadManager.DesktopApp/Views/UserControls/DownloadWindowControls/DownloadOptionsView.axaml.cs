@@ -7,7 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls;
 
 public partial class DownloadOptionsView : UserControl
 {
@@ -31,20 +31,6 @@ public partial class DownloadOptionsView : UserControl
 
     #endregion
 
-    #region Commands
-
-    public static readonly StyledProperty<ICommand?> OptionsStateChangedCommandProperty =
-        AvaloniaProperty.Register<DownloadOptionsView, ICommand?>(
-            "OptionsStateChangedCommand");
-
-    public ICommand? OptionsStateChangedCommand
-    {
-        get => GetValue(OptionsStateChangedCommandProperty);
-        set => SetValue(OptionsStateChangedCommandProperty, value);
-    }
-
-    #endregion
-
     public DownloadOptionsView()
     {
         InitializeComponent();
@@ -54,7 +40,7 @@ public partial class DownloadOptionsView : UserControl
 
     private void DownloadOptionsViewOnLoaded(object? sender, RoutedEventArgs e)
     {
-        TurnOffModesComboBox.SelectedItem = TurnOffModesComboBox.Items.FirstOrDefault();
+        TurnOffModesComboBox.SelectedItem = Enumerable.FirstOrDefault<object?>(TurnOffModesComboBox.Items);
     }
 
     private void OpenFolderToggleSwitch_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
@@ -87,7 +73,6 @@ public partial class DownloadOptionsView : UserControl
             TurnOffComputerMode = TurnOffModesComboBox.SelectedItem as string,
         };
 
-        this.OptionsStateChanged?.Invoke(this, eventArgs);
-        this.OptionsStateChangedCommand?.Execute(eventArgs);
+        OptionsStateChanged?.Invoke(this, eventArgs);
     }
 }

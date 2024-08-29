@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Reflection;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
@@ -17,7 +19,7 @@ public class DownloadFileService : NotifyProperty, IDownloadFileService
 
     #region Events
 
-    public event EventHandler<List<DownloadFileViewModel>>? DataChanged;
+    public event EventHandler<DownloadFileServiceEventArgs>? DataChanged;
 
     #endregion
 
@@ -28,7 +30,12 @@ public class DownloadFileService : NotifyProperty, IDownloadFileService
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
         get => _downloadFiles;
-        set => SetField(ref _downloadFiles, value);
+        set
+        {
+            var result = SetField(ref _downloadFiles, value);
+            if (result)
+                DataChanged?.Invoke(this, new DownloadFileServiceEventArgs { DownloadFiles = _downloadFiles.ToList() });
+        }
     }
 
     #endregion
@@ -45,7 +52,8 @@ public class DownloadFileService : NotifyProperty, IDownloadFileService
         try
         {
             var downloadFiles = await _unitOfWork.DownloadFileRepository
-                .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
+                .GetAllAsync(includeProperties:
+                    ["Category.FileExtensions", "DownloadQueue"]);
 
             var result = new List<DownloadFileViewModel>();
             foreach (var downloadFile in downloadFiles)
@@ -55,7 +63,6 @@ public class DownloadFileService : NotifyProperty, IDownloadFileService
             }
 
             DownloadFiles = result.ToObservableCollection();
-            DataChanged?.Invoke(this, result);
         }
         catch (Exception ex)
         {
@@ -108,10 +115,14 @@ public class DownloadFileService : NotifyProperty, IDownloadFileService
             IsPaused = downloadFile.IsPaused,
             IsError = downloadFile.IsError,
             DownloadProgress = downloadFile.DownloadProgress == 0 ? null : downloadFile.DownloadProgress,
+            ElapsedTime = downloadFile.ElapsedTime.GetShortTime(),
             TimeLeft = downloadFile.TimeLeft.GetShortTime(),
             TransferRate = downloadFile.TransferRate?.ToFileSize() ?? string.Empty,
             LastTryDate = downloadFile.LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
             DateAdded = downloadFile.DateAdded.ToString(CultureInfo.InvariantCulture),
+            Url = downloadFile.Url,
+            SaveLocation = downloadFile.SaveLocation,
+            CategoryId = downloadFile.CategoryId,
         };
 
         return vm;

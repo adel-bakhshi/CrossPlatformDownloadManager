@@ -3,23 +3,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
-        xmlns:ext="https://github.com/RolandK.AvaloniaExtensions"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
+        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="600"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DownloadWindow"
         x:DataType="vm:DownloadWindowViewModel"
-        DataContext="{ext:CreateUsingDependencyInjection {x:Type vm:DownloadWindowViewModel}}"
         Icon="/Assets/avalonia-logo.ico"
         Title="CDM - Download"
         Width="800"
         Height="600"
         MinWidth="800"
-        MinHeight="600"
-        ExtendClientAreaChromeHints="NoChrome"
+        MinHeight="600">
+    <!-- ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0">
+        ExtendClientAreaTitleBarHeightHint="0" -->
     <Border Padding="20">
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
             <!-- Tab Items -->
@@ -59,30 +57,27 @@
                     Margin="0, 0, 0, 10">
                 <Grid>
                     <!-- Download Status View -->
-                    <uc:DownloadStatusView DataContext="{Binding $self}"
-                                           IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowStatusView, FallbackValue=False, TargetNullValue=False}"
-                                           Url="https://dl2.soft98.ir/soft/f/Figma.124.3.1.0.rar?1723883935"
-                                           FileName="Figma.124.3.1.0.rar"
-                                           SaveLocation="D:\Downloads\Compressed"
-                                           FileSize="110.23 MB"
-                                           Downloaded="23.78 MB (21.50%)"
-                                           Speed="6.84 Mbps"
-                                           ElapsedTime="00 : 01 : 12"
-                                           TimeLeft="00 : 05 : 54"
+                    <uc:DownloadStatusView IsVisible="{Binding ShowStatusView}"
+                                           Url="{Binding DownloadFile.Url}"
+                                           FileName="{Binding DownloadFile.FileName}"
+                                           SaveLocation="{Binding DownloadFile.SaveLocation}"
+                                           FileSize="{Binding DownloadFile.SizeAsString}"
+                                           Downloaded="{Binding DownloadFile.DownloadProgressAsString}"
+                                           Speed="{Binding DownloadFile.TransferRate}"
+                                           ElapsedTime="{Binding DownloadFile.ElapsedTime}"
+                                           TimeLeft="{Binding DownloadFile.TimeLeft}"
                                            ResumeCapability="Yes" />
 
                     <!-- Download Speed Limiter View  -->
-                    <uc:DownloadSpeedLimiterView DataContext="{Binding $self}"
-                                                 IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowSpeedLimiterView, FallbackValue=False, TargetNullValue=False}"
-                                                 UnitsDropDownItemsSource="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterUnits}"
+                    <uc:DownloadSpeedLimiterView IsVisible="{Binding ShowSpeedLimiterView}"
+                                                 UnitsDropDownItemsSource="{Binding SpeedLimiterUnits}"
                                                  SpeedLimiterEnabled="False"
-                                                 SpeedLimiterStateChangedCommand="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SpeedLimiterStateChangedCommand}" />
+                                                 SpeedLimiterStateChanged="DownloadSpeedLimiterView_OnSpeedLimiterStateChanged" />
 
                     <!-- Download Options View -->
-                    <uc:DownloadOptionsView DataContext="{Binding $self}"
-                                            IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).ShowOptionsView, FallbackValue=False, TargetNullValue=False}"
-                                            TurnOffModesDropDownItemsSource="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).OptionsTurnOffModes}"
-                                            OptionsStateChangedCommand="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).OptionsStateChangedCommand}" />
+                    <uc:DownloadOptionsView IsVisible="{Binding ShowOptionsView}"
+                                            TurnOffModesDropDownItemsSource="{Binding OptionsTurnOffModes}"
+                                            OptionsStateChanged="DownloadOptionsView_OnOptionsStateChanged" />
                 </Grid>
             </Border>
 
@@ -90,7 +85,7 @@
             <ProgressBar Grid.Row="2"
                          Classes="customProgressBar"
                          Foreground="{DynamicResource ProgressBarGradientBrush}"
-                         Value="21.5"
+                         Value="{Binding DownloadFile.DownloadProgress, FallbackValue=0, TargetNullValue=0}"
                          Margin="0, 0, 0, 10" />
 
             <!-- Action buttons -->
@@ -106,8 +101,20 @@
                             Spacing="10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
-                    <Button Classes="button warning">
-                        Pause
+                    <Button Classes="button warning"
+                            Classes.paused="{Binding IsPaused}"
+                            Command="{Binding ResumePauseDownloadCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Content"
+                                        Value="Pause" />
+
+                                <Style Selector="^.paused">
+                                    <Setter Property="Content"
+                                            Value="Resume" />
+                                </Style>
+                            </Style>
+                        </Button.Styles>
                     </Button>
 
                     <Button Classes="button danger">
@@ -136,7 +143,7 @@
                                         Binding="{Binding RowIndex}"
                                         MinWidth="50" />
                     <DataGridTextColumn Header="Downloaded"
-                                        Binding="{Binding DownloadedSizeAsFileSize}"
+                                        Binding="{Binding DownloadedSizeAsString}"
                                         MinWidth="180" />
                     <DataGridTextColumn Header="Info"
                                         Binding="{Binding Info}"

@@ -13,7 +13,7 @@ using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls;
 
 public partial class FilesView : UserControl
 {

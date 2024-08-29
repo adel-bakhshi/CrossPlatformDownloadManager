@@ -3,11 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadSpeedLimiterView"
-             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadSpeedLimiterView">
     <StackPanel Orientation="Vertical"
                 Spacing="15"
                 HorizontalAlignment="Stretch"
@@ -20,7 +20,7 @@
                         Spacing="5">
                 <TextBlock Text="Speed Limiter is" />
                 <TextBlock FontWeight="Bold"
-                           Classes.speedLimiterEnabled="{Binding SpeedLimiterEnabled}">
+                           Classes.speedLimiterEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}">
                     <TextBlock.Styles>
                         <Style Selector="TextBlock">
                             <Setter Property="Text"
@@ -42,10 +42,10 @@
             <!-- Enable/Disable Speed limiter -->
             <Button Name="BtnEnableOrDisableSpeedLimiter"
                     Classes="button"
-                    Classes.danger="{Binding SpeedLimiterEnabled}"
-                    Classes.success="{Binding !SpeedLimiterEnabled}"
+                    Classes.danger="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
+                    Classes.success="{Binding !$parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
                     Click="BtnEnableOrDisableSpeedLimiter_OnClick">
-                <TextBlock Classes.speedLimiterEnabled="{Binding SpeedLimiterEnabled}">
+                <TextBlock Classes.speedLimiterEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}">
                     <TextBlock.Styles>
                         <Style Selector="TextBlock">
                             <Setter Property="Text"
@@ -72,7 +72,7 @@
                               Background="{DynamicResource PrimaryColor}"
                               Width="80"
                               BorderThickness="0"
-                              IsEnabled="{Binding SpeedLimiterEnabled}"
+                              IsEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
                               TextChanged="TxtSpeedLimiterValue_OnTextChanged" />
 
             <cc:CustomComboBox Name="CboSpeedLimiterUnit"
@@ -81,8 +81,8 @@
                                Background="{DynamicResource PrimaryColor}"
                                ToggleIconColor="{DynamicResource TertiaryColor}"
                                OnHoverToggleIconColor="{DynamicResource TextColor}"
-                               ItemsSource="{Binding UnitsDropDownItemsSource}"
-                               IsEnabled="{Binding SpeedLimiterEnabled}"
+                               ItemsSource="{Binding $parent[local:DownloadSpeedLimiterView].UnitsDropDownItemsSource}"
+                               IsEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
                                SelectionChanged="CboSpeedLimiterUnit_OnSelectionChanged">
                 <cc:CustomComboBox.ItemTemplate>
                     <DataTemplate DataType="x:String">

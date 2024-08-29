@@ -126,7 +126,7 @@ public static class ExtensionMethods
         var minutes = seconds / 60;
         seconds = seconds % 60;
 
-        return hours > 1 ? $"{hours:N0:##} : {minutes:N0:##} : {seconds:N0:##}" : $"{minutes:N0:##} : {seconds:N0:##}";
+        return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }
 
     public static string GetShortTime(this TimeSpan? time)

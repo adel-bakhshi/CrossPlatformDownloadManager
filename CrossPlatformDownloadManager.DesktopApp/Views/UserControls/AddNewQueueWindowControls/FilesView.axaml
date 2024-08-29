@@ -2,12 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow.FilesView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls.FilesView">
     <Grid RowDefinitions="Auto, *">
         <!-- DataGrid Actions -->
         <Grid Grid.Row="0"

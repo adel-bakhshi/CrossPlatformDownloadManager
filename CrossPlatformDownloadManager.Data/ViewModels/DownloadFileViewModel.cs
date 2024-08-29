@@ -49,10 +49,21 @@ public sealed class DownloadFileViewModel : NotifyProperty
     public double? Size
     {
         get => _size;
-        set => SetField(ref _size, value);
+        set
+        {
+            var result = SetField(ref _size, value);
+            if (result)
+                SizeAsString = value.ToFileSize();
+        }
     }
 
-    public string? SizeAsString => Size.ToFileSize();
+    private string? _sizeAsString;
+
+    public string? SizeAsString
+    {
+        get => _sizeAsString;
+        set => SetField(ref _sizeAsString, value);
+    }
 
     private bool _isCompleted;
 
@@ -91,7 +102,28 @@ public sealed class DownloadFileViewModel : NotifyProperty
     public float? DownloadProgress
     {
         get => _downloadProgress;
-        set => SetField(ref _downloadProgress, value);
+        set
+        {
+            var result = SetField(ref _downloadProgress, value);
+            if (result)
+                DownloadProgressAsString = value == null ? string.Empty : $"{value:00.00}%";
+        }
+    }
+
+    private string? _downloadProgressAsString;
+    
+    public string? DownloadProgressAsString
+    {
+        get => _downloadProgressAsString;
+        set => SetField(ref _downloadProgressAsString, value);
+    }
+
+    private string? _elapsedTime;
+
+    public string? ElapsedTime
+    {
+        get => _elapsedTime;
+        set => SetField(ref _elapsedTime, value);
     }
 
     private string? _timeLeft;
@@ -124,5 +156,29 @@ public sealed class DownloadFileViewModel : NotifyProperty
     {
         get => _dateAdded;
         set => SetField(ref _dateAdded, value);
+    }
+
+    private string? _url;
+
+    public string? Url
+    {
+        get => _url;
+        set => SetField(ref _url, value);
+    }
+
+    private string? _saveLocation;
+
+    public string? SaveLocation
+    {
+        get => _saveLocation;
+        set => SetField(ref _saveLocation, value);
+    }
+
+    private int? _categoryId;
+
+    public int? CategoryId
+    {
+        get => _categoryId;
+        set => SetField(ref _categoryId, value);
     }
 }

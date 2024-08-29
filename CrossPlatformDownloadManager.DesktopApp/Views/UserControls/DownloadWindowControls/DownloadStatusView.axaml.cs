@@ -2,9 +2,8 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls;
 
 public partial class DownloadStatusView : UserControl
 {

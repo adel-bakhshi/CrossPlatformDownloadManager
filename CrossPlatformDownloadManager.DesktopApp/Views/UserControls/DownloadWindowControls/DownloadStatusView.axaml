@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadStatusView"
-             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadStatusView">
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
           ColumnDefinitions="Auto, *"
           HorizontalAlignment="Stretch"
@@ -19,7 +19,7 @@
 
         <TextBlock Grid.Row="0"
                    Grid.Column="1"
-                   Text="{Binding Url}"
+                   Text="{Binding $parent[local:DownloadStatusView].Url}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Name -->
@@ -30,7 +30,7 @@
 
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
-                   Text="{Binding FileName}"
+                   Text="{Binding $parent[local:DownloadStatusView].FileName}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Save Location -->
@@ -41,7 +41,7 @@
 
         <TextBlock Grid.Row="2"
                    Grid.Column="1"
-                   Text="{Binding SaveLocation}"
+                   Text="{Binding $parent[local:DownloadStatusView].SaveLocation}"
                    Cursor="Hand"
                    Name="TxbSaveLocation"
                    Tapped="TxbSaveLocation_OnTapped"
@@ -62,7 +62,7 @@
 
         <TextBlock Grid.Row="3"
                    Grid.Column="1"
-                   Text="{Binding FileSize}"
+                   Text="{Binding $parent[local:DownloadStatusView].FileSize}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Downloaded -->
@@ -73,7 +73,7 @@
 
         <TextBlock Grid.Row="4"
                    Grid.Column="1"
-                   Text="{Binding Downloaded}"
+                   Text="{Binding $parent[local:DownloadStatusView].Downloaded}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Speed -->
@@ -84,7 +84,7 @@
 
         <TextBlock Grid.Row="5"
                    Grid.Column="1"
-                   Text="{Binding Speed}"
+                   Text="{Binding $parent[local:DownloadStatusView].Speed}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Elapsed Time -->
@@ -95,7 +95,7 @@
 
         <TextBlock Grid.Row="6"
                    Grid.Column="1"
-                   Text="{Binding ElapsedTime}"
+                   Text="{Binding $parent[local:DownloadStatusView].ElapsedTime}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Time Left -->
@@ -106,7 +106,7 @@
 
         <TextBlock Grid.Row="7"
                    Grid.Column="1"
-                   Text="{Binding TimeLeft}"
+                   Text="{Binding $parent[local:DownloadStatusView].TimeLeft}"
                    Margin="0, 0, 0, 10" />
 
         <!-- Resume Capability -->
@@ -117,6 +117,6 @@
 
         <TextBlock Grid.Row="8"
                    Grid.Column="1"
-                   Text="{Binding ResumeCapability}" />
+                   Text="{Binding $parent[local:DownloadStatusView].ResumeCapability}" />
     </Grid>
 </UserControl>

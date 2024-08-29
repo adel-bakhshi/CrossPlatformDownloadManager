@@ -40,7 +40,11 @@ public class DownloadFile
 
     [Required] public float DownloadProgress { get; set; } = 0.0f;
 
+    public TimeSpan? ElapsedTime { get; set; }
+
     public TimeSpan? TimeLeft { get; set; }
 
     public float? TransferRate { get; set; }
+
+    [Required] [MaxLength(500)] public string SaveLocation { get; set; } = "";
 }

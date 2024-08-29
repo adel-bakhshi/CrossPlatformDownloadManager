@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,6 +8,7 @@ using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -127,8 +126,7 @@ public class MainWindowViewModel : ViewModelBase
             if (!result)
                 return;
 
-            // UpdateDownloadList();
-            await LoadCategoriesAsync();
+            // await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
@@ -181,8 +179,8 @@ public class MainWindowViewModel : ViewModelBase
         DownloadFiles = DownloadFileService.DownloadFiles;
     }
 
-    protected override void DownloadFileServiceDataChanged(List<DownloadFileViewModel> downloadFiles)
+    protected override void DownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
     {
-        DownloadFiles = downloadFiles.ToObservableCollection();
+        DownloadFiles = eventArgs.DownloadFiles.ToObservableCollection();
     }
 }

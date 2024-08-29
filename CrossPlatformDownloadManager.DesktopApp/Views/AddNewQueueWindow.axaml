@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindow"
+        xmlns:addNewQueueWindowControls="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -503,7 +503,7 @@
         </ScrollViewer>
 
         <!-- Files content -->
-        <uc:FilesView Grid.Row="1"
+        <addNewQueueWindowControls:FilesView Grid.Row="1"
                       IsVisible="{Binding ShowFilesView}"
                       FilesItemsSource="{Binding DownloadFiles}"
                       DownloadQueueId="{Binding DownloadQueueId}"

@@ -4,9 +4,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
@@ -19,6 +22,12 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class AddDownloadLinkWindowViewModel : ViewModelBase
 {
+    #region Private Fields
+
+    private int? _addedDownloadFileId;
+
+    #endregion
+
     #region Properties
 
     private string? _url;
@@ -137,6 +146,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public ICommand AddToDefaultQueueCommand { get; }
 
+    public ICommand StartDownloadCommand { get; }
+
     #endregion
 
     public AddDownloadLinkWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(
@@ -150,6 +161,39 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
         AddFileToQueueCommand = ReactiveCommand.Create<Window?>(AddFileToQueue);
         AddToDefaultQueueCommand = ReactiveCommand.Create<Window?>(AddToDefaultQueue);
+        StartDownloadCommand = ReactiveCommand.Create<Window?>(StartDownload);
+    }
+
+    private async void StartDownload(Window? owner)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (owner == null || !ValidateDownloadFile())
+                return;
+
+            var result = AddDownloadFileAsync(null).Result;
+            if (!result)
+                return;
+
+            var downloadFile =
+                DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == _addedDownloadFileId);
+            if (downloadFile == null)
+                return;
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
+                var window = new DownloadWindow { DataContext = vm };
+                window.Show();
+            });
+
+            owner.Close(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private async void AddNewCategory(Window? owner)
@@ -215,7 +259,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (downloadQueue == null)
                 return;
 
-            await AddDownloadFileToDownloadQueueAsync(downloadQueue);
+            var result = await AddDownloadFileAsync(downloadQueue);
+            if (!result)
+                return;
 
             if (RememberMyChoice)
             {
@@ -264,7 +310,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             DefaultQueueIsExist = true;
 
-            await AddDownloadFileToDownloadQueueAsync(defaultDownloadQueue);
+            var result = await AddDownloadFileAsync(defaultDownloadQueue);
+            if (!result)
+                return;
 
             owner.Close(true);
         }
@@ -274,38 +322,47 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task AddDownloadFileToDownloadQueueAsync(DownloadQueue downloadQueue)
+    private async Task<bool> AddDownloadFileAsync(DownloadQueue? downloadQueue)
     {
-        var downloadFilesForSelectedQueue = await UnitOfWork.DownloadFileRepository
-            .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id);
+        List<DownloadFile>? downloadFilesForSelectedQueue = null;
+        if (downloadQueue != null)
+        {
+            downloadFilesForSelectedQueue = await UnitOfWork.DownloadFileRepository
+                .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id);
+        }
 
         var ext = Path.GetExtension(FileName!);
         var fileExtensions = await UnitOfWork.CategoryFileExtensionRepository
             .GetAllAsync(where: fe => fe.Extension.ToLower() == ext.ToLower(),
-                includeProperties: ["Category"]);
+                includeProperties: ["Category.CategorySaveDirectory"]);
 
         var category = fileExtensions.FirstOrDefault(fe => fe.Category != null && !fe.Category.IsDefault)?.Category
                        ?? fileExtensions.FirstOrDefault()?.Category;
 
-        if (category == null)
-            return;
+        if (category?.CategorySaveDirectory == null)
+            return false;
 
         var downloadFile = new DownloadFile
         {
             Url = Url!,
             FileName = FileName!,
-            DownloadQueueId = downloadQueue.Id,
+            DownloadQueueId = downloadQueue?.Id,
             Size = FileSize,
             Description = Description,
             Status = DownloadStatus.None,
             LastTryDate = null,
             DateAdded = DateTime.Now,
-            QueuePriority = (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1,
+            QueuePriority = downloadFilesForSelectedQueue != null
+                ? (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1
+                : null,
             CategoryId = category.Id,
             IsPaused = false,
+            SaveLocation = category.CategorySaveDirectory.SaveDirectory,
         };
 
         await DownloadFileService.AddFileAsync(downloadFile);
+        _addedDownloadFileId = downloadFile.Id;
+        return true;
     }
 
     private bool ValidateDownloadFile()

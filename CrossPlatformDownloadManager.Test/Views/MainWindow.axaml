@@ -16,18 +16,21 @@
     </Design.DataContext>
 
     <Grid>
-        <StackPanel HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="10">
-            <TimePicker Padding="12, 10"
-                        Background="#222"
-                        Foreground="#FFF"
-                        Margin="0"
-                        CornerRadius="8"
-                        BorderThickness="0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" />
-            <DatePicker />
+        <StackPanel Spacing="15"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <TextBlock Name="ProgressTextBlock"
+                       HorizontalAlignment="Center"
+                       Text="Download Progress" />
+            <Button Name="StartButton"
+                    Click="StartButton_OnClick"
+                    HorizontalAlignment="Center">
+                Start Download
+            </Button>
+            <Button Name="StopButton" Click="StopButton_OnClick"
+                    HorizontalAlignment="Center">
+                Stop Download
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

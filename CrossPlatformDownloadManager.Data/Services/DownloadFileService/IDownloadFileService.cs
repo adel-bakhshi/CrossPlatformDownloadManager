@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
@@ -9,7 +9,7 @@ public interface IDownloadFileService
 {
     #region Events
 
-    event EventHandler<List<DownloadFileViewModel>>? DataChanged;
+    event EventHandler<DownloadFileServiceEventArgs>? DataChanged;
     
     #endregion
 

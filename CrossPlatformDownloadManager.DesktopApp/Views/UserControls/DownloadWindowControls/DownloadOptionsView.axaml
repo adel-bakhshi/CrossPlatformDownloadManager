@@ -3,11 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadOptionsView"
-             DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadOptionsView">
     <StackPanel Orientation="Vertical"
                 Spacing="10">
         <!-- Open folder after download finished -->
@@ -102,7 +102,7 @@
                                    Background="{DynamicResource SecondaryColor}"
                                    ToggleIconColor="{DynamicResource TertiaryColor}"
                                    OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                   ItemsSource="{Binding TurnOffModesDropDownItemsSource}"
+                                   ItemsSource="{Binding $parent[local:DownloadOptionsView].TurnOffModesDropDownItemsSource}"
                                    IsEnabled="{Binding #TurnOffComputerToggleSwitch.IsChecked}"
                                    Margin="0, 10, 0, 0"
                                    SelectionChanged="TurnOffModesComboBox_OnSelectionChanged">

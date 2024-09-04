@@ -11,5 +11,5 @@ public class ChunkDataViewModel
     public long DownloadedSize { get; set; }
     public string? DownloadedSizeAsString => DownloadedSize.ToFileSize();
     public string? Info { get; set; }
-    public int RowIndex { get; set; }
+    public int RowIndex => ChunkIndex + 1;
 }

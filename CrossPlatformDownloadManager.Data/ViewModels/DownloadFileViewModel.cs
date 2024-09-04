@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Globalization;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using Downloader;
 using PropertyChanged;
@@ -23,6 +24,14 @@ public sealed class DownloadFileViewModel
     private List<ChunkProgressViewModel>? _chunkProgresses;
 
     #endregion
+
+    #region Events
+
+    public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
+
+    #endregion
+
+    #region Properties
 
     public int Id { get; set; }
     public string? FileName { get; set; }
@@ -53,8 +62,9 @@ public sealed class DownloadFileViewModel
     public string? SaveLocation { get; set; }
     public int? CategoryId { get; set; }
     public string? DownloadPackage { get; set; }
-    public ObservableCollection<ChunkProgressViewModel> ChunkProgresses { get; set; } = [];
     public ObservableCollection<ChunkDataViewModel> ChunksData { get; set; } = [];
+
+    #endregion
 
     public async Task StartDownloadFileAsync(DownloadService? downloadService,
         DownloadConfiguration downloadConfiguration, IUnitOfWork? unitOfWork)
@@ -103,6 +113,11 @@ public sealed class DownloadFileViewModel
 
         _elapsedTimeTimer?.Stop();
         _updateChunksDataTimer?.Stop();
+
+        _elapsedTimeTimer = null;
+        _elapsedTime = null;
+        _updateChunksDataTimer = null;
+        _chunkProgresses = null;
 
         var pack = downloadService.Package;
         await downloadService.CancelTaskAsync();
@@ -153,7 +168,11 @@ public sealed class DownloadFileViewModel
         if (e.Cancelled)
             ChangeDownloadFileState(isPaused: true);
         else
+        {
             ChangeDownloadFileState(isCompleted: true);
+            var eventArgs = new DownloadFileEventArgs { Id = Id };
+            DownloadFinished?.Invoke(this, eventArgs);
+        }
     }
 
     private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
@@ -252,7 +271,7 @@ public sealed class DownloadFileViewModel
 
             if (chunkProgress.CheckCount % 5 == 0)
             {
-                if (_updateChunksDataTimer!.IsEnabled)
+                if (_updateChunksDataTimer!.IsEnabled && chunkData.DownloadedSize != chunkData.TotalSize)
                 {
                     chunkData.Info = chunkData.DownloadedSize == chunkProgress.ReceivedBytesSize
                         ? "Connecting..."
@@ -265,8 +284,10 @@ public sealed class DownloadFileViewModel
             {
                 chunkProgress.CheckCount++;
             }
-            
-            if (!_updateChunksDataTimer!.IsEnabled)
+
+            if (chunkData.DownloadedSize == chunkData.TotalSize)
+                chunkData.Info = "Completed";
+            else if (!_updateChunksDataTimer!.IsEnabled)
                 chunkData.Info = "Paused";
 
             chunkData.DownloadedSize = chunkProgress.ReceivedBytesSize;

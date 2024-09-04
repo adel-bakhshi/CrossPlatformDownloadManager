@@ -106,6 +106,16 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand AddNewLinkCommand { get; }
 
+    public ICommand ResumeDownloadCommand { get; }
+
+    public ICommand StopDownloadCommand { get; }
+
+    public ICommand StopAllDownloadsCommand { get; }
+    
+    public ICommand DeleteDownloadFilesCommand { get; }
+    
+    public ICommand DeleteCompletedDownloadFilesCommand { get; }
+
     #endregion
 
     public MainWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, MainWindow mainWindow)
@@ -129,6 +139,130 @@ public class MainWindowViewModel : ViewModelBase
 
         SelectAllRowsCommand = ReactiveCommand.Create<object>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
+        ResumeDownloadCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownload);
+        StopDownloadCommand = ReactiveCommand.Create<DataGrid?>(StopDownload);
+        StopAllDownloadsCommand = ReactiveCommand.Create(StopAllDownloads);
+        DeleteDownloadFilesCommand = ReactiveCommand.Create<DataGrid?>(DeleteDownloadFiles);
+        DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
+    }
+
+    private void ResumeDownload(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            foreach (var selectedItem in dataGrid.SelectedItems)
+            {
+                var id = (selectedItem as DownloadFileViewModel)?.Id;
+                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
+                if (downloadFile == null)
+                    continue;
+
+                if (downloadFile.IsDownloading || downloadFile.IsCompleted)
+                    continue;
+
+                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
+                var window = new DownloadWindow { DataContext = vm };
+                window.Show();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void StopDownload(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            foreach (var selectedItem in dataGrid.SelectedItems)
+            {
+                var id = (selectedItem as DownloadFileViewModel)?.Id;
+                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
+                if (downloadFile == null)
+                    continue;
+
+                if (!downloadFile.IsDownloading)
+                    continue;
+
+                await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void StopAllDownloads()
+    {
+        // TODO: Show message box
+        try
+        {
+            var downloadFiles = DownloadFileService.DownloadFiles
+                .Where(df => df.IsDownloading)
+                .ToList();
+
+            foreach (var downloadFile in downloadFiles)
+                await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void DeleteDownloadFiles(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            foreach (var selectedItem in dataGrid.SelectedItems)
+            {
+                var id = (selectedItem as DownloadFileViewModel)?.Id;
+                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
+                if (downloadFile == null)
+                    continue;
+
+                if (downloadFile.IsDownloading)
+                    await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
+
+                await DownloadFileService.DeleteDownloadFileAsync(downloadFile, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void DeleteCompletedDownloadFiles()
+    {
+        // TODO: Show message box and ask user for deleting file
+        try
+        {
+            var downloadFiles = DownloadFileService.DownloadFiles
+                .Where(df => df.IsCompleted)
+                .ToList();
+
+            foreach (var downloadFile in downloadFiles)
+                await DownloadFileService.DeleteDownloadFileAsync(downloadFile, false);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
@@ -139,7 +273,7 @@ public class MainWindowViewModel : ViewModelBase
             var totalSpeed = DownloadFileService.DownloadFiles
                 .Where(df => df.IsDownloading)
                 .Sum(df => df.TransferRate ?? 0);
-            
+
             TotalSpeed = totalSpeed == 0 ? "0 KB" : totalSpeed.ToFileSize();
         }
         catch (Exception ex)

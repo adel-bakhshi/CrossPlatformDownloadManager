@@ -152,13 +152,12 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    public async Task StartDownloadAsync(Window? window, bool minimizeDownloadWindow, bool hideDownloadWindow)
+    public async Task StartDownloadAsync(Window? window)
     {
         // TODO: Show message box
         try
         {
-            await DownloadFileService.StartDownloadFileAsync(DownloadFile, window, minimizeDownloadWindow,
-                hideDownloadWindow);
+            await DownloadFileService.StartDownloadFileAsync(DownloadFile, window);
         }
         catch (Exception ex)
         {

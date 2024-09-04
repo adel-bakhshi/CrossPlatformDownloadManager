@@ -161,7 +161,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         StartDownloadCommand = ReactiveCommand.Create<Window?>(StartDownload);
     }
 
-    private async void StartDownload(Window? owner)
+    private void StartDownload(Window? owner)
     {
         // TODO: Show message box
         try
@@ -178,15 +178,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (downloadFile == null)
                 return;
 
-            // Dispatcher.UIThread.InvokeAsync(() =>
-            // {
-            //     var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
-            //     var window = new DownloadWindow { DataContext = vm };
-            //     window.Show();
-            // });
-
             var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
-            var window = new DownloadWindow(minimizeWindow: false, hideWindow: false) { DataContext = vm };
+            var window = new DownloadWindow { DataContext = vm };
             window.Show();
 
             owner.Close(true);

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -111,29 +112,10 @@ public class DownloadFileService : IDownloadFileService
         await LoadFilesAsync();
     }
 
-    public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window,
-        bool minimizeDownloadWindow, bool hideDownloadWindow)
+    public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window)
     {
         if (downloadFile == null || window == null)
             return;
-
-        if (minimizeDownloadWindow)
-            window.WindowState = WindowState.Minimized;
-
-        switch (hideDownloadWindow)
-        {
-            case true:
-            {
-                window.Hide();
-                break;
-            }
-
-            case false:
-            {
-                window.Show();
-                break;
-            }
-        }
 
         window.Tag = downloadFile.Id;
         window.Closing += WindowOnClosing;
@@ -152,7 +134,28 @@ public class DownloadFileService : IDownloadFileService
         _downloadFileWindows.Add(downloadFile.Id, window);
         _windowClosingStates.Add(downloadFile.Id, false);
 
+        downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
         await downloadFile.StartDownloadFileAsync(downloadService, downloadConfiguration, _unitOfWork);
+    }
+
+    private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
+            if (downloadFile == null)
+                return;
+
+            downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+
+            var window = _downloadFileWindows.FirstOrDefault(dw => dw.Key == e.Id).Value;
+            if (window == null)
+                return;
+
+            RemoveDownloadOptions(downloadFile).GetAwaiter();
+            window.Closing -= WindowOnClosing;
+            window.Close();
+        });
     }
 
     private async void WindowOnClosing(object? sender, WindowClosingEventArgs e)
@@ -187,7 +190,7 @@ public class DownloadFileService : IDownloadFileService
         }
     }
 
-    public async Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile)
+    public async Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile, bool closeWindow = false)
     {
         if (downloadFile == null)
             return;
@@ -198,15 +201,12 @@ public class DownloadFileService : IDownloadFileService
             return;
 
         await downloadFile.StopDownloadFileAsync(downloadService);
+        await RemoveDownloadOptions(downloadFile);
 
-        _downloadConfigurations.Remove(downloadFile.Id);
-        _downloadServices.Remove(downloadFile.Id);
-        _downloadFileWindows.Remove(downloadFile.Id);
-        _windowClosingStates.Remove(downloadFile.Id);
-
-        await UpdateFileAsync(downloadFile);
-        
         window.Closing -= WindowOnClosing;
+
+        if (closeWindow)
+            window.Close();
     }
 
     public void ResumeDownloadFile(DownloadFileViewModel? downloadFile)
@@ -245,6 +245,31 @@ public class DownloadFileService : IDownloadFileService
         downloadConfiguration.MaximumBytesPerSecond = speed;
     }
 
+    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile)
+    {
+        if (downloadFile == null)
+            return;
+
+        var downloadFileInDb = await _unitOfWork.DownloadFileRepository
+            .GetAsync(where: df => df.Id == downloadFile.Id);
+
+        if (downloadFileInDb == null)
+            return;
+
+        if (alsoDeleteFile)
+        {
+            var filePath = Path.Combine(downloadFileInDb.SaveLocation, downloadFileInDb.FileName);
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+        }
+
+        DownloadFiles.Remove(downloadFile);
+        _unitOfWork.DownloadFileRepository.Delete(downloadFileInDb);
+        await _unitOfWork.SaveAsync();
+
+        await LoadFilesAsync();
+    }
+
     #region Helpers
 
     private DownloadFileViewModel ConvertToDownloadFileViewModel(DownloadFile downloadFile)
@@ -280,6 +305,16 @@ public class DownloadFileService : IDownloadFileService
         };
 
         return vm;
+    }
+
+    private async Task RemoveDownloadOptions(DownloadFileViewModel downloadFile)
+    {
+        _downloadConfigurations.Remove(downloadFile.Id);
+        _downloadServices.Remove(downloadFile.Id);
+        _downloadFileWindows.Remove(downloadFile.Id);
+        _windowClosingStates.Remove(downloadFile.Id);
+
+        await UpdateFileAsync(downloadFile);
     }
 
     #endregion

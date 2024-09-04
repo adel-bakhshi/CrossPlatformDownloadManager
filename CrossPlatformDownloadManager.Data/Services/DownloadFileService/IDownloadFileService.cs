@@ -30,14 +30,15 @@ public interface IDownloadFileService
 
     Task UpdateFilesAsync(List<DownloadFile> downloadFiles);
 
-    Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window, bool minimizeDownloadWindow,
-        bool hideDownloadWindow);
+    Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window);
 
-    Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile);
+    Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile, bool closeWindow = false);
 
     void ResumeDownloadFile(DownloadFileViewModel? downloadFile);
 
     void PauseDownloadFile(DownloadFileViewModel? downloadFile);
 
     void LimitDownloadFileSpeed(DownloadFileViewModel? downloadFile, long speed);
+
+    Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile);
 }

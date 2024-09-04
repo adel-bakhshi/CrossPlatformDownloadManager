@@ -164,15 +164,20 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Resume"
                                                  IconData="{DynamicResource Resume}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 Command="{Binding ResumeDownloadCommand}"
+                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop"
                                                  IconData="{DynamicResource Stop}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 Command="{Binding StopDownloadCommand}"
+                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop All"
                                                  IconData="{DynamicResource StopAll}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}" />
+                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 Command="{Binding StopAllDownloadsCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryColor}"
@@ -184,11 +189,14 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Delete"
                                                  IconData="{DynamicResource Delete}"
-                                                 IconColor="{DynamicResource DangerGradientBrush}" />
+                                                 IconColor="{DynamicResource DangerGradientBrush}"
+                                                 Command="{Binding DeleteDownloadFilesCommand}"
+                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Delete Completed"
                                                  IconData="{DynamicResource DeleteCompleted}"
-                                                 IconColor="{DynamicResource DangerGradientBrush}" />
+                                                 IconColor="{DynamicResource DangerGradientBrush}"
+                                                 Command="{Binding DeleteCompletedDownloadFilesCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryColor}"

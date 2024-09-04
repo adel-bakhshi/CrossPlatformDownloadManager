@@ -16,20 +16,15 @@ public partial class DownloadWindow : Window
 {
     #region Private Fields
 
+    // Update chunks data
     private readonly List<Rectangle> _chunksDataRectangles;
     private readonly DispatcherTimer _updateChunksDataTimer;
 
-    private readonly bool _minimizeWindow;
-    private readonly bool _hideWindow;
-
     #endregion
 
-    public DownloadWindow(bool minimizeWindow, bool hideWindow)
+    public DownloadWindow()
     {
         InitializeComponent();
-
-        _minimizeWindow = minimizeWindow;
-        _hideWindow = hideWindow;
 
         _chunksDataRectangles = [];
         _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
@@ -113,8 +108,8 @@ public partial class DownloadWindow : Window
                 return;
 
             _updateChunksDataTimer.Start();
-            await vm.StartDownloadAsync(window: this, minimizeDownloadWindow: _minimizeWindow,
-                hideDownloadWindow: _hideWindow);
+            Focus();
+            await vm.StartDownloadAsync(window: this);
         }
         catch (Exception ex)
         {

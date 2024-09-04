@@ -14,10 +14,10 @@
         Width="800"
         Height="600"
         MinWidth="800"
-        MinHeight="600">
-    <!-- ExtendClientAreaChromeHints="NoChrome"
+        MinHeight="600"
+        ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0" -->
+        ExtendClientAreaTitleBarHeightHint="0">
     <Border Padding="20">
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
             <!-- Tab Items -->
@@ -62,10 +62,11 @@
                                            FileName="{Binding DownloadFile.FileName}"
                                            SaveLocation="{Binding DownloadFile.SaveLocation}"
                                            FileSize="{Binding DownloadFile.SizeAsString}"
-                                           Downloaded="{Binding DownloadFile.DownloadProgressAsString}"
-                                           Speed="{Binding DownloadFile.TransferRate}"
-                                           ElapsedTime="{Binding DownloadFile.ElapsedTime}"
-                                           TimeLeft="{Binding DownloadFile.TimeLeft}"
+                                           DownloadProgress="{Binding DownloadFile.DownloadProgressAsString}"
+                                           DownloadSize="{Binding DownloadFile.DownloadSizeAsString}"
+                                           Speed="{Binding DownloadFile.TransferRateAsString}"
+                                           ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
+                                           TimeLeft="{Binding DownloadFile.TimeLeftAsString}"
                                            ResumeCapability="Yes" />
 
                     <!-- Download Speed Limiter View  -->
@@ -117,7 +118,9 @@
                         </Button.Styles>
                     </Button>
 
-                    <Button Classes="button danger">
+                    <Button Classes="button danger"
+                            Command="{Binding CancelDownloadCommand}"
+                            CommandParameter="{Binding $parent[Window]}">
                         Cancel
                     </Button>
                 </StackPanel>
@@ -131,12 +134,12 @@
                     HorizontalAlignment="Stretch"
                     Height="24"
                     Margin="0, 0, 0, 15">
-                <Canvas Name="ChunksProgressBarsCanvas"></Canvas>
+                <Canvas Name="ChunksProgressBarsCanvas" />
             </Border>
 
             <!-- Chunks DataGrid -->
             <DataGrid Grid.Row="5"
-                      ItemsSource="{Binding ChunksData}"
+                      ItemsSource="{Binding DownloadFile.ChunksData}"
                       Classes="chunksDataGrid">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="#"

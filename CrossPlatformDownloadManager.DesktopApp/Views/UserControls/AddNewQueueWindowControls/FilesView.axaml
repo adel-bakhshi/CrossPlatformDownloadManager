@@ -157,7 +157,7 @@
                                     Binding="{Binding DownloadProgress, StringFormat={}{0:##.00}%, FallbackValue='', TargetNullValue=''}" />
 
                 <DataGridTextColumn Header="Time Left"
-                                    Binding="{Binding TimeLeft}"
+                                    Binding="{Binding TimeLeftAsString}"
                                     MinWidth="100" />
             </DataGrid.Columns>
         </DataGrid>

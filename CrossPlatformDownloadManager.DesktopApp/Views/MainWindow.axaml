@@ -223,8 +223,10 @@
                     </Grid>
 
                     <!-- Download list -->
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding DownloadFiles}">
+                    <DataGrid Name="DownloadFilesDataGrid"
+                              Grid.Row="1"
+                              ItemsSource="{Binding DownloadFiles}"
+                              SelectionChanged="DownloadFilesDataGrid_OnSelectionChanged">
                         <DataGrid.Columns>
                             <!-- Checkbox for selecting rows -->
                             <DataGridTemplateColumn MinWidth="50">
@@ -286,7 +288,7 @@
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
                                                         IsVisible="{Binding IsDownloading}">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:##.00}%}" />
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:00.00}%}" />
                                                 <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
@@ -296,7 +298,7 @@
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
                                                         IsVisible="{Binding IsPaused}">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Paused - {0:##.00}%}"
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Paused - {0:00.00}%}"
                                                            Foreground="{DynamicResource WarningGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
@@ -307,7 +309,7 @@
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
                                                         IsVisible="{Binding IsError}">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Error - {0:##.00}%}"
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Error - {0:00.00}%}"
                                                            Foreground="{DynamicResource DangerGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
                                                              Value="{Binding DownloadProgress}"
@@ -321,22 +323,22 @@
                             <!-- Time Left -->
                             <DataGridTextColumn Header="Time Left"
                                                 MinWidth="150"
-                                                Binding="{Binding TimeLeft}" />
+                                                Binding="{Binding TimeLeftAsString}" />
 
                             <!-- Transfer Rate -->
                             <DataGridTextColumn Header="Transfer Rate"
                                                 MinWidth="150"
-                                                Binding="{Binding TransferRate}" />
+                                                Binding="{Binding TransferRateAsString}" />
 
                             <!-- Last Try Date -->
                             <DataGridTextColumn Header="Last Try Date"
                                                 MinWidth="250"
-                                                Binding="{Binding LastTryDate}" />
+                                                Binding="{Binding LastTryDateAsString}" />
 
                             <!-- Date Added -->
                             <DataGridTextColumn Header="Date Added"
                                                 MinWidth="250"
-                                                Binding="{Binding DateAdded}" />
+                                                Binding="{Binding DateAddedAsString}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -368,7 +370,7 @@
                                   Foreground="{DynamicResource TertiaryColor}"
                                   Width="16"
                                   Height="16" />
-                        <TextBlock Text="2.4 GB"
+                        <TextBlock Text="{Binding SelectedFilesTotalSize}"
                                    Foreground="{DynamicResource TertiaryColor}" />
                     </StackPanel>
                 </StackPanel>
@@ -382,7 +384,7 @@
                               Width="16"
                               Height="16"
                               VerticalAlignment="Center" />
-                    <TextBlock Text="16.2 Mbps"
+                    <TextBlock Text="{Binding TotalSpeed}"
                                Foreground="{DynamicResource SuccessGradientBrush}"
                                VerticalAlignment="Center" />
                 </StackPanel>

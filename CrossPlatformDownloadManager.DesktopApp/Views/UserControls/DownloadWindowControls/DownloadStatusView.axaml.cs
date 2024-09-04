@@ -48,14 +48,23 @@ public partial class DownloadStatusView : UserControl
         set => SetValue(FileSizeProperty, value);
     }
 
-    public static readonly StyledProperty<string?> DownloadedProperty =
+    public static readonly StyledProperty<string?> DownloadProgressProperty =
         AvaloniaProperty.Register<DownloadStatusView, string?>(
-            "Downloaded");
+            "DownloadProgress");
 
-    public string? Downloaded
+    public string? DownloadProgress
     {
-        get => GetValue(DownloadedProperty);
-        set => SetValue(DownloadedProperty, value);
+        get => GetValue(DownloadProgressProperty);
+        set => SetValue(DownloadProgressProperty, value);
+    }
+
+    public static readonly StyledProperty<string?> DownloadSizeProperty = AvaloniaProperty.Register<DownloadStatusView, string?>(
+        "DownloadSize");
+
+    public string? DownloadSize
+    {
+        get => GetValue(DownloadSizeProperty);
+        set => SetValue(DownloadSizeProperty, value);
     }
 
     public static readonly StyledProperty<string?> SpeedProperty =

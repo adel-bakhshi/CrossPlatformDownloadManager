@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
@@ -20,6 +21,7 @@ public class MainWindowViewModel : ViewModelBase
     #region Private Fields
 
     private readonly MainWindow _mainWindow;
+    private readonly DispatcherTimer _updateSpeedTimer;
 
     #endregion
 
@@ -80,6 +82,22 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectAllDownloadFiles, value);
     }
 
+    private string? _totalSpeed;
+
+    public string? TotalSpeed
+    {
+        get => _totalSpeed;
+        set => this.RaiseAndSetIfChanged(ref _totalSpeed, value);
+    }
+
+    private string? _selectedFilesTotalSize;
+
+    public string? SelectedFilesTotalSize
+    {
+        get => _selectedFilesTotalSize;
+        set => this.RaiseAndSetIfChanged(ref _selectedFilesTotalSize, value);
+    }
+
     #endregion
 
     #region Commands
@@ -95,6 +113,10 @@ public class MainWindowViewModel : ViewModelBase
     {
         _mainWindow = mainWindow;
 
+        _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
+        _updateSpeedTimer.Start();
+
         // Create basic data before application startup
         UnitOfWork.CreateCategoriesAsync().GetAwaiter().GetResult();
 
@@ -102,8 +124,28 @@ public class MainWindowViewModel : ViewModelBase
         SelectedCategory = Categories.FirstOrDefault();
         UpdateDownloadList();
 
+        TotalSpeed = "0 KB";
+        SelectedFilesTotalSize = "0 KB";
+
         SelectAllRowsCommand = ReactiveCommand.Create<object>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
+    }
+
+    private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
+    {
+        // TODO: Show message box
+        try
+        {
+            var totalSpeed = DownloadFileService.DownloadFiles
+                .Where(df => df.IsDownloading)
+                .Sum(df => df.TransferRate ?? 0);
+            
+            TotalSpeed = totalSpeed == 0 ? "0 KB" : totalSpeed.ToFileSize();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private async void AddNewLink()
@@ -182,5 +224,10 @@ public class MainWindowViewModel : ViewModelBase
     protected override void DownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
     {
         DownloadFiles = eventArgs.DownloadFiles.ToObservableCollection();
+    }
+
+    public async Task LoadDownloadFilesAsync()
+    {
+        await DownloadFileService.LoadFilesAsync();
     }
 }

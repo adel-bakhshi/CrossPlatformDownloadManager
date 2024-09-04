@@ -1,34 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
-using Downloader;
 using ReactiveUI;
-using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class DownloadWindowViewModel : ViewModelBase
 {
     #region Private Fields
-
-    // DownloadService
-    private DownloadService? _downloadService;
-    
-    // ElapsedTime timer
-    private DispatcherTimer? _elapsedTimeTimer;
-    private TimeSpan? _elapsedTime;
 
     // Speed Limiter
     private bool _isSpeedLimiterEnabled;
@@ -85,14 +72,6 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _optionsTurnOffModes, value);
     }
 
-    private ObservableCollection<ChunkDataViewModel> _chunksData = [];
-
-    public ObservableCollection<ChunkDataViewModel> ChunksData
-    {
-        get => _chunksData;
-        set => this.RaiseAndSetIfChanged(ref _chunksData, value);
-    }
-
     private DownloadFileViewModel _downloadFile = new();
 
     public DownloadFileViewModel DownloadFile
@@ -117,6 +96,8 @@ public class DownloadWindowViewModel : ViewModelBase
 
     public ICommand ResumePauseDownloadCommand { get; }
 
+    public ICommand CancelDownloadCommand { get; }
+
     #endregion
 
     public DownloadWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
@@ -129,68 +110,19 @@ public class DownloadWindowViewModel : ViewModelBase
 
         ChangeViewCommand = ReactiveCommand.Create<object?>(ChangeView);
         ResumePauseDownloadCommand = ReactiveCommand.Create(ResumePauseDownload);
+        CancelDownloadCommand = ReactiveCommand.Create<Window?>(CancelDownload);
     }
 
-    private void ResumePauseDownload()
-    {
-        if (_downloadService == null)
-            return;
-
-        if (IsPaused)
-        {
-            _downloadService.Resume();
-            IsPaused = false;
-            _elapsedTimeTimer?.Start();
-        }
-        else
-        {
-            _downloadService.Pause();
-            IsPaused = true;
-            _elapsedTimeTimer?.Stop();
-        }
-    }
-
-    public async Task StartDownloadAsync()
+    private async void CancelDownload(Window? owner)
     {
         // TODO: Show message box
         try
         {
-            var downloadOptions = new DownloadConfiguration
-            {
-                ChunkCount = 8,
-                // MaximumBytesPerSecond = 64 * 1000,
-                ParallelDownload = true,
-            };
-
-            _downloadService = new DownloadService(downloadOptions);
-            _downloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
-            _downloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
-            _downloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
-            _downloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
-
-            var downloadPath = DownloadFile.SaveLocation;
-            if (downloadPath.IsNullOrEmpty())
-            {
-                var saveDirectory = await UnitOfWork.CategorySaveDirectoryRepository
-                    .GetAsync(where: sd => sd.CategoryId == null);
-
-                downloadPath = saveDirectory?.SaveDirectory;
-                if (downloadPath.IsNullOrEmpty())
-                    return;
-            }
-
-            if (DownloadFile.FileName.IsNullOrEmpty() || DownloadFile.Url.IsNullOrEmpty())
+            if (owner == null)
                 return;
 
-            if (!Directory.Exists(downloadPath!))
-                Directory.CreateDirectory(downloadPath!);
-
-            CreateChunksData(downloadOptions.ChunkCount);
-            CalculateElapsedTime();
-            var fileName = Path.Join(downloadPath!, DownloadFile.FileName!);
-            var url = DownloadFile.Url!;
-
-            await _downloadService.DownloadFileTaskAsync(address: url, fileName: fileName).ConfigureAwait(false);
+            await DownloadFileService.StopDownloadFileAsync(DownloadFile);
+            owner.Close();
         }
         catch (Exception ex)
         {
@@ -198,71 +130,40 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
+    private void ResumePauseDownload()
     {
-        Console.WriteLine("Download Started...");
-    }
-
-    private void DownloadServiceOnDownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
-    {
-        Console.WriteLine("Download Completed...");
-    }
-
-    private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
+        // TODO: Show message box
+        try
         {
-            DownloadFile.DownloadProgress = (float)e.ProgressPercentage;
-            DownloadFile.TransferRate = e.BytesPerSecondSpeed.ToFileSize();
-
-            TimeSpan timeLeft = TimeSpan.Zero;
-            var remainSizeToReceive = (DownloadFile.Size ?? 0) - e.ReceivedBytesSize;
-            var remainSeconds = remainSizeToReceive / e.BytesPerSecondSpeed;
-            if (!double.IsInfinity(remainSeconds))
-                timeLeft = TimeSpan.FromSeconds(remainSeconds);
-
-            DownloadFile.TimeLeft = timeLeft.GetShortTime();
-        });
-    }
-
-    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
+            if (IsPaused)
+            {
+                DownloadFileService.ResumeDownloadFile(DownloadFile);
+                IsPaused = false;
+            }
+            else
+            {
+                DownloadFileService.PauseDownloadFile(DownloadFile);
+                IsPaused = true;
+            }
+        }
+        catch (Exception ex)
         {
-            if (!int.TryParse(e.ProgressId, out var progressId))
-                return;
-
-            var chunkData = ChunksData.FirstOrDefault(cd => cd.ChunkIndex == progressId);
-            if (chunkData == null)
-                return;
-
-            chunkData.Info = chunkData.DownloadedSize == e.ReceivedBytesSize ? "Waiting..." : "Receiving...";
-            chunkData.DownloadedSize = e.ReceivedBytesSize;
-            chunkData.TotalSize = e.TotalBytesToReceive;
-        });
+            Console.WriteLine(ex);
+        }
     }
 
-    private void CreateChunksData(int count)
+    public async Task StartDownloadAsync(Window? window, bool minimizeDownloadWindow, bool hideDownloadWindow)
     {
-        var chunks = new List<ChunkDataViewModel>();
-        for (int i = 0; i < count; i++)
-            chunks.Add(new ChunkDataViewModel { ChunkIndex = i });
-
-        ChunksData = chunks.ToObservableCollection();
-    }
-
-    private void CalculateElapsedTime()
-    {
-        _elapsedTimeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _elapsedTimeTimer.Tick += ElapsedTimeTimerOnTick;
-        _elapsedTimeTimer.Start();
-    }
-
-    private void ElapsedTimeTimerOnTick(object? sender, EventArgs e)
-    {
-        _elapsedTime ??= TimeSpan.Zero;
-        _elapsedTime = TimeSpan.FromSeconds(_elapsedTime.Value.TotalSeconds + 1);
-        DownloadFile.ElapsedTime = _elapsedTime.GetShortTime();
+        // TODO: Show message box
+        try
+        {
+            await DownloadFileService.StartDownloadFileAsync(DownloadFile, window, minimizeDownloadWindow,
+                hideDownloadWindow);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void ChangeView(object? obj)
@@ -301,6 +202,18 @@ public class DownloadWindowViewModel : ViewModelBase
         _isSpeedLimiterEnabled = eventArgs.Enabled;
         _limitSpeed = _isSpeedLimiterEnabled ? eventArgs.Speed : null;
         _speedUnit = _isSpeedLimiterEnabled ? eventArgs.Unit : null;
+
+        if (_isSpeedLimiterEnabled)
+        {
+            var unit = _speedUnit.IsNullOrEmpty() ? 0 :
+                _speedUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
+            var speed = (long)(_limitSpeed == null ? 0 : _limitSpeed.Value * unit);
+            DownloadFileService.LimitDownloadFileSpeed(DownloadFile, speed);
+        }
+        else
+        {
+            DownloadFileService.LimitDownloadFileSpeed(DownloadFile, 0);
+        }
     }
 
     public void ChangeOptions(DownloadOptionsViewEventArgs eventArgs)

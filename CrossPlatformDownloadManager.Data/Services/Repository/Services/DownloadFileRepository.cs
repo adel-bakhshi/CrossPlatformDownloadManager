@@ -29,9 +29,11 @@ public class DownloadFileRepository : RepositoryBase<DownloadFile>, IDownloadFil
         downloadFileInDb.IsPaused = downloadFile.IsPaused;
         downloadFileInDb.IsError = downloadFile.IsError;
         downloadFileInDb.DownloadProgress = downloadFile.DownloadProgress;
+        downloadFileInDb.ElapsedTime = downloadFile.ElapsedTime;
         downloadFileInDb.TimeLeft = downloadFile.TimeLeft;
         downloadFileInDb.TransferRate = downloadFile.TransferRate;
         downloadFileInDb.SaveLocation = downloadFile.SaveLocation;
+        downloadFileInDb.DownloadPackage = downloadFile.DownloadPackage;
     }
 
     public async Task UpdateAllAsync(List<DownloadFile> downloadFiles)

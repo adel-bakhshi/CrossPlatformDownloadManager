@@ -71,10 +71,14 @@
                    Text="Downloaded"
                    Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="4"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].Downloaded}"
-                   Margin="0, 0, 0, 10" />
+        <StackPanel Grid.Row="4"
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="5"
+                    Margin="0, 0, 0, 10">
+            <TextBlock Text="{Binding $parent[local:DownloadStatusView].DownloadProgress}" />
+            <TextBlock Text="{Binding $parent[local:DownloadStatusView].DownloadSize}" />
+        </StackPanel>
 
         <!-- Speed -->
         <TextBlock Grid.Row="5"

@@ -21,7 +21,6 @@ public class ViewModelBase : ReactiveObject
     {
         UnitOfWork = unitOfWork;
         DownloadFileService = downloadFileService;
-
         DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
     }
 

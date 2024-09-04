@@ -47,4 +47,7 @@ public class DownloadFile
     public float? TransferRate { get; set; }
 
     [Required] [MaxLength(500)] public string SaveLocation { get; set; } = "";
+    
+    [MaxLength(3000)]
+    public string? DownloadPackage { get; set; }
 }

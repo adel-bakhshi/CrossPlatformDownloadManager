@@ -17,17 +17,23 @@ public partial class DownloadWindow : Window
     #region Private Fields
 
     private readonly List<Rectangle> _chunksDataRectangles;
-    private readonly DispatcherTimer _timer;
+    private readonly DispatcherTimer _updateChunksDataTimer;
+
+    private readonly bool _minimizeWindow;
+    private readonly bool _hideWindow;
 
     #endregion
 
-    public DownloadWindow()
+    public DownloadWindow(bool minimizeWindow, bool hideWindow)
     {
         InitializeComponent();
 
+        _minimizeWindow = minimizeWindow;
+        _hideWindow = hideWindow;
+
         _chunksDataRectangles = [];
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-        _timer.Tick += UpdateChunksDataTimerOnTick;
+        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
     }
 
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
@@ -36,8 +42,9 @@ public partial class DownloadWindow : Window
         if (vm == null || vm.IsPaused)
             return;
 
+        var chunksData = vm.DownloadFile.ChunksData;
         var bounds = ChunksProgressBarsCanvas.Bounds;
-        var chunksCount = vm.ChunksData.Count;
+        var chunksCount = chunksData.Count;
         var divisionsWidth = bounds.Width / chunksCount;
 
         if (!_chunksDataRectangles.Any())
@@ -57,9 +64,9 @@ public partial class DownloadWindow : Window
                 var rect = new Rectangle();
                 rect.Bind(Rectangle.HeightProperty, heightBinding);
                 rect.Fill = this.FindResource("ChunkProgressGradientBrush") as IBrush;
-                rect.Width = vm.ChunksData[i].TotalSize == 0
+                rect.Width = chunksData[i].TotalSize == 0
                     ? 0
-                    : vm.ChunksData[i].DownloadedSize * divisionsWidth / vm.ChunksData[i].TotalSize;
+                    : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
 
                 Canvas.SetLeft(rect, divisionsWidth * i);
                 Canvas.SetTop(rect, 0);
@@ -71,9 +78,9 @@ public partial class DownloadWindow : Window
 
         for (int i = 0; i < chunksCount; i++)
         {
-            _chunksDataRectangles[i].Width = vm.ChunksData[i].TotalSize == 0
+            _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0
                 ? 0
-                : vm.ChunksData[i].DownloadedSize * divisionsWidth / vm.ChunksData[i].TotalSize;
+                : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
         }
     }
 
@@ -98,11 +105,20 @@ public partial class DownloadWindow : Window
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
-        var vm = DataContext as DownloadWindowViewModel;
-        if (vm == null)
-            return;
+        // TODO: Show message box
+        try
+        {
+            var vm = DataContext as DownloadWindowViewModel;
+            if (vm == null)
+                return;
 
-        _timer.Start();
-        await vm.StartDownloadAsync().ConfigureAwait(false);
+            _updateChunksDataTimer.Start();
+            await vm.StartDownloadAsync(window: this, minimizeDownloadWindow: _minimizeWindow,
+                hideDownloadWindow: _hideWindow);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

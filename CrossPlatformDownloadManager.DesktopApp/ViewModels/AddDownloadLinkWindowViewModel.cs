@@ -4,12 +4,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
@@ -181,12 +178,16 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (downloadFile == null)
                 return;
 
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
-                var window = new DownloadWindow { DataContext = vm };
-                window.Show();
-            });
+            // Dispatcher.UIThread.InvokeAsync(() =>
+            // {
+            //     var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
+            //     var window = new DownloadWindow { DataContext = vm };
+            //     window.Show();
+            // });
+
+            var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
+            var window = new DownloadWindow(minimizeWindow: false, hideWindow: false) { DataContext = vm };
+            window.Show();
 
             owner.Close(true);
         }

@@ -107,7 +107,8 @@
                                   OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
                                   OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource SecondaryColor}" />
+                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  Text="{Binding SearchText, Mode=OneWayToSource}" />
 
                 <!-- Separator -->
                 <Separator Grid.Row="1"
@@ -132,7 +133,7 @@
                         Width="250">
                     <ListBox ItemsSource="{Binding Categories}"
                              Classes="categoryList"
-                             SelectedItem="{Binding SelectedCategory}"
+                             SelectedItem="{Binding SelectedCategoryHeader}"
                              Name="LstCategories" />
                 </Border>
 
@@ -273,7 +274,7 @@
                             <!-- Queue Name -->
                             <DataGridTextColumn Header="Queue"
                                                 MinWidth="150"
-                                                Binding="{Binding QueueName}" />
+                                                Binding="{Binding DownloadQueueName}" />
 
                             <!-- File Size -->
                             <DataGridTextColumn Header="Size"

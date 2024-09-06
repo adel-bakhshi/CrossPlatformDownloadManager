@@ -248,7 +248,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
             return [];
 
         return DownloadFileService.DownloadFiles
-            .Where(df => df.QueueId == DownloadQueueId)
+            .Where(df => df.DownloadQueueId == DownloadQueueId)
             .ToObservableCollection();
     }
 

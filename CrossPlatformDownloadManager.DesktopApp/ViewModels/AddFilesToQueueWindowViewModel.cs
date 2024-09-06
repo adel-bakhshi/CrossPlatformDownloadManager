@@ -80,7 +80,7 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
     private ObservableCollection<DownloadFileViewModel> GetDownloadFiles()
     {
         var downloadFiles = DownloadFileService.DownloadFiles
-            .Where(df => (df.QueueId ?? 0) != DownloadQueueId)
+            .Where(df => (df.DownloadQueueId ?? 0) != DownloadQueueId)
             .ToObservableCollection();
 
         return downloadFiles;

@@ -343,14 +343,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             DownloadQueueId = downloadQueue?.Id,
             Size = FileSize,
             Description = Description,
-            Status = DownloadStatus.None,
+            Status = DownloadFileStatus.None,
             LastTryDate = null,
             DateAdded = DateTime.Now,
             QueuePriority = downloadFilesForSelectedQueue != null
                 ? (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1
                 : null,
             CategoryId = category.Id,
-            IsPaused = false,
             SaveLocation = category.CategorySaveDirectory.SaveDirectory,
         };
 
@@ -454,7 +453,26 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 if (fileName.IsNullOrEmpty())
                 {
                     var uri = new Uri(Url!);
-                    fileName = Path.GetFileName(uri.LocalPath);
+                    if (uri.IsFile)
+                    {
+                        fileName = Path.GetFileName(uri.LocalPath);
+                    }
+                    else
+                    {
+                        var extensions = await UnitOfWork.CategoryFileExtensionRepository
+                            .GetAllAsync(select: fe => fe.Extension, distinct: true);
+
+                        var url = Url!.Replace("\\", "/");
+                        var startIndex = url.LastIndexOf('/') + 1;
+                        var name = url.Substring(startIndex);
+                        var extension = extensions.FirstOrDefault(e => name.Contains(e, StringComparison.Ordinal));
+                        if (!extension.IsNullOrEmpty())
+                        {
+                            var endIndex = url.IndexOf(extension!, startIndex, StringComparison.Ordinal) + extension!.Length;
+                            var length = endIndex - startIndex;
+                            fileName = url.Substring(startIndex, length);
+                        }
+                    }
                 }
 
                 // Get the content length

@@ -22,7 +22,7 @@ public class DownloadFile
 
     [MaxLength(300)] public string? Description { get; set; }
 
-    public DownloadStatus? Status { get; set; }
+    public DownloadFileStatus? Status { get; set; }
 
     public DateTime? LastTryDate { get; set; }
 
@@ -33,10 +33,6 @@ public class DownloadFile
     [Required] public int? CategoryId { get; set; }
 
     [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
-
-    [Required] public bool IsPaused { get; set; } = false;
-
-    [Required] public bool IsError { get; set; } = false;
 
     [Required] public float DownloadProgress { get; set; } = 0.0f;
 

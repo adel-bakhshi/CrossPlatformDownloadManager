@@ -70,7 +70,7 @@
                                     MinWidth="200" />
 
                 <DataGridTextColumn Header="Queue"
-                                    Binding="{Binding QueueName, FallbackValue='', TargetNullValue=''}"
+                                    Binding="{Binding DownloadQueueName, FallbackValue='', TargetNullValue=''}"
                                     MinWidth="150" />
 
                 <DataGridTextColumn Header="Size"

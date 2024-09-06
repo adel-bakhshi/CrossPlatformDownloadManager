@@ -8,7 +8,6 @@ using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using Downloader;
 using PropertyChanged;
-using DownloadStatus = CrossPlatformDownloadManager.Utils.Enums.DownloadStatus;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
@@ -48,17 +47,28 @@ public class DownloadFileService : IDownloadFileService
 
     public async Task LoadFilesAsync()
     {
-        var primaryKeys = DownloadFiles.Select(df => df.Id).ToList();
         var downloadFiles = await _unitOfWork.DownloadFileRepository
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
 
+        var primaryKeys = downloadFiles
+            .Select(df => df.Id)
+            .ToList();
+
+        var exceptDownloadFiles = DownloadFiles
+            .Where(df => !primaryKeys.Contains(df.Id))
+            .ToList();
+
+        foreach (var downloadFile in exceptDownloadFiles)
+            await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: true, reloadData: false);
+
         foreach (var downloadFile in downloadFiles)
         {
-            if (primaryKeys.Contains(downloadFile.Id))
-                continue;
-
+            var oldDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
             var vm = ConvertToDownloadFileViewModel(downloadFile);
-            DownloadFiles.Add(vm);
+            if (oldDownloadFile != null)
+                UpdateDownloadFileViewModel(oldDownloadFile, vm);
+            else
+                DownloadFiles.Add(vm);
         }
     }
 
@@ -82,20 +92,8 @@ public class DownloadFileService : IDownloadFileService
         if (downloadFile == null)
             return;
 
-        DownloadStatus downloadStatus = DownloadStatus.None;
-        if (viewModel.IsCompleted)
-            downloadStatus = DownloadStatus.Completed;
-        else if (viewModel.IsDownloading)
-            downloadStatus = DownloadStatus.Downloading;
-        else if (viewModel.IsPaused)
-            downloadStatus = DownloadStatus.Pause;
-        else if (viewModel.IsError)
-            downloadStatus = DownloadStatus.Error;
-
-        downloadFile.Status = downloadStatus;
+        downloadFile.Status = viewModel.Status;
         downloadFile.LastTryDate = viewModel.LastTryDate;
-        downloadFile.IsPaused = viewModel.IsPaused;
-        downloadFile.IsError = viewModel.IsError;
         downloadFile.DownloadProgress = viewModel.DownloadProgress ?? 0;
         downloadFile.ElapsedTime = viewModel.ElapsedTime;
         downloadFile.TimeLeft = viewModel.TimeLeft;
@@ -245,7 +243,8 @@ public class DownloadFileService : IDownloadFileService
         downloadConfiguration.MaximumBytesPerSecond = speed;
     }
 
-    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile)
+    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile,
+        bool reloadData = true)
     {
         if (downloadFile == null)
             return;
@@ -253,21 +252,37 @@ public class DownloadFileService : IDownloadFileService
         var downloadFileInDb = await _unitOfWork.DownloadFileRepository
             .GetAsync(where: df => df.Id == downloadFile.Id);
 
+        if (downloadFile.IsDownloading)
+            await StopDownloadFileAsync(downloadFile, true);
+
+        var shouldReturn = false;
         if (downloadFileInDb == null)
-            return;
+        {
+            DownloadFiles.Remove(downloadFile);
+            shouldReturn = true;
+        }
 
         if (alsoDeleteFile)
         {
-            var filePath = Path.Combine(downloadFileInDb.SaveLocation, downloadFileInDb.FileName);
-            if (File.Exists(filePath))
-                File.Delete(filePath);
+            var saveLocation = downloadFileInDb?.SaveLocation ?? downloadFile.SaveLocation ?? string.Empty;
+            var fileName = downloadFileInDb?.FileName ?? downloadFile.FileName ?? string.Empty;
+
+            if (!saveLocation.IsNullOrEmpty() && !fileName.IsNullOrEmpty())
+            {
+                var filePath = Path.Combine(saveLocation, fileName);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
         }
 
-        DownloadFiles.Remove(downloadFile);
+        if (shouldReturn)
+            return;
+
         _unitOfWork.DownloadFileRepository.Delete(downloadFileInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadFilesAsync();
+        if (reloadData)
+            await LoadFilesAsync();
     }
 
     #region Helpers
@@ -285,13 +300,10 @@ public class DownloadFileService : IDownloadFileService
             Id = downloadFile.Id,
             FileName = downloadFile.FileName,
             FileType = fileType,
-            QueueId = downloadFile.DownloadQueue?.Id,
-            QueueName = downloadFile.DownloadQueue?.Title ?? string.Empty,
+            DownloadQueueId = downloadFile.DownloadQueue?.Id,
+            DownloadQueueName = downloadFile.DownloadQueue?.Title ?? string.Empty,
             Size = downloadFile.Size == 0 ? null : downloadFile.Size,
-            IsCompleted = Math.Abs(Math.Floor(downloadFile.DownloadProgress) - 100) == 0,
-            IsDownloading = false,
-            IsPaused = downloadFile.IsPaused,
-            IsError = downloadFile.IsError,
+            Status = downloadFile.Status,
             DownloadProgress = downloadFile.DownloadProgress == 0 ? null : downloadFile.DownloadProgress,
             ElapsedTime = downloadFile.ElapsedTime,
             TimeLeft = downloadFile.TimeLeft,
@@ -305,6 +317,26 @@ public class DownloadFileService : IDownloadFileService
         };
 
         return vm;
+    }
+
+    private void UpdateDownloadFileViewModel(DownloadFileViewModel? oldDownloadFile,
+        DownloadFileViewModel? newDownloadFile)
+    {
+        if (oldDownloadFile == null || newDownloadFile == null)
+            return;
+
+        var properties = newDownloadFile
+            .GetType()
+            .GetProperties()
+            .Where(pi => !pi.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && pi.CanWrite)
+            .Select(pi => pi.Name)
+            .ToList();
+
+        foreach (var property in properties)
+        {
+            var value = newDownloadFile.GetType().GetProperty(property)?.GetValue(newDownloadFile);
+            oldDownloadFile.GetType().GetProperty(property)?.SetValue(oldDownloadFile, value);
+        }
     }
 
     private async Task RemoveDownloadOptions(DownloadFileViewModel downloadFile)

@@ -65,20 +65,23 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
 
     public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        bool distinct = false,
         params string[] includeProperties)
     {
-        return await GetEntitiesAsync<T>(where: where, orderBy: orderBy, includeProperties: includeProperties);
+        return await GetEntitiesAsync<T>(where: where, orderBy: orderBy, distinct: distinct,
+            includeProperties: includeProperties);
     }
 
     public async Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Expression<Func<T, TR>>? select = null,
+        bool distinct = false,
         params string[] includeProperties)
     {
         if (select == null)
             return [];
 
-        return await GetEntitiesAsync(where: where, orderBy: orderBy, select: select,
+        return await GetEntitiesAsync(where: where, orderBy: orderBy, select: select, distinct: distinct,
             includeProperties: includeProperties);
     }
 
@@ -104,6 +107,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
     private async Task<List<TR>> GetEntitiesAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Expression<Func<T, TR>>? select = null,
+        bool distinct = false,
         params string[] includeProperties)
     {
         var table = Table.AsQueryable();
@@ -120,11 +124,13 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
                 table = table.Include(includeProperty);
         }
 
-        IQueryable<TR>? result = select != null ? table.Select(select) : table as IQueryable<TR>;
-        if (result == null)
-            return new List<TR>();
+        IQueryable<TR>? selectResult = select != null ? table.Select(select) : table as IQueryable<TR>;
+        List<TR> result = selectResult == null ? [] : await selectResult.ToListAsync();
 
-        return await result.ToListAsync();
+        if (distinct)
+            result = result.Distinct().ToList();
+
+        return result;
     }
 
     #endregion

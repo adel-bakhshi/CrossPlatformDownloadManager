@@ -88,7 +88,7 @@
                                  ItemTemplate="{StaticResource CategoryListItemDataTemplate}"
                                  ItemsPanel="{StaticResource CategoryListItemItemsPanelTemplate}"
                                  SelectionMode="Single"
-                                 SelectedItem="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectedCategoryItem, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+                                 SelectedItem="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectedCategory, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
                     </Expander>
                 </DataTemplate>
             </Setter>

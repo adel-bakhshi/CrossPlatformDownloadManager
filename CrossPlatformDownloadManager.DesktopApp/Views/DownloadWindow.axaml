@@ -63,7 +63,7 @@
                                            SaveLocation="{Binding DownloadFile.SaveLocation}"
                                            FileSize="{Binding DownloadFile.SizeAsString}"
                                            DownloadProgress="{Binding DownloadFile.DownloadProgressAsString}"
-                                           DownloadSize="{Binding DownloadFile.DownloadSizeAsString}"
+                                           DownloadSize="{Binding DownloadFile.DownloadedSizeAsString}"
                                            Speed="{Binding DownloadFile.TransferRateAsString}"
                                            ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
                                            TimeLeft="{Binding DownloadFile.TimeLeftAsString}"

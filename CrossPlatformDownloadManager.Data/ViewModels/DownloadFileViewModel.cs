@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using Downloader;
 using PropertyChanged;
 
@@ -36,18 +37,18 @@ public sealed class DownloadFileViewModel
     public int Id { get; set; }
     public string? FileName { get; set; }
     public string? FileType { get; set; }
-    public int? QueueId { get; set; }
-    public string? QueueName { get; set; }
+    public int? DownloadQueueId { get; set; }
+    public string? DownloadQueueName { get; set; }
     public double? Size { get; set; }
     public string? SizeAsString => Size.ToFileSize();
-    public bool IsCompleted { get; set; }
-    public bool IsDownloading { get; set; }
-    public bool IsPaused { get; set; }
-    public bool IsError { get; set; }
+    public DownloadFileStatus? Status { get; set; }
+    public bool IsCompleted => Status == DownloadFileStatus.Completed;
+    public bool IsDownloading => Status == DownloadFileStatus.Downloading;
+    public bool IsPaused => Status == DownloadFileStatus.Paused;
+    public bool IsError => Status == DownloadFileStatus.Error;
     public float? DownloadProgress { get; set; }
     public string? DownloadProgressAsString => DownloadProgress == null ? string.Empty : $"{DownloadProgress:00.00}%";
-    public double? DownloadSize { get; set; }
-    public string? DownloadSizeAsString => DownloadSize.ToFileSize();
+    public string? DownloadedSizeAsString { get; set; }
     public TimeSpan? ElapsedTime { get; set; }
     public string? ElapsedTimeAsString => ElapsedTime.GetShortTime();
     public TimeSpan? TimeLeft { get; set; }
@@ -132,7 +133,7 @@ public sealed class DownloadFileViewModel
         downloadService.Resume();
         _elapsedTimeTimer?.Start();
         _updateChunksDataTimer?.Start();
-        ChangeDownloadFileState(isDownloading: true);
+        Status = DownloadFileStatus.Downloading;
     }
 
     public void PauseDownloadFile(DownloadService? downloadService)
@@ -143,7 +144,7 @@ public sealed class DownloadFileViewModel
         downloadService.Pause();
         _elapsedTimeTimer?.Stop();
         _updateChunksDataTimer?.Stop();
-        ChangeDownloadFileState(isPaused: true);
+        Status = DownloadFileStatus.Paused;
         UpdateChunksDataTimerOnTick(null, null);
         SaveDownloadPackage(downloadService.Package);
     }
@@ -152,7 +153,7 @@ public sealed class DownloadFileViewModel
 
     private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
     {
-        ChangeDownloadFileState(isDownloading: true);
+        Status = DownloadFileStatus.Downloading;
         LastTryDate = DateTime.Now;
     }
 
@@ -161,15 +162,17 @@ public sealed class DownloadFileViewModel
         // TODO: Show error
         if (e.Error != null && !e.Cancelled)
         {
-            ChangeDownloadFileState(isError: true);
+            Status = DownloadFileStatus.Error;
             return;
         }
 
         if (e.Cancelled)
-            ChangeDownloadFileState(isPaused: true);
+        {
+            Status = DownloadFileStatus.Paused;
+        }
         else
         {
-            ChangeDownloadFileState(isCompleted: true);
+            Status = DownloadFileStatus.Completed;
             var eventArgs = new DownloadFileEventArgs { Id = Id };
             DownloadFinished?.Invoke(this, eventArgs);
         }
@@ -179,7 +182,7 @@ public sealed class DownloadFileViewModel
     {
         DownloadProgress = (float)e.ProgressPercentage;
         TransferRate = (float)e.BytesPerSecondSpeed;
-        DownloadSize = e.ReceivedBytesSize;
+        DownloadedSizeAsString = e.ReceivedBytesSize.ToFileSize();
 
         TimeSpan timeLeft = TimeSpan.Zero;
         var remainSizeToReceive = (Size ?? 0) - e.ReceivedBytesSize;
@@ -201,23 +204,6 @@ public sealed class DownloadFileViewModel
 
         chunkProgress.ReceivedBytesSize = e.ReceivedBytesSize;
         chunkProgress.TotalBytesToReceive = e.TotalBytesToReceive;
-    }
-
-    private void ChangeDownloadFileState(bool isCompleted = false, bool isDownloading = false, bool isPaused = false,
-        bool isError = false)
-    {
-        IsCompleted = IsDownloading = IsPaused = IsError = false;
-        if (!isCompleted && !isDownloading && !isPaused && !isError)
-            return;
-
-        if (isCompleted)
-            IsCompleted = true;
-        else if (isDownloading)
-            IsDownloading = true;
-        else if (isPaused)
-            IsPaused = true;
-        else if (isError)
-            IsError = true;
     }
 
     private void CreateChunksData(int count)

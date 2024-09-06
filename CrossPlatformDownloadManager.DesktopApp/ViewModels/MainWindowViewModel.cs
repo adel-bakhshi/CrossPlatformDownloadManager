@@ -12,6 +12,7 @@ using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -37,30 +38,30 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Selected category
-    private CategoryHeader? _selectedCategory = null;
+    private CategoryHeader? _selectedCategoryHeader = null;
 
-    public CategoryHeader? SelectedCategory
+    public CategoryHeader? SelectedCategoryHeader
     {
-        get => _selectedCategory;
+        get => _selectedCategoryHeader;
         set
         {
-            if (_selectedCategory != null && value != _selectedCategory)
-                SelectedCategoryItem = null;
+            if (_selectedCategoryHeader != null && value != _selectedCategoryHeader)
+                SelectedCategory = null;
 
-            this.RaiseAndSetIfChanged(ref _selectedCategory, value);
+            this.RaiseAndSetIfChanged(ref _selectedCategoryHeader, value);
             FilterDownloadList();
         }
     }
 
     // Selected category item
-    private Category? _selectedCategoryItem = null;
+    private Category? _selectedCategory = null;
 
-    public Category? SelectedCategoryItem
+    public Category? SelectedCategory
     {
-        get => _selectedCategoryItem;
+        get => _selectedCategory;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedCategoryItem, value);
+            this.RaiseAndSetIfChanged(ref _selectedCategory, value);
             FilterDownloadList();
         }
     }
@@ -98,6 +99,18 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedFilesTotalSize, value);
     }
 
+    private string? _searchText;
+
+    public string? SearchText
+    {
+        get => _searchText;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _searchText, value);
+            FilterDownloadList();
+        }
+    }
+
     #endregion
 
     #region Commands
@@ -111,9 +124,9 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand StopDownloadCommand { get; }
 
     public ICommand StopAllDownloadsCommand { get; }
-    
+
     public ICommand DeleteDownloadFilesCommand { get; }
-    
+
     public ICommand DeleteCompletedDownloadFilesCommand { get; }
 
     #endregion
@@ -131,7 +144,7 @@ public class MainWindowViewModel : ViewModelBase
         UnitOfWork.CreateCategoriesAsync().GetAwaiter().GetResult();
 
         LoadCategoriesAsync().GetAwaiter().GetResult();
-        SelectedCategory = Categories.FirstOrDefault();
+        SelectedCategoryHeader = Categories.FirstOrDefault();
         UpdateDownloadList();
 
         TotalSpeed = "0 KB";
@@ -347,7 +360,56 @@ public class MainWindowViewModel : ViewModelBase
 
     private void FilterDownloadList()
     {
-        // TODO: Complete this method
+        // TODO: Show message box
+        try
+        {
+            var downloadFiles = DownloadFileService.DownloadFiles.ToList();
+            if (SelectedCategoryHeader != null)
+            {
+                switch (SelectedCategoryHeader.Title)
+                {
+                    case Constants.UnfinishedCategoryHeaderTitle:
+                    {
+                        downloadFiles = downloadFiles
+                            .Where(df => df.Status != DownloadFileStatus.Completed)
+                            .ToList();
+                        
+                        break;
+                    }
+                    
+                    case Constants.FinishedCategoryHeaderTitle:
+                    {
+                        downloadFiles = downloadFiles
+                            .Where(df => df.Status == DownloadFileStatus.Completed)
+                            .ToList();
+
+                        break;
+                    }
+                }
+            }
+
+            if (SelectedCategory != null)
+            {
+                downloadFiles = downloadFiles
+                    .Where(df => df.CategoryId == SelectedCategory.Id)
+                    .ToList();
+            }
+            
+            if (!SearchText.IsNullOrEmpty())
+            {
+                downloadFiles = downloadFiles
+                    .Where(df => (df.Url?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true)
+                                 || (df.FileName?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true)
+                                 || (df.SaveLocation?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true))
+                    .ToList();
+            }
+
+            DownloadFiles = downloadFiles.ToObservableCollection();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void UpdateDownloadList()
@@ -357,7 +419,7 @@ public class MainWindowViewModel : ViewModelBase
 
     protected override void DownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
     {
-        DownloadFiles = eventArgs.DownloadFiles.ToObservableCollection();
+        FilterDownloadList();
     }
 
     public async Task LoadDownloadFilesAsync()

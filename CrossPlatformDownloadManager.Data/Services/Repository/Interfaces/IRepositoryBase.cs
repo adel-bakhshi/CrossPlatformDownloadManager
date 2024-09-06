@@ -19,11 +19,13 @@ public interface IRepositoryBase<T> where T : class, new()
 
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        bool distinct = false,
         params string[] includeProperties);
 
     Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Expression<Func<T, TR>>? select = null,
+        bool distinct = false,
         params string[] includeProperties);
 
     void Delete(T? entity);

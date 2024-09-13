@@ -10,6 +10,7 @@
     <Color x:Key="MenuBgColor">#1C1420</Color>
     <Color x:Key="MenuItemBgOnHoverColor">#201824</Color>
     <Color x:Key="LoadingColor">#980C0C</Color>
+    <Color x:Key="IconColor">#3A58C2</Color>
 
     <!-- Gradients -->
     <LinearGradientBrush x:Key="SuccessGradientBrush"

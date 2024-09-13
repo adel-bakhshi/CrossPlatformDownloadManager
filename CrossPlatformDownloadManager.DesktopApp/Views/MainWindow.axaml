@@ -209,7 +209,9 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Settings"
                                                  IconData="{DynamicResource Settings}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 Command="{Binding OpenSettingsWindowCommand}"
+                                                 CommandParameter="{Binding $parent[Window]}" />
 
                                 <uc:ActionButton Text="Schedule"
                                                  IconData="{DynamicResource Schedule}"

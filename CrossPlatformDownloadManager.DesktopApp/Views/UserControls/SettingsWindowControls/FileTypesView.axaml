@@ -1,0 +1,155 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.FileTypesView">
+    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+            Padding="15"
+            Background="{DynamicResource SecondaryColor}">
+        <Grid RowDefinitions="Auto, Auto, *">
+            <!-- Title -->
+            <TextBlock Grid.Row="0"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Center"
+                       TextAlignment="Left"
+                       Text="Manage file types"
+                       FontWeight="Bold"
+                       Margin="0, 0, 0, 10" />
+
+            <!-- DataGrid Actions -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*, Auto"
+                  Margin="0, 0, 0, 10">
+                <!-- Search -->
+                <cc:CustomTextBox Grid.Column="0"
+                                  Width="250"
+                                  Background="{DynamicResource PrimaryColor}"
+                                  Watermark="Search file type"
+                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource Search}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                  OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource PrimaryColor}"
+                                  Text="{Binding $parent[local:FileTypesView].SearchText}" />
+
+                <!-- Action buttons -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            HorizontalAlignment="Right">
+                    <Button Classes="button danger"
+                            Height="{Binding $parent[StackPanel].Bounds.Height}"
+                            Width="{Binding $self.Bounds.Height}"
+                            VerticalAlignment="Center"
+                            Command="{Binding $parent[local:FileTypesView].DeleteFileTypeCommand}"
+                            CommandParameter="{Binding #FileTypesDataGrid}">
+                        <PathIcon Data="{DynamicResource XMark}"
+                                  Foreground="{DynamicResource TextColor}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                    </Button>
+
+                    <Button Classes="button warning"
+                            Height="{Binding $parent[StackPanel].Bounds.Height}"
+                            Width="{Binding $self.Bounds.Height}"
+                            VerticalAlignment="Center"
+                            Command="{Binding $parent[local:FileTypesView].EditFileTypeCommand}"
+                            CommandParameter="{Binding #FileTypesDataGrid}">
+                        <PathIcon Data="{DynamicResource Pen}"
+                                  Foreground="{DynamicResource TextColor}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                    </Button>
+
+                    <Button Classes="button success"
+                            Height="{Binding $parent[StackPanel].Bounds.Height}"
+                            Width="{Binding $self.Bounds.Height}"
+                            VerticalAlignment="Center"
+                            Command="{Binding $parent[local:FileTypesView].AddNewFileTypeCommand}"
+                            CommandParameter="{Binding #FileTypesDataGrid}">
+                        <PathIcon Data="{DynamicResource Plus}"
+                                  Foreground="{DynamicResource TextColor}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- File types DataGrid -->
+            <DataGrid Name="FileTypesDataGrid"
+                      Grid.Row="2"
+                      DataContext="{Binding $parent[local:FileTypesView]}"
+                      ItemsSource="{Binding $parent[local:FileTypesView].FileExtensions}"
+                      SelectedItem="{Binding $parent[local:FileTypesView].SelectedFileExtension}"
+                      Classes="chunksDataGrid"
+                      Background="{DynamicResource PrimaryColor}"
+                      SelectionMode="Single">
+                <DataGrid.Styles>
+                    <Style Selector="DataGrid DataGridRow">
+                        <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
+                            <Setter Property="Fill"
+                                    Value="{DynamicResource PrimaryColor}" />
+                            <Setter Property="IsVisible"
+                                    Value="True" />
+                            <Setter Property="Opacity"
+                                    Value="1" />
+                        </Style>
+
+                        <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
+                            <Setter Property="Fill"
+                                    Value="{DynamicResource SecondaryColor}" />
+                            <Setter Property="IsVisible"
+                                    Value="True" />
+                            <Setter Property="Opacity"
+                                    Value="1" />
+                        </Style>
+
+                        <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                            <Setter Property="Fill"
+                                    Value="{DynamicResource SecondaryColor}" />
+                            <Setter Property="Opacity"
+                                    Value="0.5" />
+                        </Style>
+
+                        <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                            <Setter Property="Fill"
+                                    Value="{DynamicResource MenuBgColor}" />
+                        </Style>
+                    </Style>
+                </DataGrid.Styles>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Extension"
+                                        Binding="{Binding Extension}"
+                                        MinWidth="200" />
+
+                    <DataGridTextColumn Header="Alias"
+                                        Binding="{Binding Alias}"
+                                        MinWidth="200" />
+
+                    <DataGridTextColumn Header="Category"
+                                        MinWidth="200"
+                                        Binding="{Binding CategoryTitle}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</UserControl>

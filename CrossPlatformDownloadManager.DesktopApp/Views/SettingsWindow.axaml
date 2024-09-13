@@ -1,0 +1,186 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Add New Category"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+    <!-- Resources -->
+    <Window.Resources>
+        <!-- Converters -->
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Main content -->
+    <Grid RowDefinitions="Auto, *, Auto"
+          Margin="20">
+        <!-- Tabs -->
+        <ListBox Grid.Row="0"
+                 ItemsSource="{Binding TabItems}"
+                 SelectedItem="{Binding SelectedTabItem}">
+            <!-- Styles -->
+            <ListBox.Styles>
+                <Style Selector="ListBox">
+                    <Setter Property="Padding"
+                            Value="0" />
+                    <Setter Property="Margin"
+                            Value="0, 0, 0, 15" />
+                    <Setter Property="MinWidth"
+                            Value="0" />
+                    <Setter Property="MinHeight"
+                            Value="0" />
+                    <Setter Property="BorderThickness"
+                            Value="0" />
+                    <Setter Property="CornerRadius"
+                            Value="0" />
+                    <Setter Property="Background"
+                            Value="{DynamicResource TransparentColor}" />
+                    <Setter Property="SelectionMode"
+                            Value="Single" />
+
+                    <!-- ListBoxItem Styles -->
+                    <Style Selector="^ ListBoxItem">
+                        <Setter Property="Padding"
+                                Value="10" />
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="MinWidth"
+                                Value="0" />
+                        <Setter Property="MinHeight"
+                                Value="0" />
+                        <Setter Property="BorderThickness"
+                                Value="0" />
+                        <Setter Property="CornerRadius"
+                                Value="{DynamicResource DefaultCornerRadius}" />
+                        <Setter Property="Background"
+                                Value="{DynamicResource TransparentColor}" />
+
+                        <!-- ContentPresenter Style -->
+                        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource TransparentColor}" />
+
+                            <Setter Property="Transitions">
+                                <Setter.Value>
+                                    <Transitions>
+                                        <BrushTransition Duration="00:00:00.3"
+                                                         Property="Background" />
+                                    </Transitions>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <!-- Pseudo classes  -->
+                        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+
+                        <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+
+                        <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+
+                        <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+
+                        <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+                    </Style>
+                </Style>
+            </ListBox.Styles>
+
+            <!-- ItemsPanel -->
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <!-- ItemTemplate -->
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type x:String}">
+                    <TextBlock Text="{Binding}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Main content -->
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden">
+            <Grid>
+                <!-- Generals view -->
+                <controls:GeneralsView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals'}" />
+            
+                <!-- FileTypes view -->
+                <controls:FileTypesView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types'}" />
+                
+                <!-- SaveLocations view -->
+                <controls:SaveLocationsView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations'}" />
+                
+                <!-- Downloads view -->
+                <controls:DownloadsView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads'}" />
+                
+                <!-- Proxy view -->
+                <controls:ProxyView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy'}" />
+                
+                <!-- Notifications view -->
+                <controls:NotificationsView
+                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications'}" />
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 15, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Save
+            </Button>
+
+            <Button Name="CancelButton"
+                    Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Cancel
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

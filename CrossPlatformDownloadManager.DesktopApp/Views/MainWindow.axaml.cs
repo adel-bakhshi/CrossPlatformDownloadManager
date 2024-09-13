@@ -12,8 +12,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
-        Loaded += MainWindow_OnLoaded;
     }
 
     private void DownloadFilesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -44,8 +42,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void MainWindow_OnLoaded(object? sender, RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
+        base.OnLoaded(e);
+        
         // TODO: Show message box
         try
         {

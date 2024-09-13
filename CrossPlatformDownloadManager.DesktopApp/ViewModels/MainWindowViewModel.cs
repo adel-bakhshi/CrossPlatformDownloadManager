@@ -128,6 +128,8 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand DeleteDownloadFilesCommand { get; }
 
     public ICommand DeleteCompletedDownloadFilesCommand { get; }
+    
+    public ICommand OpenSettingsWindowCommand { get; }
 
     #endregion
 
@@ -150,13 +152,60 @@ public class MainWindowViewModel : ViewModelBase
         TotalSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
 
-        SelectAllRowsCommand = ReactiveCommand.Create<object>(SelectAllRows);
+        SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
         ResumeDownloadCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownload);
         StopDownloadCommand = ReactiveCommand.Create<DataGrid?>(StopDownload);
         StopAllDownloadsCommand = ReactiveCommand.Create(StopAllDownloads);
         DeleteDownloadFilesCommand = ReactiveCommand.Create<DataGrid?>(DeleteDownloadFiles);
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
+        OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
+    }
+    
+    private void SelectAllRows(DataGrid? dataGrid)
+    {
+        if (dataGrid == null)
+            return;
+        
+        if (DownloadFiles.Count == 0)
+        {
+            SelectAllDownloadFiles = false;
+            dataGrid.SelectedIndex = -1;
+            return;
+        }
+        
+        if (!SelectAllDownloadFiles)
+            dataGrid.SelectedIndex = -1;
+        else
+            dataGrid.SelectAll();
+    }
+
+    private async void AddNewLink()
+    {
+        try
+        {
+            var url = string.Empty;
+            if (_mainWindow.Clipboard != null)
+                url = await _mainWindow.Clipboard.GetTextAsync();
+
+            var urlIsValid = url.CheckUrlValidation();
+            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService)
+            {
+                Url = urlIsValid ? url : null,
+                IsLoadingUrl = urlIsValid
+            };
+
+            var window = new AddDownloadLinkWindow { DataContext = vm };
+            var result = await window.ShowDialog<bool>(_mainWindow);
+            if (!result)
+                return;
+
+            // await LoadCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void ResumeDownload(DataGrid? dataGrid)
@@ -241,8 +290,9 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            foreach (var selectedItem in dataGrid.SelectedItems)
+            for (int i = dataGrid.SelectedItems.Count - 1; i >= 0; i--)
             {
+                var selectedItem = dataGrid.SelectedItems[i];
                 var id = (selectedItem as DownloadFileViewModel)?.Id;
                 var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
                 if (downloadFile == null)
@@ -278,6 +328,24 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async void OpenSettingsWindow(Window? owner)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (owner == null)
+                return;
+
+            var vm = new SettingsWindowViewModel(UnitOfWork, DownloadFileService);
+            var window = new SettingsWindow { DataContext = vm };
+            await window.ShowDialog(owner);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
     private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
     {
         // TODO: Show message box
@@ -293,46 +361,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             Console.WriteLine(ex);
         }
-    }
-
-    private async void AddNewLink()
-    {
-        try
-        {
-            var url = string.Empty;
-            if (_mainWindow.Clipboard != null)
-                url = await _mainWindow.Clipboard.GetTextAsync();
-
-            var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService)
-            {
-                Url = urlIsValid ? url : null,
-                IsLoadingUrl = urlIsValid
-            };
-
-            var window = new AddDownloadLinkWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool>(_mainWindow);
-            if (!result)
-                return;
-
-            // await LoadCategoriesAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private void SelectAllRows(object? obj)
-    {
-        if (obj == null || obj.GetType() != typeof(DataGrid))
-            return;
-
-        var grd = obj as DataGrid;
-        if (!SelectAllDownloadFiles)
-            grd!.SelectedIndex = -1;
-        else
-            grd!.SelectAll();
     }
 
     private async Task LoadCategoriesAsync()
@@ -373,10 +401,10 @@ public class MainWindowViewModel : ViewModelBase
                         downloadFiles = downloadFiles
                             .Where(df => df.Status != DownloadFileStatus.Completed)
                             .ToList();
-                        
+
                         break;
                     }
-                    
+
                     case Constants.FinishedCategoryHeaderTitle:
                     {
                         downloadFiles = downloadFiles
@@ -394,13 +422,14 @@ public class MainWindowViewModel : ViewModelBase
                     .Where(df => df.CategoryId == SelectedCategory.Id)
                     .ToList();
             }
-            
+
             if (!SearchText.IsNullOrEmpty())
             {
                 downloadFiles = downloadFiles
                     .Where(df => (df.Url?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true)
                                  || (df.FileName?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true)
-                                 || (df.SaveLocation?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ?? true))
+                                 || (df.SaveLocation?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) ??
+                                     true))
                     .ToList();
             }
 

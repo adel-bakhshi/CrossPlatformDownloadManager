@@ -1,1 +1,12 @@
 Download files with same name must handle
+Fix titles and text blocks. I mean change this "Start Download On Application Startup" to this "Start download on application startup"
+WindowNotificationManager
+NetCoreAudio
+LibVLCSharp.Avalonia
+CSCore: Windows only, Linux and Mac experimental
+SharpAudio
+https://khalidabuhakmeh.com/play-audio-files-with-net: Audio for mac only
+https://code.google.com/archive/p/portaudiosharp/
+https://github.com/CryShana/CryMedia
+https://gitlab.com/define-private-public/Bassoon
+Beautiful icons: https://www.svgrepo.com/collection/scarlab-solid-oval-interface-icons/1

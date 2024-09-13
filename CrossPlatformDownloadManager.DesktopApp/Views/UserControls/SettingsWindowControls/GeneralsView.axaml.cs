@@ -28,6 +28,15 @@ public partial class GeneralsView : UserControl
         set => SetValue(UseBrowserExtensionProperty, value);
     }
 
+    public static readonly StyledProperty<bool> DarkModeProperty = AvaloniaProperty.Register<GeneralsView, bool>(
+        name: nameof(DarkMode), defaultValue: false, defaultBindingMode: BindingMode.TwoWay);
+
+    public bool DarkMode
+    {
+        get => GetValue(DarkModeProperty);
+        set => SetValue(DarkModeProperty, value);
+    }
+
     #endregion
 
     public GeneralsView()

@@ -2,9 +2,320 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.ProxyView">
-    Welcome to Avalonia!
+    <StackPanel Orientation="Vertical"
+                Spacing="15">
+        <!-- Disable proxy -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Disable proxy"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding $parent[local:ProxyView].DisableProxy}" />
+            </Grid>
+        </Border>
+
+        <!-- Use system proxy settings -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use system proxy settings"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding $parent[local:ProxyView].UseSystemProxySettings}" />
+            </Grid>
+        </Border>
+
+        <!-- Use custom proxy -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <StackPanel Orientation="Vertical"
+                        Spacing="10">
+                <!-- Title -->
+                <Grid ColumnDefinitions="*, Auto"
+                      Margin="0, 0, 0, 10">
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Use custom proxy"
+                               FontWeight="Bold" />
+
+                    <ToggleSwitch Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding $parent[local:ProxyView].UseCustomProxy}" />
+                </Grid>
+
+                <!-- Content -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="10"
+                            HorizontalAlignment="Left">
+                    <!-- Select Box -->
+                    <ListBox ItemsSource="{Binding $parent[local:ProxyView].ProxyTypes}"
+                             SelectedItem="{Binding $parent[local:ProxyView].SelectedProxyType}">
+                        <!-- Styles -->
+                        <ListBox.Styles>
+                            <Style Selector="ListBox">
+                                <Setter Property="Padding"
+                                        Value="0" />
+                                <Setter Property="Margin"
+                                        Value="0" />
+                                <Setter Property="MinWidth"
+                                        Value="0" />
+                                <Setter Property="MinHeight"
+                                        Value="0" />
+                                <Setter Property="BorderThickness"
+                                        Value="0" />
+                                <Setter Property="CornerRadius"
+                                        Value="{DynamicResource DefaultCornerRadius}" />
+                                <Setter Property="ClipToBounds"
+                                        Value="True" />
+                                <Setter Property="Background"
+                                        Value="{DynamicResource TransparentColor}" />
+                                <Setter Property="SelectionMode"
+                                        Value="Single" />
+                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                                        Value="Auto" />
+                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                                        Value="Auto" />
+                                <Setter Property="ScrollViewer.IsScrollChainingEnabled"
+                                        Value="True" />
+
+                                <!-- Disabled style -->
+                                <Style Selector="^:disabled /template/ Border#border">
+                                    <Setter Property="Opacity"
+                                            Value="0.7" />
+                                </Style>
+
+                                <!-- ListBoxItem Styles -->
+                                <Style Selector="^ ListBoxItem">
+                                    <Setter Property="Padding"
+                                            Value="10" />
+                                    <Setter Property="Margin"
+                                            Value="0" />
+                                    <Setter Property="MinWidth"
+                                            Value="80" />
+                                    <Setter Property="MinHeight"
+                                            Value="0" />
+                                    <Setter Property="BorderThickness"
+                                            Value="0" />
+                                    <Setter Property="CornerRadius"
+                                            Value="0" />
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="HorizontalContentAlignment"
+                                            Value="Center" />
+                                    <Setter Property="VerticalContentAlignment"
+                                            Value="Center" />
+                                    <Setter Property="UseLayoutRounding"
+                                            Value="True" />
+
+                                    <!-- ContentPresenter Style -->
+                                    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{Binding $parent[ListBoxItem].Background}" />
+
+                                        <Setter Property="Transitions">
+                                            <Setter.Value>
+                                                <Transitions>
+                                                    <BrushTransition Duration="00:00:00.3"
+                                                                     Property="Background" />
+                                                </Transitions>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+
+                                    <!-- Pseudo classes  -->
+                                    <Style Selector="^:nth-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="CornerRadius"
+                                                Value="8, 0, 0, 8" />
+                                    </Style>
+
+                                    <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="CornerRadius"
+                                                Value="0, 8, 8, 0" />
+                                    </Style>
+                                    
+                                    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{Binding $parent[ListBoxItem].Background}" />
+                                    </Style>
+
+                                    <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                    </Style>
+
+                                    <Style Selector="^:focus /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{Binding $parent[ListBoxItem].Background}" />
+                                    </Style>
+
+                                    <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                    </Style>
+
+                                    <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                    </Style>
+
+                                    <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                    </Style>
+                                </Style>
+                            </Style>
+                        </ListBox.Styles>
+
+                        <!-- ItemsPanel -->
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="0" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <!-- ItemTemplate -->
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type x:String}">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <!-- Host -->
+                        <cc:CustomTextBox Width="260"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          Watermark="Host"
+                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource Server}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          Text="{Binding $parent[local:ProxyView].Host}" />
+
+                        <!-- Port -->
+                        <cc:CustomTextBox Width="90"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          Watermark="Port"
+                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource Ethernet}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          Text="{Binding $parent[local:ProxyView].Port}" />
+                    </StackPanel>
+
+                    <!-- Credentials title -->
+                    <TextBlock HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Credentials (Optional)"
+                               Margin="0, 5, 0, 0" />
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <!-- Username -->
+                        <cc:CustomTextBox Width="175"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          Watermark="Username"
+                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource User}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          Text="{Binding $parent[local:ProxyView].Username}" />
+
+                        <!-- Password -->
+                        <cc:CustomTextBox Width="175"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          Watermark="Password"
+                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource UnlockKeyhole}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          Text="{Binding $parent[local:ProxyView].Password}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </UserControl>

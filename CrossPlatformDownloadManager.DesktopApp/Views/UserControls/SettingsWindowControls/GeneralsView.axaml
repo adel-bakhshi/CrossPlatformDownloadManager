@@ -60,5 +60,31 @@
                               IsChecked="{Binding $parent[local:GeneralsView].UseBrowserExtension}" />
             </Grid>
         </Border>
+        
+        <!-- Dark mode -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Dark mode"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding $parent[local:GeneralsView].DarkMode}" />
+            </Grid>
+        </Border>
     </StackPanel>
 </UserControl>

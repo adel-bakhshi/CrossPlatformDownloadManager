@@ -36,6 +36,22 @@ public class SettingsWindowViewModel : ViewModelBase
         }
     }
 
+    private ObservableCollection<string> _proxyTypes = [];
+
+    public ObservableCollection<string> ProxyTypes
+    {
+        get => _proxyTypes;
+        set => this.RaiseAndSetIfChanged(ref _proxyTypes, value);
+    }
+
+    private string? _selectedProxyType;
+
+    public string? SelectedProxyType
+    {
+        get => _selectedProxyType;
+        set => this.RaiseAndSetIfChanged(ref _selectedProxyType, value);
+    }
+
     #endregion
 
     #region Commands
@@ -49,6 +65,7 @@ public class SettingsWindowViewModel : ViewModelBase
     public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
     {
         GenerateTabs();
+        GenerateProxyTypes();
         
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
         CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
@@ -68,6 +85,19 @@ public class SettingsWindowViewModel : ViewModelBase
         
         TabItems = tabItems.ToObservableCollection();
         SelectedTabItem = TabItems.FirstOrDefault();
+    }
+
+    private void GenerateProxyTypes()
+    {
+        var proxyTypes = new List<string>
+        {
+            "Http",
+            "Https",
+            "Socks 5",
+        };
+
+        ProxyTypes = proxyTypes.ToObservableCollection();
+        SelectedProxyType = ProxyTypes.FirstOrDefault();
     }
 
     private void Save(Window? owner)

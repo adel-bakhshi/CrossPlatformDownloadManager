@@ -37,6 +37,7 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomComboBox.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomNumericUpDown.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomSelectBox.axaml" />
     </Application.Styles>
 
     <Application.Resources>

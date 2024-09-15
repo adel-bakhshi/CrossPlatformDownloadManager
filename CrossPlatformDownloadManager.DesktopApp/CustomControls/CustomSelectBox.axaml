@@ -1,0 +1,153 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.CustomControls">
+    <Design.PreviewWith>
+        <controls:CustomSelectBox />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|CustomSelectBox">
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="MinWidth"
+                Value="0" />
+        <Setter Property="MinHeight"
+                Value="0" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="ClipToBounds"
+                Value="True" />
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="SelectionMode"
+                Value="Single" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Auto" />
+        <Setter Property="ScrollViewer.IsScrollChainingEnabled"
+                Value="True" />
+
+        <!-- ItemsPanel -->
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="{Binding $parent[controls:CustomSelectBox].ItemsSpacing}" />
+            </ItemsPanelTemplate>
+        </Setter>
+
+        <!-- Disabled style -->
+        <Style Selector="^:disabled /template/ Border#border">
+            <Setter Property="Opacity"
+                    Value="0.7" />
+        </Style>
+
+        <!-- ListBoxItem Styles -->
+        <Style Selector="^ ListBoxItem">
+            <Setter Property="Padding"
+                    Value="{Binding $parent[controls:CustomSelectBox].ItemsPadding}" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="MinWidth"
+                    Value="{Binding $parent[controls:CustomSelectBox].ItemsMinWidth}" />
+            <Setter Property="MinHeight"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{Binding $parent[controls:CustomSelectBox].ItemsBackground}" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Center" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+            <Setter Property="UseLayoutRounding"
+                    Value="True" />
+
+            <!-- ContentPresenter Style -->
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[ListBoxItem].Background}" />
+
+                <!-- Transitions -->
+                <!-- <Setter Property="Transitions"> -->
+                <!--     <Setter.Value> -->
+                <!--         <Transitions> -->
+                <!--             <BrushTransition Duration="00:00:00.3" -->
+                <!--                              Property="Background" /> -->
+                <!--         </Transitions> -->
+                <!--     </Setter.Value> -->
+                <!-- </Setter> -->
+            </Style>
+
+            <!-- Pseudo classes  -->
+            <Style Selector="^:nth-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="CornerRadius"
+                        Value="8, 0, 0, 8" />
+            </Style>
+
+            <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="CornerRadius"
+                        Value="0, 8, 8, 0" />
+            </Style>
+
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnHoverItemsBackground}" />
+            </Style>
+
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnSelectItemsBackground}" />
+            </Style>
+
+            <Style Selector="^:focus /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnFocusItemsBackground}" />
+            </Style>
+
+            <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnSelectItemsBackground}" />
+            </Style>
+
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnSelectItemsBackground}" />
+            </Style>
+
+            <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{Binding $parent[controls:CustomSelectBox].OnSelectItemsBackground}" />
+            </Style>
+        </Style>
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="border"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <ScrollViewer Name="PART_ScrollViewer"
+                                  AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                                  BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                                  Background="{TemplateBinding Background}"
+                                  HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                                  IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                                  IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                                  VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                                  VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                                  HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}">
+                        <ItemsPresenter Name="PART_ItemsPresenter"
+                                        Margin="{TemplateBinding Padding}"
+                                        ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

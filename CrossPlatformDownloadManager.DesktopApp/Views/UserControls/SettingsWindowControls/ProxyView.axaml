@@ -96,139 +96,18 @@
                             Spacing="10"
                             HorizontalAlignment="Left">
                     <!-- Select Box -->
-                    <ListBox ItemsSource="{Binding $parent[local:ProxyView].ProxyTypes}"
-                             SelectedItem="{Binding $parent[local:ProxyView].SelectedProxyType}">
-                        <!-- Styles -->
-                        <ListBox.Styles>
-                            <Style Selector="ListBox">
-                                <Setter Property="Padding"
-                                        Value="0" />
-                                <Setter Property="Margin"
-                                        Value="0" />
-                                <Setter Property="MinWidth"
-                                        Value="0" />
-                                <Setter Property="MinHeight"
-                                        Value="0" />
-                                <Setter Property="BorderThickness"
-                                        Value="0" />
-                                <Setter Property="CornerRadius"
-                                        Value="{DynamicResource DefaultCornerRadius}" />
-                                <Setter Property="ClipToBounds"
-                                        Value="True" />
-                                <Setter Property="Background"
-                                        Value="{DynamicResource TransparentColor}" />
-                                <Setter Property="SelectionMode"
-                                        Value="Single" />
-                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
-                                        Value="Auto" />
-                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
-                                        Value="Auto" />
-                                <Setter Property="ScrollViewer.IsScrollChainingEnabled"
-                                        Value="True" />
-
-                                <!-- Disabled style -->
-                                <Style Selector="^:disabled /template/ Border#border">
-                                    <Setter Property="Opacity"
-                                            Value="0.7" />
-                                </Style>
-
-                                <!-- ListBoxItem Styles -->
-                                <Style Selector="^ ListBoxItem">
-                                    <Setter Property="Padding"
-                                            Value="10" />
-                                    <Setter Property="Margin"
-                                            Value="0" />
-                                    <Setter Property="MinWidth"
-                                            Value="80" />
-                                    <Setter Property="MinHeight"
-                                            Value="0" />
-                                    <Setter Property="BorderThickness"
-                                            Value="0" />
-                                    <Setter Property="CornerRadius"
-                                            Value="0" />
-                                    <Setter Property="Background"
-                                            Value="{DynamicResource PrimaryColor}" />
-                                    <Setter Property="HorizontalContentAlignment"
-                                            Value="Center" />
-                                    <Setter Property="VerticalContentAlignment"
-                                            Value="Center" />
-                                    <Setter Property="UseLayoutRounding"
-                                            Value="True" />
-
-                                    <!-- ContentPresenter Style -->
-                                    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{Binding $parent[ListBoxItem].Background}" />
-
-                                        <Setter Property="Transitions">
-                                            <Setter.Value>
-                                                <Transitions>
-                                                    <BrushTransition Duration="00:00:00.3"
-                                                                     Property="Background" />
-                                                </Transitions>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-
-                                    <!-- Pseudo classes  -->
-                                    <Style Selector="^:nth-child(1) /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="CornerRadius"
-                                                Value="8, 0, 0, 8" />
-                                    </Style>
-
-                                    <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="CornerRadius"
-                                                Value="0, 8, 8, 0" />
-                                    </Style>
-                                    
-                                    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{Binding $parent[ListBoxItem].Background}" />
-                                    </Style>
-
-                                    <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SuccessGradientBrush}" />
-                                    </Style>
-
-                                    <Style Selector="^:focus /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{Binding $parent[ListBoxItem].Background}" />
-                                    </Style>
-
-                                    <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SuccessGradientBrush}" />
-                                    </Style>
-
-                                    <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SuccessGradientBrush}" />
-                                    </Style>
-
-                                    <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SuccessGradientBrush}" />
-                                    </Style>
-                                </Style>
-                            </Style>
-                        </ListBox.Styles>
-
-                        <!-- ItemsPanel -->
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"
-                                            Spacing="0" />
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-
-                        <!-- ItemTemplate -->
-                        <ListBox.ItemTemplate>
+                    <cc:CustomSelectBox ItemsSource="{Binding $parent[local:ProxyView].ProxyTypes}"
+                                        SelectedItem="{Binding $parent[local:ProxyView].SelectedProxyType}"
+                                        ItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnHoverItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnFocusItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}">
+                        <cc:CustomSelectBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type x:String}">
                                 <TextBlock Text="{Binding}" />
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                        </cc:CustomSelectBox.ItemTemplate>
+                    </cc:CustomSelectBox>
 
                     <StackPanel Orientation="Horizontal"
                                 Spacing="10">

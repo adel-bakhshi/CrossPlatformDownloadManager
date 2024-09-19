@@ -2,11 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.NotificationsView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.NotificationsView"
+             x:DataType="vm:NotificationsViewModel">
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Duplicate download link action -->
@@ -45,7 +46,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].DownloadComplete}" />
+                                      IsChecked="{Binding DownloadComplete}" />
                     </Grid>
 
                     <!-- Download stopped -->
@@ -66,7 +67,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].DownloadStopped}" />
+                                      IsChecked="{Binding DownloadStopped}" />
                     </Grid>
 
                     <!-- Download failed -->
@@ -87,7 +88,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].DownloadFailed}" />
+                                      IsChecked="{Binding DownloadFailed}" />
                     </Grid>
 
                     <!-- Queue started -->
@@ -108,7 +109,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].QueueStarted}" />
+                                      IsChecked="{Binding QueueStarted}" />
                     </Grid>
 
                     <!-- Queue stopped -->
@@ -129,7 +130,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].QueueStopped}" />
+                                      IsChecked="{Binding QueueStopped}" />
                     </Grid>
 
                     <!-- Queue finished -->
@@ -150,7 +151,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding $parent[local:NotificationsView].QueueFinished}" />
+                                      IsChecked="{Binding QueueFinished}" />
                     </Grid>
                 </StackPanel>
             </Grid>
@@ -178,7 +179,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:NotificationsView].UseSystemNotifications}" />
+                              IsChecked="{Binding UseSystemNotifications}" />
             </Grid>
         </Border>
     </StackPanel>

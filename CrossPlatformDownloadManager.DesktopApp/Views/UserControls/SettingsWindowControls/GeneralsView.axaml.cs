@@ -1,44 +1,10 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 
-public partial class GeneralsView : UserControl
+public partial class GeneralsView : MyUserControlBase<GeneralsViewModel>
 {
-    #region Properties
-
-    public static readonly StyledProperty<bool> StartOnSystemStartupProperty =
-        AvaloniaProperty.Register<GeneralsView, bool>(
-            name: nameof(StartOnSystemStartup), defaultValue: false, defaultBindingMode: BindingMode.TwoWay);
-
-    public bool StartOnSystemStartup
-    {
-        get => GetValue(StartOnSystemStartupProperty);
-        set => SetValue(StartOnSystemStartupProperty, value);
-    }
-
-    public static readonly StyledProperty<bool> UseBrowserExtensionProperty =
-        AvaloniaProperty.Register<GeneralsView, bool>(
-            name: nameof(UseBrowserExtension), defaultValue: false, defaultBindingMode: BindingMode.TwoWay);
-
-    public bool UseBrowserExtension
-    {
-        get => GetValue(UseBrowserExtensionProperty);
-        set => SetValue(UseBrowserExtensionProperty, value);
-    }
-
-    public static readonly StyledProperty<bool> DarkModeProperty = AvaloniaProperty.Register<GeneralsView, bool>(
-        name: nameof(DarkMode), defaultValue: false, defaultBindingMode: BindingMode.TwoWay);
-
-    public bool DarkMode
-    {
-        get => GetValue(DarkModeProperty);
-        set => SetValue(DarkModeProperty, value);
-    }
-
-    #endregion
-
     public GeneralsView()
     {
         InitializeComponent();

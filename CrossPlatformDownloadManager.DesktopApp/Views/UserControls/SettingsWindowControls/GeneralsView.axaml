@@ -2,11 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.GeneralsView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.GeneralsView"
+             x:DataType="vm:GeneralsViewModel">
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Start on system startup -->
@@ -31,7 +32,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:GeneralsView].StartOnSystemStartup}" />
+                              IsChecked="{Binding StartOnSystemStartup}" />
             </Grid>
         </Border>
         
@@ -57,7 +58,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:GeneralsView].UseBrowserExtension}" />
+                              IsChecked="{Binding UseBrowserExtension}" />
             </Grid>
         </Border>
         
@@ -83,7 +84,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:GeneralsView].DarkMode}" />
+                              IsChecked="{Binding DarkMode}" />
             </Grid>
         </Border>
     </StackPanel>

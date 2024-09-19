@@ -3,12 +3,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.SaveLocationsView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.SaveLocationsView"
+             x:DataType="vm:SaveLocationsViewModel">
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Manage categories -->
@@ -37,8 +38,8 @@
                                        IconColor="{DynamicResource IconColor}"
                                        IconSize="{DynamicResource SmallIconSize}"
                                        BorderThickness="0"
-                                       SelectedItem="{Binding $parent[local:SaveLocationsView].SelectedCategory}"
-                                       ItemsSource="{Binding $parent[local:SaveLocationsView].Categories}"
+                                       SelectedItem="{Binding SelectedCategory}"
+                                       ItemsSource="{Binding Categories}"
                                        MaxDropDownHeight="300"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Left"
@@ -59,7 +60,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].DeleteCategoryCommand}"
+                                Command="{Binding DeleteCategoryCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource XMark}"
                                       Foreground="{DynamicResource TextColor}"
@@ -73,7 +74,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].EditCategoryCommand}"
+                                Command="{Binding EditCategoryCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource Pen}"
                                       Foreground="{DynamicResource TextColor}"
@@ -87,7 +88,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].AddNewCategoryCommand}"
+                                Command="{Binding AddNewCategoryCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource Plus}"
                                       Foreground="{DynamicResource TextColor}"
@@ -136,7 +137,7 @@
                                       OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                       BorderThickness="1"
                                       BorderBrush="{DynamicResource PrimaryColor}"
-                                      Text="{Binding $parent[local:SaveLocationsView].SearchText}" />
+                                      Text="{Binding SearchText}" />
 
                     <!-- Action buttons -->
                     <StackPanel Grid.Column="1"
@@ -147,7 +148,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].DeleteFileTypeCommand}"
+                                Command="{Binding DeleteFileTypeCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource XMark}"
                                       Foreground="{DynamicResource TextColor}"
@@ -161,7 +162,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].EditFileTypeCommand}"
+                                Command="{Binding EditFileTypeCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource Pen}"
                                       Foreground="{DynamicResource TextColor}"
@@ -175,7 +176,7 @@
                                 Height="{Binding $parent[StackPanel].Bounds.Height}"
                                 Width="{Binding $self.Bounds.Height}"
                                 VerticalAlignment="Center"
-                                Command="{Binding $parent[local:SaveLocationsView].AddNewFileTypeCommand}"
+                                Command="{Binding AddNewFileTypeCommand}"
                                 CommandParameter="{Binding #FileTypesDataGrid}">
                             <PathIcon Data="{DynamicResource Plus}"
                                       Foreground="{DynamicResource TextColor}"
@@ -190,9 +191,8 @@
                 <!-- File types DataGrid -->
                 <DataGrid Name="FileTypesDataGrid"
                           Grid.Row="2"
-                          DataContext="{Binding $parent[local:SaveLocationsView]}"
-                          ItemsSource="{Binding $parent[local:SaveLocationsView].FileExtensions}"
-                          SelectedItem="{Binding $parent[local:SaveLocationsView].SelectedFileExtension}"
+                          ItemsSource="{Binding FileExtensions}"
+                          SelectedItem="{Binding SelectedFileExtension}"
                           Classes="chunksDataGrid"
                           Background="{DynamicResource PrimaryColor}"
                           SelectionMode="Single"
@@ -276,7 +276,7 @@
                                       OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                       BorderThickness="1"
                                       BorderBrush="{DynamicResource PrimaryColor}"
-                                      Text="{Binding $parent[local:SaveLocationsView].SaveLocation}"
+                                      Text="{Binding SaveLocation}"
                                       IsReadOnly="True" />
 
                     <Button Name="BrowseButton"

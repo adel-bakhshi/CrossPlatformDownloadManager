@@ -3,11 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.ProxyView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.ProxyView"
+             x:DataType="vm:ProxyViewModel">
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Disable proxy -->
@@ -32,7 +33,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:ProxyView].DisableProxy}" />
+                              IsChecked="{Binding DisableProxy}" />
             </Grid>
         </Border>
 
@@ -58,7 +59,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:ProxyView].UseSystemProxySettings}" />
+                              IsChecked="{Binding UseSystemProxySettings}" />
             </Grid>
         </Border>
 
@@ -88,7 +89,7 @@
                                   HorizontalContentAlignment="Right"
                                   VerticalContentAlignment="Center"
                                   Width="40"
-                                  IsChecked="{Binding $parent[local:ProxyView].UseCustomProxy}" />
+                                  IsChecked="{Binding UseCustomProxy}" />
                 </Grid>
 
                 <!-- Content -->
@@ -96,8 +97,8 @@
                             Spacing="10"
                             HorizontalAlignment="Left">
                     <!-- Select Box -->
-                    <cc:CustomSelectBox ItemsSource="{Binding $parent[local:ProxyView].ProxyTypes}"
-                                        SelectedItem="{Binding $parent[local:ProxyView].SelectedProxyType}"
+                    <cc:CustomSelectBox ItemsSource="{Binding ProxyTypes}"
+                                        SelectedItem="{Binding SelectedProxyType}"
                                         ItemsBackground="{DynamicResource PrimaryColor}"
                                         OnHoverItemsBackground="{DynamicResource PrimaryColor}"
                                         OnFocusItemsBackground="{DynamicResource PrimaryColor}"
@@ -127,7 +128,7 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding $parent[local:ProxyView].Host}" />
+                                          Text="{Binding Host}" />
 
                         <!-- Port -->
                         <cc:CustomTextBox Width="90"
@@ -145,7 +146,7 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding $parent[local:ProxyView].Port}" />
+                                          Text="{Binding Port}" />
                     </StackPanel>
 
                     <!-- Credentials title -->
@@ -173,7 +174,7 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding $parent[local:ProxyView].Username}" />
+                                          Text="{Binding Username}" />
 
                         <!-- Password -->
                         <cc:CustomTextBox Width="175"
@@ -191,7 +192,7 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding $parent[local:ProxyView].Password}" />
+                                          Text="{Binding Password}" />
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

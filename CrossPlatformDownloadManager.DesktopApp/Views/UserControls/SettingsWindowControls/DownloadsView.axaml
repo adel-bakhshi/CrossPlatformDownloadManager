@@ -3,11 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.DownloadsView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.DownloadsView"
+             x:DataType="vm:DownloadsViewModel">
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Show start download dialog -->
@@ -32,7 +33,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:DownloadsView].ShowStartDownloadDialog}" />
+                              IsChecked="{Binding ShowStartDownloadDialog}" />
             </Grid>
         </Border>
 
@@ -58,7 +59,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding $parent[local:DownloadsView].ShowCompleteDownloadDialog}" />
+                              IsChecked="{Binding ShowCompleteDownloadDialog}" />
             </Grid>
         </Border>
 
@@ -85,8 +86,8 @@
                                    IconColor="{DynamicResource IconColor}"
                                    IconSize="{DynamicResource SmallIconSize}"
                                    BorderThickness="0"
-                                   SelectedItem="{Binding $parent[local:DownloadsView].SelectedDuplicateDownloadLinkAction}"
-                                   ItemsSource="{Binding $parent[local:DownloadsView].DuplicateDownloadLinkActions}"
+                                   SelectedItem="{Binding SelectedDuplicateDownloadLinkAction}"
+                                   ItemsSource="{Binding DuplicateDownloadLinkActions}"
                                    MaxDropDownHeight="300"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Stretch">
@@ -122,8 +123,8 @@
                                    IconColor="{DynamicResource IconColor}"
                                    IconSize="{DynamicResource SmallIconSize}"
                                    BorderThickness="0"
-                                   SelectedItem="{Binding $parent[local:DownloadsView].SelectedDuplicateDownloadLinkAction}"
-                                   ItemsSource="{Binding $parent[local:DownloadsView].DuplicateDownloadLinkActions}"
+                                   SelectedItem="{Binding SelectedDuplicateDownloadLinkAction}"
+                                   ItemsSource="{Binding DuplicateDownloadLinkActions}"
                                    MaxDropDownHeight="300"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Stretch">

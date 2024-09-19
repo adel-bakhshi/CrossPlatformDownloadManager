@@ -139,29 +139,33 @@
             <Grid>
                 <!-- Generals view -->
                 <controls:GeneralsView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals'}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).GeneralsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                 <!-- FileTypes view -->
                 <controls:FileTypesView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types'}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).FileTypesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                 <!-- SaveLocations view -->
                 <controls:SaveLocationsView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations'}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SaveLocationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                 <!-- Downloads view -->
                 <controls:DownloadsView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads'}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).DownloadsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                 <!-- Proxy view -->
                 <controls:ProxyView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy'}"
-                    ProxyTypes="{Binding ProxyTypes}"
-                    SelectedProxyType="{Binding SelectedProxyType}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).ProxyViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                 <!-- Notifications view -->
                 <controls:NotificationsView
-                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications'}" />
+                    IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications', FallbackValue=False, TargetNullValue=False}"
+                    DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).NotificationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
             </Grid>
         </ScrollViewer>
 

@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
@@ -27,29 +28,55 @@ public class SettingsWindowViewModel : ViewModelBase
     public string? SelectedTabItem
     {
         get => _selectedTabItem;
-        set
-        {
-            var oldValue = SelectedTabItem;
-            var newValue = this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
-            if (!newValue.IsNullOrEmpty() && !newValue!.Equals(oldValue))
-                ChangeView();
-        }
+        set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
     }
 
-    private ObservableCollection<string> _proxyTypes = [];
+    private GeneralsViewModel? _generalsViewModel;
 
-    public ObservableCollection<string> ProxyTypes
+    public GeneralsViewModel? GeneralsViewModel
     {
-        get => _proxyTypes;
-        set => this.RaiseAndSetIfChanged(ref _proxyTypes, value);
+        get => _generalsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
     }
 
-    private string? _selectedProxyType;
+    private FileTypesViewModel? _fileTypesViewModel;
 
-    public string? SelectedProxyType
+    public FileTypesViewModel? FileTypesViewModel
     {
-        get => _selectedProxyType;
-        set => this.RaiseAndSetIfChanged(ref _selectedProxyType, value);
+        get => _fileTypesViewModel;
+        set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
+    }
+
+    private SaveLocationsViewModel? _saveLocationsViewModel;
+
+    public SaveLocationsViewModel? SaveLocationsViewModel
+    {
+        get => _saveLocationsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
+    }
+
+    private DownloadsViewModel? _downloadsViewModel;
+
+    public DownloadsViewModel? DownloadsViewModel
+    {
+        get => _downloadsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);   
+    }
+
+    private ProxyViewModel? _proxyViewModel;
+
+    public ProxyViewModel? ProxyViewModel
+    {
+        get => _proxyViewModel;
+        set => this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
+    }
+
+    private NotificationsViewModel? _notificationsViewModel;
+
+    public NotificationsViewModel? NotificationsViewModel
+    {
+        get => _notificationsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _notificationsViewModel, value);
     }
 
     #endregion
@@ -57,16 +84,23 @@ public class SettingsWindowViewModel : ViewModelBase
     #region Commands
 
     public ICommand SaveCommand { get; }
-    
+
     public ICommand CancelCommand { get; }
 
     #endregion
-    
-    public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
+
+    public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork,
+        downloadFileService)
     {
-        GenerateTabs();
-        GenerateProxyTypes();
+        GeneralsViewModel = new GeneralsViewModel(unitOfWork, downloadFileService);
+        FileTypesViewModel = new FileTypesViewModel(unitOfWork, downloadFileService);
+        SaveLocationsViewModel= new SaveLocationsViewModel(unitOfWork, downloadFileService);
+        DownloadsViewModel = new DownloadsViewModel(unitOfWork, downloadFileService);
+        ProxyViewModel = new ProxyViewModel(unitOfWork, downloadFileService);
+        NotificationsViewModel = new NotificationsViewModel(unitOfWork, downloadFileService);
         
+        GenerateTabs();
+
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
         CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
     }
@@ -82,22 +116,9 @@ public class SettingsWindowViewModel : ViewModelBase
             "Proxy",
             "Notifications",
         };
-        
+
         TabItems = tabItems.ToObservableCollection();
         SelectedTabItem = TabItems.FirstOrDefault();
-    }
-
-    private void GenerateProxyTypes()
-    {
-        var proxyTypes = new List<string>
-        {
-            "Http",
-            "Https",
-            "Socks 5",
-        };
-
-        ProxyTypes = proxyTypes.ToObservableCollection();
-        SelectedProxyType = ProxyTypes.FirstOrDefault();
     }
 
     private void Save(Window? owner)
@@ -108,10 +129,5 @@ public class SettingsWindowViewModel : ViewModelBase
     private void Cancel(Window? owner)
     {
         throw new System.NotImplementedException();
-    }
-
-    private void ChangeView()
-    {
-        
     }
 }

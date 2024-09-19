@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
@@ -12,7 +14,7 @@ using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
-public class AddNewCategoryWindowViewModel : ViewModelBase
+public class AddEditCategoryWindowViewModel : ViewModelBase
 {
     #region Properties
 
@@ -64,6 +66,32 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _saveDirectory, value);
     }
 
+    public string Title => IsEditMode ? "CDM - Edit Category" : "CDM - Add New Category";
+
+    private bool _isEditMode;
+
+    public bool IsEditMode
+    {
+        get => _isEditMode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isEditMode, value);
+            this.RaisePropertyChanged(nameof(Title));
+        }
+    }
+
+    private int? _categoryId;
+
+    public int? CategoryId
+    {
+        get => _categoryId;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _categoryId, value);
+            LoadCategoryAsync().GetAwaiter();
+        }
+    }
+
     #endregion
 
     #region Commands
@@ -80,12 +108,12 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddNewCategoryWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(
-        unitOfWork, downloadFileService)
+    public AddEditCategoryWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
+        IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
     {
-        SaveDirectory = GetGeneralDirectoryAsync().Result;
+        LoadCategoryAsync().GetAwaiter();
 
-        AddNewFileExtensionCommand = ReactiveCommand.Create(AddNewFileExtension);
+        AddNewFileExtensionCommand = ReactiveCommand.Create<Window?>(AddNewFileExtension);
         DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtension?>(DeleteFileExtension);
         AddNewSiteAddressCommand = ReactiveCommand.Create(AddNewSiteAddress);
         DeleteSiteAddressCommand = ReactiveCommand.Create<string?>(DeleteSiteAddress);
@@ -94,22 +122,48 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
 
     private async void Save(Window? owner)
     {
+        // TODO: Show message box
         try
         {
-            // TODO: Show message box
             if (owner == null || CategoryTitle.IsNullOrEmpty() || SaveDirectory.IsNullOrEmpty())
                 return;
 
-            var category = new Category
-            {
-                Icon = Constants.NewCategoryIcon,
-                Title = CategoryTitle!.Trim(),
-                AutoAddLinkFromSites = SiteAddresses.Any() ? SiteAddresses.ConvertToJson() : null,
-                IsDefault = false,
-            };
+            CategoryTitle = CategoryTitle!.Trim();
+            SaveDirectory = SaveDirectory!.Trim();
 
-            await UnitOfWork.CategoryRepository.AddAsync(category);
+            Category? category = null;
+            if (IsEditMode)
+            {
+                category = await UnitOfWork.CategoryRepository
+                    .GetAsync(where: c => c.Id == CategoryId,
+                        includeProperties: "FileExtensions");
+
+                if (category == null)
+                    return;
+
+                category.Title = CategoryTitle!;
+                category.AutoAddLinkFromSites = SiteAddresses.Any() ? SiteAddresses.ConvertToJson() : null;
+            }
+            else
+            {
+                category = new Category
+                {
+                    Icon = Constants.NewCategoryIcon,
+                    Title = CategoryTitle!,
+                    AutoAddLinkFromSites = SiteAddresses.Any() ? SiteAddresses.ConvertToJson() : null,
+                    IsDefault = false,
+                };
+
+                await UnitOfWork.CategoryRepository.AddAsync(category);
+            }
+
             await UnitOfWork.SaveAsync();
+
+            if (IsEditMode && category.FileExtensions.Count > 0)
+            {
+                UnitOfWork.CategoryFileExtensionRepository.DeleteAll(category.FileExtensions);
+                await UnitOfWork.SaveAsync();
+            }
 
             var fileExtensions = FileExtensions
                 .Select(fe =>
@@ -123,13 +177,28 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
             await UnitOfWork.CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
             await UnitOfWork.SaveAsync();
 
-            var saveDirectory = new CategorySaveDirectory
+            CategorySaveDirectory? saveDirectory = null;
+            if (IsEditMode)
             {
-                SaveDirectory = SaveDirectory!.Trim(),
-                CategoryId = category.Id,
-            };
+                saveDirectory = await UnitOfWork.CategorySaveDirectoryRepository
+                    .GetAsync(where: cs => cs.CategoryId == category.Id);
 
-            await UnitOfWork.CategorySaveDirectoryRepository.AddAsync(saveDirectory);
+                if (saveDirectory == null)
+                    return;
+
+                saveDirectory.SaveDirectory = SaveDirectory!;
+            }
+            else
+            {
+                saveDirectory = new CategorySaveDirectory
+                {
+                    SaveDirectory = SaveDirectory!,
+                    CategoryId = category.Id,
+                };
+
+                await UnitOfWork.CategorySaveDirectoryRepository.AddAsync(saveDirectory);
+            }
+
             await UnitOfWork.SaveAsync();
 
             category.CategorySaveDirectoryId = saveDirectory.Id;
@@ -143,20 +212,46 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task<string?> GetGeneralDirectoryAsync()
+    private async Task LoadCategoryAsync()
     {
+        // TODO: Show message box
         try
         {
-            var saveDirectory = (await UnitOfWork.CategorySaveDirectoryRepository
-                    .GetAsync(where: sd => sd.CategoryId == null))?
-                .SaveDirectory;
+            if (CategoryId != null)
+            {
+                var category = await UnitOfWork.CategoryRepository
+                    .GetAsync(where: c => c.Id == CategoryId,
+                        includeProperties: ["CategorySaveDirectory"]);
 
-            return saveDirectory;
+                if (category == null)
+                    return;
+
+                CategoryTitle = category.Title;
+                FileExtensions = category.FileExtensions.ToObservableCollection();
+
+                var json = category.AutoAddLinkFromSites;
+                SiteAddresses = json.IsNullOrEmpty()
+                    ? []
+                    : json!.ConvertFromJson<List<string>>().ToObservableCollection();
+
+                if (category.CategorySaveDirectory != null)
+                    SaveDirectory = category.CategorySaveDirectory.SaveDirectory;
+            }
+            else
+            {
+                var generalCategory = await UnitOfWork.CategoryRepository
+                    .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle,
+                        includeProperties: ["CategorySaveDirectory"]);
+
+                if (generalCategory?.CategorySaveDirectory == null)
+                    return;
+
+                SaveDirectory = generalCategory.CategorySaveDirectory.SaveDirectory;
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return string.Empty;
         }
     }
 
@@ -185,7 +280,7 @@ public class AddNewCategoryWindowViewModel : ViewModelBase
         SiteAddress = string.Empty;
     }
 
-    private void AddNewFileExtension()
+    private void AddNewFileExtension(Window? owner)
     {
         if (NewFileExtension.Extension.IsNullOrEmpty() || NewFileExtension.Alias.IsNullOrEmpty())
             return;

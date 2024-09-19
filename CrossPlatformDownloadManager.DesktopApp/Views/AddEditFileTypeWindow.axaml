@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditFileTypeWindow"
+        x:DataType="vm:AddEditFileTypeWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="{Binding Title}"
+        Width="450"
+        Height="200"
+        MinWidth="450"
+        MinHeight="200"
+        MaxWidth="450"
+        MaxHeight="200"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+    <Grid RowDefinitions="*, Auto"
+          Margin="20">
+        <StackPanel Grid.Row="0"
+                    Orientation="Vertical"
+                    Spacing="20">
+            <Grid ColumnDefinitions="*, Auto, *">
+                <!-- Extension -->
+                <cc:CustomTextBox Grid.Column="0"
+                                  Background="{DynamicResource SecondaryColor}"
+                                  Watermark="Extension"
+                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource FileCircleQuestion}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                                  OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  Text="{Binding Extension}" />
+
+                <!-- Separator -->
+                <Viewbox Grid.Column="1"
+                         Width="20" />
+
+                <!-- Alias -->
+                <cc:CustomTextBox Grid.Column="2"
+                                  Background="{DynamicResource SecondaryColor}"
+                                  Watermark="Alias"
+                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource FileCircleCheck}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                                  OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  Text="{Binding Alias}" />
+            </Grid>
+            
+            <!-- Categories -->
+            <cc:CustomComboBox PlaceholderText="Category"
+                               Background="{DynamicResource SecondaryColor}"
+                               ToggleIconColor="{DynamicResource TertiaryColor}"
+                               OnHoverToggleIconColor="{DynamicResource TextColor}"
+                               IconData="{DynamicResource Category}"
+                               IconColor="{DynamicResource IconColor}"
+                               IconSize="{DynamicResource SmallIconSize}"
+                               BorderThickness="0"
+                               SelectedItem="{Binding SelectedCategory}"
+                               ItemsSource="{Binding Categories}"
+                               MaxDropDownHeight="300"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               IsEnabled="{Binding CategoryComboBoxIsEnabled}">
+                <cc:CustomComboBox.ItemTemplate>
+                    <DataTemplate DataType="viewModels:CategoryViewModel">
+                        <TextBlock Text="{Binding Title}" />
+                    </DataTemplate>
+                </cc:CustomComboBox.ItemTemplate>
+            </cc:CustomComboBox>
+        </StackPanel>
+        
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Save
+            </Button>
+
+            <Button Classes="button danger"
+                    Command="{Binding CloseCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Cancel
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

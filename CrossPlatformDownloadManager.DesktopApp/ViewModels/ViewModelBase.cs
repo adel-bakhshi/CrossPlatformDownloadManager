@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -14,13 +15,16 @@ public class ViewModelBase : ReactiveObject
     protected IUnitOfWork UnitOfWork { get; }
 
     protected IDownloadFileService DownloadFileService { get; }
+    
+    protected IMapper Mapper { get; }
 
     #endregion
 
-    public ViewModelBase(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService)
+    public ViewModelBase(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper)
     {
         UnitOfWork = unitOfWork;
         DownloadFileService = downloadFileService;
+        Mapper = mapper;
         DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
     }
 

@@ -8,11 +8,12 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class DownloadWindow : Window
+public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 {
     #region Private Fields
 
@@ -33,11 +34,7 @@ public partial class DownloadWindow : Window
 
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
-        var vm = DataContext as DownloadWindowViewModel;
-        if (vm == null || vm.IsPaused)
-            return;
-
-        var chunksData = vm.DownloadFile.ChunksData;
+        var chunksData = ViewModel.DownloadFile.ChunksData;
         var bounds = ChunksProgressBarsCanvas.Bounds;
         var chunksCount = chunksData.Count;
         var divisionsWidth = bounds.Width / chunksCount;
@@ -82,20 +79,12 @@ public partial class DownloadWindow : Window
     private void DownloadSpeedLimiterView_OnSpeedLimiterStateChanged(object? sender,
         DownloadSpeedLimiterViewEventArgs e)
     {
-        var vm = DataContext as DownloadWindowViewModel;
-        if (vm == null)
-            return;
-
-        vm.ChangeSpeedLimiterState(e);
+        ViewModel.ChangeSpeedLimiterState(e);
     }
 
     private void DownloadOptionsView_OnOptionsStateChanged(object? sender, DownloadOptionsViewEventArgs e)
     {
-        var vm = DataContext as DownloadWindowViewModel;
-        if (vm == null)
-            return;
-
-        vm.ChangeOptions(e);
+        ViewModel.ChangeOptions(e);
     }
 
     protected override async void OnLoaded(RoutedEventArgs e)
@@ -103,13 +92,9 @@ public partial class DownloadWindow : Window
         // TODO: Show message box
         try
         {
-            var vm = DataContext as DownloadWindowViewModel;
-            if (vm == null)
-                return;
-
             _updateChunksDataTimer.Start();
             Focus();
-            await vm.StartDownloadAsync(window: this);
+            await ViewModel.StartDownloadAsync(window: this);
         }
         catch (Exception ex)
         {

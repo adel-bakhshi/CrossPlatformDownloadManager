@@ -1,3 +1,4 @@
+using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using ReactiveUI;
@@ -15,7 +16,7 @@ public class GeneralsViewModel : ViewModelBase
         get => _startOnSystemStartup;
         set => this.RaiseAndSetIfChanged(ref _startOnSystemStartup, value);
     }
-    
+
     private bool _useBrowserExtension;
 
     public bool UseBrowserExtension
@@ -33,8 +34,9 @@ public class GeneralsViewModel : ViewModelBase
     }
 
     #endregion
-    
-    public GeneralsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
+
+    public GeneralsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
+        unitOfWork, downloadFileService, mapper)
     {
     }
 }

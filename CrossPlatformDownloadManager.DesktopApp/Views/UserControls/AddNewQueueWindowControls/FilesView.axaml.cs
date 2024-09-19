@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -130,10 +131,11 @@ public partial class FilesView : UserControl
             var serviceProvider = this.GetServiceProvider();
             var unitOfWork = serviceProvider.GetService<IUnitOfWork>();
             var downloadFileService = serviceProvider.GetService<IDownloadFileService>();
-            if (unitOfWork == null || downloadFileService == null)
+            var mapper = serviceProvider.GetService<IMapper>();
+            if (unitOfWork == null || downloadFileService == null || mapper == null)
                 return;
             
-            var vm = new AddFilesToQueueWindowViewModel(unitOfWork, downloadFileService)
+            var vm = new AddFilesToQueueWindowViewModel(unitOfWork, downloadFileService, mapper)
             {
                 DownloadQueueId = GetValue(DownloadQueueIdProperty),
             };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
@@ -36,13 +37,7 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _downloadFiles, value);
     }
 
-    private List<DownloadFileViewModel> _selectedDownloadFiles = [];
-
-    public List<DownloadFileViewModel> SelectedDownloadFiles
-    {
-        get => _selectedDownloadFiles;
-        set => this.RaiseAndSetIfChanged(ref _selectedDownloadFiles, value);
-    }
+    public List<DownloadFileViewModel> SelectedDownloadFiles { get; set; } = [];
 
     #endregion
 
@@ -52,8 +47,8 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddFilesToQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(
-        unitOfWork, downloadFileService)
+    public AddFilesToQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
+        IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
     {
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
     }
@@ -65,10 +60,10 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-            
-            if (!SelectedDownloadFiles.Any())
+
+            if (SelectedDownloadFiles.Count == 0)
                 return;
-            
+
             owner.Close(SelectedDownloadFiles);
         }
         catch (Exception ex)

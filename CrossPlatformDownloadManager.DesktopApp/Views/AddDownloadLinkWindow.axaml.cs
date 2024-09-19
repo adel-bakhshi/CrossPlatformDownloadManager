@@ -2,11 +2,12 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class AddDownloadLinkWindow : Window
+public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowViewModel>
 {
     #region Private Fields
 
@@ -32,16 +33,11 @@ public partial class AddDownloadLinkWindow : Window
     private async void GetUrlInfo(object? sender, EventArgs e)
     {
         _urlTextChangedTimer.Stop();
-
-        var vm = DataContext as AddDownloadLinkWindowViewModel;
-        if (vm == null)
-            return;
-
-        await vm.GetUrlInfoAsync();
+        await ViewModel.GetUrlInfoAsync();
     }
 
     private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        this.Close();
+        Close();
     }
 }

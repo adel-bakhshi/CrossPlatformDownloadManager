@@ -23,6 +23,8 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
         .UseDependencyInjection(services =>
         {
+            // Add AutoMapper to services
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // Add UnitOfWork to services
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             // Add DownloadFileService to services

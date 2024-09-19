@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using CrossPlatformDownloadManager.Data.Models;
@@ -228,8 +229,8 @@ public class AddNewQueueWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddNewQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(
-        unitOfWork, downloadFileService)
+    public AddNewQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper)
+        : base(unitOfWork, downloadFileService, mapper)
     {
         TimesOfDay = Constants.TimesOfDay.ToObservableCollection();
         SelectedStartTimeOfDay = SelectedStopTimeOfDay = TimesOfDay.FirstOrDefault();
@@ -367,7 +368,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
             var primaryKeys = DownloadFiles.Select(df => df.Id).Distinct().ToList();
             var downloadFiles = await UnitOfWork.DownloadFileRepository
                 .GetAllAsync(where: df => primaryKeys.Contains(df.Id));
-            
+
             var maxQueuePriority = (await UnitOfWork.DownloadFileRepository
                     .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id, select: df => df.QueuePriority))
                 .Max() ?? 0;

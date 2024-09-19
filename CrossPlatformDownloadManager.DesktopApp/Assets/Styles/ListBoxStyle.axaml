@@ -177,7 +177,7 @@
                                     Padding="0"
                                     BorderThickness="0"
                                     CornerRadius="0"
-                                    Command="{Binding $parent[Window].((vm:AddNewCategoryWindowViewModel)DataContext).DeleteFileExtensionCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                    Command="{Binding $parent[Window].((vm:AddEditCategoryWindowViewModel)DataContext).DeleteFileExtensionCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                     CommandParameter="{Binding}"
                                     Background="{DynamicResource TransparentColor}">
                                 <PathIcon Width="16"

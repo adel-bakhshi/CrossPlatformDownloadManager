@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using ReactiveUI;
@@ -16,7 +17,7 @@ public class DownloadsViewModel : ViewModelBase
         get => _showStartDownloadDialog;
         set => this.RaiseAndSetIfChanged(ref _showStartDownloadDialog, value);
     }
-    
+
     private bool _showCompleteDownloadDialog;
 
     public bool ShowCompleteDownloadDialog
@@ -42,8 +43,9 @@ public class DownloadsViewModel : ViewModelBase
     }
 
     #endregion
-    
-    public DownloadsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
+
+    public DownloadsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
+        unitOfWork, downloadFileService, mapper)
     {
     }
 }

@@ -1,34 +1,30 @@
 using System;
 using System.Linq;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class AddNewCategoryWindow : Window
+public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowViewModel>
 {
-    public AddNewCategoryWindow()
+    public AddEditCategoryWindow()
     {
         InitializeComponent();
     }
 
     private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        this.Close(false);
+        Close(false);
     }
 
     private async void BrowseButton_OnClick(object? sender, RoutedEventArgs e)
     {
+        // TODO: Show message box
         try
         {
-            var vm = DataContext as AddNewCategoryWindowViewModel;
-            if (vm == null)
-                return;
-            
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel == null)
                 return;
@@ -43,8 +39,8 @@ public partial class AddNewCategoryWindow : Window
             if (!directories.Any())
                 return;
 
-            var directory = directories.First();
-            vm.SaveDirectory = directory.Path.LocalPath;
+            var directory = directories[0];
+            ViewModel.SaveDirectory = directory.Path.LocalPath;
         }
         catch (Exception ex)
         {

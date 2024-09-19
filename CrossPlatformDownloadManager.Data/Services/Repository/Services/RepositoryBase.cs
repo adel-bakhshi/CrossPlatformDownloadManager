@@ -52,7 +52,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
 
     public async Task<TR?> GetAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Expression<Func<T, TR>>? select = null,
+        Func<T, TR>? select = null,
         params string[] includeProperties)
     {
         if (select == null)
@@ -74,7 +74,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
 
     public async Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Expression<Func<T, TR>>? select = null,
+        Func<T, TR>? select = null,
         bool distinct = false,
         params string[] includeProperties)
     {
@@ -106,7 +106,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
 
     private async Task<List<TR>> GetEntitiesAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Expression<Func<T, TR>>? select = null,
+        Func<T, TR>? select = null,
         bool distinct = false,
         params string[] includeProperties)
     {
@@ -124,12 +124,11 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
                 table = table.Include(includeProperty);
         }
 
-        IQueryable<TR>? selectResult = select != null ? table.Select(select) : table as IQueryable<TR>;
-        List<TR> result = selectResult == null ? [] : await selectResult.ToListAsync();
-
         if (distinct)
-            result = result.Distinct().ToList();
+            table = table.Distinct();
 
+        var data = await table.ToListAsync();
+        var result = select != null ? data.Select(select).ToList() : data.Cast<TR>().ToList();
         return result;
     }
 

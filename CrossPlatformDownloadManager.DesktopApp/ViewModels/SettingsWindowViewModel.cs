@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
@@ -60,7 +61,7 @@ public class SettingsWindowViewModel : ViewModelBase
     public DownloadsViewModel? DownloadsViewModel
     {
         get => _downloadsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);   
+        set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
     }
 
     private ProxyViewModel? _proxyViewModel;
@@ -89,16 +90,16 @@ public class SettingsWindowViewModel : ViewModelBase
 
     #endregion
 
-    public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork,
-        downloadFileService)
+    public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) :
+        base(unitOfWork, downloadFileService, mapper)
     {
-        GeneralsViewModel = new GeneralsViewModel(unitOfWork, downloadFileService);
-        FileTypesViewModel = new FileTypesViewModel(unitOfWork, downloadFileService);
-        SaveLocationsViewModel= new SaveLocationsViewModel(unitOfWork, downloadFileService);
-        DownloadsViewModel = new DownloadsViewModel(unitOfWork, downloadFileService);
-        ProxyViewModel = new ProxyViewModel(unitOfWork, downloadFileService);
-        NotificationsViewModel = new NotificationsViewModel(unitOfWork, downloadFileService);
-        
+        GeneralsViewModel = new GeneralsViewModel(unitOfWork, downloadFileService, mapper);
+        FileTypesViewModel = new FileTypesViewModel(unitOfWork, downloadFileService, mapper);
+        SaveLocationsViewModel = new SaveLocationsViewModel(unitOfWork, downloadFileService, mapper);
+        DownloadsViewModel = new DownloadsViewModel(unitOfWork, downloadFileService, mapper);
+        ProxyViewModel = new ProxyViewModel(unitOfWork, downloadFileService, mapper);
+        NotificationsViewModel = new NotificationsViewModel(unitOfWork, downloadFileService, mapper);
+
         GenerateTabs();
 
         SaveCommand = ReactiveCommand.Create<Window?>(Save);

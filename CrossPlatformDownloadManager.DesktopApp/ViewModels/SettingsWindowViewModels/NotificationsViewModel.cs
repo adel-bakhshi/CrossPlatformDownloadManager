@@ -1,3 +1,4 @@
+using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using ReactiveUI;
@@ -65,8 +66,9 @@ public class NotificationsViewModel : ViewModelBase
     }
 
     #endregion
-    
-    public NotificationsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
+
+    public NotificationsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) :
+        base(unitOfWork, downloadFileService, mapper)
     {
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
@@ -100,8 +101,8 @@ public class DownloadWindowViewModel : ViewModelBase
 
     #endregion
 
-    public DownloadWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
-        DownloadFileViewModel downloadFile) : base(unitOfWork, downloadFileService)
+    public DownloadWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper,
+        DownloadFileViewModel downloadFile) : base(unitOfWork, downloadFileService, mapper)
     {
         DownloadFile = downloadFile;
         ShowStatusView = true;

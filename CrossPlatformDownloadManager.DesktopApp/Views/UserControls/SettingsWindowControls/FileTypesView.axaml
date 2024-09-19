@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -55,7 +56,7 @@
                             Width="{Binding $self.Bounds.Height}"
                             VerticalAlignment="Center"
                             Command="{Binding DeleteFileTypeCommand}"
-                            CommandParameter="{Binding #FileTypesDataGrid}">
+                            IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <PathIcon Data="{DynamicResource XMark}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
@@ -69,7 +70,8 @@
                             Width="{Binding $self.Bounds.Height}"
                             VerticalAlignment="Center"
                             Command="{Binding EditFileTypeCommand}"
-                            CommandParameter="{Binding #FileTypesDataGrid}">
+                            CommandParameter="{Binding $parent[Window]}"
+                            IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <PathIcon Data="{DynamicResource Pen}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
@@ -83,7 +85,7 @@
                             Width="{Binding $self.Bounds.Height}"
                             VerticalAlignment="Center"
                             Command="{Binding AddNewFileTypeCommand}"
-                            CommandParameter="{Binding #FileTypesDataGrid}">
+                            CommandParameter="{Binding $parent[Window]}">
                         <PathIcon Data="{DynamicResource Plus}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
@@ -95,13 +97,13 @@
             </Grid>
 
             <!-- File types DataGrid -->
-            <DataGrid Name="FileTypesDataGrid"
-                      Grid.Row="2"
+            <DataGrid Grid.Row="2"
                       ItemsSource="{Binding FileExtensions}"
                       SelectedItem="{Binding SelectedFileExtension}"
                       Classes="chunksDataGrid"
                       Background="{DynamicResource PrimaryColor}"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      Height="{Binding $parent[local:FileTypesView].DataGridHeight}">
                 <DataGrid.Styles>
                     <Style Selector="DataGrid DataGridRow">
                         <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
@@ -139,15 +141,28 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Extension"
                                         Binding="{Binding Extension}"
-                                        MinWidth="200" />
+                                        MinWidth="200"
+                                        IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
 
                     <DataGridTextColumn Header="Alias"
                                         Binding="{Binding Alias}"
-                                        MinWidth="200" />
+                                        MinWidth="200"
+                                        IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
 
                     <DataGridTextColumn Header="Category"
+                                        Binding="{Binding CategoryTitle}"
                                         MinWidth="200"
-                                        Binding="{Binding CategoryTitle}" />
+                                        IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
+                    
+                    <DataGridTextColumn Header="Extension"
+                                        Binding="{Binding Extension}"
+                                        MinWidth="300"
+                                        IsVisible="{Binding $parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
+
+                    <DataGridTextColumn Header="Alias"
+                                        Binding="{Binding Alias}"
+                                        MinWidth="300"
+                                        IsVisible="{Binding $parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

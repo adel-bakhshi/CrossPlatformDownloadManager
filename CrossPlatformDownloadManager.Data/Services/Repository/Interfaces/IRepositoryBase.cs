@@ -14,7 +14,7 @@ public interface IRepositoryBase<T> where T : class, new()
 
     Task<TR?> GetAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Expression<Func<T, TR>>? select = null,
+        Func<T, TR>? select = null,
         params string[] includeProperties);
 
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null,
@@ -24,7 +24,7 @@ public interface IRepositoryBase<T> where T : class, new()
 
     Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Expression<Func<T, TR>>? select = null,
+        Func<T, TR>? select = null,
         bool distinct = false,
         params string[] includeProperties);
 

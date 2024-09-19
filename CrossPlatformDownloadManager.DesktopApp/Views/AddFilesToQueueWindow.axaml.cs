@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class AddFilesToQueueWindow : Window
+public partial class AddFilesToQueueWindow : MyWindowBase<AddFilesToQueueWindowViewModel>
 {
     public AddFilesToQueueWindow()
     {
@@ -24,20 +26,7 @@ public partial class AddFilesToQueueWindow : Window
         if (selectedItems == null || selectedItems.Count == 0)
             return;
 
-        var vm = DataContext as AddFilesToQueueWindowViewModel;
-        if (vm == null)
-            return;
-
-        var downloadFiles = new List<DownloadFileViewModel>();
-        foreach (var item in selectedItems)
-        {
-            var downloadFile = item as DownloadFileViewModel;
-            if (downloadFile == null)
-                continue;
-
-            downloadFiles.Add(downloadFile);
-        }
-
-        vm.SelectedDownloadFiles = downloadFiles;
+        var downloadFiles = selectedItems.OfType<DownloadFileViewModel>().ToList();
+        ViewModel.SelectedDownloadFiles = downloadFiles;
     }
 }

@@ -3,9 +3,9 @@ using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class SettingsWindow : MyWindowBase<SettingsWindowViewModel>
+public partial class AddEditFileTypeWindow : MyWindowBase<AddEditFileTypeWindowViewModel>
 {
-    public SettingsWindow()
+    public AddEditFileTypeWindow()
     {
         InitializeComponent();
     }

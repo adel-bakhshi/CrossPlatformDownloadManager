@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.UnitOfWork;
 using CrossPlatformDownloadManager.Utils;
@@ -19,7 +20,7 @@ public class ProxyViewModel : ViewModelBase
         get => _disableProxy;
         set => this.RaiseAndSetIfChanged(ref _disableProxy, value);
     }
-    
+
     private bool _useSystemProxySettings;
 
     public bool UseSystemProxySettings
@@ -27,7 +28,7 @@ public class ProxyViewModel : ViewModelBase
         get => _useSystemProxySettings;
         set => this.RaiseAndSetIfChanged(ref _useSystemProxySettings, value);
     }
-    
+
     private bool _useCustomProxy;
 
     public bool UseCustomProxy
@@ -43,7 +44,7 @@ public class ProxyViewModel : ViewModelBase
         get => _proxyTypes;
         set => this.RaiseAndSetIfChanged(ref _proxyTypes, value);
     }
-    
+
     private string? _selectedProxyType;
 
     public string? SelectedProxyType
@@ -51,7 +52,7 @@ public class ProxyViewModel : ViewModelBase
         get => _selectedProxyType;
         set => this.RaiseAndSetIfChanged(ref _selectedProxyType, value);
     }
-    
+
     private string? _host;
 
     public string? Host
@@ -59,7 +60,7 @@ public class ProxyViewModel : ViewModelBase
         get => _host;
         set => this.RaiseAndSetIfChanged(ref _host, value);
     }
-    
+
     private string? _port;
 
     public string? Port
@@ -67,7 +68,7 @@ public class ProxyViewModel : ViewModelBase
         get => _port;
         set => this.RaiseAndSetIfChanged(ref _port, value);
     }
-    
+
     private string? _username;
 
     public string? Username
@@ -75,7 +76,7 @@ public class ProxyViewModel : ViewModelBase
         get => _username;
         set => this.RaiseAndSetIfChanged(ref _username, value);
     }
-    
+
     private string? _password;
 
     public string? Password
@@ -85,12 +86,13 @@ public class ProxyViewModel : ViewModelBase
     }
 
     #endregion
-    
-    public ProxyViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService) : base(unitOfWork, downloadFileService)
+
+    public ProxyViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
+        unitOfWork, downloadFileService, mapper)
     {
         GenerateProxyTypes();
     }
-    
+
     private void GenerateProxyTypes()
     {
         var proxyTypes = new List<string>

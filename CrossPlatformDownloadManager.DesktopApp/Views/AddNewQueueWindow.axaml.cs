@@ -1,15 +1,12 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class AddNewQueueWindow : Window
+public partial class AddNewQueueWindow : MyWindowBase<AddNewQueueWindowViewModel>
 {
     public AddNewQueueWindow()
     {
@@ -24,10 +21,6 @@ public partial class AddNewQueueWindow : Window
     private void FilesView_OnDownloadQueueListPriorityChanged(object? sender,
         DownloadQueueListPriorityChangedEventArgs e)
     {
-        var vm = DataContext as AddNewQueueWindowViewModel;
-        if (vm == null)
-            return;
-
-        vm.DownloadFiles = e.NewList.ToObservableCollection();
+        ViewModel.DownloadFiles = e.NewList.ToObservableCollection();
     }
 }

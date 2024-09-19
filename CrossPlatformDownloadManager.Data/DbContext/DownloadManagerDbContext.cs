@@ -16,7 +16,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
     
     public DownloadManagerDbContext()
     {
-        var dbPath = Path.Join(Environment.CurrentDirectory, "ApplicationData.db");
+        var dbPath = Path.Combine(Environment.CurrentDirectory, "ApplicationData.db");
         DbPath = dbPath;
     }
 

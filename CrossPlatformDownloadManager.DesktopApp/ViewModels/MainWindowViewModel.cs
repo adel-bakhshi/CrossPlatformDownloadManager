@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
@@ -21,7 +22,6 @@ public class MainWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private readonly MainWindow _mainWindow;
     private readonly DispatcherTimer _updateSpeedTimer;
 
     #endregion
@@ -128,16 +128,13 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand DeleteDownloadFilesCommand { get; }
 
     public ICommand DeleteCompletedDownloadFilesCommand { get; }
-    
+
     public ICommand OpenSettingsWindowCommand { get; }
 
     #endregion
 
-    public MainWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, MainWindow mainWindow)
-        : base(unitOfWork, downloadFileService)
+    public MainWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
     {
-        _mainWindow = mainWindow;
-
         _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
         _updateSpeedTimer.Start();
@@ -153,7 +150,7 @@ public class MainWindowViewModel : ViewModelBase
         SelectedFilesTotalSize = "0 KB";
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
-        AddNewLinkCommand = ReactiveCommand.Create(AddNewLink);
+        AddNewLinkCommand = ReactiveCommand.Create<Window?>(AddNewLink);
         ResumeDownloadCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownload);
         StopDownloadCommand = ReactiveCommand.Create<DataGrid?>(StopDownload);
         StopAllDownloadsCommand = ReactiveCommand.Create(StopAllDownloads);
@@ -161,42 +158,45 @@ public class MainWindowViewModel : ViewModelBase
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
         OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
     }
-    
+
     private void SelectAllRows(DataGrid? dataGrid)
     {
         if (dataGrid == null)
             return;
-        
+
         if (DownloadFiles.Count == 0)
         {
             SelectAllDownloadFiles = false;
             dataGrid.SelectedIndex = -1;
             return;
         }
-        
+
         if (!SelectAllDownloadFiles)
             dataGrid.SelectedIndex = -1;
         else
             dataGrid.SelectAll();
     }
 
-    private async void AddNewLink()
+    private async void AddNewLink(Window? owner)
     {
         try
         {
+            if (owner == null)
+                return;
+            
             var url = string.Empty;
-            if (_mainWindow.Clipboard != null)
-                url = await _mainWindow.Clipboard.GetTextAsync();
+            if (owner.Clipboard != null)
+                url = await owner.Clipboard.GetTextAsync();
 
             var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService)
+            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService, Mapper)
             {
                 Url = urlIsValid ? url : null,
                 IsLoadingUrl = urlIsValid
             };
 
             var window = new AddDownloadLinkWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool>(_mainWindow);
+            var result = await window.ShowDialog<bool>(owner);
             if (!result)
                 return;
 
@@ -226,7 +226,7 @@ public class MainWindowViewModel : ViewModelBase
                 if (downloadFile.IsDownloading || downloadFile.IsCompleted)
                     continue;
 
-                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, downloadFile);
+                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, Mapper, downloadFile);
                 var window = new DownloadWindow { DataContext = vm };
                 window.Show();
             }
@@ -336,7 +336,7 @@ public class MainWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new SettingsWindowViewModel(UnitOfWork, DownloadFileService);
+            var vm = new SettingsWindowViewModel(UnitOfWork, DownloadFileService, Mapper);
             var window = new SettingsWindow { DataContext = vm };
             await window.ShowDialog(owner);
         }

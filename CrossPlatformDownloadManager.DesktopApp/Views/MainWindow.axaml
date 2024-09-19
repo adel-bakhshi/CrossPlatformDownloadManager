@@ -153,7 +153,8 @@
                                 <uc:ActionButton Text="Add Url"
                                                  IconData="{DynamicResource AddUrl}"
                                                  IconColor="{DynamicResource SuccessGradientBrush}"
-                                                 Command="{Binding AddNewLinkCommand}" />
+                                                 Command="{Binding AddNewLinkCommand}"
+                                                 CommandParameter="{Binding $parent[Window]}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryColor}"

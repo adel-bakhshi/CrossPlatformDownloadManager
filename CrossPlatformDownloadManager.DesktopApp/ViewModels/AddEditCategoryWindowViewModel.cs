@@ -4,11 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
@@ -26,17 +25,17 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _categoryTitle, value);
     }
 
-    private ObservableCollection<CategoryFileExtension> _fileExtensions = [];
+    private ObservableCollection<CategoryFileExtensionViewModel> _fileExtensions = [];
 
-    public ObservableCollection<CategoryFileExtension> FileExtensions
+    public ObservableCollection<CategoryFileExtensionViewModel> FileExtensions
     {
         get => _fileExtensions;
         set => this.RaiseAndSetIfChanged(ref _fileExtensions, value);
     }
 
-    private CategoryFileExtension _newFileExtension = new();
+    private CategoryFileExtensionViewModel _newFileExtension = new();
 
-    public CategoryFileExtension NewFileExtension
+    public CategoryFileExtensionViewModel NewFileExtension
     {
         get => _newFileExtension;
         set => this.RaiseAndSetIfChanged(ref _newFileExtension, value);
@@ -108,13 +107,12 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddEditCategoryWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
-        IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
+    public AddEditCategoryWindowViewModel(IAppService appService) : base(appService)
     {
         LoadCategoryAsync().GetAwaiter();
 
         AddNewFileExtensionCommand = ReactiveCommand.Create<Window?>(AddNewFileExtension);
-        DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtension?>(DeleteFileExtension);
+        DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtensionViewModel?>(DeleteFileExtension);
         AddNewSiteAddressCommand = ReactiveCommand.Create(AddNewSiteAddress);
         DeleteSiteAddressCommand = ReactiveCommand.Create<string?>(DeleteSiteAddress);
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
@@ -134,7 +132,9 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             Category? category = null;
             if (IsEditMode)
             {
-                category = await UnitOfWork.CategoryRepository
+                category = await AppService
+                    .UnitOfWork
+                    .CategoryRepository
                     .GetAsync(where: c => c.Id == CategoryId,
                         includeProperties: "FileExtensions");
 
@@ -154,33 +154,52 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     IsDefault = false,
                 };
 
-                await UnitOfWork.CategoryRepository.AddAsync(category);
+                await AppService
+                    .UnitOfWork
+                    .CategoryRepository
+                    .AddAsync(category);
             }
 
-            await UnitOfWork.SaveAsync();
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
 
             if (IsEditMode && category.FileExtensions.Count > 0)
             {
-                UnitOfWork.CategoryFileExtensionRepository.DeleteAll(category.FileExtensions);
-                await UnitOfWork.SaveAsync();
+                AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
+                    .DeleteAll(category.FileExtensions);
+
+                await AppService
+                    .UnitOfWork
+                    .SaveAsync();
             }
 
             var fileExtensions = FileExtensions
-                .Select(fe =>
+                .Select(fe => new CategoryFileExtension
                 {
-                    fe.CategoryId = category.Id;
-                    fe.Extension = "." + fe.Extension.ToLower();
-                    return fe;
+                    CategoryId = category.Id,
+                    Extension = "." + fe.Extension!,
+                    Alias = fe.Alias!,
                 })
                 .ToList();
 
-            await UnitOfWork.CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
-            await UnitOfWork.SaveAsync();
+            await AppService
+                .UnitOfWork
+                .CategoryFileExtensionRepository
+                .AddRangeAsync(fileExtensions);
 
-            CategorySaveDirectory? saveDirectory = null;
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
+
+            CategorySaveDirectory? saveDirectory;
             if (IsEditMode)
             {
-                saveDirectory = await UnitOfWork.CategorySaveDirectoryRepository
+                saveDirectory = await AppService
+                    .UnitOfWork
+                    .CategorySaveDirectoryRepository
                     .GetAsync(where: cs => cs.CategoryId == category.Id);
 
                 if (saveDirectory == null)
@@ -196,13 +215,20 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     CategoryId = category.Id,
                 };
 
-                await UnitOfWork.CategorySaveDirectoryRepository.AddAsync(saveDirectory);
+                await AppService
+                    .UnitOfWork
+                    .CategorySaveDirectoryRepository
+                    .AddAsync(saveDirectory);
             }
 
-            await UnitOfWork.SaveAsync();
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
 
             category.CategorySaveDirectoryId = saveDirectory.Id;
-            await UnitOfWork.SaveAsync();
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
 
             owner.Close(true);
         }
@@ -219,7 +245,9 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         {
             if (CategoryId != null)
             {
-                var category = await UnitOfWork.CategoryRepository
+                var category = await AppService
+                    .UnitOfWork
+                    .CategoryRepository
                     .GetAsync(where: c => c.Id == CategoryId,
                         includeProperties: ["CategorySaveDirectory"]);
 
@@ -227,7 +255,10 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     return;
 
                 CategoryTitle = category.Title;
-                FileExtensions = category.FileExtensions.ToObservableCollection();
+                FileExtensions = AppService
+                    .Mapper
+                    .Map<List<CategoryFileExtensionViewModel>>(category.FileExtensions)
+                    .ToObservableCollection();
 
                 var json = category.AutoAddLinkFromSites;
                 SiteAddresses = json.IsNullOrEmpty()
@@ -239,7 +270,9 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             }
             else
             {
-                var generalCategory = await UnitOfWork.CategoryRepository
+                var generalCategory = await AppService
+                    .UnitOfWork
+                    .CategoryRepository
                     .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle,
                         includeProperties: ["CategorySaveDirectory"]);
 
@@ -286,34 +319,31 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             return;
 
         var isExist = FileExtensions
-            .Any(fe => fe.Extension.Equals(NewFileExtension.Extension, StringComparison.OrdinalIgnoreCase));
+            .Any(fe => fe.Extension!.Equals(NewFileExtension.Extension, StringComparison.OrdinalIgnoreCase));
 
         if (isExist)
         {
-            NewFileExtension = new CategoryFileExtension();
+            NewFileExtension = new CategoryFileExtensionViewModel();
             return;
         }
 
-        var newFileExtension = new CategoryFileExtension
+        var newFileExtension = new CategoryFileExtensionViewModel
         {
-            Extension = NewFileExtension.Extension.Trim().Replace(".", "").Replace(" ", "").ToLower(),
-            Alias = NewFileExtension.Alias.Trim(),
+            Extension = NewFileExtension.Extension!.Trim().Replace(".", "").Replace(" ", "").ToLower(),
+            Alias = NewFileExtension.Alias!.Trim(),
         };
 
-        var fileExtensions = FileExtensions.ToList();
-        fileExtensions.Add(newFileExtension);
-        FileExtensions = fileExtensions.ToObservableCollection();
-
-        NewFileExtension = new CategoryFileExtension();
+        FileExtensions.Add(newFileExtension);
+        this.RaisePropertyChanged(nameof(FileExtensions));
+        NewFileExtension = new CategoryFileExtensionViewModel();
     }
 
-    private void DeleteFileExtension(CategoryFileExtension? fileExtension)
+    private void DeleteFileExtension(CategoryFileExtensionViewModel? fileExtension)
     {
         if (fileExtension == null)
             return;
 
-        var fileExtensions = FileExtensions.ToList();
-        fileExtensions.Remove(fileExtension);
-        FileExtensions = fileExtensions.ToObservableCollection();
+        FileExtensions.Remove(fileExtension);
+        this.RaisePropertyChanged(nameof(FileExtensions));
     }
 }

@@ -32,7 +32,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CategoryId = table.Column<int>(type: "INTEGER", nullable: true),
-                    SaveDirectory = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false)
+                    SaveDirectory = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,7 +51,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     StopDownloadSchedule = table.Column<TimeSpan>(type: "TEXT", nullable: true),
                     IsDaily = table.Column<bool>(type: "INTEGER", nullable: false),
                     JustForDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DaysOfWeek = table.Column<string>(type: "TEXT", nullable: true),
+                    DaysOfWeek = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     RetryOnDownloadingFailed = table.Column<bool>(type: "INTEGER", nullable: false),
                     RetryCount = table.Column<int>(type: "INTEGER", nullable: false),
                     ShowAlarmWhenDone = table.Column<bool>(type: "INTEGER", nullable: true),
@@ -66,6 +66,35 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Settings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    StartOnSystemStartup = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseBrowserExtension = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DarkMode = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowStartDownloadDialog = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowCompleteDownloadDialog = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DuplicateDownloadLinkAction = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    MaximumConnectionsCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProxyMode = table.Column<byte>(type: "INTEGER", nullable: false),
+                    ProxyType = table.Column<byte>(type: "INTEGER", nullable: false),
+                    CustomProxySettings = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
+                    UseDownloadCompleteSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseDownloadStoppedSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseDownloadFailedSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseQueueStartedSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseQueueStoppedSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseQueueFinishedSound = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UseSystemNotifications = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
@@ -74,18 +103,12 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     Title = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Icon = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
                     IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AutoAddLinkFromSites = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    CategorySaveDirectoryId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CategoryHeaderId = table.Column<int>(type: "INTEGER", nullable: true)
+                    AutoAddLinkFromSites = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    CategorySaveDirectoryId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Categories_CategoryHeaders_CategoryHeaderId",
-                        column: x => x.CategoryHeaderId,
-                        principalTable: "CategoryHeaders",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Categories_CategorySaveDirectories_CategorySaveDirectoryId",
                         column: x => x.CategorySaveDirectoryId,
@@ -119,21 +142,22 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Url = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
+                    Url = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
                     FileName = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
                     DownloadQueueId = table.Column<int>(type: "INTEGER", nullable: true),
                     Size = table.Column<double>(type: "REAL", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 300, nullable: true),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     Status = table.Column<byte>(type: "INTEGER", nullable: true),
                     LastTryDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DateAdded = table.Column<DateTime>(type: "TEXT", nullable: false),
                     QueuePriority = table.Column<int>(type: "INTEGER", nullable: true),
                     CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsPaused = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsError = table.Column<bool>(type: "INTEGER", nullable: false),
                     DownloadProgress = table.Column<float>(type: "REAL", nullable: false),
+                    ElapsedTime = table.Column<TimeSpan>(type: "TEXT", nullable: true),
                     TimeLeft = table.Column<TimeSpan>(type: "TEXT", nullable: true),
-                    TransferRate = table.Column<float>(type: "REAL", nullable: true)
+                    TransferRate = table.Column<float>(type: "REAL", nullable: true),
+                    SaveLocation = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    DownloadPackage = table.Column<string>(type: "TEXT", maxLength: 5000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -150,11 +174,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         principalTable: "DownloadQueues",
                         principalColumn: "Id");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Categories_CategoryHeaderId",
-                table: "Categories",
-                column: "CategoryHeaderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_CategorySaveDirectoryId",
@@ -190,16 +209,19 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                 name: "CategoryFileExtensions");
 
             migrationBuilder.DropTable(
+                name: "CategoryHeaders");
+
+            migrationBuilder.DropTable(
                 name: "DownloadFiles");
+
+            migrationBuilder.DropTable(
+                name: "Settings");
 
             migrationBuilder.DropTable(
                 name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "DownloadQueues");
-
-            migrationBuilder.DropTable(
-                name: "CategoryHeaders");
 
             migrationBuilder.DropTable(
                 name: "CategorySaveDirectories");

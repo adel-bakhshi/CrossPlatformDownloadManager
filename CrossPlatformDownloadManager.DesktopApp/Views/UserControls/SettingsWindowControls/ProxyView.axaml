@@ -23,7 +23,8 @@
                            Text="Disable proxy"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
+                <ToggleSwitch Name="DisableProxyToggleSwitch"
+                              Grid.Column="1"
                               OffContent="{x:Null}"
                               OnContent="{x:Null}"
                               Margin="0"
@@ -33,7 +34,9 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding DisableProxy}" />
+                              IsChecked="{Binding DisableProxy}"
+                              Command="{Binding ChangeProxyModeCommand}"
+                              CommandParameter="{Binding $self.Name}" />
             </Grid>
         </Border>
 
@@ -49,7 +52,8 @@
                            Text="Use system proxy settings"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
+                <ToggleSwitch Name="UseSystemProxySettingsToggleSwitch"
+                              Grid.Column="1"
                               OffContent="{x:Null}"
                               OnContent="{x:Null}"
                               Margin="0"
@@ -59,7 +63,9 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding UseSystemProxySettings}" />
+                              IsChecked="{Binding UseSystemProxySettings}"
+                              Command="{Binding ChangeProxyModeCommand}"
+                              CommandParameter="{Binding $self.Name}" />
             </Grid>
         </Border>
 
@@ -79,7 +85,8 @@
                                Text="Use custom proxy"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
+                    <ToggleSwitch Name="UseCustomProxyToggleSwitch"
+                                  Grid.Column="1"
                                   OffContent="{x:Null}"
                                   OnContent="{x:Null}"
                                   Margin="0"
@@ -89,13 +96,16 @@
                                   HorizontalContentAlignment="Right"
                                   VerticalContentAlignment="Center"
                                   Width="40"
-                                  IsChecked="{Binding UseCustomProxy}" />
+                                  IsChecked="{Binding UseCustomProxy}"
+                                  Command="{Binding ChangeProxyModeCommand}"
+                                  CommandParameter="{Binding $self.Name}" />
                 </Grid>
 
                 <!-- Content -->
                 <StackPanel Orientation="Vertical"
                             Spacing="10"
-                            HorizontalAlignment="Left">
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding UseCustomProxy}">
                     <!-- Select Box -->
                     <cc:CustomSelectBox ItemsSource="{Binding ProxyTypes}"
                                         SelectedItem="{Binding SelectedProxyType}"

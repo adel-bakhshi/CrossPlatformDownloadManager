@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -97,7 +93,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedStopTimeOfDay, value);
     }
 
-    private bool _isDailyDownload = false;
+    private bool _isDailyDownload;
 
     public bool IsDailyDownload
     {
@@ -229,8 +225,7 @@ public class AddNewQueueWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddNewQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper)
-        : base(unitOfWork, downloadFileService, mapper)
+    public AddNewQueueWindowViewModel(IAppService appService) : base(appService)
     {
         TimesOfDay = Constants.TimesOfDay.ToObservableCollection();
         SelectedStartTimeOfDay = SelectedStopTimeOfDay = TimesOfDay.FirstOrDefault();
@@ -248,7 +243,9 @@ public class AddNewQueueWindowViewModel : ViewModelBase
         if (DownloadQueueId == null)
             return [];
 
-        return DownloadFileService.DownloadFiles
+        return AppService
+            .DownloadFileService
+            .DownloadFiles
             .Where(df => df.DownloadQueueId == DownloadQueueId)
             .ToObservableCollection();
     }
@@ -362,24 +359,41 @@ public class AddNewQueueWindowViewModel : ViewModelBase
                 IsDefault = false,
             };
 
-            await UnitOfWork.DownloadQueueRepository.AddAsync(downloadQueue);
-            await UnitOfWork.SaveAsync();
+            await AppService
+                .UnitOfWork
+                .DownloadQueueRepository
+                .AddAsync(downloadQueue);
 
-            var primaryKeys = DownloadFiles.Select(df => df.Id).Distinct().ToList();
-            var downloadFiles = await UnitOfWork.DownloadFileRepository
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
+
+            var primaryKeys = DownloadFiles
+                .Select(df => df.Id)
+                .Distinct()
+                .ToList();
+
+            var downloadFiles = await AppService
+                .UnitOfWork
+                .DownloadFileRepository
                 .GetAllAsync(where: df => primaryKeys.Contains(df.Id));
 
-            var maxQueuePriority = (await UnitOfWork.DownloadFileRepository
-                    .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id, select: df => df.QueuePriority))
-                .Max() ?? 0;
+            var maxQueuePriority = await AppService
+                .UnitOfWork
+                .DownloadFileRepository
+                .GetMaxAsync(selector: df => df.QueuePriority,
+                    where: df => df.DownloadQueueId == downloadQueue.Id) ?? 0;
 
-            for (int i = 0; i < downloadFiles.Count; i++)
+            for (var i = 0; i < downloadFiles.Count; i++)
             {
                 downloadFiles[i].DownloadQueueId = downloadQueue.Id;
                 downloadFiles[i].QueuePriority = maxQueuePriority + 1 + i;
             }
 
-            await DownloadFileService.UpdateFilesAsync(downloadFiles);
+            await AppService
+                .DownloadFileService
+                .UpdateFilesAsync(downloadFiles);
+            
             owner.Close(true);
         }
         catch (Exception ex)

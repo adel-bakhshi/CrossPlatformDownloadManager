@@ -10,7 +10,7 @@ public class DownloadQueue
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required] [MaxLength(100)] public string Title { get; set; } = "";
+    [Required] [MaxLength(100)] public string Title { get; set; } = string.Empty;
 
     [Required] public bool StartOnApplicationStartup { get; set; }
 
@@ -22,12 +22,11 @@ public class DownloadQueue
 
     public DateTime? JustForDate { get; set; }
 
-    [MaxLength(500)]
-    public string? DaysOfWeek { get; set; }
+    [MaxLength(500)] public string? DaysOfWeek { get; set; }
 
     [Required] public bool RetryOnDownloadingFailed { get; set; }
 
-    [Required] public int RetryCount { get; set; } = 3;
+    [Required] public int RetryCount { get; set; }
 
     public bool? ShowAlarmWhenDone { get; set; }
 
@@ -39,5 +38,5 @@ public class DownloadQueue
 
     [Required] public bool IsDefault { get; set; }
 
-    public ICollection<DownloadFile> DownloadFiles { get; set; } = new List<DownloadFile>();
+    public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
 }

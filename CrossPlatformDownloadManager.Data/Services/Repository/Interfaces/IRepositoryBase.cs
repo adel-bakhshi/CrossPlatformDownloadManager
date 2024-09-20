@@ -31,4 +31,13 @@ public interface IRepositoryBase<T> where T : class, new()
     void Delete(T? entity);
 
     void DeleteAll(IEnumerable<T>? entities);
+
+    Task<int> GetCountAsync(Expression<Func<T, bool>>? where = null,
+        bool distinct = false,
+        params string[] includeProperties);
+
+    Task<TResult> GetMaxAsync<TResult>(Expression<Func<T, TResult>> selector,
+        Expression<Func<T, bool>>? where = null,
+        bool distinct = false,
+        params string[] includeProperties);
 }

@@ -3,12 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -133,14 +131,11 @@ public class MainWindowViewModel : ViewModelBase
 
     #endregion
 
-    public MainWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
+    public MainWindowViewModel(IAppService appService) : base(appService)
     {
         _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
         _updateSpeedTimer.Start();
-
-        // Create basic data before application startup
-        UnitOfWork.CreateCategoriesAsync().GetAwaiter().GetResult();
 
         LoadCategoriesAsync().GetAwaiter().GetResult();
         SelectedCategoryHeader = Categories.FirstOrDefault();
@@ -183,13 +178,13 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-            
+
             var url = string.Empty;
             if (owner.Clipboard != null)
                 url = await owner.Clipboard.GetTextAsync();
 
             var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(UnitOfWork, DownloadFileService, Mapper)
+            var vm = new AddDownloadLinkWindowViewModel(AppService)
             {
                 Url = urlIsValid ? url : null,
                 IsLoadingUrl = urlIsValid
@@ -216,20 +211,20 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            foreach (var selectedItem in dataGrid.SelectedItems)
-            {
-                var id = (selectedItem as DownloadFileViewModel)?.Id;
-                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
-                if (downloadFile == null)
-                    continue;
+            var windows = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => !df.IsDownloading || !df.IsCompleted)
+                .Select(df =>
+                {
+                    var vm = new DownloadWindowViewModel(AppService, df);
+                    var window = new DownloadWindow { DataContext = vm };
+                    return window;
+                })
+                .ToList();
 
-                if (downloadFile.IsDownloading || downloadFile.IsCompleted)
-                    continue;
-
-                var vm = new DownloadWindowViewModel(UnitOfWork, DownloadFileService, Mapper, downloadFile);
-                var window = new DownloadWindow { DataContext = vm };
+            foreach (var window in windows)
                 window.Show();
-            }
         }
         catch (Exception ex)
         {
@@ -245,17 +240,17 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            foreach (var selectedItem in dataGrid.SelectedItems)
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => df.IsDownloading)
+                .ToList();
+
+            foreach (var downloadFile in downloadFiles)
             {
-                var id = (selectedItem as DownloadFileViewModel)?.Id;
-                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
-                if (downloadFile == null)
-                    continue;
-
-                if (!downloadFile.IsDownloading)
-                    continue;
-
-                await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
+                await AppService
+                    .DownloadFileService
+                    .StopDownloadFileAsync(downloadFile, true);
             }
         }
         catch (Exception ex)
@@ -269,12 +264,18 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var downloadFiles = DownloadFileService.DownloadFiles
+            var downloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
                 .Where(df => df.IsDownloading)
                 .ToList();
 
             foreach (var downloadFile in downloadFiles)
-                await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
+            {
+                await AppService
+                    .DownloadFileService
+                    .StopDownloadFileAsync(downloadFile, true);
+            }
         }
         catch (Exception ex)
         {
@@ -290,18 +291,21 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            for (int i = dataGrid.SelectedItems.Count - 1; i >= 0; i--)
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .ToList();
+
+            for (var i = downloadFiles.Count - 1; i >= 0; i--)
             {
-                var selectedItem = dataGrid.SelectedItems[i];
-                var id = (selectedItem as DownloadFileViewModel)?.Id;
-                var downloadFile = DownloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == id);
-                if (downloadFile == null)
-                    continue;
+                if (downloadFiles[i].IsDownloading)
+                    await AppService
+                        .DownloadFileService
+                        .StopDownloadFileAsync(downloadFiles[i], true);
 
-                if (downloadFile.IsDownloading)
-                    await DownloadFileService.StopDownloadFileAsync(downloadFile, true);
-
-                await DownloadFileService.DeleteDownloadFileAsync(downloadFile, true);
+                await AppService
+                    .DownloadFileService
+                    .DeleteDownloadFileAsync(downloadFiles[i], true);
             }
         }
         catch (Exception ex)
@@ -315,12 +319,18 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box and ask user for deleting file
         try
         {
-            var downloadFiles = DownloadFileService.DownloadFiles
+            var downloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
                 .Where(df => df.IsCompleted)
                 .ToList();
 
             foreach (var downloadFile in downloadFiles)
-                await DownloadFileService.DeleteDownloadFileAsync(downloadFile, false);
+            {
+                await AppService
+                    .DownloadFileService
+                    .DeleteDownloadFileAsync(downloadFile, false);
+            }
         }
         catch (Exception ex)
         {
@@ -336,7 +346,7 @@ public class MainWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new SettingsWindowViewModel(UnitOfWork, DownloadFileService, Mapper);
+            var vm = new SettingsWindowViewModel(AppService);
             var window = new SettingsWindow { DataContext = vm };
             await window.ShowDialog(owner);
         }
@@ -351,7 +361,9 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var totalSpeed = DownloadFileService.DownloadFiles
+            var totalSpeed = AppService
+                .DownloadFileService
+                .DownloadFiles
                 .Where(df => df.IsDownloading)
                 .Sum(df => df.TransferRate ?? 0);
 
@@ -367,8 +379,15 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            var categoryHeaders = await UnitOfWork.CategoryHeaderRepository.GetAllAsync();
-            var categories = await UnitOfWork.CategoryRepository.GetAllAsync();
+            var categoryHeaders = await AppService
+                .UnitOfWork
+                .CategoryHeaderRepository
+                .GetAllAsync();
+            
+            var categories = await AppService
+                .UnitOfWork
+                .CategoryRepository
+                .GetAllAsync();
 
             categoryHeaders = categoryHeaders
                 .Select(c =>
@@ -382,7 +401,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch
         {
-            Categories = new ObservableCollection<CategoryHeader>();
+            Categories = [];
         }
     }
 
@@ -391,7 +410,11 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var downloadFiles = DownloadFileService.DownloadFiles.ToList();
+            var downloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
+                .ToList();
+            
             if (SelectedCategoryHeader != null)
             {
                 switch (SelectedCategoryHeader.Title)
@@ -443,16 +466,13 @@ public class MainWindowViewModel : ViewModelBase
 
     private void UpdateDownloadList()
     {
-        DownloadFiles = DownloadFileService.DownloadFiles;
+        DownloadFiles = AppService
+            .DownloadFileService
+            .DownloadFiles;
     }
 
-    protected override void DownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
+    protected override void OnDownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
     {
         FilterDownloadList();
-    }
-
-    public async Task LoadDownloadFilesAsync()
-    {
-        await DownloadFileService.LoadFilesAsync();
     }
 }

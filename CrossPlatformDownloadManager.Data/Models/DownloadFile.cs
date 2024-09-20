@@ -10,9 +10,9 @@ public class DownloadFile
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required] [MaxLength(300)] public string Url { get; set; } = "";
+    [Required] [MaxLength(500)] public string Url { get; set; } = string.Empty;
 
-    [Required] [MaxLength(300)] public string FileName { get; set; } = "";
+    [Required] [MaxLength(300)] public string FileName { get; set; } = string.Empty;
 
     public int? DownloadQueueId { get; set; }
 
@@ -20,7 +20,7 @@ public class DownloadFile
 
     [Required] public double Size { get; set; }
 
-    [MaxLength(300)] public string? Description { get; set; }
+    [MaxLength(500)] public string? Description { get; set; }
 
     public DownloadFileStatus? Status { get; set; }
 
@@ -34,7 +34,7 @@ public class DownloadFile
 
     [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
 
-    [Required] public float DownloadProgress { get; set; } = 0.0f;
+    [Required] public float DownloadProgress { get; set; }
 
     public TimeSpan? ElapsedTime { get; set; }
 
@@ -42,8 +42,7 @@ public class DownloadFile
 
     public float? TransferRate { get; set; }
 
-    [Required] [MaxLength(500)] public string SaveLocation { get; set; } = "";
-    
-    [MaxLength(3000)]
-    public string? DownloadPackage { get; set; }
+    [Required] [MaxLength(500)] public string SaveLocation { get; set; } = string.Empty;
+
+    [MaxLength(5000)] public string? DownloadPackage { get; set; }
 }

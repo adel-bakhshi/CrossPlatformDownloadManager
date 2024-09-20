@@ -1,6 +1,4 @@
-using AutoMapper;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
@@ -35,8 +33,7 @@ public class GeneralsViewModel : ViewModelBase
 
     #endregion
 
-    public GeneralsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
-        unitOfWork, downloadFileService, mapper)
+    public GeneralsViewModel(IAppService appService) : base(appService)
     {
     }
 }

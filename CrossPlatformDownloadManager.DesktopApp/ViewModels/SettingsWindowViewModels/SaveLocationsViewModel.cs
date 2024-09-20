@@ -4,10 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
@@ -17,12 +15,6 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewM
 
 public class SaveLocationsViewModel : ViewModelBase
 {
-    #region Private Fields
-
-    private readonly List<CategoryFileExtensionViewModel> _dbFileExtensions;
-
-    #endregion
-
     #region Properties
 
     private ObservableCollection<CategoryViewModel> _categories = [];
@@ -65,12 +57,9 @@ public class SaveLocationsViewModel : ViewModelBase
 
     #endregion
 
-    public SaveLocationsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) :
-        base(unitOfWork, downloadFileService, mapper)
+    public SaveLocationsViewModel(IAppService appService) : base(appService)
     {
-        _dbFileExtensions = [];
-
-        FileTypesViewModel = new FileTypesViewModel(unitOfWork, downloadFileService, mapper)
+        FileTypesViewModel = new FileTypesViewModel(appService)
         {
             DependsOnCategory = true
         };
@@ -90,7 +79,7 @@ public class SaveLocationsViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddEditCategoryWindowViewModel(UnitOfWork, DownloadFileService, Mapper)
+            var vm = new AddEditCategoryWindowViewModel(AppService)
             {
                 IsEditMode = false,
             };
@@ -116,9 +105,9 @@ public class SaveLocationsViewModel : ViewModelBase
         {
             if (owner == null || SelectedCategory == null)
                 return;
-            
+
             var selectedCategoryId = SelectedCategory.Id;
-            var vm = new AddEditCategoryWindowViewModel(UnitOfWork, DownloadFileService, Mapper)
+            var vm = new AddEditCategoryWindowViewModel(AppService)
             {
                 IsEditMode = true,
                 CategoryId = SelectedCategory?.Id,
@@ -128,7 +117,7 @@ public class SaveLocationsViewModel : ViewModelBase
             var result = await window.ShowDialog<bool?>(owner);
             if (result != true)
                 return;
-            
+
             await LoadCategoriesAsync();
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId);
         }
@@ -146,23 +135,46 @@ public class SaveLocationsViewModel : ViewModelBase
             if (SelectedCategory == null)
                 return;
 
-            var category = await UnitOfWork.CategoryRepository
+            var category = await AppService
+                .UnitOfWork
+                .CategoryRepository
                 .GetAsync(where: c => c.Id == SelectedCategory.Id,
                     includeProperties: ["CategorySaveDirectory", "FileExtensions", "DownloadFiles"]);
-            
+
             if (category == null)
                 return;
-            
+
             if (category.IsDefault)
                 return;
-            
-            UnitOfWork.CategorySaveDirectoryRepository.Delete(category.CategorySaveDirectory);
-            UnitOfWork.CategoryFileExtensionRepository.DeleteAll(category.FileExtensions);
-            UnitOfWork.DownloadFileRepository.DeleteAll(category.DownloadFiles);
-            UnitOfWork.CategoryRepository.Delete(category);
-            await UnitOfWork.SaveAsync();
 
-            await DownloadFileService.LoadFilesAsync();
+            AppService
+                .UnitOfWork
+                .CategorySaveDirectoryRepository
+                .Delete(category.CategorySaveDirectory);
+
+            AppService
+                .UnitOfWork
+                .CategoryFileExtensionRepository
+                .DeleteAll(category.FileExtensions);
+
+            AppService
+                .UnitOfWork
+                .DownloadFileRepository
+                .DeleteAll(category.DownloadFiles);
+
+            AppService
+                .UnitOfWork
+                .CategoryRepository
+                .Delete(category);
+
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
+
+            await AppService
+                .DownloadFileService
+                .LoadFilesAsync();
+
             await LoadCategoriesAsync();
         }
         catch (Exception ex)
@@ -176,10 +188,15 @@ public class SaveLocationsViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var categories = await UnitOfWork.CategoryRepository
+            var categories = await AppService
+                .UnitOfWork
+                .CategoryRepository
                 .GetAllAsync(includeProperties: ["CategorySaveDirectory"]);
 
-            var categoryViewModels = Mapper.Map<List<CategoryViewModel>>(categories);
+            var categoryViewModels = AppService
+                .Mapper
+                .Map<List<CategoryViewModel>>(categories);
+
             Categories = categoryViewModels.ToObservableCollection();
             SelectedCategory = Categories.FirstOrDefault();
 

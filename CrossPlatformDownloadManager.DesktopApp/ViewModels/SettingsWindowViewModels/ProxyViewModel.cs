@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using AutoMapper;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using System.Windows.Input;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
@@ -87,22 +87,65 @@ public class ProxyViewModel : ViewModelBase
 
     #endregion
 
-    public ProxyViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
-        unitOfWork, downloadFileService, mapper)
+    #region Commands
+
+    public ICommand? ChangeProxyModeCommand { get; }
+
+    #endregion
+
+    public ProxyViewModel(IAppService appService) : base(appService)
     {
-        GenerateProxyTypes();
+        ProxyTypes = Constants.ProxyTypes.ToObservableCollection();
+        SelectedProxyType = ProxyTypes.FirstOrDefault();
+
+        ChangeProxyModeCommand = ReactiveCommand.Create<string?>(ChangeProxyMode);
     }
 
-    private void GenerateProxyTypes()
+    private void ChangeProxyMode(string? toggleSwitchName)
     {
-        var proxyTypes = new List<string>
+        if (toggleSwitchName.IsNullOrEmpty())
+            return;
+
+        string? proxyMode = null;
+        switch (toggleSwitchName)
         {
-            "Http",
-            "Https",
-            "Socks 5",
+            case "DisableProxyToggleSwitch":
+            {
+                proxyMode = nameof(DisableProxy);
+                break;
+            }
+
+            case "UseSystemProxySettingsToggleSwitch":
+            {
+                proxyMode = nameof(UseSystemProxySettings);
+                break;
+            }
+
+            case "UseCustomProxyToggleSwitch":
+            {
+                proxyMode = nameof(UseCustomProxy);
+                break;
+            }
+        }
+
+        if (proxyMode.IsNullOrEmpty())
+            return;
+
+        var proxies = new List<string>
+        {
+            nameof(DisableProxy),
+            nameof(UseSystemProxySettings),
+            nameof(UseCustomProxy),
         };
 
-        ProxyTypes = proxyTypes.ToObservableCollection();
-        SelectedProxyType = ProxyTypes.FirstOrDefault();
+        proxies
+            .Where(proxy => !proxyMode!.Equals(proxy, StringComparison.OrdinalIgnoreCase))
+            .ToList()
+            .ForEach(proxy =>
+            {
+                var propertyValue = GetType().GetProperty(proxy)?.GetValue(this) as bool?;
+                if (propertyValue == true)
+                    GetType().GetProperty(proxy)?.SetValue(this, false);
+            });
     }
 }

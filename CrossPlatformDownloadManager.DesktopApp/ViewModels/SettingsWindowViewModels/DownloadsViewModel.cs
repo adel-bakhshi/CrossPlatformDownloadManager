@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using AutoMapper;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using System.Linq;
+using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
@@ -42,10 +42,29 @@ public class DownloadsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedDuplicateDownloadLinkAction, value);
     }
 
+    private ObservableCollection<int> _maximumConnectionsCount = [];
+
+    public ObservableCollection<int> MaximumConnectionsCount
+    {
+        get => _maximumConnectionsCount;
+        set => this.RaiseAndSetIfChanged(ref _maximumConnectionsCount, value);
+    }
+
+    private int _selectedMaximumConnectionsCount;
+
+    public int SelectedMaximumConnectionsCount
+    {
+        get => _selectedMaximumConnectionsCount;
+        set => this.RaiseAndSetIfChanged(ref _selectedMaximumConnectionsCount, value);
+    }
+
     #endregion
 
-    public DownloadsViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) : base(
-        unitOfWork, downloadFileService, mapper)
+    public DownloadsViewModel(IAppService appService) : base(appService)
     {
+        DuplicateDownloadLinkActions = Constants.DuplicateDownloadLinkActions.ToObservableCollection();
+        SelectedDuplicateDownloadLinkAction = DuplicateDownloadLinkActions.FirstOrDefault();
+        MaximumConnectionsCount = Constants.MaximumConnectionsCounts.ToObservableCollection();
+        SelectedMaximumConnectionsCount = MaximumConnectionsCount.FirstOrDefault();
     }
 }

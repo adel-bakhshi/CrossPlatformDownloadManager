@@ -105,6 +105,9 @@ public static class ExtensionMethods
         using var stream = AssetLoader.Open(uri);
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
+        reader.Close();
+        stream.Close();
+        
         return json.ConvertFromJson<T>();
     }
 

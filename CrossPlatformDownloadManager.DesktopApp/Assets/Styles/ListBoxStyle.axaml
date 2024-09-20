@@ -1,6 +1,7 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
+        xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels">
     <Design.PreviewWith>
@@ -162,7 +163,7 @@
             </Setter>
 
             <Setter Property="ItemTemplate">
-                <DataTemplate DataType="models:CategoryFileExtension">
+                <DataTemplate DataType="viewModels:CategoryFileExtensionViewModel">
                     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                             Padding="10"
                             Background="{DynamicResource PrimaryColor}">

@@ -24,11 +24,8 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AutoAddLinkFromSites")
-                        .HasMaxLength(500)
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("CategoryHeaderId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("CategorySaveDirectoryId")
                         .HasColumnType("INTEGER");
@@ -47,8 +44,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryHeaderId");
 
                     b.HasIndex("CategorySaveDirectoryId")
                         .IsUnique();
@@ -114,7 +109,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<string>("SaveDirectory")
                         .IsRequired()
-                        .HasMaxLength(300)
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -138,11 +133,11 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(300)
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DownloadPackage")
-                        .HasMaxLength(3000)
+                        .HasMaxLength(5000)
                         .HasColumnType("TEXT");
 
                     b.Property<float>("DownloadProgress")
@@ -184,7 +179,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasMaxLength(300)
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -252,12 +247,74 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.ToTable("DownloadQueues");
                 });
 
+            modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Settings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CustomProxySettings")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("DarkMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DuplicateDownloadLinkAction")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MaximumConnectionsCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("ProxyMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("ProxyType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowCompleteDownloadDialog")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowStartDownloadDialog")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("StartOnSystemStartup")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseBrowserExtension")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseDownloadCompleteSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseDownloadFailedSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseDownloadStoppedSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseQueueFinishedSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseQueueStartedSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseQueueStoppedSound")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseSystemNotifications")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Settings");
+                });
+
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Category", b =>
                 {
-                    b.HasOne("CrossPlatformDownloadManager.Data.Models.CategoryHeader", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("CategoryHeaderId");
-
                     b.HasOne("CrossPlatformDownloadManager.Data.Models.CategorySaveDirectory", "CategorySaveDirectory")
                         .WithOne("Category")
                         .HasForeignKey("CrossPlatformDownloadManager.Data.Models.Category", "CategorySaveDirectoryId");
@@ -296,11 +353,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.Navigation("DownloadFiles");
 
                     b.Navigation("FileExtensions");
-                });
-
-            modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.CategoryHeader", b =>
-                {
-                    b.Navigation("Categories");
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.CategorySaveDirectory", b =>

@@ -4,11 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
@@ -90,8 +88,7 @@ public class FileTypesViewModel : ViewModelBase
 
     #endregion
 
-    public FileTypesViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper)
-        : base(unitOfWork, downloadFileService, mapper)
+    public FileTypesViewModel(IAppService appService) : base(appService)
     {
         _dbFileExtensions = [];
 
@@ -110,7 +107,7 @@ public class FileTypesViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddEditFileTypeWindowViewModel(UnitOfWork, DownloadFileService, Mapper) { IsEditMode = false };
+            var vm = new AddEditFileTypeWindowViewModel(AppService) { IsEditMode = false };
             vm.SetSelectedCategory(CategoryId, DependsOnCategory);
             var window = new AddEditFileTypeWindow { DataContext = vm };
             var result = await window.ShowDialog<bool?>(owner);
@@ -133,7 +130,7 @@ public class FileTypesViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddEditFileTypeWindowViewModel(UnitOfWork, DownloadFileService, Mapper)
+            var vm = new AddEditFileTypeWindowViewModel(AppService)
             {
                 IsEditMode = true,
                 CategoryFileExtensionId = SelectedFileExtension?.Id
@@ -160,14 +157,22 @@ public class FileTypesViewModel : ViewModelBase
             if (SelectedFileExtension == null)
                 return;
 
-            var fileExtension = await UnitOfWork.CategoryFileExtensionRepository
+            var fileExtension = await AppService
+                .UnitOfWork
+                .CategoryFileExtensionRepository
                 .GetAsync(where: fe => fe.Id == SelectedFileExtension.Id);
 
             if (fileExtension == null)
                 return;
 
-            UnitOfWork.CategoryFileExtensionRepository.Delete(fileExtension);
-            await UnitOfWork.SaveAsync();
+            AppService
+                .UnitOfWork
+                .CategoryFileExtensionRepository
+                .Delete(fileExtension);
+            
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
 
             await LoadFileExtensionsAsync();
         }
@@ -187,7 +192,9 @@ public class FileTypesViewModel : ViewModelBase
             List<CategoryFileExtension> fileExtensions;
             if (DependsOnCategory)
             {
-                fileExtensions = await UnitOfWork.CategoryFileExtensionRepository
+                fileExtensions = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
                     .GetAllAsync(where: fe => fe.CategoryId == CategoryId,
                         orderBy: o => o.OrderBy(fe => fe.Category.Id)
                             .ThenBy(fe => fe.Extension),
@@ -195,13 +202,18 @@ public class FileTypesViewModel : ViewModelBase
             }
             else
             {
-                fileExtensions = await UnitOfWork.CategoryFileExtensionRepository
+                fileExtensions = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
                     .GetAllAsync(orderBy: o => o.OrderBy(fe => fe.Category.Id)
                             .ThenBy(fe => fe.Extension),
                         includeProperties: ["Category"]);
             }
 
-            var fileExtensionViewModels = Mapper.Map<List<CategoryFileExtensionViewModel>>(fileExtensions);
+            var fileExtensionViewModels = AppService
+                .Mapper
+                .Map<List<CategoryFileExtensionViewModel>>(fileExtensions);
+            
             _dbFileExtensions.AddRange(fileExtensionViewModels);
             FilterFileExtensions();
         }

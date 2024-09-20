@@ -1,7 +1,8 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
@@ -15,18 +16,23 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
-        var serviceProvider = this.GetServiceProvider();
-        var mainWindow = serviceProvider.GetService<MainWindow>();
-        var viewModel = serviceProvider.GetService<MainWindowViewModel>();
-
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        try
         {
-            mainWindow!.DataContext = viewModel;
-            desktop.MainWindow = mainWindow;
-        }
+            var serviceProvider = this.TryGetServiceProvider();
+            var mainWindow = serviceProvider?.GetService<MainWindow>();
+            if (mainWindow == null)
+                throw new NullReferenceException(nameof(mainWindow));
 
-        base.OnFrameworkInitializationCompleted();
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.MainWindow = mainWindow;
+
+            base.OnFrameworkInitializationCompleted();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

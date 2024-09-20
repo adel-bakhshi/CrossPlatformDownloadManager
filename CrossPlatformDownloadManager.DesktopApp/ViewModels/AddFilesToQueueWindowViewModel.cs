@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -47,8 +45,7 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddFilesToQueueWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
-        IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
+    public AddFilesToQueueWindowViewModel(IAppService appService) : base(appService)
     {
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
     }
@@ -74,7 +71,9 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
 
     private ObservableCollection<DownloadFileViewModel> GetDownloadFiles()
     {
-        var downloadFiles = DownloadFileService.DownloadFiles
+        var downloadFiles = AppService
+            .DownloadFileService
+            .DownloadFiles
             .Where(df => (df.DownloadQueueId ?? 0) != DownloadQueueId)
             .ToObservableCollection();
 

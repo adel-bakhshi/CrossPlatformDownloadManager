@@ -4,11 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -96,8 +94,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
     #endregion
 
-    public AddEditFileTypeWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService,
-        IMapper mapper) : base(unitOfWork, downloadFileService, mapper)
+    public AddEditFileTypeWindowViewModel(IAppService appService) : base(appService)
     {
         LoadCategoriesAsync().GetAwaiter();
 
@@ -121,7 +118,9 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
             if (IsEditMode)
             {
-                var fileExtension = await UnitOfWork.CategoryFileExtensionRepository
+                var fileExtension = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
                     .GetAsync(where: fe => fe.Id == CategoryFileExtensionId);
 
                 if (fileExtension == null)
@@ -130,12 +129,16 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
                 fileExtension.Extension = Extension!;
                 fileExtension.Alias = Alias!;
 
-                await UnitOfWork.SaveAsync();
+                await AppService
+                    .UnitOfWork
+                    .SaveAsync();
             }
             else
             {
                 // If there is a CategoryFileExtension with Extension and CategoryId entries, it should not be added to the database 
-                var fileExtension = await UnitOfWork.CategoryFileExtensionRepository
+                var fileExtension = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
                     .GetAsync(where: fe =>
                         fe.Extension.ToLower() == Extension.ToLower() && fe.CategoryId == SelectedCategory.Id);
 
@@ -149,8 +152,14 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
                     CategoryId = SelectedCategory.Id
                 };
 
-                await UnitOfWork.CategoryFileExtensionRepository.AddAsync(fileExtension);
-                await UnitOfWork.SaveAsync();
+                await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
+                    .AddAsync(fileExtension);
+                
+                await AppService
+                    .UnitOfWork
+                    .SaveAsync();
             }
 
             owner.Close(true);
@@ -182,8 +191,15 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var categories = await UnitOfWork.CategoryRepository.GetAllAsync();
-            var categoryViewModels = Mapper.Map<List<CategoryViewModel>>(categories);
+            var categories = await AppService
+                .UnitOfWork
+                .CategoryRepository
+                .GetAllAsync();
+            
+            var categoryViewModels = AppService
+                .Mapper
+                .Map<List<CategoryViewModel>>(categories);
+            
             Categories = categoryViewModels.ToObservableCollection();
             if (!IsEditMode)
                 SelectedCategory = Categories.FirstOrDefault();
@@ -199,7 +215,9 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var fileExtension = await UnitOfWork.CategoryFileExtensionRepository
+            var fileExtension = await AppService
+                .UnitOfWork
+                .CategoryFileExtensionRepository
                 .GetAsync(where: fe => fe.Id == CategoryFileExtensionId);
 
             if (fileExtension == null)

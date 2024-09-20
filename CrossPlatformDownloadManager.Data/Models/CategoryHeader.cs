@@ -10,9 +10,15 @@ public class CategoryHeader
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required] [MaxLength(100)] [JsonProperty("title")] public string Title { get; set; } = "";
+    [Required]
+    [MaxLength(100)]
+    [JsonProperty("title")]
+    public string Title { get; set; } = string.Empty;
 
-    [Required] [MaxLength(300)] [JsonProperty("icon")] public string Icon { get; set; } = "";
+    [Required]
+    [MaxLength(300)]
+    [JsonProperty("icon")]
+    public string Icon { get; set; } = string.Empty;
 
-    public ICollection<Category> Categories { get; set; } = new List<Category>();
+    [NotMapped] public ICollection<Category> Categories { get; set; } = [];
 }

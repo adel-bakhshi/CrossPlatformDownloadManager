@@ -46,8 +46,21 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         params string[] includeProperties)
     {
-        return (await GetEntitiesAsync<T>(where: where, orderBy: orderBy, includeProperties: includeProperties))
-            .FirstOrDefault();
+        var query = Table.AsQueryable();
+
+        if (includeProperties.Length != 0)
+        {
+            foreach (var includeProperty in includeProperties)
+                query = query.Include(includeProperty);
+        }
+
+        if (where != null)
+            query = query.Where(where);
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        return await query.FirstOrDefaultAsync();
     }
 
     public async Task<TR?> GetAsync<TR>(Expression<Func<T, bool>>? where = null,
@@ -58,9 +71,22 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (select == null)
             return default;
 
-        return (await GetEntitiesAsync(where: where, orderBy: orderBy, select: select,
-                includeProperties: includeProperties))
-            .FirstOrDefault();
+        var query = Table.AsQueryable();
+
+        if (includeProperties.Length != 0)
+        {
+            foreach (var includeProperty in includeProperties)
+                query = query.Include(includeProperty);
+        }
+
+        if (where != null)
+            query = query.Where(where);
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        var data = await query.ToListAsync();
+        return data.Select(select).FirstOrDefault();
     }
 
     public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? where = null,
@@ -68,8 +94,24 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         bool distinct = false,
         params string[] includeProperties)
     {
-        return await GetEntitiesAsync<T>(where: where, orderBy: orderBy, distinct: distinct,
-            includeProperties: includeProperties);
+        var query = Table.AsQueryable();
+
+        if (includeProperties.Length != 0)
+        {
+            foreach (var includeProperty in includeProperties)
+                query = query.Include(includeProperty);
+        }
+
+        if (where != null)
+            query = query.Where(where);
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        if (distinct)
+            query = query.Distinct();
+
+        return await query.ToListAsync();
     }
 
     public async Task<List<TR>> GetAllAsync<TR>(Expression<Func<T, bool>>? where = null,
@@ -81,8 +123,25 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (select == null)
             return [];
 
-        return await GetEntitiesAsync(where: where, orderBy: orderBy, select: select, distinct: distinct,
-            includeProperties: includeProperties);
+        var query = Table.AsQueryable();
+
+        if (includeProperties.Length != 0)
+        {
+            foreach (var includeProperty in includeProperties)
+                query = query.Include(includeProperty);
+        }
+
+        if (where != null)
+            query = query.Where(where);
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        if (distinct)
+            query = query.Distinct();
+
+        var data = await query.ToListAsync();
+        return data.Select(select).ToList();
     }
 
     public void Delete(T? entity)
@@ -102,35 +161,39 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         Table.RemoveRange(objects);
     }
 
-    #region Helpers
+    public async Task<int> GetCountAsync(Expression<Func<T, bool>>? where = null, bool distinct = false,
+        params string[] includeProperties)
+    {
+        var query = Table.AsQueryable();
 
-    private async Task<List<TR>> GetEntitiesAsync<TR>(Expression<Func<T, bool>>? where = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-        Func<T, TR>? select = null,
+        if (where != null)
+            query = query.Where(where);
+
+        if (distinct)
+            query = query.Distinct();
+
+        return await query.CountAsync();
+    }
+
+    public async Task<TResult> GetMaxAsync<TResult>(Expression<Func<T, TResult>> selector,
+        Expression<Func<T, bool>>? where = null,
         bool distinct = false,
         params string[] includeProperties)
     {
-        var table = Table.AsQueryable();
-
-        if (where != null)
-            table = table.Where(where);
-
-        if (orderBy != null)
-            table = orderBy(table);
-
-        if (includeProperties.Any())
+        var query = Table.AsQueryable();
+        
+        if (includeProperties.Length != 0)
         {
             foreach (var includeProperty in includeProperties)
-                table = table.Include(includeProperty);
+                query = query.Include(includeProperty);
         }
 
+        if (where != null)
+            query = query.Where(where);
+
         if (distinct)
-            table = table.Distinct();
+            query = query.Distinct();
 
-        var data = await table.ToListAsync();
-        var result = select != null ? data.Select(select).ToList() : data.Cast<TR>().ToList();
-        return result;
+        return await query.MaxAsync(selector);
     }
-
-    #endregion
 }

@@ -1,11 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -90,15 +89,14 @@ public class SettingsWindowViewModel : ViewModelBase
 
     #endregion
 
-    public SettingsWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper) :
-        base(unitOfWork, downloadFileService, mapper)
+    public SettingsWindowViewModel(IAppService appService) : base(appService)
     {
-        GeneralsViewModel = new GeneralsViewModel(unitOfWork, downloadFileService, mapper);
-        FileTypesViewModel = new FileTypesViewModel(unitOfWork, downloadFileService, mapper);
-        SaveLocationsViewModel = new SaveLocationsViewModel(unitOfWork, downloadFileService, mapper);
-        DownloadsViewModel = new DownloadsViewModel(unitOfWork, downloadFileService, mapper);
-        ProxyViewModel = new ProxyViewModel(unitOfWork, downloadFileService, mapper);
-        NotificationsViewModel = new NotificationsViewModel(unitOfWork, downloadFileService, mapper);
+        GeneralsViewModel = new GeneralsViewModel(appService);
+        FileTypesViewModel = new FileTypesViewModel(appService);
+        SaveLocationsViewModel = new SaveLocationsViewModel(appService);
+        DownloadsViewModel = new DownloadsViewModel(appService);
+        ProxyViewModel = new ProxyViewModel(appService);
+        NotificationsViewModel = new NotificationsViewModel(appService);
 
         GenerateTabs();
 
@@ -129,6 +127,17 @@ public class SettingsWindowViewModel : ViewModelBase
 
     private void Cancel(Window? owner)
     {
-        throw new System.NotImplementedException();
+        // TODO: Show message box
+        try
+        {
+            if (owner == null)
+                return;
+            
+            owner.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }

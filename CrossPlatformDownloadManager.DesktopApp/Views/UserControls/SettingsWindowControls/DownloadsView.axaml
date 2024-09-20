@@ -123,13 +123,13 @@
                                    IconColor="{DynamicResource IconColor}"
                                    IconSize="{DynamicResource SmallIconSize}"
                                    BorderThickness="0"
-                                   SelectedItem="{Binding SelectedDuplicateDownloadLinkAction}"
-                                   ItemsSource="{Binding DuplicateDownloadLinkActions}"
+                                   SelectedItem="{Binding SelectedMaximumConnectionsCount}"
+                                   ItemsSource="{Binding MaximumConnectionsCount}"
                                    MaxDropDownHeight="300"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Stretch">
                     <cc:CustomComboBox.ItemTemplate>
-                        <DataTemplate DataType="x:String">
+                        <DataTemplate DataType="x:Int32">
                             <TextBlock Text="{Binding}" />
                         </DataTemplate>
                     </cc:CustomComboBox.ItemTemplate>

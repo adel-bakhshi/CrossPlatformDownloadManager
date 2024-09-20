@@ -5,26 +5,34 @@ namespace CrossPlatformDownloadManager.Data.DbContext;
 
 public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
+    #region Private Fields
+
+    private string _dbPath;
+
+    #endregion
+
+    #region Properties
+
     public DbSet<CategoryHeader> CategoryHeaders { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<CategoryFileExtension> CategoryFileExtensions { get; set; }
     public DbSet<CategorySaveDirectory> CategorySaveDirectories { get; set; }
     public DbSet<DownloadFile> DownloadFiles { get; set; }
     public DbSet<DownloadQueue> DownloadQueues { get; set; }
+    public DbSet<Settings> Settings { get; set; }
 
-    public string DbPath { get; }
-    
+    #endregion
+
     public DownloadManagerDbContext()
     {
-        var dbPath = Path.Combine(Environment.CurrentDirectory, "ApplicationData.db");
-        DbPath = dbPath;
+        _dbPath = Path.Combine(Environment.CurrentDirectory, "ApplicationData.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.UseSqlite($"Data Source={DbPath}");
+        optionsBuilder.UseSqlite($"Data Source={_dbPath}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,7 +79,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
             options.HasOne(df => df.DownloadQueue)
                 .WithMany(dq => dq.DownloadFiles)
                 .HasForeignKey(df => df.DownloadQueueId);
-            
+
             options.HasOne(df => df.Category)
                 .WithMany(c => c.DownloadFiles)
                 .HasForeignKey(df => df.CategoryId);

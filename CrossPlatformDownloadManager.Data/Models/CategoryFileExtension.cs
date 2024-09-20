@@ -10,9 +10,15 @@ public class CategoryFileExtension
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required] [MaxLength(100)] [JsonProperty("extension")] public string Extension { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(100)]
+    [JsonProperty("extension")]
+    public string Extension { get; set; } = string.Empty;
 
-    [Required] [MaxLength(100)] [JsonProperty("alias")] public string Alias { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(100)]
+    [JsonProperty("alias")]
+    public string Alias { get; set; } = string.Empty;
 
     public int? CategoryId { get; set; }
 

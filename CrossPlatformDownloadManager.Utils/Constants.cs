@@ -11,7 +11,8 @@ public static class Constants
     public const long TB = GB * 1024;
 
     // Turn off computer modes
-    public static readonly List<string> TurnOffComputerModes = Enum.GetNames(typeof(TurnOffComputerMode))
+    public static readonly List<string> TurnOffComputerModes = Enum
+        .GetNames(typeof(TurnOffComputerMode))
         .Select(n =>
         {
             if (n.Equals(Enum.GetName(TurnOffComputerMode.Shutdown)))
@@ -23,13 +24,13 @@ public static class Constants
 
     // Speed limiter units
     public static readonly List<string> SpeedLimiterUnits = ["KB", "MB"];
-    
+
     // Times of day
     public static readonly List<string> TimesOfDay = ["AM", "PM"];
-    
+
     // General category title
     public const string GeneralCategoryTitle = "General";
-    
+
     // Unknown file type
     public const string UnknownFileType = "Unknown";
 
@@ -38,4 +39,33 @@ public static class Constants
 
     public const string UnfinishedCategoryHeaderTitle = "Unfinished";
     public const string FinishedCategoryHeaderTitle = "Finished";
+
+    public static readonly List<string> DuplicateDownloadLinkActions =
+    [
+        "Show the dialog and let me choose",
+        "Add the duplicate with a number after its file name",
+        "Add the duplicate and overwrite existing file",
+        "if download file complete, show download complete dialog. Otherwise resume it"
+    ];
+
+    public static readonly List<int> MaximumConnectionsCounts =
+    [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+    ];
+
+    public static readonly List<string> ProxyTypes = Enum
+        .GetNames(typeof(ProxyType))
+        .Select(pt =>
+        {
+            if (pt.Equals(Enum.GetName(ProxyType.Socks5)))
+                pt = "Socks 5";
+            
+            return pt;
+        })
+        .ToList();
 }

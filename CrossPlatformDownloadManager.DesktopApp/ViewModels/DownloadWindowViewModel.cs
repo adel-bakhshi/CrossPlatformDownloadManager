@@ -2,11 +2,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
@@ -101,8 +99,7 @@ public class DownloadWindowViewModel : ViewModelBase
 
     #endregion
 
-    public DownloadWindowViewModel(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper,
-        DownloadFileViewModel downloadFile) : base(unitOfWork, downloadFileService, mapper)
+    public DownloadWindowViewModel(IAppService appService, DownloadFileViewModel downloadFile) : base(appService)
     {
         DownloadFile = downloadFile;
         ShowStatusView = true;
@@ -122,7 +119,10 @@ public class DownloadWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            await DownloadFileService.StopDownloadFileAsync(DownloadFile);
+            await AppService
+                .DownloadFileService
+                .StopDownloadFileAsync(DownloadFile);
+            
             owner.Close();
         }
         catch (Exception ex)
@@ -138,12 +138,18 @@ public class DownloadWindowViewModel : ViewModelBase
         {
             if (IsPaused)
             {
-                DownloadFileService.ResumeDownloadFile(DownloadFile);
+                AppService
+                    .DownloadFileService
+                    .ResumeDownloadFile(DownloadFile);
+                
                 IsPaused = false;
             }
             else
             {
-                DownloadFileService.PauseDownloadFile(DownloadFile);
+                AppService
+                    .DownloadFileService
+                    .PauseDownloadFile(DownloadFile);
+                
                 IsPaused = true;
             }
         }
@@ -158,7 +164,9 @@ public class DownloadWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            await DownloadFileService.StartDownloadFileAsync(DownloadFile, window);
+            await AppService
+                .DownloadFileService
+                .StartDownloadFileAsync(DownloadFile, window);
         }
         catch (Exception ex)
         {
@@ -208,11 +216,15 @@ public class DownloadWindowViewModel : ViewModelBase
             var unit = _speedUnit.IsNullOrEmpty() ? 0 :
                 _speedUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
             var speed = (long)(_limitSpeed == null ? 0 : _limitSpeed.Value * unit);
-            DownloadFileService.LimitDownloadFileSpeed(DownloadFile, speed);
+            AppService
+                .DownloadFileService
+                .LimitDownloadFileSpeed(DownloadFile, speed);
         }
         else
         {
-            DownloadFileService.LimitDownloadFileSpeed(DownloadFile, 0);
+            AppService
+                .DownloadFileService
+                .LimitDownloadFileSpeed(DownloadFile, 0);
         }
     }
 

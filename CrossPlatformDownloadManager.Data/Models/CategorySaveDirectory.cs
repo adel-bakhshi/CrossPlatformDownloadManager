@@ -13,5 +13,5 @@ public class CategorySaveDirectory
 
     [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
 
-    [MaxLength(300)] public string SaveDirectory { get; set; } = "";
+    [MaxLength(500)] public string SaveDirectory { get; set; } = string.Empty;
 }

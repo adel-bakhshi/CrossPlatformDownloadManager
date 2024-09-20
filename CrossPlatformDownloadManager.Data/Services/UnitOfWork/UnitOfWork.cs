@@ -5,7 +5,7 @@ using CrossPlatformDownloadManager.Data.Services.Repository.Services;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace CrossPlatformDownloadManager.Data.UnitOfWork;
+namespace CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -23,13 +23,13 @@ public class UnitOfWork : IUnitOfWork
     public IDownloadQueueRepository DownloadQueueRepository { get; }
     public ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
     public IDownloadFileRepository DownloadFileRepository { get; }
+    public ISettingsRepository SettingsRepository { get; }
 
     #endregion
 
     public UnitOfWork()
     {
         _dbContext = new DownloadManagerDbContext();
-        CreateDatabaseAsync().GetAwaiter().GetResult();
 
         CategoryHeaderRepository = new CategoryHeaderRepository(_dbContext!);
         CategoryRepository = new CategoryRepository(_dbContext!);
@@ -37,11 +37,7 @@ public class UnitOfWork : IUnitOfWork
         CategorySaveDirectoryRepository = new CategorySaveDirectoryRepository(_dbContext!);
         DownloadQueueRepository = new DownloadQueueRepository(_dbContext!);
         DownloadFileRepository = new DownloadFileRepository(_dbContext!);
-    }
-
-    public void Dispose()
-    {
-        _dbContext?.Dispose();
+        SettingsRepository = new SettingsRepository(_dbContext!);
     }
 
     public async Task SaveAsync()
@@ -87,59 +83,20 @@ public class UnitOfWork : IUnitOfWork
             var categoryInDb = await CategoryRepository
                 .GetAsync(where: c => c.Title.ToLower() == category.Title.ToLower());
 
-            if (categoryInDb != null)
-                continue;
-            
-            await CategoryRepository.AddAsync(category);
-            await SaveAsync();
+            if (categoryInDb == null)
+            {
+                await CategoryRepository.AddAsync(category);
+                await SaveAsync();
 
-            await CreateFileTypesAsync(category.Id, fileExtensions);
-            await CreateSaveDirectoryAsync(category);
+                categoryInDb = category;
+            }
+
+            await CreateFileTypesAsync(categoryInDb.Id, fileExtensions);
+            await CreateSaveDirectoryAsync(categoryInDb);
         }
     }
 
-    private async Task CreateFileTypesAsync(int categoryId, List<CategoryFileExtension> extensions)
-    {
-        var fileExtensions = await CategoryFileExtensionRepository
-            .GetAllAsync(where: fe => fe.CategoryId == categoryId);
-        
-        if (fileExtensions.Count > 0)
-            CategoryFileExtensionRepository.DeleteAll(fileExtensions);
-
-        fileExtensions = extensions
-            .Select(fe =>
-            {
-                fe.CategoryId = categoryId;
-                return fe;
-            })
-            .ToList();
-
-        await CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
-        await SaveAsync();
-    }
-
-    private async Task CreateSaveDirectoryAsync(Category category)
-    {
-        var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var savePath = !category.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase)
-            ? Path.Combine(downloadFolderPath, "Downloads", "CDM", category.Title)
-            : Path.Combine(downloadFolderPath, "Downloads", "CDM");
-
-        var saveDirectory = new CategorySaveDirectory
-        {
-            CategoryId = category.Id,
-            SaveDirectory = savePath,
-        };
-
-        await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
-        await SaveAsync();
-
-        category.CategorySaveDirectoryId = saveDirectory.Id;
-        await CategoryRepository.UpdateAsync(category);
-        await SaveAsync();
-    }
-
-    private async Task CreateDatabaseAsync()
+    public async Task CreateDatabaseAsync()
     {
         try
         {
@@ -156,4 +113,70 @@ public class UnitOfWork : IUnitOfWork
             Console.WriteLine(ex);
         }
     }
+
+    public void Dispose()
+    {
+        _dbContext?.Dispose();
+    }
+
+    #region Helpers
+
+    private async Task CreateFileTypesAsync(int categoryId, List<CategoryFileExtension> extensions)
+    {
+        var fileExtensions = await CategoryFileExtensionRepository
+            .GetAllAsync(where: fe => fe.CategoryId == categoryId);
+
+        if (fileExtensions.Count == 0)
+        {
+            fileExtensions = extensions
+                .Select(fe =>
+                {
+                    fe.CategoryId = categoryId;
+                    return fe;
+                })
+                .ToList();
+        }
+        else
+        {
+            var extensionsInDb = fileExtensions
+                .Select(fe => fe.Extension.ToLower())
+                .ToList();
+
+            fileExtensions = extensions
+                .Where(fe => !extensionsInDb.Contains(fe.Extension.ToLower()))
+                .ToList();
+        }
+
+        await CategoryFileExtensionRepository.AddRangeAsync(fileExtensions);
+        await SaveAsync();
+    }
+
+    private async Task CreateSaveDirectoryAsync(Category category)
+    {
+        var saveDirectory = await CategorySaveDirectoryRepository
+            .GetAsync(where: sd => sd.CategoryId == category.Id);
+
+        if (saveDirectory != null)
+            return;
+
+        var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var savePath = !category.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase)
+            ? Path.Combine(downloadFolderPath, "Downloads", "CDM", category.Title)
+            : Path.Combine(downloadFolderPath, "Downloads", "CDM");
+
+        saveDirectory = new CategorySaveDirectory
+        {
+            CategoryId = category.Id,
+            SaveDirectory = savePath,
+        };
+
+        await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
+        await SaveAsync();
+
+        category.CategorySaveDirectoryId = saveDirectory.Id;
+        await CategoryRepository.UpdateAsync(category);
+        await SaveAsync();
+    }
+
+    #endregion
 }

@@ -6,8 +6,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.UnitOfWork;
+using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -129,13 +130,11 @@ public partial class FilesView : UserControl
         try
         {
             var serviceProvider = this.GetServiceProvider();
-            var unitOfWork = serviceProvider.GetService<IUnitOfWork>();
-            var downloadFileService = serviceProvider.GetService<IDownloadFileService>();
-            var mapper = serviceProvider.GetService<IMapper>();
-            if (unitOfWork == null || downloadFileService == null || mapper == null)
+            var appService = serviceProvider.GetService<IAppService>();
+            if (appService == null)
                 return;
             
-            var vm = new AddFilesToQueueWindowViewModel(unitOfWork, downloadFileService, mapper)
+            var vm = new AddFilesToQueueWindowViewModel(appService)
             {
                 DownloadQueueId = GetValue(DownloadQueueIdProperty),
             };

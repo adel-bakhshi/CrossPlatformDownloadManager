@@ -7,8 +7,8 @@
     <Color x:Key="TextColor">#FFF</Color>
     <Color x:Key="CategoryItemHoverColor">#25E6C9</Color>
     <Color x:Key="TransparentColor">#00000000</Color>
-    <Color x:Key="MenuBgColor">#1C1420</Color>
-    <Color x:Key="MenuItemBgOnHoverColor">#201824</Color>
+    <Color x:Key="MenuBackgroundColor">#1C1420</Color>
+    <Color x:Key="MenuItemOnHoverBackgroundColor">#201824</Color>
     <Color x:Key="LoadingColor">#980C0C</Color>
     <Color x:Key="IconColor">#3A58C2</Color>
 
@@ -74,7 +74,7 @@
         <LinearGradientBrush.GradientStops>
             <GradientStop Color="#14041C"
                           Offset="0" />
-            <GradientStop Color="#00372B2B"
+            <GradientStop Color="#372B2B"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>

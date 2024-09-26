@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
+        xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
         mc:Ignorable="d"
         d:DesignWidth="1280"
         d:DesignHeight="720"
@@ -16,6 +17,194 @@
         Height="720"
         MinWidth="1280"
         MinHeight="720">
+
+    <!-- Styles -->
+    <Window.Styles>
+        <Style Selector="Button.queueListAction">
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="MinWidth"
+                    Value="0" />
+            <Setter Property="MinHeight"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+
+            <!-- Template -->
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Margin="{TemplateBinding Padding}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Opacity"
+                        Value="0.8" />
+            </Style>
+
+            <Style Selector="^:pressed">
+                <Setter Property="Opacity"
+                        Value="0.7" />
+            </Style>
+        </Style>
+    </Window.Styles>
+
+    <!-- Resources -->
+    <Window.Resources>
+        <Flyout x:Key="QueuesListFlyout"
+                Placement="BottomEdgeAlignedRight"
+                ShowMode="Transient"
+                VerticalOffset="5">
+            <StackPanel Orientation="Vertical"
+                        Spacing="5"
+                        Width="230"
+                        Margin="0, 8">
+                <!-- Title -->
+                <TextBlock Text="Your Queues"
+                           FontWeight="Bold"
+                           Margin="8, 0" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 0" />
+
+                <!-- Queues list -->
+                <ItemsControl ItemsSource="{Binding DownloadQueues}">
+                    <ItemsControl.Styles>
+                        <Style Selector="ItemsControl">
+                            <Setter Property="Margin"
+                                    Value="0" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Setter Property="Background"
+                                    Value="{DynamicResource TransparentColor}" />
+                            <Setter Property="MinHeight"
+                                    Value="0" />
+                            <Setter Property="MinWidth"
+                                    Value="0" />
+                            <Setter Property="CornerRadius"
+                                    Value="0" />
+                            <Setter Property="ClipToBounds"
+                                    Value="False" />
+                            <Setter Property="HorizontalAlignment"
+                                    Value="Stretch" />
+                        </Style>
+                    </ItemsControl.Styles>
+
+                    <!-- ItemsPanel -->
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"
+                                        Spacing="0" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <!-- ItemTemplate -->
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="viewModels:DownloadQueueViewModel">
+                            <Border Name="DownloadQueueMainBorder"
+                                    Padding="8, 5">
+                                <!-- Styles -->
+                                <Border.Styles>
+                                    <Style Selector="Border#DownloadQueueMainBorder">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource TransparentColor}" />
+
+                                        <Style Selector="^:pointerover">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                        </Style>
+                                    </Style>
+                                </Border.Styles>
+
+                                <!-- Content -->
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <!-- Queue title -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Title}"
+                                               HorizontalAlignment="Stretch"
+                                               VerticalAlignment="Center" />
+
+                                    <!-- Action buttons -->
+                                    <StackPanel Grid.Column="1"
+                                                Spacing="5"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <!-- Start/Stop queue button -->
+                                        <Button Classes="queueListAction"
+                                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                                CommandParameter="{Binding}">
+                                            <PathIcon Width="16"
+                                                      Height="16"
+                                                      Classes.isRunning="{Binding IsRunning}">
+                                                <PathIcon.Styles>
+                                                    <Style Selector="PathIcon">
+                                                        <Setter Property="Data"
+                                                                Value="{DynamicResource StartQueueIcon}" />
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SuccessGradientBrush}" />
+
+                                                        <Style Selector="^.isRunning">
+                                                            <Setter Property="Data"
+                                                                    Value="{DynamicResource StopQueueIcon}" />
+                                                            <Setter Property="Foreground"
+                                                                    Value="{DynamicResource DangerGradientBrush}" />
+                                                        </Style>
+                                                    </Style>
+                                                </PathIcon.Styles>
+                                            </PathIcon>
+                                        </Button>
+
+                                        <!-- Show details button -->
+                                        <Button Classes="queueListAction"
+                                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowDownloadQueueDetailsCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                                CommandParameter="{Binding $parent[Window]}">
+                                            <PathIcon Width="16"
+                                                      Height="16"
+                                                      Data="{DynamicResource ShowQueueDetailsIcon}"
+                                                      Foreground="{DynamicResource InfoGradientBrush}" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 0" />
+
+                <!-- Add new queue button -->
+                <Button Classes="button success"
+                        Margin="8, 0">
+                    Add new queue
+                </Button>
+            </StackPanel>
+        </Flyout>
+    </Window.Resources>
+
+    <!-- Main Content -->
     <Grid RowDefinitions="Auto, *, Auto">
         <!-- Top bar -->
         <Border Grid.Row="0"
@@ -51,19 +240,20 @@
                             <MenuItem Header="Add Url"
                                       Classes="listItem">
                             </MenuItem>
-                            <MenuItem Header="Add Url from clipboard"
-                                      Classes="listItem">
-                            </MenuItem>
+
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
+
                             <MenuItem Header="Export"
                                       Classes="listItem">
                             </MenuItem>
                             <MenuItem Header="Import"
                                       Classes="listItem">
                             </MenuItem>
+
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
+
                             <MenuItem Header="Exit"
                                       Classes="listItem">
                             </MenuItem>
@@ -94,7 +284,7 @@
                 <!-- Search box -->
                 <cc:CustomTextBox Grid.Row="0"
                                   Grid.Column="1"
-                                  Width="240"
+                                  Width="250"
                                   Background="{DynamicResource SecondaryColor}"
                                   Watermark="Search in the list"
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
@@ -205,7 +395,7 @@
                                        Width="1"
                                        VerticalAlignment="Stretch" />
 
-                            <!-- Settings, Schedule, Queues and Share -->
+                            <!-- Settings, Queues and Share -->
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
                                 <uc:ActionButton Text="Settings"
@@ -214,13 +404,10 @@
                                                  Command="{Binding OpenSettingsWindowCommand}"
                                                  CommandParameter="{Binding $parent[Window]}" />
 
-                                <uc:ActionButton Text="Schedule"
-                                                 IconData="{DynamicResource Schedule}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}" />
-
                                 <uc:ActionButton Text="Queues"
                                                  IconData="{DynamicResource Queues}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 Flyout="{StaticResource QueuesListFlyout}" />
 
                                 <uc:ActionButton Text="Share"
                                                  IconData="{DynamicResource Share}"
@@ -299,9 +486,11 @@
                                             <StackPanel VerticalAlignment="Center"
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
-                                                        IsVisible="{Binding IsDownloading}">
+                                                        IsVisible="{Binding IsDownloading}"
+                                                        Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:00.00}%}" />
                                                 <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                                             Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -309,10 +498,12 @@
                                             <StackPanel VerticalAlignment="Center"
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
-                                                        IsVisible="{Binding IsPaused}">
+                                                        IsVisible="{Binding IsPaused}"
+                                                        Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgress, StringFormat={}Paused - {0:00.00}%}"
                                                            Foreground="{DynamicResource WarningGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
+                                                             Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -320,10 +511,12 @@
                                             <StackPanel VerticalAlignment="Center"
                                                         HorizontalAlignment="Stretch"
                                                         Margin="5, 0"
-                                                        IsVisible="{Binding IsError}">
+                                                        IsVisible="{Binding IsError}"
+                                                        Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgress, StringFormat={}Error - {0:00.00}%}"
                                                            Foreground="{DynamicResource DangerGradientBrush}" />
                                                 <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
+                                                             Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>

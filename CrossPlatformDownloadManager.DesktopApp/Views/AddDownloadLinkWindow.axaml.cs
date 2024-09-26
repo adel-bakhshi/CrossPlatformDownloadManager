@@ -32,6 +32,9 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 
     private async void GetUrlInfo(object? sender, EventArgs e)
     {
+        if (ViewModel == null)
+            return;
+        
         _urlTextChangedTimer.Stop();
         await ViewModel.GetUrlInfoAsync();
     }

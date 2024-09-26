@@ -8,7 +8,6 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -109,25 +108,37 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
+
+    public ObservableCollection<DownloadQueueViewModel> DownloadQueues
+    {
+        get => _downloadQueues;
+        set => this.RaiseAndSetIfChanged(ref _downloadQueues, value);
+    }
+
     #endregion
 
     #region Commands
 
-    public ICommand SelectAllRowsCommand { get; }
+    public ICommand? SelectAllRowsCommand { get; }
 
-    public ICommand AddNewLinkCommand { get; }
+    public ICommand? AddNewLinkCommand { get; }
 
-    public ICommand ResumeDownloadCommand { get; }
+    public ICommand? ResumeDownloadCommand { get; }
 
-    public ICommand StopDownloadCommand { get; }
+    public ICommand? StopDownloadCommand { get; }
 
-    public ICommand StopAllDownloadsCommand { get; }
+    public ICommand? StopAllDownloadsCommand { get; }
 
-    public ICommand DeleteDownloadFilesCommand { get; }
+    public ICommand? DeleteDownloadFilesCommand { get; }
 
-    public ICommand DeleteCompletedDownloadFilesCommand { get; }
+    public ICommand? DeleteCompletedDownloadFilesCommand { get; }
 
-    public ICommand OpenSettingsWindowCommand { get; }
+    public ICommand? OpenSettingsWindowCommand { get; }
+
+    public ICommand? StartStopDownloadQueueCommand { get; }
+
+    public ICommand? ShowDownloadQueueDetailsCommand { get; }
 
     #endregion
 
@@ -137,9 +148,10 @@ public class MainWindowViewModel : ViewModelBase
         _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
         _updateSpeedTimer.Start();
 
-        LoadCategoriesAsync().GetAwaiter().GetResult();
+        LoadCategoriesAsync().GetAwaiter();
         SelectedCategoryHeader = Categories.FirstOrDefault();
         UpdateDownloadList();
+        LoadDownloadQueues();
 
         TotalSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
@@ -152,6 +164,15 @@ public class MainWindowViewModel : ViewModelBase
         DeleteDownloadFilesCommand = ReactiveCommand.Create<DataGrid?>(DeleteDownloadFiles);
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
         OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
+        StartStopDownloadQueueCommand = ReactiveCommand.Create<DownloadQueueViewModel?>(StartStopDownloadQueue);
+        ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Window?>(ShowDownloadQueueDetails);
+    }
+
+    private void LoadDownloadQueues()
+    {
+        DownloadQueues = AppService
+            .DownloadQueueService
+            .DownloadQueues;
     }
 
     private void SelectAllRows(DataGrid? dataGrid)
@@ -356,6 +377,36 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void StartStopDownloadQueue(DownloadQueueViewModel? downloadQueue)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (downloadQueue == null)
+                return;
+
+            AppService
+                .DownloadQueueService
+                .StartDownloadQueueAsync(downloadQueue);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void ShowDownloadQueueDetails(Window? owner)
+    {
+        // TODO: Show message box
+        try
+        {
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
     private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
     {
         // TODO: Show message box
@@ -383,7 +434,7 @@ public class MainWindowViewModel : ViewModelBase
                 .UnitOfWork
                 .CategoryHeaderRepository
                 .GetAllAsync();
-            
+
             var categories = await AppService
                 .UnitOfWork
                 .CategoryRepository
@@ -414,7 +465,7 @@ public class MainWindowViewModel : ViewModelBase
                 .DownloadFileService
                 .DownloadFiles
                 .ToList();
-            
+
             if (SelectedCategoryHeader != null)
             {
                 switch (SelectedCategoryHeader.Title)
@@ -471,8 +522,13 @@ public class MainWindowViewModel : ViewModelBase
             .DownloadFiles;
     }
 
-    protected override void OnDownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
+    protected override void OnDownloadFileServiceDataChanged()
     {
         FilterDownloadList();
+    }
+
+    protected override void OnDownloadQueueServiceDataChanged()
+    {
+        LoadDownloadQueues();
     }
 }

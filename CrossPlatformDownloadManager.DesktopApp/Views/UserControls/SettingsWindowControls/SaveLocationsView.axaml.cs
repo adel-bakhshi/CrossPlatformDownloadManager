@@ -23,8 +23,10 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
         if (!change.Property.Name.Equals("IsVisible"))
             return;
 
-        if (IsVisible)
-            ViewModel.LoadFileExtensions();
+        if (!IsVisible || ViewModel == null)
+            return;
+
+        ViewModel.LoadFileExtensions();
     }
 
     private async void BrowseButton_OnClick(object? sender, RoutedEventArgs e)
@@ -32,9 +34,9 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
         // TODO: Show message box
         try
         {
-            if (ViewModel.SelectedCategory == null)
+            if (ViewModel?.SelectedCategory == null)
                 return;
-            
+
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel == null)
                 return;

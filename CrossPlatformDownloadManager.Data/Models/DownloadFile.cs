@@ -28,7 +28,7 @@ public class DownloadFile
 
     [Required] public DateTime DateAdded { get; set; }
 
-    public int? QueuePriority { get; set; }
+    public int? DownloadQueuePriority { get; set; }
 
     [Required] public int? CategoryId { get; set; }
 

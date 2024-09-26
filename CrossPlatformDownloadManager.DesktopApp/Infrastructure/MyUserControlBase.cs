@@ -10,16 +10,5 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 /// <typeparam name="T">The ViewModel type of this UserControl</typeparam>
 public class MyUserControlBase<T> : UserControl where T : ViewModelBase
 {
-    protected T ViewModel
-    {
-        get
-        {
-            if (DataContext is T vm)
-                return vm;
-            
-            vm = Activator.CreateInstance<T>();
-            DataContext = vm;
-            return vm;
-        }
-    }
+    protected T? ViewModel => DataContext as T;
 }

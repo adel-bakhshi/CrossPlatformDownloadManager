@@ -25,8 +25,8 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         // TODO: Show message box
         try
         {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel == null)
+            var topLevel = GetTopLevel(this);
+            if (topLevel == null || ViewModel == null)
                 return;
 
             var options = new FolderPickerOpenOptions

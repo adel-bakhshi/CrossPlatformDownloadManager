@@ -34,12 +34,15 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
+        if (ViewModel == null)
+            return;
+        
         var chunksData = ViewModel.DownloadFile.ChunksData;
         var bounds = ChunksProgressBarsCanvas.Bounds;
         var chunksCount = chunksData.Count;
         var divisionsWidth = bounds.Width / chunksCount;
 
-        if (!_chunksDataRectangles.Any())
+        if (_chunksDataRectangles.Count == 0)
         {
             var heightBinding = new Binding
             {
@@ -51,7 +54,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
                 },
             };
 
-            for (int i = 0; i < chunksCount; i++)
+            for (var i = 0; i < chunksCount; i++)
             {
                 var rect = new Rectangle();
                 rect.Bind(Rectangle.HeightProperty, heightBinding);
@@ -68,7 +71,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             }
         }
 
-        for (int i = 0; i < chunksCount; i++)
+        for (var i = 0; i < chunksCount; i++)
         {
             _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0
                 ? 0
@@ -79,12 +82,12 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     private void DownloadSpeedLimiterView_OnSpeedLimiterStateChanged(object? sender,
         DownloadSpeedLimiterViewEventArgs e)
     {
-        ViewModel.ChangeSpeedLimiterState(e);
+        ViewModel?.ChangeSpeedLimiterState(e);
     }
 
     private void DownloadOptionsView_OnOptionsStateChanged(object? sender, DownloadOptionsViewEventArgs e)
     {
-        ViewModel.ChangeOptions(e);
+        ViewModel?.ChangeOptions(e);
     }
 
     protected override async void OnLoaded(RoutedEventArgs e)
@@ -92,6 +95,9 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         // TODO: Show message box
         try
         {
+            if (ViewModel == null)
+                return;
+            
             _updateChunksDataTimer.Start();
             Focus();
             await ViewModel.StartDownloadAsync(window: this);

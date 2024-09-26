@@ -36,27 +36,27 @@
 
         <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemBgOnHoverColor}" />
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
         </Style>
 
         <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemBgOnHoverColor}" />
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
         </Style>
 
         <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemBgOnHoverColor}" />
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
         </Style>
 
         <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemBgOnHoverColor}" />
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
         </Style>
 
         <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemBgOnHoverColor}" />
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
         </Style>
     </Style>
 
@@ -90,7 +90,7 @@
         <Setter Property="OnHoverToggleIconColor"
                 Value="{DynamicResource TextColor}" />
         <Setter Property="PopupBackground"
-                Value="{DynamicResource MenuBgColor}" />
+                Value="{DynamicResource MenuBackgroundColor}" />
 
         <Setter Property="Template">
             <ControlTemplate>

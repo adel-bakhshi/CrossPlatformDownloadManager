@@ -1,6 +1,8 @@
 ﻿using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Media;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
@@ -37,12 +39,23 @@ public partial class ActionButton : UserControl
         set => SetValue(IconColorProperty, value);
     }
 
+    public static readonly StyledProperty<FlyoutBase?> FlyoutProperty =
+        AvaloniaProperty.Register<ActionButton, FlyoutBase?>(
+            name: nameof(Flyout), defaultValue: null, defaultBindingMode: BindingMode.TwoWay);
+
+    public FlyoutBase? Flyout
+    {
+        get => GetValue(FlyoutProperty);
+        set => SetValue(FlyoutProperty, value);
+    }
+
     #endregion
 
     #region Commands
 
-    public static readonly StyledProperty<ICommand?> CommandProperty = AvaloniaProperty.Register<ActionButton, ICommand?>(
-        "Command", defaultValue: null);
+    public static readonly StyledProperty<ICommand?> CommandProperty =
+        AvaloniaProperty.Register<ActionButton, ICommand?>(
+            "Command", defaultValue: null);
 
     public ICommand? Command
     {
@@ -50,8 +63,9 @@ public partial class ActionButton : UserControl
         set => SetValue(CommandProperty, value);
     }
 
-    public static readonly StyledProperty<object?> CommandParameterProperty = AvaloniaProperty.Register<ActionButton, object?>(
-        "CommandParameter");
+    public static readonly StyledProperty<object?> CommandParameterProperty =
+        AvaloniaProperty.Register<ActionButton, object?>(
+            "CommandParameter");
 
     public object? CommandParameter
     {

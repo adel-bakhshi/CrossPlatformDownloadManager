@@ -219,8 +219,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddNewQueueWindowViewModel(AppService);
-            var window = new AddNewQueueWindow { DataContext = vm };
+            var vm = new AddEditQueueWindowViewModel(AppService);
+            var window = new AddEditQueueWindow { DataContext = vm };
             var result = await window.ShowDialog<bool>(owner);
             if (!result)
                 return;
@@ -372,8 +372,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             Status = DownloadFileStatus.None,
             LastTryDate = null,
             DateAdded = DateTime.Now,
-            QueuePriority = downloadFilesForSelectedQueue != null
-                ? (downloadFilesForSelectedQueue.Max(df => df.QueuePriority) ?? 0) + 1
+            DownloadQueuePriority = downloadFilesForSelectedQueue != null
+                ? (downloadFilesForSelectedQueue.Max(df => df.DownloadQueuePriority) ?? 0) + 1
                 : null,
             CategoryId = category.Id,
             SaveLocation = category.CategorySaveDirectory.SaveDirectory,
@@ -381,7 +381,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
         await AppService
             .DownloadFileService
-            .AddFileAsync(downloadFile);
+            .AddDownloadFileAsync(downloadFile);
 
         _addedDownloadFileId = downloadFile.Id;
         return true;

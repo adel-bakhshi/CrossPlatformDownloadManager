@@ -5,13 +5,14 @@
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:controls="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
-        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddNewQueueWindow"
-        x:DataType="vm:AddNewQueueWindowViewModel"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueueWindow"
+        x:DataType="vm:AddEditQueueWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="CDM - Add New Category"
+        Title="{Binding Title}"
         Width="800"
         Height="600"
         MinWidth="800"
@@ -22,34 +23,26 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="0"
         CanResize="False">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Main Content -->
     <Grid RowDefinitions="Auto, *, Auto"
           Margin="20">
         <!-- Tabs -->
-        <StackPanel Grid.Row="0"
-                    Orientation="Horizontal"
-                    Spacing="10"
-                    Margin="0, 0, 0, 15">
-            <ToggleButton Classes="tabItemToggleButton"
-                          IsChecked="{Binding ShowOptionsView}"
-                          Command="{Binding ChangeViewCommand}"
-                          CommandParameter="{Binding $self}"
-                          Name="OptionsButton">
-                <TextBlock Text="Options" />
-            </ToggleButton>
-            <ToggleButton Classes="tabItemToggleButton"
-                          IsChecked="{Binding ShowFilesView}"
-                          Command="{Binding ChangeViewCommand}"
-                          CommandParameter="{Binding $self}"
-                          Name="FilesButton">
-                <TextBlock Text="Files" />
-            </ToggleButton>
-        </StackPanel>
+        <ListBox Grid.Row="0"
+                 Classes="menuListBox"
+                 ItemsSource="{Binding TabItems}"
+                 SelectedItem="{Binding SelectedTabItem}" />
 
         <!-- Options content -->
         <ScrollViewer Grid.Row="1"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Hidden"
-                      IsVisible="{Binding ShowOptionsView}">
+                      IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options'}">
             <StackPanel Orientation="Vertical"
                         Spacing="15">
                 <!-- Must have 20px margin bottom. 15px spacing + 5px margin bottom -->
@@ -68,7 +61,7 @@
                                   OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{DynamicResource SecondaryColor}"
-                                  Text="{Binding QueueTitle}" />
+                                  Text="{Binding DownloadQueue.Title}" />
 
                 <!-- Start download on application startup section -->
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
@@ -92,7 +85,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding StartDownloadOnApplicationStartup}" />
+                                      IsChecked="{Binding DownloadQueue.StartOnApplicationStartup}" />
                     </Grid>
                 </Border>
 
@@ -121,13 +114,14 @@
                                           HorizontalContentAlignment="Right"
                                           VerticalContentAlignment="Center"
                                           Width="40"
-                                          IsChecked="{Binding StartDownloadScheduleEnabled}" />
+                                          IsChecked="{Binding DownloadQueue.StartDownloadScheduleEnabled}" />
                         </Grid>
 
                         <!-- Start download schedule -->
                         <StackPanel Orientation="Horizontal"
                                     Spacing="10"
-                                    HorizontalAlignment="Left">
+                                    HorizontalAlignment="Left"
+                                    IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
                             <cc:CustomNumericUpDown Padding="12, 10"
                                                     Background="{DynamicResource PrimaryColor}"
                                                     CornerRadius="{DynamicResource DefaultCornerRadius}"
@@ -135,8 +129,7 @@
                                                     WatermarkForeground="{DynamicResource TertiaryColor}"
                                                     HorizontalAlignment="Stretch"
                                                     BorderThickness="0"
-                                                    Value="{Binding StartDownloadHour}"
-                                                    IsEnabled="{Binding StartDownloadScheduleEnabled}"
+                                                    Value="{Binding DownloadQueue.StartDownloadHour}"
                                                     VerticalAlignment="Center"
                                                     MinWidth="80"
                                                     ShowButtonSpinner="False"
@@ -156,8 +149,7 @@
                                                     WatermarkForeground="{DynamicResource TertiaryColor}"
                                                     HorizontalAlignment="Stretch"
                                                     BorderThickness="0"
-                                                    Value="{Binding StartDownloadMinute}"
-                                                    IsEnabled="{Binding StartDownloadScheduleEnabled}"
+                                                    Value="{Binding DownloadQueue.StartDownloadMinute}"
                                                     VerticalAlignment="Center"
                                                     MinWidth="80"
                                                     ShowButtonSpinner="False"
@@ -172,9 +164,8 @@
                                                Background="{DynamicResource PrimaryColor}"
                                                ToggleIconColor="{DynamicResource TertiaryColor}"
                                                OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                               ItemsSource="{Binding TimesOfDay}"
-                                               SelectedItem="{Binding SelectedStartTimeOfDay}"
-                                               IsEnabled="{Binding StartDownloadScheduleEnabled}"
+                                               ItemsSource="{Binding DownloadQueue.TimesOfDay}"
+                                               SelectedItem="{Binding DownloadQueue.SelectedStartTimeOfDay}"
                                                VerticalAlignment="Center"
                                                Margin="10, 0, 0, 0">
                                 <cc:CustomComboBox.ItemTemplate>
@@ -189,75 +180,62 @@
                         <StackPanel Orientation="Horizontal"
                                     Spacing="10"
                                     HorizontalAlignment="Left"
-                                    Margin="0, 5, 0, 0">
+                                    Margin="0, 5, 0, 0"
+                                    IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
                             <RadioButton GroupName="StartDownloadDate"
-                                         IsEnabled="{Binding StartDownloadScheduleEnabled}"
                                          Classes="startDownloadDate"
                                          Command="{Binding ChangeStartDownloadDateCommand}"
                                          CommandParameter="Today"
-                                         IsChecked="{Binding !IsDailyDownload}">
+                                         IsChecked="{Binding !DownloadQueue.IsDaily}">
                                 Today
                             </RadioButton>
 
                             <RadioButton GroupName="StartDownloadDate"
-                                         IsEnabled="{Binding StartDownloadScheduleEnabled}"
                                          Classes="startDownloadDate"
                                          Command="{Binding ChangeStartDownloadDateCommand}"
                                          CommandParameter="Daily"
-                                         IsChecked="{Binding IsDailyDownload}">
+                                         IsChecked="{Binding DownloadQueue.IsDaily}">
                                 Daily
                             </RadioButton>
                         </StackPanel>
 
                         <!-- Days of week -->
                         <StackPanel Orientation="Horizontal"
-                                    Spacing="5">
+                                    Spacing="5"
+                                    IsVisible="{Binding DownloadQueue.IsDaily}"
+                                    IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Saturday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Saturday}">
                                 Saturday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Sunday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Sunday}">
                                 Sunday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Monday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Monday}">
                                 Monday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Tuesday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Tuesday}">
                                 Tuesday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Wednesday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Wednesday}">
                                 Wednesday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Thursday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Thursday}">
                                 Thursday
                             </CheckBox>
 
                             <CheckBox Classes="dayOfWeek"
-                                      IsVisible="{Binding IsDailyDownload}"
-                                      IsEnabled="{Binding StartDownloadScheduleEnabled}"
-                                      IsChecked="{Binding DaysOfWeek.Friday}">
+                                      IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Friday}">
                                 Friday
                             </CheckBox>
                         </StackPanel>
@@ -289,13 +267,14 @@
                                           HorizontalContentAlignment="Right"
                                           VerticalContentAlignment="Center"
                                           Width="40"
-                                          IsChecked="{Binding StopDownloadScheduleEnabled}" />
+                                          IsChecked="{Binding DownloadQueue.StopDownloadScheduleEnabled}" />
                         </Grid>
 
                         <!-- Stop download schedule -->
                         <StackPanel Orientation="Horizontal"
                                     Spacing="10"
-                                    HorizontalAlignment="Left">
+                                    HorizontalAlignment="Left"
+                                    IsEnabled="{Binding DownloadQueue.StopDownloadScheduleEnabled}">
                             <cc:CustomNumericUpDown Padding="12, 10"
                                                     Background="{DynamicResource PrimaryColor}"
                                                     CornerRadius="{DynamicResource DefaultCornerRadius}"
@@ -303,8 +282,7 @@
                                                     WatermarkForeground="{DynamicResource TertiaryColor}"
                                                     HorizontalAlignment="Stretch"
                                                     BorderThickness="0"
-                                                    Value="{Binding StopDownloadHour}"
-                                                    IsEnabled="{Binding StopDownloadScheduleEnabled}"
+                                                    Value="{Binding DownloadQueue.StopDownloadHour}"
                                                     VerticalAlignment="Center"
                                                     MinWidth="80"
                                                     ShowButtonSpinner="False"
@@ -324,8 +302,7 @@
                                                     WatermarkForeground="{DynamicResource TertiaryColor}"
                                                     HorizontalAlignment="Stretch"
                                                     BorderThickness="0"
-                                                    Value="{Binding StopDownloadMinute}"
-                                                    IsEnabled="{Binding StopDownloadScheduleEnabled}"
+                                                    Value="{Binding DownloadQueue.StopDownloadMinute}"
                                                     VerticalAlignment="Center"
                                                     MinWidth="80"
                                                     ShowButtonSpinner="False"
@@ -340,9 +317,8 @@
                                                Background="{DynamicResource PrimaryColor}"
                                                ToggleIconColor="{DynamicResource TertiaryColor}"
                                                OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                               ItemsSource="{Binding TimesOfDay}"
-                                               SelectedItem="{Binding SelectedStopTimeOfDay}"
-                                               IsEnabled="{Binding StopDownloadScheduleEnabled}"
+                                               ItemsSource="{Binding DownloadQueue.TimesOfDay}"
+                                               SelectedItem="{Binding DownloadQueue.SelectedStopTimeOfDay}"
                                                VerticalAlignment="Center"
                                                Margin="10, 0, 0, 0">
                                 <cc:CustomComboBox.ItemTemplate>
@@ -380,7 +356,7 @@
                                           HorizontalContentAlignment="Right"
                                           VerticalContentAlignment="Center"
                                           Width="40"
-                                          IsChecked="{Binding RetryOnDownloadFailed}" />
+                                          IsChecked="{Binding DownloadQueue.RetryOnDownloadingFailed}" />
                         </Grid>
 
                         <cc:CustomNumericUpDown BorderThickness="0"
@@ -393,10 +369,10 @@
                                                 Increment="1"
                                                 Minimum="0"
                                                 Maximum="100"
-                                                Value="{Binding NumberOfRetries}"
+                                                Value="{Binding DownloadQueue.RetryCount}"
                                                 ShowButtonSpinner="False"
                                                 ClipValueToMinMax="True"
-                                                IsEnabled="{Binding RetryOnDownloadFailed}" />
+                                                IsEnabled="{Binding DownloadQueue.RetryOnDownloadingFailed}" />
                     </StackPanel>
                 </Border>
 
@@ -422,7 +398,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding ShowAlarmWhenDone}" />
+                                      IsChecked="{Binding DownloadQueue.ShowAlarmWhenDone}" />
                     </Grid>
                 </Border>
 
@@ -448,7 +424,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding ExitProgramWhenDone}" />
+                                      IsChecked="{Binding DownloadQueue.ExitProgramWhenDone}" />
                     </Grid>
                 </Border>
 
@@ -477,7 +453,7 @@
                                           HorizontalContentAlignment="Right"
                                           VerticalContentAlignment="Center"
                                           Width="40"
-                                          IsChecked="{Binding TurnOffComputerWhenDone}" />
+                                          IsChecked="{Binding DownloadQueue.TurnOffComputerWhenDone}" />
                         </Grid>
 
                         <cc:CustomComboBox PlaceholderText="AM / PM"
@@ -485,8 +461,8 @@
                                            Background="{DynamicResource PrimaryColor}"
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
                                            OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                           ItemsSource="{Binding TurnOffComputerModes}"
-                                           SelectedItem="{Binding SelectedTurnOffComputerMode}"
+                                           ItemsSource="{Binding DownloadQueue.TurnOffComputerModes}"
+                                           SelectedItem="{Binding DownloadQueue.SelectedTurnOffComputerMode}"
                                            IsEnabled="{Binding #TurnOffComputerWhenDoneToggleSwitch.IsChecked}"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Right"
@@ -504,10 +480,8 @@
 
         <!-- Files content -->
         <controls:FilesView Grid.Row="1"
-                      IsVisible="{Binding ShowFilesView}"
-                      FilesItemsSource="{Binding DownloadFiles}"
-                      DownloadQueueId="{Binding DownloadQueueId}"
-                      DownloadQueueListPriorityChanged="FilesView_OnDownloadQueueListPriorityChanged"/>
+                            IsVisible="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Files', FallbackValue=False, TargetNullValue=False}"
+                            DataContext="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).FilesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="2"

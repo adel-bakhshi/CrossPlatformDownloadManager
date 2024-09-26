@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
@@ -29,10 +30,12 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
     {
         base.OnPropertyChanged(change);
 
-        if (!change.Property.Name.Equals("IsVisible"))
+        if (change.Property != IsVisibleProperty)
             return;
 
-        if (IsVisible)
-            await ViewModel.LoadFileExtensionsAsync();
+        if (!IsVisible || ViewModel == null)
+            return;
+        
+        await ViewModel.LoadFileExtensionsAsync();
     }
 }

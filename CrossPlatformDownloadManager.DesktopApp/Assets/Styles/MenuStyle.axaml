@@ -17,60 +17,75 @@
                 Value="0" />
         <Setter Property="Margin"
                 Value="0, 0, 10, 0" />
-    </Style>
 
-    <Style Selector="MenuItem.header /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource TransparentColor}" />
-    </Style>
+        <Style Selector="^:nth-last-child(1)">
+            <Setter Property="Margin"
+                    Value="0" />
+        </Style>
 
-    <Style Selector="MenuItem.header:pointerover /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource MenuBgColor}" />
-    </Style>
+        <Style Selector="^ /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+        </Style>
 
-    <Style Selector="MenuItem.header:selected /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource MenuBgColor}" />
-    </Style>
+        <Style Selector="^:pointerover /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource SecondaryColor}" />
+        </Style>
 
-    <Style Selector="MenuItem.header /template/ Popup#PART_Popup > Border">
-        <Setter Property="CornerRadius"
-                Value="{DynamicResource DefaultCornerRadius}" />
-        <Setter Property="Background"
-                Value="{DynamicResource MenuBgColor}" />
-        <Setter Property="Padding"
-                Value="0, 8" />
-        <Setter Property="BorderThickness"
-                Value="0" />
-        <Setter Property="Margin"
-                Value="0, 5, 0, 0" />
+        <Style Selector="^:selected /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource SecondaryColor}" />
+        </Style>
+
+        <Style Selector="^ /template/ Popup#PART_Popup > Border">
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource DefaultCornerRadius}" />
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuBackgroundColor}" />
+            <Setter Property="ClipToBounds"
+                    Value="True" />
+            <Setter Property="Padding"
+                    Value="0, 8" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Margin"
+                    Value="0, 5, 0, 0" />
+        </Style>
+
+        <Style Selector="^ /template/ Popup#PART_Popup > Border > Border">
+            <Setter Property="Margin"
+                    Value="0" />
+        </Style>
+
+        <Style Selector="^ /template/ ItemsPresenter#PART_ItemsPresenter">
+            <Setter Property="Margin"
+                    Value="0" />
+        </Style>
     </Style>
 
     <!-- Menu list items -->
     <Style Selector="MenuItem.listItem">
-        <Setter Property="CornerRadius"
-                Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="Background"
                 Value="{DynamicResource TransparentColor}" />
         <Setter Property="Padding"
                 Value="15, 5" />
         <Setter Property="BorderThickness"
                 Value="0" />
-    </Style>
 
-    <Style Selector="MenuItem.listItem /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource TransparentColor}" />
-    </Style>
+        <Style Selector="^ /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+        </Style>
 
-    <Style Selector="MenuItem.listItem:pointerover /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource MenuItemBgOnHoverColor}" />
-    </Style>
+        <Style Selector="^:pointerover /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+        </Style>
 
-    <Style Selector="MenuItem.listItem:selected /template/ Border#root">
-        <Setter Property="Background"
-                Value="{DynamicResource MenuItemBgOnHoverColor}" />
+        <Style Selector="^:selected /template/ Border#root">
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+        </Style>
     </Style>
 </Styles>

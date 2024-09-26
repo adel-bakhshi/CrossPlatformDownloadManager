@@ -24,7 +24,7 @@ public class DownloadFileRepository : RepositoryBase<DownloadFile>, IDownloadFil
         downloadFileInDb.Status = downloadFile.Status;
         downloadFileInDb.LastTryDate = downloadFile.LastTryDate;
         downloadFileInDb.DateAdded = downloadFile.DateAdded;
-        downloadFileInDb.QueuePriority = downloadFile.QueuePriority;
+        downloadFileInDb.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
         downloadFileInDb.CategoryId = downloadFile.CategoryId;
         downloadFileInDb.DownloadProgress = downloadFile.DownloadProgress;
         downloadFileInDb.ElapsedTime = downloadFile.ElapsedTime;

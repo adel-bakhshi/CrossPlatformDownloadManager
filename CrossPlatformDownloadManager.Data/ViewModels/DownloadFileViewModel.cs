@@ -35,6 +35,7 @@ public sealed class DownloadFileViewModel
     #region Properties
 
     public int Id { get; set; }
+    public string? Url { get; set; }
     public string? FileName { get; set; }
     public string? FileType { get; set; }
     public int? DownloadQueueId { get; set; }
@@ -46,6 +47,12 @@ public sealed class DownloadFileViewModel
     public bool IsDownloading => Status == DownloadFileStatus.Downloading;
     public bool IsPaused => Status == DownloadFileStatus.Paused;
     public bool IsError => Status == DownloadFileStatus.Error;
+    public DateTime? LastTryDate { get; set; }
+    public string? LastTryDateAsString => LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    public DateTime DateAdded { get; set; }
+    public string DateAddedAsString => DateAdded.ToString(CultureInfo.InvariantCulture);
+    public int? DownloadQueuePriority { get; set; }
+    public int? CategoryId { get; set; }
     public float? DownloadProgress { get; set; }
     public string? DownloadProgressAsString => DownloadProgress == null ? string.Empty : $"{DownloadProgress:00.00}%";
     public string? DownloadedSizeAsString { get; set; }
@@ -55,13 +62,7 @@ public sealed class DownloadFileViewModel
     public string? TimeLeftAsString => TimeLeft.GetShortTime();
     public float? TransferRate { get; set; }
     public string? TransferRateAsString => TransferRate.ToFileSize();
-    public DateTime? LastTryDate { get; set; }
-    public string? LastTryDateAsString => LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-    public DateTime DateAdded { get; set; }
-    public string DateAddedAsString => DateAdded.ToString(CultureInfo.InvariantCulture);
-    public string? Url { get; set; }
     public string? SaveLocation { get; set; }
-    public int? CategoryId { get; set; }
     public string? DownloadPackage { get; set; }
     public ObservableCollection<ChunkDataViewModel> ChunksData { get; set; } = [];
 

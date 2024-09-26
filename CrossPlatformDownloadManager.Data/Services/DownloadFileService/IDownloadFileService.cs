@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
@@ -10,7 +9,7 @@ public interface IDownloadFileService
 {
     #region Events
 
-    event EventHandler<DownloadFileServiceEventArgs>? DataChanged;
+    event EventHandler? DataChanged;
 
     #endregion
 
@@ -20,15 +19,15 @@ public interface IDownloadFileService
 
     #endregion
 
-    Task LoadFilesAsync();
+    Task LoadDownloadFilesAsync();
 
-    Task AddFileAsync(DownloadFile downloadFile);
+    Task AddDownloadFileAsync(DownloadFile downloadFile);
 
-    Task UpdateFileAsync(DownloadFile downloadFile);
+    Task UpdateDownloadFileAsync(DownloadFile downloadFile);
 
-    Task UpdateFileAsync(DownloadFileViewModel viewModel);
+    Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel);
 
-    Task UpdateFilesAsync(List<DownloadFile> downloadFiles);
+    Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles);
 
     Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window);
 

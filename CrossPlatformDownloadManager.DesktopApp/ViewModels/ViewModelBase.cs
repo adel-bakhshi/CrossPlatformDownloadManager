@@ -1,5 +1,5 @@
-﻿using CrossPlatformDownloadManager.Data.Services.AppService;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+﻿using System;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -16,16 +16,28 @@ public abstract class ViewModelBase : ReactiveObject
     {
         AppService = appService;
         AppService.DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
+        AppService.DownloadQueueService.DataChanged += DownloadQueueServiceOnDataChanged;
     }
 
-    protected virtual void OnDownloadFileServiceDataChanged(DownloadFileServiceEventArgs eventArgs)
+    #region Virtual Methods
+
+    protected virtual void OnDownloadFileServiceDataChanged()
     {
     }
 
+    protected virtual void OnDownloadQueueServiceDataChanged()
+    {
+    }
+
+    #endregion
+
     #region Helpers
 
-    private void DownloadFileServiceOnDataChanged(object? sender, DownloadFileServiceEventArgs e) =>
-        OnDownloadFileServiceDataChanged(e);
+    private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e) =>
+        OnDownloadFileServiceDataChanged();
+
+    private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e) =>
+        OnDownloadQueueServiceDataChanged();
 
     #endregion
 }

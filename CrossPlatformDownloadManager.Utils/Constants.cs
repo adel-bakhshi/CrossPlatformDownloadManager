@@ -68,4 +68,6 @@ public static class Constants
             return pt;
         })
         .ToList();
+
+    public const string DefaultDownloadQueueTitle = "Main Queue";
 }

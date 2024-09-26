@@ -3,6 +3,7 @@ using Avalonia.ReactiveUI;
 using System;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
+using CrossPlatformDownloadManager.Data.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.Data.Services.SettingsService;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
@@ -38,6 +39,8 @@ sealed class Program
                 services.AddTransient<IUnitOfWork, UnitOfWork>();
                 // Add DownloadFileService to services
                 services.AddSingleton<IDownloadFileService, DownloadFileService>();
+                // Add DownloadQueueService to services
+                services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
                 // Add AppService to services

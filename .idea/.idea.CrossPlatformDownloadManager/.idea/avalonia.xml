@@ -8,6 +8,7 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ActionButtonStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ButtonStyles.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ButtonsStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CategoryListStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CheckBoxStyles.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
@@ -15,7 +16,9 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridProgressBarStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/GridCheckBoxStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ListBoxStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuListBoxStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ProgressBarStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/RadioButtonStyles.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
@@ -29,6 +32,7 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddDownloadLinkWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddEditCategoryWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddEditFileTypeWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddEditQueueWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddFilesToQueueWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddNewCategoryWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddNewQueueWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />

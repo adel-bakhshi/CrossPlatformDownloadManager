@@ -133,7 +133,7 @@
 
                         <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
                             <Setter Property="Fill"
-                                    Value="{DynamicResource MenuBgColor}" />
+                                    Value="{DynamicResource MenuBackgroundColor}" />
                         </Style>
                     </Style>
                 </DataGrid.Styles>

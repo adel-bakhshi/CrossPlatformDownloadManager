@@ -28,15 +28,17 @@ public class DownloadQueue
 
     [Required] public int RetryCount { get; set; }
 
-    public bool? ShowAlarmWhenDone { get; set; }
+    public bool ShowAlarmWhenDone { get; set; }
 
-    public bool? ExitProgramWhenDone { get; set; }
+    public bool ExitProgramWhenDone { get; set; }
 
-    public bool? TurnOffComputerWhenDone { get; set; }
+    public bool TurnOffComputerWhenDone { get; set; }
 
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
 
     [Required] public bool IsDefault { get; set; }
+
+    [Required] public int DownloadCountAtSameTime { get; set; }
 
     public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
 }

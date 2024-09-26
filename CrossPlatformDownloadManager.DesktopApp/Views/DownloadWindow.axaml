@@ -129,7 +129,7 @@
             <!-- Chunks progress bars -->
             <Border Grid.Row="4"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource MenuItemBgOnHoverColor}"
+                    Background="{DynamicResource MenuItemOnHoverBackgroundColor}"
                     ClipToBounds="True"
                     HorizontalAlignment="Stretch"
                     Height="24"

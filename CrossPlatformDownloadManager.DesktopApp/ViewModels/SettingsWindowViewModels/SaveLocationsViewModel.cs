@@ -173,7 +173,7 @@ public class SaveLocationsViewModel : ViewModelBase
 
             await AppService
                 .DownloadFileService
-                .LoadFilesAsync();
+                .LoadDownloadFilesAsync();
 
             await LoadCategoriesAsync();
         }

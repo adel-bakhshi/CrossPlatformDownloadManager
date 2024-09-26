@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
@@ -17,6 +18,8 @@ public class DownloadFileService : IDownloadFileService
     #region Private Fields
 
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
     private readonly Dictionary<int, DownloadService> _downloadServices;
     private readonly Dictionary<int, DownloadConfiguration> _downloadConfigurations;
     private readonly Dictionary<int, Window> _downloadFileWindows;
@@ -26,26 +29,30 @@ public class DownloadFileService : IDownloadFileService
 
     #region Events
 
-    public event EventHandler<DownloadFileServiceEventArgs>? DataChanged;
+    public event EventHandler? DataChanged;
 
     #endregion
 
     #region Properties
 
-    public ObservableCollection<DownloadFileViewModel> DownloadFiles { get; set; } = [];
+    public ObservableCollection<DownloadFileViewModel> DownloadFiles { get; }
 
     #endregion
 
-    public DownloadFileService(IUnitOfWork unitOfWork)
+    public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
+
+        DownloadFiles = [];
+
         _downloadServices = [];
         _downloadConfigurations = [];
         _downloadFileWindows = [];
         _windowClosingStates = [];
     }
 
-    public async Task LoadFilesAsync()
+    public async Task LoadDownloadFilesAsync()
     {
         var downloadFiles = await _unitOfWork.DownloadFileRepository
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
@@ -64,29 +71,31 @@ public class DownloadFileService : IDownloadFileService
         foreach (var downloadFile in downloadFiles)
         {
             var oldDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
-            var vm = ConvertToDownloadFileViewModel(downloadFile);
+            var vm = _mapper.Map<DownloadFileViewModel>(downloadFile);
             if (oldDownloadFile != null)
                 UpdateDownloadFileViewModel(oldDownloadFile, vm);
             else
                 DownloadFiles.Add(vm);
         }
+
+        DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task AddFileAsync(DownloadFile downloadFile)
+    public async Task AddDownloadFileAsync(DownloadFile downloadFile)
     {
         await _unitOfWork.DownloadFileRepository.AddAsync(downloadFile);
         await _unitOfWork.SaveAsync();
-        await LoadFilesAsync();
+        await LoadDownloadFilesAsync();
     }
 
-    public async Task UpdateFileAsync(DownloadFile downloadFile)
+    public async Task UpdateDownloadFileAsync(DownloadFile downloadFile)
     {
         await _unitOfWork.DownloadFileRepository.UpdateAsync(downloadFile);
         await _unitOfWork.SaveAsync();
-        await LoadFilesAsync();
+        await LoadDownloadFilesAsync();
     }
 
-    public async Task UpdateFileAsync(DownloadFileViewModel viewModel)
+    public async Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel)
     {
         var downloadFile = await _unitOfWork.DownloadFileRepository.GetAsync(where: df => df.Id == viewModel.Id);
         if (downloadFile == null)
@@ -100,14 +109,14 @@ public class DownloadFileService : IDownloadFileService
         downloadFile.TransferRate = viewModel.TransferRate;
         downloadFile.DownloadPackage = viewModel.DownloadPackage;
 
-        await UpdateFileAsync(downloadFile);
+        await UpdateDownloadFileAsync(downloadFile);
     }
 
-    public async Task UpdateFilesAsync(List<DownloadFile> downloadFiles)
+    public async Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles)
     {
         await _unitOfWork.DownloadFileRepository.UpdateAllAsync(downloadFiles);
         await _unitOfWork.SaveAsync();
-        await LoadFilesAsync();
+        await LoadDownloadFilesAsync();
     }
 
     public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window)
@@ -282,42 +291,10 @@ public class DownloadFileService : IDownloadFileService
         await _unitOfWork.SaveAsync();
 
         if (reloadData)
-            await LoadFilesAsync();
+            await LoadDownloadFilesAsync();
     }
 
     #region Helpers
-
-    private DownloadFileViewModel ConvertToDownloadFileViewModel(DownloadFile downloadFile)
-    {
-        var ext = Path.GetExtension(downloadFile.FileName);
-        var fileType =
-            downloadFile.Category?.FileExtensions
-                ?.FirstOrDefault(fe => fe.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase))?.Alias ??
-            Constants.UnknownFileType;
-
-        var vm = new DownloadFileViewModel
-        {
-            Id = downloadFile.Id,
-            FileName = downloadFile.FileName,
-            FileType = fileType,
-            DownloadQueueId = downloadFile.DownloadQueue?.Id,
-            DownloadQueueName = downloadFile.DownloadQueue?.Title ?? string.Empty,
-            Size = downloadFile.Size == 0 ? null : downloadFile.Size,
-            Status = downloadFile.Status,
-            DownloadProgress = downloadFile.DownloadProgress == 0 ? null : downloadFile.DownloadProgress,
-            ElapsedTime = downloadFile.ElapsedTime,
-            TimeLeft = downloadFile.TimeLeft,
-            TransferRate = downloadFile.TransferRate,
-            LastTryDate = downloadFile.LastTryDate,
-            DateAdded = downloadFile.DateAdded,
-            Url = downloadFile.Url,
-            SaveLocation = downloadFile.SaveLocation,
-            CategoryId = downloadFile.CategoryId,
-            DownloadPackage = downloadFile.DownloadPackage,
-        };
-
-        return vm;
-    }
 
     private void UpdateDownloadFileViewModel(DownloadFileViewModel? oldDownloadFile,
         DownloadFileViewModel? newDownloadFile)
@@ -329,13 +306,12 @@ public class DownloadFileService : IDownloadFileService
             .GetType()
             .GetProperties()
             .Where(pi => !pi.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && pi.CanWrite)
-            .Select(pi => pi.Name)
             .ToList();
 
         foreach (var property in properties)
         {
-            var value = newDownloadFile.GetType().GetProperty(property)?.GetValue(newDownloadFile);
-            oldDownloadFile.GetType().GetProperty(property)?.SetValue(oldDownloadFile, value);
+            var value = property.GetValue(newDownloadFile);
+            property.SetValue(oldDownloadFile, value);
         }
     }
 
@@ -346,7 +322,7 @@ public class DownloadFileService : IDownloadFileService
         _downloadFileWindows.Remove(downloadFile.Id);
         _windowClosingStates.Remove(downloadFile.Id);
 
-        await UpdateFileAsync(downloadFile);
+        await UpdateDownloadFileAsync(downloadFile);
     }
 
     #endregion

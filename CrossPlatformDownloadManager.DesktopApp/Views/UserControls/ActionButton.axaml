@@ -11,7 +11,8 @@
             Classes="actionButtonStyle"
             Command="{Binding $parent[local:ActionButton].Command}"
             CommandParameter="{Binding $parent[local:ActionButton].CommandParameter}"
-            ToolTip.Tip="{Binding $parent[local:ActionButton].Text}">
+            ToolTip.Tip="{Binding $parent[local:ActionButton].Text}"
+            Flyout="{Binding $parent[local:ActionButton].Flyout}">
         <StackPanel Spacing="5">
             <PathIcon Data="{Binding $parent[local:ActionButton].IconData}"
                       Width="{DynamicResource MediumIconSize}"

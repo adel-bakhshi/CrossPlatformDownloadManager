@@ -19,6 +19,9 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     private void DownloadFilesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         // TODO: Show message box
+        if (ViewModel == null)
+            return;
+
         try
         {
             var downloadFiles = DownloadFilesDataGrid

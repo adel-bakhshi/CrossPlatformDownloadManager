@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls.FilesView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls.FilesView"
+             x:DataType="vm:FilesViewModel">
     <Grid RowDefinitions="Auto, *">
         <!-- DataGrid Actions -->
         <Grid Grid.Row="0"
@@ -27,7 +29,7 @@
                                         Watermark="Count"
                                         WatermarkForeground="{DynamicResource TertiaryColor}"
                                         BorderThickness="0"
-                                        Value="{Binding $parent[local:FilesView].DownloadFilesCountAtTheSameTime, Mode=TwoWay}"
+                                        Value="{Binding DownloadFilesCountAtTheSameTime}"
                                         VerticalAlignment="Center"
                                         MinWidth="80"
                                         ShowButtonSpinner="False"
@@ -42,12 +44,12 @@
                         Orientation="Horizontal"
                         Spacing="10"
                         HorizontalAlignment="Right">
-                <Button Name="ChangePriorityToHigherLevelButton"
-                        Classes="button info"
+                <Button Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
                         VerticalAlignment="Center"
-                        Click="ChangePriorityToHigherLevelButton_OnClick">
+                        Command="{Binding ChangePriorityToHigherLevelCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
                     <PathIcon Data="{DynamicResource LongArrowUp}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
@@ -56,12 +58,12 @@
                               VerticalAlignment="Center" />
                 </Button>
 
-                <Button Name="ChangePriorityToLowerLevelButton"
-                        Classes="button info"
+                <Button Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
                         VerticalAlignment="Center"
-                        Click="ChangePriorityToLowerLevelButton_OnClick">
+                        Command="{Binding ChangePriorityToLowerLevelCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
                     <PathIcon Data="{DynamicResource LongArrowDown}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
@@ -70,12 +72,12 @@
                               VerticalAlignment="Center" />
                 </Button>
 
-                <Button Name="DeleteItemFromDataGridButton"
-                        Classes="button danger"
+                <Button Classes="button danger"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
                         VerticalAlignment="Center"
-                        Click="DeleteItemFromDataGridButton_OnClick">
+                        Command="{Binding DeleteItemFromDataGridCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
                     <PathIcon Data="{DynamicResource XMark}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
@@ -84,12 +86,12 @@
                               VerticalAlignment="Center" />
                 </Button>
 
-                <Button Name="AddItemToDataGridButton"
-                        Classes="button success"
+                <Button Classes="button success"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
                         VerticalAlignment="Center"
-                        Click="AddItemToDataGridButton_OnClick">
+                        Command="{Binding AddItemToDataGridCommand}"
+                        CommandParameter="{Binding $parent[Window]}">
                     <PathIcon Data="{DynamicResource Plus}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
@@ -103,11 +105,11 @@
         <!-- Files DataGrid -->
         <DataGrid Name="FilesDataGrid"
                   Grid.Row="1"
-                  DataContext="{Binding $parent[local:FilesView]}"
-                  ItemsSource="{Binding $parent[local:FilesView].FilesItemsSource, Mode=TwoWay}"
+                  ItemsSource="{Binding DownloadFiles}"
                   Classes="chunksDataGrid"
                   Background="{DynamicResource SecondaryColor}"
                   SelectionMode="Extended"
+                  SelectionChanged="FilesDataGrid_OnSelectionChanged"
                   PropertyChanged="FilesDataGrid_OnPropertyChanged">
             <DataGrid.Styles>
                 <Style Selector="DataGrid DataGridRow">
@@ -138,7 +140,7 @@
 
                     <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
                         <Setter Property="Fill"
-                                Value="{DynamicResource MenuBgColor}" />
+                                Value="{DynamicResource MenuBackgroundColor}" />
                     </Style>
                 </Style>
             </DataGrid.Styles>

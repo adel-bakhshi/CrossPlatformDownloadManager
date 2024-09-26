@@ -10,3 +10,5 @@ https://code.google.com/archive/p/portaudiosharp/
 https://github.com/CryShana/CryMedia
 https://gitlab.com/define-private-public/Bassoon
 Beautiful icons: https://www.svgrepo.com/collection/scarlab-solid-oval-interface-icons/1
+DownloadFilesDataGrid on MainWindow cells align top
+Add icon for MenuItems?

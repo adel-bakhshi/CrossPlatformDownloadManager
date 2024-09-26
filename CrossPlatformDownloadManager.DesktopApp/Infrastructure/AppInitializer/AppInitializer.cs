@@ -30,7 +30,10 @@ public class AppInitializer : IAppInitializer
             await _appService.SettingsService.LoadSettingsAsync();
 
             // Initialize DownloadFileService
-            await _appService.DownloadFileService.LoadFilesAsync();
+            await _appService.DownloadFileService.LoadDownloadFilesAsync();
+            
+            // Initialize DownloadQueueService
+            await _appService.DownloadQueueService.LoadDownloadQueuesAsync(addDefaultDownloadQueue: true);
         }
         catch (Exception ex)
         {

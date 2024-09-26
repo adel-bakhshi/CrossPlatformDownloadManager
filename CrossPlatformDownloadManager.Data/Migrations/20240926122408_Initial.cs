@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CrossPlatformDownloadManager.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,7 +58,8 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     ExitProgramWhenDone = table.Column<bool>(type: "INTEGER", nullable: true),
                     TurnOffComputerWhenDone = table.Column<bool>(type: "INTEGER", nullable: true),
                     TurnOffComputerMode = table.Column<byte>(type: "INTEGER", nullable: true),
-                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DownloadCountAtSameTime = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -150,7 +151,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     Status = table.Column<byte>(type: "INTEGER", nullable: true),
                     LastTryDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DateAdded = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    QueuePriority = table.Column<int>(type: "INTEGER", nullable: true),
+                    DownloadQueuePriority = table.Column<int>(type: "INTEGER", nullable: true),
                     CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
                     DownloadProgress = table.Column<float>(type: "REAL", nullable: false),
                     ElapsedTime = table.Column<TimeSpan>(type: "TEXT", nullable: true),

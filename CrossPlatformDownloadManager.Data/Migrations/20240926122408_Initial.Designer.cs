@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrossPlatformDownloadManager.Data.Migrations
 {
     [DbContext(typeof(DownloadManagerDbContext))]
-    [Migration("20240920095111_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240926122408_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,6 +149,9 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.Property<int?>("DownloadQueueId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("DownloadQueuePriority")
+                        .HasColumnType("INTEGER");
+
                     b.Property<TimeSpan?>("ElapsedTime")
                         .HasColumnType("TEXT");
 
@@ -159,9 +162,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<DateTime?>("LastTryDate")
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("QueuePriority")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("SaveLocation")
                         .IsRequired()
@@ -203,6 +203,9 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.Property<string>("DaysOfWeek")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("DownloadCountAtSameTime")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool?>("ExitProgramWhenDone")
                         .HasColumnType("INTEGER");

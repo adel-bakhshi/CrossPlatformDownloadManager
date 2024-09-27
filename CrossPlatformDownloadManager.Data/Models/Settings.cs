@@ -43,4 +43,30 @@ public class Settings
     [Required] public bool UseQueueFinishedSound { get; set; }
 
     [Required] public bool UseSystemNotifications { get; set; }
+
+    public Settings()
+    {
+        
+    }
+
+    public void UpdateData(Settings settings)
+    {
+        StartOnSystemStartup = settings.StartOnSystemStartup;
+        UseBrowserExtension = settings.UseBrowserExtension;
+        DarkMode = settings.DarkMode;
+        ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
+        ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;
+        DuplicateDownloadLinkAction = settings.DuplicateDownloadLinkAction;
+        MaximumConnectionsCount = settings.MaximumConnectionsCount;
+        ProxyMode = settings.ProxyMode;
+        ProxyType = settings.ProxyType;
+        CustomProxySettings = settings.CustomProxySettings;
+        UseDownloadCompleteSound = settings.UseDownloadCompleteSound;
+        UseDownloadStoppedSound = settings.UseDownloadStoppedSound;
+        UseDownloadFailedSound = settings.UseDownloadFailedSound;
+        UseQueueStartedSound = settings.UseQueueStartedSound;
+        UseQueueStoppedSound = settings.UseQueueStoppedSound;
+        UseQueueFinishedSound = settings.UseQueueFinishedSound;
+        UseSystemNotifications = settings.UseSystemNotifications;
+    }
 }

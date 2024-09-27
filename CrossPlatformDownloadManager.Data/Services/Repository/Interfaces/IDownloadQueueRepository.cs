@@ -2,9 +2,6 @@ using CrossPlatformDownloadManager.Data.Models;
 
 namespace CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 
-public interface IDownloadQueueRepository : IRepositoryBase<DownloadQueue>
+public interface IDownloadQueueRepository : IRepositoryBase<DownloadQueue>, IUpdateRepositoryBase<DownloadQueue>
 {
-    Task UpdateAsync(DownloadQueue downloadQueue);
-
-    Task UpdateAllAsync(List<DownloadQueue> downloadQueues);
 }

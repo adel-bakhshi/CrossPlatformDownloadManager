@@ -10,31 +10,19 @@ public class DownloadQueueRepository : RepositoryBase<DownloadQueue>, IDownloadQ
     {
     }
 
-    public async Task UpdateAsync(DownloadQueue downloadQueue)
+    public async Task UpdateAsync(DownloadQueue? entity)
     {
-        var downloadQueueInDb = await GetAsync(where: dq => dq.Id == downloadQueue.Id);
-        if (downloadQueueInDb == null)
+        if (entity == null)
             return;
 
-        downloadQueueInDb.Title = downloadQueue.Title;
-        downloadQueueInDb.StartOnApplicationStartup = downloadQueue.StartOnApplicationStartup;
-        downloadQueueInDb.StartDownloadSchedule = downloadQueue.StartDownloadSchedule;
-        downloadQueueInDb.StopDownloadSchedule = downloadQueue.StopDownloadSchedule;
-        downloadQueueInDb.IsDaily = downloadQueue.IsDaily;
-        downloadQueueInDb.JustForDate = downloadQueue.JustForDate;
-        downloadQueueInDb.DaysOfWeek = downloadQueue.DaysOfWeek;
-        downloadQueueInDb.RetryOnDownloadingFailed = downloadQueue.RetryOnDownloadingFailed;
-        downloadQueueInDb.RetryCount = downloadQueue.RetryCount;
-        downloadQueueInDb.ShowAlarmWhenDone = downloadQueue.ShowAlarmWhenDone;
-        downloadQueueInDb.ExitProgramWhenDone = downloadQueue.ExitProgramWhenDone;
-        downloadQueueInDb.TurnOffComputerWhenDone = downloadQueue.TurnOffComputerWhenDone;
-        downloadQueueInDb.TurnOffComputerMode = downloadQueue.TurnOffComputerMode;
-        downloadQueueInDb.IsDefault = downloadQueue.IsDefault;
+        var downloadQueueInDb = await GetAsync(where: dq => dq.Id == entity.Id);
+        downloadQueueInDb?.UpdateData(entity);
     }
 
-    public async Task UpdateAllAsync(List<DownloadQueue> downloadQueues)
+    public async Task UpdateAllAsync(IEnumerable<DownloadQueue>? entities)
     {
-        if (!downloadQueues.Any())
+        var downloadQueues = entities?.ToList();
+        if (downloadQueues == null || downloadQueues.Count == 0)
             return;
 
         foreach (var downloadQueue in downloadQueues)

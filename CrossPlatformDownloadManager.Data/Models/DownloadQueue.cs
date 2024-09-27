@@ -41,4 +41,27 @@ public class DownloadQueue
     [Required] public int DownloadCountAtSameTime { get; set; }
 
     public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
+
+    public DownloadQueue()
+    {
+    }
+
+    public void UpdateData(DownloadQueue downloadQueue)
+    {
+        Title = downloadQueue.Title;
+        StartOnApplicationStartup = downloadQueue.StartOnApplicationStartup;
+        StartDownloadSchedule = downloadQueue.StartDownloadSchedule;
+        StopDownloadSchedule = downloadQueue.StopDownloadSchedule;
+        IsDaily = downloadQueue.IsDaily;
+        JustForDate = downloadQueue.JustForDate;
+        DaysOfWeek = downloadQueue.DaysOfWeek;
+        RetryOnDownloadingFailed = downloadQueue.RetryOnDownloadingFailed;
+        RetryCount = downloadQueue.RetryCount;
+        ShowAlarmWhenDone = downloadQueue.ShowAlarmWhenDone;
+        ExitProgramWhenDone = downloadQueue.ExitProgramWhenDone;
+        TurnOffComputerWhenDone = downloadQueue.TurnOffComputerWhenDone;
+        TurnOffComputerMode = downloadQueue.TurnOffComputerMode;
+        IsDefault = downloadQueue.IsDefault;
+        DownloadCountAtSameTime = downloadQueue.DownloadCountAtSameTime;
+    }
 }

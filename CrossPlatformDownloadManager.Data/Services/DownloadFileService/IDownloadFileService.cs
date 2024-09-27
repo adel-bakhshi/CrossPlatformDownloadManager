@@ -28,6 +28,8 @@ public interface IDownloadFileService
     Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel);
 
     Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles);
+    
+    Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels);
 
     Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window);
 

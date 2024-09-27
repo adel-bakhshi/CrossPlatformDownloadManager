@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
@@ -140,6 +141,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand? ShowDownloadQueueDetailsCommand { get; }
 
+    public ICommand? AddNewDownloadQueueCommand { get; }
+
     #endregion
 
     public MainWindowViewModel(IAppService appService) : base(appService)
@@ -165,7 +168,8 @@ public class MainWindowViewModel : ViewModelBase
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
         OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
         StartStopDownloadQueueCommand = ReactiveCommand.Create<DownloadQueueViewModel?>(StartStopDownloadQueue);
-        ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Window?>(ShowDownloadQueueDetails);
+        ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Button?>(ShowDownloadQueueDetails);
+        AddNewDownloadQueueCommand = ReactiveCommand.Create<Window?>(AddNewDownloadQueue);
     }
 
     private void LoadDownloadQueues()
@@ -195,6 +199,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async void AddNewLink(Window? owner)
     {
+        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -216,6 +221,7 @@ public class MainWindowViewModel : ViewModelBase
             if (!result)
                 return;
 
+            // TODO: Why I'm comment this code???
             // await LoadCategoriesAsync();
         }
         catch (Exception ex)
@@ -395,11 +401,48 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void ShowDownloadQueueDetails(Window? owner)
+    private async void ShowDownloadQueueDetails(Button? button)
     {
         // TODO: Show message box
         try
         {
+            var owner = button?.FindLogicalAncestorOfType<Window>();
+            if (owner == null)
+                return;
+
+            var tag = button?.Tag?.ToString();
+            if (tag.IsNullOrEmpty() || !int.TryParse(tag, out var downloadQueueId))
+                return;
+
+            var downloadQueue = AppService
+                .DownloadQueueService
+                .DownloadQueues
+                .FirstOrDefault(dq => dq.Id == downloadQueueId);
+
+            if (downloadQueue == null)
+                return;
+
+            var vm = new AddEditQueueWindowViewModel(AppService) { IsEditMode = true, DownloadQueue = downloadQueue };
+            var window = new AddEditQueueWindow { DataContext = vm };
+            await window.ShowDialog(owner);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void AddNewDownloadQueue(Window? owner)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (owner == null)
+                return;
+
+            var vm = new AddEditQueueWindowViewModel(AppService) { IsEditMode = false };
+            var window = new AddEditQueueWindow { DataContext = vm };
+            await window.ShowDialog(owner);
         }
         catch (Exception ex)
         {

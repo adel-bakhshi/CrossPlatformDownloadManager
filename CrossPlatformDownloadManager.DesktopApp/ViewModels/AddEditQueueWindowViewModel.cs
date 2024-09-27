@@ -59,6 +59,14 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
     }
 
+    private OptionsViewModel? _optionsViewModel;
+
+    public OptionsViewModel? OptionsViewModel
+    {
+        get => _optionsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _optionsViewModel, value);
+    }
+
     private FilesViewModel? _filesViewModel;
 
     public FilesViewModel? FilesViewModel
@@ -73,8 +81,6 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
     public ICommand? SaveCommand { get; }
 
-    public ICommand? ChangeStartDownloadDateCommand { get; }
-
     #endregion
 
     public AddEditQueueWindowViewModel(IAppService appService) : base(appService)
@@ -83,33 +89,43 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         TabItems = ["Options", "Files"];
         SelectedTabItem = TabItems.FirstOrDefault();
 
+        OptionsViewModel = new OptionsViewModel(appService) { DownloadQueue = DownloadQueue };
         FilesViewModel = new FilesViewModel(appService) { DownloadQueue = DownloadQueue };
 
         SaveCommand = ReactiveCommand.Create<Window?>(Save);
-        ChangeStartDownloadDateCommand = ReactiveCommand.Create<string?>(ChangeStartDownloadDate);
     }
 
     private void LoadDownloadQueueData()
     {
         if (!IsEditMode)
             return;
-
+        
         DownloadQueue.LoadViewData();
-    }
-
-    private void ChangeStartDownloadDate(string? value)
-    {
-        if (value.IsNullOrEmpty())
-            return;
-
-        DownloadQueue.IsDaily = value!.Equals("Daily");
+        this.RaisePropertyChanged(nameof(DownloadQueue));
+        OptionsViewModel!.DownloadQueue = DownloadQueue;
+        FilesViewModel!.DownloadQueue = DownloadQueue;
     }
 
     private async void Save(Window? owner)
     {
         try
         {
-            if (owner == null || DownloadQueue.Title.IsNullOrEmpty())
+            if (owner == null)
+                return;
+
+            if (DownloadQueue.IsRunning)
+                return;
+
+            if (OptionsViewModel == null || FilesViewModel == null)
+                return;
+
+            if (DownloadQueue.Title.IsNullOrEmpty())
+                return;
+
+            if (DownloadQueue is { RetryOnDownloadingFailed: true, RetryCount: 0 })
+                return;
+
+            if (DownloadQueue.DownloadCountAtSameTime == 0)
                 return;
 
             TimeSpan? startSchedule = null;
@@ -137,9 +153,6 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 stopSchedule = TimeSpan.FromHours(DownloadQueue.StopDownloadHour.Value + (isAfternoon ? 12 : 0))
                     .Add(TimeSpan.FromMinutes(DownloadQueue.StopDownloadMinute.Value));
             }
-
-            if (DownloadQueue is { RetryOnDownloadingFailed: true, RetryCount: 0 })
-                return;
 
             TurnOffComputerMode? turnOffComputerMode = null;
             if (DownloadQueue.TurnOffComputerWhenDone)
@@ -169,9 +182,6 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 }
             }
 
-            if (FilesViewModel == null)
-                return;
-
             DownloadQueue.Title = DownloadQueue.Title!.Trim();
             DownloadQueue.StartDownloadSchedule = startSchedule;
             DownloadQueue.StopDownloadSchedule = stopSchedule;
@@ -180,27 +190,41 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             DownloadQueue.DaysOfWeek = DownloadQueue.IsDaily ? DownloadQueue.DaysOfWeekViewModel.ConvertToJson() : null;
             DownloadQueue.TurnOffComputerMode = turnOffComputerMode;
             DownloadQueue.IsDefault = false;
-            // TODO: I think this is properly filled in FilesViewModel but check it again
-            // DownloadQueue.DownloadCountAtSameTime = FilesViewModel.DownloadFilesCountAtTheSameTime;
 
             var downloadQueue = AppService
                 .Mapper
                 .Map<DownloadQueue>(DownloadQueue);
 
-            await AppService
-                .DownloadQueueService
-                .AddNewDownloadQueueAsync(downloadQueue);
+            if (!IsEditMode)
+            {
+                await AppService
+                    .DownloadQueueService
+                    .AddNewDownloadQueueAsync(downloadQueue);
+            }
+            else
+            {
+                await AppService
+                    .DownloadQueueService
+                    .UpdateDownloadQueueAsync(downloadQueue);
+            }
 
-            var primaryKeys = FilesViewModel
-                .DownloadFiles
-                .Select(df => df.Id)
-                .Distinct()
-                .ToList();
+            if (IsEditMode)
+            {
+                var oldDownloadFiles = await AppService
+                    .UnitOfWork
+                    .DownloadFileRepository
+                    .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id);
 
-            var downloadFiles = await AppService
-                .UnitOfWork
-                .DownloadFileRepository
-                .GetAllAsync(where: df => primaryKeys.Contains(df.Id));
+                if (oldDownloadFiles.Count > 0)
+                {
+                    foreach (var downloadFile in oldDownloadFiles)
+                        downloadFile.DownloadQueueId = null;
+                    
+                    await AppService
+                        .DownloadFileService
+                        .UpdateDownloadFilesAsync(oldDownloadFiles);
+                }
+            }
 
             var maxQueuePriority = await AppService
                 .UnitOfWork
@@ -208,11 +232,15 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 .GetMaxAsync(selector: df => df.DownloadQueuePriority,
                     where: df => df.DownloadQueueId == downloadQueue.Id) ?? 0;
 
-            for (var i = 0; i < downloadFiles.Count; i++)
-            {
-                downloadFiles[i].DownloadQueueId = downloadQueue.Id;
-                downloadFiles[i].DownloadQueuePriority = maxQueuePriority + 1 + i;
-            }
+            var downloadFiles = FilesViewModel
+                .DownloadFiles
+                .Select((df, i) =>
+                {
+                    df.DownloadQueueId = downloadQueue.Id;
+                    df.DownloadQueuePriority = maxQueuePriority + 1 + i;
+                    return df;
+                })
+                .ToList();
 
             await AppService
                 .DownloadFileService

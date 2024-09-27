@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reflection;
 using AutoMapper;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -97,19 +98,24 @@ public class DownloadFileService : IDownloadFileService
 
     public async Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel)
     {
-        var downloadFile = await _unitOfWork.DownloadFileRepository.GetAsync(where: df => df.Id == viewModel.Id);
-        if (downloadFile == null)
+        var downloadFileInDb = await _unitOfWork
+            .DownloadFileRepository
+            .GetAsync(where: df => df.Id == viewModel.Id);
+        
+        if (downloadFileInDb == null)
             return;
 
-        downloadFile.Status = viewModel.Status;
-        downloadFile.LastTryDate = viewModel.LastTryDate;
-        downloadFile.DownloadProgress = viewModel.DownloadProgress ?? 0;
-        downloadFile.ElapsedTime = viewModel.ElapsedTime;
-        downloadFile.TimeLeft = viewModel.TimeLeft;
-        downloadFile.TransferRate = viewModel.TransferRate;
-        downloadFile.DownloadPackage = viewModel.DownloadPackage;
+        var downloadFile = _mapper.Map<DownloadFile>(viewModel);
+        var properties = downloadFile
+            .GetType()
+            .GetProperties()
+            .Where(p =>!p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && p.CanWrite)
+            .ToList();
+        
+        foreach (var property in properties)
+            property.SetValue(downloadFileInDb, property.GetValue(downloadFile));
 
-        await UpdateDownloadFileAsync(downloadFile);
+        await UpdateDownloadFileAsync(downloadFileInDb);
     }
 
     public async Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles)
@@ -117,6 +123,12 @@ public class DownloadFileService : IDownloadFileService
         await _unitOfWork.DownloadFileRepository.UpdateAllAsync(downloadFiles);
         await _unitOfWork.SaveAsync();
         await LoadDownloadFilesAsync();
+    }
+
+    public async Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels)
+    {
+        var downloadFiles = _mapper.Map<List<DownloadFile>>(viewModels);
+        await UpdateDownloadFilesAsync(downloadFiles);
     }
 
     public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window)

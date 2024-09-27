@@ -23,7 +23,7 @@ public class DownloadQueueViewModel
     public bool TurnOffComputerWhenDone { get; set; }
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
     public bool IsDefault { get; set; }
-    public int DownloadCountAtSameTime { get; set; }
+    public int DownloadCountAtSameTime { get; set; } = 1;
     public bool StartDownloadScheduleEnabled { get; set; }
     public double? StartDownloadHour { get; set; }
     public double? StartDownloadMinute { get; set; }
@@ -56,35 +56,27 @@ public class DownloadQueueViewModel
 
         if (StartDownloadScheduleEnabled)
         {
-            var timeSpan = StartDownloadSchedule!;
-            var startDownloadHour = timeSpan.Value.TotalMinutes / 60;
-            timeSpan = timeSpan.Value.Add(TimeSpan.FromMinutes(-startDownloadHour * 60));
-            var startDownloadMinute = timeSpan.Value.TotalMinutes;
+            var isAfternoon = StartDownloadSchedule!.Value.Hours > 12;
 
-            var isAfternoon = startDownloadHour > 12;
+            StartDownloadHour = StartDownloadSchedule!.Value.Hours - (isAfternoon ? 12 : 0);
+            StartDownloadMinute = StartDownloadSchedule!.Value.Minutes;
 
-            StartDownloadHour = startDownloadHour - (isAfternoon ? 12 : 0);
-            StartDownloadMinute = startDownloadMinute;
+            var timeOfDay = isAfternoon ? "PM" : "AM";
             SelectedStartTimeOfDay =
-                TimesOfDay.FirstOrDefault(tod =>
-                    tod.Equals(isAfternoon ? "PM" : "AM", StringComparison.OrdinalIgnoreCase)) ??
+                TimesOfDay.FirstOrDefault(t => t.Equals(timeOfDay, StringComparison.OrdinalIgnoreCase)) ??
                 TimesOfDay.FirstOrDefault();
         }
 
         if (StopDownloadScheduleEnabled)
         {
-            var timeSpan = StopDownloadSchedule!;
-            var stopDownloadHour = timeSpan.Value.TotalMinutes / 60;
-            timeSpan = timeSpan.Value.Add(TimeSpan.FromMinutes(-stopDownloadHour * 60));
-            var stopDownloadMinute = timeSpan.Value.TotalMinutes;
+            var isAfternoon = StopDownloadSchedule!.Value.Hours > 12;
 
-            var isAfternoon = stopDownloadHour > 12;
+            StopDownloadHour = StopDownloadSchedule!.Value.Hours - (isAfternoon ? 12 : 0);
+            StopDownloadMinute = StopDownloadSchedule!.Value.Minutes;
 
-            StopDownloadHour = stopDownloadHour - (isAfternoon ? 12 : 0);
-            StopDownloadMinute = stopDownloadMinute;
+            var timeOfDay = isAfternoon ? "PM" : "AM";
             SelectedStopTimeOfDay =
-                TimesOfDay.FirstOrDefault(tod =>
-                    tod.Equals(isAfternoon ? "PM" : "AM", StringComparison.OrdinalIgnoreCase)) ??
+                TimesOfDay.FirstOrDefault(t => t.Equals(timeOfDay, StringComparison.OrdinalIgnoreCase)) ??
                 TimesOfDay.FirstOrDefault();
         }
 

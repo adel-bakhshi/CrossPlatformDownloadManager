@@ -45,4 +45,28 @@ public class DownloadFile
     [Required] [MaxLength(500)] public string SaveLocation { get; set; } = string.Empty;
 
     [MaxLength(5000)] public string? DownloadPackage { get; set; }
+
+    public DownloadFile()
+    {
+    }
+
+    public void UpdateData(DownloadFile downloadFile)
+    {
+        Url = downloadFile.Url;
+        FileName = downloadFile.FileName;
+        DownloadQueueId = downloadFile.DownloadQueueId;
+        Size = downloadFile.Size;
+        Description = downloadFile.Description;
+        Status = downloadFile.Status;
+        LastTryDate = downloadFile.LastTryDate;
+        DateAdded = downloadFile.DateAdded;
+        DownloadQueuePriority = downloadFile.DownloadQueuePriority;
+        CategoryId = downloadFile.CategoryId;
+        DownloadProgress = downloadFile.DownloadProgress;
+        ElapsedTime = downloadFile.ElapsedTime;
+        TimeLeft = downloadFile.TimeLeft;
+        TransferRate = downloadFile.TransferRate;
+        SaveLocation = downloadFile.SaveLocation;
+        DownloadPackage = downloadFile.DownloadPackage;
+    }
 }

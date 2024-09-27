@@ -32,4 +32,17 @@ public class Category
     [JsonProperty("fileExtensions")] public ICollection<CategoryFileExtension> FileExtensions { get; set; } = [];
 
     public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
+
+    public Category()
+    {
+    }
+
+    public void UpdateData(Category category)
+    {
+        Title = category.Title;
+        Icon = category.Icon;
+        IsDefault = category.IsDefault;
+        AutoAddLinkFromSites = category.AutoAddLinkFromSites;
+        CategorySaveDirectoryId = category.CategorySaveDirectoryId;
+    }
 }

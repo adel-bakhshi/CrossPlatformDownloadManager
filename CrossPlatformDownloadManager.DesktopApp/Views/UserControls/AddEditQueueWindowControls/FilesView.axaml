@@ -3,12 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-             xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls.FilesView"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls.FilesView"
              x:DataType="vm:FilesViewModel">
     <Grid RowDefinitions="Auto, *">
         <!-- DataGrid Actions -->
@@ -29,7 +28,7 @@
                                         Watermark="Count"
                                         WatermarkForeground="{DynamicResource TertiaryColor}"
                                         BorderThickness="0"
-                                        Value="{Binding DownloadFilesCountAtTheSameTime}"
+                                        Value="{Binding DownloadQueue.DownloadCountAtSameTime}"
                                         VerticalAlignment="Center"
                                         MinWidth="80"
                                         ShowButtonSpinner="False"

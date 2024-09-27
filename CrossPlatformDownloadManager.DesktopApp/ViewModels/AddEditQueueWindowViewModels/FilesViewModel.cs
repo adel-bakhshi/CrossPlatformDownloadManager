@@ -16,33 +16,24 @@ public class FilesViewModel : ViewModelBase
 {
     #region Properties
 
+    private DownloadQueueViewModel _downloadQueue;
+
+    public DownloadQueueViewModel DownloadQueue
+    {
+        get => _downloadQueue;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadQueue, value);
+            LoadDownloadFiles();
+        }
+    }
+
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
         get => _downloadFiles;
         set => this.RaiseAndSetIfChanged(ref _downloadFiles, value);
-    }
-
-    private int _downloadFilesCountAtTheSameTime = 1;
-
-    public int DownloadFilesCountAtTheSameTime
-    {
-        get => _downloadFilesCountAtTheSameTime;
-        set => this.RaiseAndSetIfChanged(ref _downloadFilesCountAtTheSameTime, value);
-    }
-
-    private DownloadQueueViewModel? _downloadQueue;
-
-    public DownloadQueueViewModel? DownloadQueue
-    {
-        get => _downloadQueue;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _downloadQueue, value);
-            DownloadFilesCountAtTheSameTime = DownloadQueue?.DownloadCountAtSameTime ?? 1;
-            LoadDownloadFiles();
-        }
     }
 
     public List<DownloadFileViewModel>? SelectedDownloadFiles { get; set; }
@@ -63,6 +54,8 @@ public class FilesViewModel : ViewModelBase
 
     public FilesViewModel(IAppService appService) : base(appService)
     {
+        DownloadQueue = new DownloadQueueViewModel();
+        
         LoadDownloadFiles();
 
         AddItemToDataGridCommand = ReactiveCommand.Create<Window?>(AddItemToDataGrid);

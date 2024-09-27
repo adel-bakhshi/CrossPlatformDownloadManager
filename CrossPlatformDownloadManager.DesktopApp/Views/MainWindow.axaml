@@ -176,7 +176,8 @@
                                         <!-- Show details button -->
                                         <Button Classes="queueListAction"
                                                 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowDownloadQueueDetailsCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
-                                                CommandParameter="{Binding $parent[Window]}">
+                                                CommandParameter="{Binding $self}"
+                                                Tag="{Binding Id}">
                                             <PathIcon Width="16"
                                                       Height="16"
                                                       Data="{DynamicResource ShowQueueDetailsIcon}"
@@ -197,7 +198,9 @@
 
                 <!-- Add new queue button -->
                 <Button Classes="button success"
-                        Margin="8, 0">
+                        Margin="8, 0"
+                        Command="{Binding AddNewDownloadQueueCommand}"
+                        CommandParameter="{Binding $parent[Window]}">
                     Add new queue
                 </Button>
             </StackPanel>

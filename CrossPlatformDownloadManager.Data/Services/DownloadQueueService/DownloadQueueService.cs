@@ -82,12 +82,23 @@ public class DownloadQueueService : IDownloadQueueService
 
     public async Task DeleteDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel)
     {
-        throw new NotImplementedException();
+        var downloadQueueInDb = await _unitOfWork
+            .DownloadQueueRepository
+            .GetAsync(dq => dq.Id == downloadQueueViewModel.Id);
+
+        if (downloadQueueInDb == null)
+            return;
+        
+        _unitOfWork.DownloadQueueRepository.Delete(downloadQueueInDb);
+        await _unitOfWork.SaveAsync();
+        await LoadDownloadQueuesAsync();
     }
 
-    public async Task UpdateDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel)
+    public async Task UpdateDownloadQueueAsync(DownloadQueue downloadQueue)
     {
-        throw new NotImplementedException();
+        await _unitOfWork.DownloadQueueRepository.UpdateAsync(downloadQueue);
+        await _unitOfWork.SaveAsync();
+        await LoadDownloadQueuesAsync();
     }
 
     public async Task StartDownloadQueueAsync(DownloadQueueViewModel downloadQueueView)
@@ -96,19 +107,16 @@ public class DownloadQueueService : IDownloadQueueService
 
     public async Task StopDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel)
     {
-        throw new NotImplementedException();
     }
 
     public async Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel,
         DownloadFileViewModel downloadFileViewModel)
     {
-        throw new NotImplementedException();
     }
 
     public async Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel,
         DownloadFileViewModel downloadFileViewModel)
     {
-        throw new NotImplementedException();
     }
 
     #region Helpers
@@ -122,14 +130,11 @@ public class DownloadQueueService : IDownloadQueueService
         var properties = newDownloadQueue
             .GetType()
             .GetProperties()
-            .Where(pi => !pi.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && pi.CanWrite)
+            .Where(p => !p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && p.CanWrite)
             .ToList();
 
         foreach (var property in properties)
-        {
-            var value = property.GetValue(newDownloadQueue);
-            property.SetValue(oldDownloadQueue, value);
-        }
+            property.SetValue(oldDownloadQueue, property.GetValue(newDownloadQueue));
     }
 
     private async Task AddDefaultDownloadQueueAsync()

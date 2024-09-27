@@ -10,16 +10,22 @@ public class CategoryRepository : RepositoryBase<Category>, ICategoryRepository
     {
     }
 
-    public async Task UpdateAsync(Category category)
+    public async Task UpdateAsync(Category? entity)
     {
-        var categoryInDb = await GetAsync(where: c => c.Id == category.Id);
-        if (categoryInDb == null)
+        if (entity == null)
             return;
 
-        categoryInDb.Title = category.Title;
-        categoryInDb.Icon = category.Icon;
-        categoryInDb.IsDefault = category.IsDefault;
-        categoryInDb.AutoAddLinkFromSites = category.AutoAddLinkFromSites;
-        categoryInDb.CategorySaveDirectoryId = category.CategorySaveDirectoryId;
+        var categoryInDb = await GetAsync(where: c => c.Id == entity.Id);
+        categoryInDb?.UpdateData(entity);
+    }
+
+    public async Task UpdateAllAsync(IEnumerable<Category>? entities)
+    {
+        var categories = entities?.ToList();
+        if (categories == null || categories.Count == 0)
+            return;
+
+        foreach (var entity in categories)
+            await UpdateAsync(entity);
     }
 }

@@ -21,4 +21,14 @@ public class CategoryHeader
     public string Icon { get; set; } = string.Empty;
 
     [NotMapped] public ICollection<Category> Categories { get; set; } = [];
+
+    public CategoryHeader()
+    {
+    }
+
+    public void UpdateData(CategoryHeader categoryHeader)
+    {
+        Title = categoryHeader.Title;
+        Icon = categoryHeader.Icon;
+    }
 }

@@ -5,7 +5,7 @@ using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddNewQueueWindowControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls;
 
 public partial class FilesView : MyUserControlBase<FilesViewModel>
 {

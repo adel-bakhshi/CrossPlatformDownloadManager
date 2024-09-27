@@ -10,33 +10,19 @@ public class DownloadFileRepository : RepositoryBase<DownloadFile>, IDownloadFil
     {
     }
 
-    public async Task UpdateAsync(DownloadFile downloadFile)
+    public async Task UpdateAsync(DownloadFile? entity)
     {
-        var downloadFileInDb = await GetAsync(where: df => df.Id == downloadFile.Id);
-        if (downloadFileInDb == null)
+        if (entity == null)
             return;
 
-        downloadFileInDb.Url = downloadFile.Url;
-        downloadFileInDb.FileName = downloadFile.FileName;
-        downloadFileInDb.DownloadQueueId = downloadFile.DownloadQueueId;
-        downloadFileInDb.Size = downloadFile.Size;
-        downloadFileInDb.Description = downloadFile.Description;
-        downloadFileInDb.Status = downloadFile.Status;
-        downloadFileInDb.LastTryDate = downloadFile.LastTryDate;
-        downloadFileInDb.DateAdded = downloadFile.DateAdded;
-        downloadFileInDb.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
-        downloadFileInDb.CategoryId = downloadFile.CategoryId;
-        downloadFileInDb.DownloadProgress = downloadFile.DownloadProgress;
-        downloadFileInDb.ElapsedTime = downloadFile.ElapsedTime;
-        downloadFileInDb.TimeLeft = downloadFile.TimeLeft;
-        downloadFileInDb.TransferRate = downloadFile.TransferRate;
-        downloadFileInDb.SaveLocation = downloadFile.SaveLocation;
-        downloadFileInDb.DownloadPackage = downloadFile.DownloadPackage;
+        var downloadFileInDb = await GetAsync(where: df => df.Id == entity.Id);
+        downloadFileInDb?.UpdateData(entity);
     }
 
-    public async Task UpdateAllAsync(List<DownloadFile> downloadFiles)
+    public async Task UpdateAllAsync(IEnumerable<DownloadFile>? entities)
     {
-        if (!downloadFiles.Any())
+        var downloadFiles = entities?.ToList();
+        if (downloadFiles == null || downloadFiles.Count == 0)
             return;
 
         foreach (var downloadFile in downloadFiles)

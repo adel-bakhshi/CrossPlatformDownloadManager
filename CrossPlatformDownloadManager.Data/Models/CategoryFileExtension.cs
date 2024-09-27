@@ -23,4 +23,15 @@ public class CategoryFileExtension
     public int? CategoryId { get; set; }
 
     [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
+
+    public CategoryFileExtension()
+    {
+    }
+
+    public void UpdateData(CategoryFileExtension categoryFileExtension)
+    {
+        Extension = categoryFileExtension.Extension;
+        Alias = categoryFileExtension.Alias;
+        CategoryId = categoryFileExtension.CategoryId;
+    }
 }

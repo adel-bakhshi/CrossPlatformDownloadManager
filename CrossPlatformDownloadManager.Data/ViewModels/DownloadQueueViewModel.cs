@@ -24,6 +24,7 @@ public class DownloadQueueViewModel
     public TurnOffComputerMode? TurnOffComputerMode { get; set; }
     public bool IsDefault { get; set; }
     public int DownloadCountAtSameTime { get; set; } = 1;
+    public ObservableCollection<DownloadFileViewModel> DownloadFiles { get; set; } = [];
     public bool StartDownloadScheduleEnabled { get; set; }
     public double? StartDownloadHour { get; set; }
     public double? StartDownloadMinute { get; set; }

@@ -4,12 +4,8 @@ using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class CategoryHeader
+public class CategoryHeader : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required]
     [MaxLength(100)]
     [JsonProperty("title")]
@@ -26,9 +22,14 @@ public class CategoryHeader
     {
     }
 
-    public void UpdateData(CategoryHeader categoryHeader)
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not CategoryHeader categoryHeader)
+            return;
+        
         Title = categoryHeader.Title;
         Icon = categoryHeader.Icon;
+        
+        Categories.Clear();
     }
 }

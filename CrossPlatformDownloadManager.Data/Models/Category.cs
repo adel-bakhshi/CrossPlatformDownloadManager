@@ -4,12 +4,8 @@ using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class Category
+public class Category : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required]
     [MaxLength(100)]
     [JsonProperty("title")]
@@ -31,18 +27,23 @@ public class Category
 
     [JsonProperty("fileExtensions")] public ICollection<CategoryFileExtension> FileExtensions { get; set; } = [];
 
-    public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
+    public ICollection<DownloadFile> DownloadFiles { get; } = [];
 
     public Category()
     {
     }
-
-    public void UpdateData(Category category)
+    
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not Category category)
+            return;
+        
         Title = category.Title;
         Icon = category.Icon;
         IsDefault = category.IsDefault;
         AutoAddLinkFromSites = category.AutoAddLinkFromSites;
         CategorySaveDirectoryId = category.CategorySaveDirectoryId;
+        
+        DownloadFiles.Clear();
     }
 }

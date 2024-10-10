@@ -4,12 +4,8 @@ using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class DownloadFile
+public class DownloadFile : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required] [MaxLength(500)] public string Url { get; set; } = string.Empty;
 
     [Required] [MaxLength(300)] public string FileName { get; set; } = string.Empty;
@@ -50,8 +46,11 @@ public class DownloadFile
     {
     }
 
-    public void UpdateData(DownloadFile downloadFile)
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not DownloadFile downloadFile)
+            return;
+        
         Url = downloadFile.Url;
         FileName = downloadFile.FileName;
         DownloadQueueId = downloadFile.DownloadQueueId;

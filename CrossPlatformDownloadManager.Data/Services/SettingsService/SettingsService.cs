@@ -55,7 +55,7 @@ public class SettingsService : ISettingsService
             }
 
             var settingsViewModel = _mapper.Map<SettingsViewModel>(settings);
-            UpdateSettingsData(settingsViewModel);
+            Settings.UpdateViewModel(settingsViewModel, nameof(Settings.Id));
         }
         catch (Exception ex)
         {
@@ -75,20 +75,4 @@ public class SettingsService : ISettingsService
             Console.WriteLine(ex);
         }
     }
-
-    #region Helpers
-
-    private void UpdateSettingsData(SettingsViewModel settings)
-    {
-        var properties = Settings
-            .GetType()
-            .GetProperties()
-            .Where(p => p.CanWrite)
-            .ToList();
-
-        foreach (var property in properties)
-            property.SetValue(Settings, property.GetValue(settings, null));
-    }
-
-    #endregion
 }

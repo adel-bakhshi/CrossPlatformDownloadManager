@@ -9,23 +9,4 @@ public class DownloadQueueRepository : RepositoryBase<DownloadQueue>, IDownloadQ
     public DownloadQueueRepository(DownloadManagerDbContext dbContext) : base(dbContext)
     {
     }
-
-    public async Task UpdateAsync(DownloadQueue? entity)
-    {
-        if (entity == null)
-            return;
-
-        var downloadQueueInDb = await GetAsync(where: dq => dq.Id == entity.Id);
-        downloadQueueInDb?.UpdateData(entity);
-    }
-
-    public async Task UpdateAllAsync(IEnumerable<DownloadQueue>? entities)
-    {
-        var downloadQueues = entities?.ToList();
-        if (downloadQueues == null || downloadQueues.Count == 0)
-            return;
-
-        foreach (var downloadQueue in downloadQueues)
-            await UpdateAsync(downloadQueue);
-    }
 }

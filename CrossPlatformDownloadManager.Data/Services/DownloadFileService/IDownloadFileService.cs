@@ -31,9 +31,9 @@ public interface IDownloadFileService
     
     Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels);
 
-    Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window);
+    Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile);
 
-    Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile, bool closeWindow = false);
+    Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile);
 
     void ResumeDownloadFile(DownloadFileViewModel? downloadFile);
 

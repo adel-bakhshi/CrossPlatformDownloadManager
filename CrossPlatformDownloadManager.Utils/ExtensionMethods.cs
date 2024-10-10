@@ -14,10 +14,7 @@ public static class ExtensionMethods
 
     public static T? ConvertFromJson<T>(this string? json)
     {
-        if (json.IsNullOrEmpty())
-            return default;
-
-        return JsonConvert.DeserializeObject<T>(json!);
+        return json.IsNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!);
     }
 
     public static string? ConvertToJson(this object? value)
@@ -56,10 +53,7 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this double? bytes)
     {
-        if (bytes == null)
-            return string.Empty;
-
-        return bytes.Value.ToFileSize();
+        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
     }
 
     public static string ToFileSize(this long bytes)
@@ -69,10 +63,7 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this long? bytes)
     {
-        if (bytes == null)
-            return string.Empty;
-
-        return bytes.Value.ToFileSize();
+        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
     }
 
     public static string ToFileSize(this float bytes)
@@ -82,10 +73,7 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this float? bytes)
     {
-        if (bytes == null)
-            return string.Empty;
-
-        return bytes.Value.ToFileSize();
+        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
     }
 
     public static bool CheckUrlValidation(this string? url)
@@ -107,7 +95,7 @@ public static class ExtensionMethods
         var json = reader.ReadToEnd();
         reader.Close();
         stream.Close();
-        
+
         return json.ConvertFromJson<T>();
     }
 
@@ -119,9 +107,12 @@ public static class ExtensionMethods
         return !Path.GetExtension(fileName!).IsNullOrEmpty();
     }
 
-    public static string GetShortTime(this TimeSpan time)
+    public static string GetShortTime(this TimeSpan? time)
     {
-        var seconds = time.TotalSeconds;
+        if (time == null)
+            return string.Empty;
+
+        var seconds = time.Value.TotalSeconds;
 
         var hours = seconds / 3600;
         seconds = seconds % 3600;
@@ -132,11 +123,21 @@ public static class ExtensionMethods
         return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }
 
-    public static string GetShortTime(this TimeSpan? time)
+    public static void UpdateViewModel<T>(this T? viewModel, T? newViewModel, params string[] ignoreProperties)
+        where T : class
     {
-        if (time == null)
-            return string.Empty;
+        if (viewModel == null || newViewModel == null)
+            return;
 
-        return time.Value.GetShortTime();
+        var properties = typeof(T)
+            .GetProperties()
+            .Where(p => !ignoreProperties.Contains(p.Name) && p.CanWrite)
+            .ToList();
+
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(newViewModel);
+            property.SetValue(viewModel, value);
+        }
     }
 }

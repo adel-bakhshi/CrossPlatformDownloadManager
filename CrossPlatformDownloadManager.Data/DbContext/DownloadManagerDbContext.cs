@@ -43,15 +43,23 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             options.HasOne(c => c.CategorySaveDirectory)
                 .WithOne(sd => sd.Category)
-                .HasForeignKey<CategorySaveDirectory>(sd => sd.CategoryId);
+                .HasForeignKey<CategorySaveDirectory>(sd => sd.CategoryId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasMany(c => c.FileExtensions)
                 .WithOne(fe => fe.Category)
-                .HasForeignKey(fe => fe.CategoryId);
+                .HasForeignKey(fe => fe.CategoryId)
+                .HasPrincipalKey(c => c.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasMany(c => c.DownloadFiles)
                 .WithOne(df => df.Category)
-                .HasForeignKey(df => df.CategoryId);
+                .HasForeignKey(df => df.CategoryId)
+                .HasPrincipalKey(c => c.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasIndex(c => c.CategorySaveDirectoryId);
         });
@@ -60,7 +68,10 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             options.HasOne(fe => fe.Category)
                 .WithMany(c => c.FileExtensions)
-                .HasForeignKey(fe => fe.CategoryId);
+                .HasForeignKey(fe => fe.CategoryId)
+                .HasPrincipalKey(c => c.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasIndex(fe => fe.CategoryId);
         });
@@ -69,7 +80,9 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             options.HasOne<Category>(sd => sd.Category)
                 .WithOne(c => c.CategorySaveDirectory)
-                .HasForeignKey<Category>(c => c.CategorySaveDirectoryId);
+                .HasForeignKey<Category>(c => c.CategorySaveDirectoryId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasIndex(sd => sd.CategoryId);
         });
@@ -78,11 +91,17 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             options.HasOne(df => df.DownloadQueue)
                 .WithMany(dq => dq.DownloadFiles)
-                .HasForeignKey(df => df.DownloadQueueId);
+                .HasForeignKey(df => df.DownloadQueueId)
+                .HasPrincipalKey(dq => dq.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasOne(df => df.Category)
                 .WithMany(c => c.DownloadFiles)
-                .HasForeignKey(df => df.CategoryId);
+                .HasForeignKey(df => df.CategoryId)
+                .HasPrincipalKey(c => c.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             options.HasIndex(df => df.CategoryId);
             options.HasIndex(df => df.DownloadQueueId);
@@ -92,7 +111,10 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             options.HasMany(dq => dq.DownloadFiles)
                 .WithOne(df => df.DownloadQueue)
-                .HasForeignKey(df => df.DownloadQueueId);
+                .HasForeignKey(df => df.DownloadQueueId)
+                .HasPrincipalKey(dq => dq.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -20,19 +21,19 @@ public interface IDownloadQueueService
 
     Task LoadDownloadQueuesAsync(bool addDefaultDownloadQueue = false);
 
-    Task AddNewDownloadQueueAsync(DownloadQueue downloadQueue, bool reloadData = true);
+    Task AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true);
 
-    Task DeleteDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel);
+    Task DeleteDownloadQueueAsync(DownloadQueueViewModel? downloadQueue, bool reloadData = true);
 
-    Task UpdateDownloadQueueAsync(DownloadQueue downloadQueue);
+    Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue);
 
-    Task StartDownloadQueueAsync(DownloadQueueViewModel downloadQueueView);
+    void StartDownloadQueue(DownloadQueueViewModel? downloadQueue);
 
-    Task StopDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel);
+    Task StopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue);
 
-    Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel,
-        DownloadFileViewModel downloadFileViewModel);
+    Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueue,
+        DownloadFileViewModel? downloadFile);
 
-    Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel downloadQueueViewModel,
-        DownloadFileViewModel downloadFileViewModel);
+    Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueue,
+        DownloadFileViewModel? downloadFile);
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
@@ -36,7 +35,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     {
         if (ViewModel == null)
             return;
-        
+
         var chunksData = ViewModel.DownloadFile.ChunksData;
         var bounds = ChunksProgressBarsCanvas.Bounds;
         var chunksCount = chunksData.Count;
@@ -90,21 +89,36 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         ViewModel?.ChangeOptions(e);
     }
 
-    protected override async void OnLoaded(RoutedEventArgs e)
+    protected override void OnLoaded(RoutedEventArgs e)
     {
-        // TODO: Show message box
-        try
-        {
-            if (ViewModel == null)
-                return;
-            
-            _updateChunksDataTimer.Start();
-            Focus();
-            await ViewModel.StartDownloadAsync(window: this);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        if (ViewModel == null)
+            return;
+
+        ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+        _updateChunksDataTimer.Start();
+        Focus();
     }
+
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        if (ViewModel == null)
+            return;
+
+        ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+        await ViewModel.StopDownloadAsync(this, closeWindow: false);
+
+        base.OnClosing(e);
+    }
+
+    #region Helpers
+
+    private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
+    {
+        if (!e.IsSuccess || ViewModel == null)
+            return;
+        
+        Close();
+    }
+
+    #endregion
 }

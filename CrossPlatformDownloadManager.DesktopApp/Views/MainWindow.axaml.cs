@@ -29,7 +29,8 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 .OfType<DownloadFileViewModel>()
                 .ToList();
 
-            ViewModel.SelectAllDownloadFiles = downloadFiles.Count == ViewModel.DownloadFiles.Count;
+            ViewModel.SelectAllDownloadFiles = ViewModel.DownloadFiles.Count > 0 &&
+                                               downloadFiles.Count == ViewModel.DownloadFiles.Count;
 
             var totalSize = downloadFiles.Sum(downloadFile => downloadFile.Size ?? 0);
             ViewModel.SelectedFilesTotalSize = totalSize == 0 ? "0 KB" : totalSize.ToFileSize();

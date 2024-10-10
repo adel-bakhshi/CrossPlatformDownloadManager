@@ -1,8 +1,9 @@
 using System.Linq.Expressions;
+using CrossPlatformDownloadManager.Data.Models;
 
 namespace CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 
-public interface IRepositoryBase<T> where T : class, new()
+public interface IRepositoryBase<T> where T : DbModelBase
 {
     Task AddAsync(T? entity);
 
@@ -31,6 +32,10 @@ public interface IRepositoryBase<T> where T : class, new()
     void Delete(T? entity);
 
     void DeleteAll(IEnumerable<T>? entities);
+
+    Task UpdateAsync(T? entity);
+
+    Task UpdateAllAsync(IEnumerable<T>? entities);
 
     Task<int> GetCountAsync(Expression<Func<T, bool>>? where = null,
         bool distinct = false,

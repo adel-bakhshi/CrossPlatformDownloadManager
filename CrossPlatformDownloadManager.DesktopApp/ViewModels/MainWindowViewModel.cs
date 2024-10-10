@@ -153,7 +153,7 @@ public class MainWindowViewModel : ViewModelBase
 
         LoadCategoriesAsync().GetAwaiter();
         SelectedCategoryHeader = Categories.FirstOrDefault();
-        UpdateDownloadList();
+        FilterDownloadList();
         LoadDownloadQueues();
 
         TotalSpeed = "0 KB";
@@ -238,20 +238,22 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            var windows = dataGrid
+            var downloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
                 .Where(df => !df.IsDownloading || !df.IsCompleted)
-                .Select(df =>
-                {
-                    var vm = new DownloadWindowViewModel(AppService, df);
-                    var window = new DownloadWindow { DataContext = vm };
-                    return window;
-                })
                 .ToList();
 
-            foreach (var window in windows)
+            foreach (var downloadFile in downloadFiles)
+            {
+                AppService
+                    .DownloadFileService
+                    .StartDownloadFileAsync(downloadFile);
+
+                var vm = new DownloadWindowViewModel(AppService, downloadFile);
+                var window = new DownloadWindow { DataContext = vm };
                 window.Show();
+            }
         }
         catch (Exception ex)
         {
@@ -277,7 +279,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 await AppService
                     .DownloadFileService
-                    .StopDownloadFileAsync(downloadFile, true);
+                    .StopDownloadFileAsync(downloadFile);
             }
         }
         catch (Exception ex)
@@ -301,7 +303,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 await AppService
                     .DownloadFileService
-                    .StopDownloadFileAsync(downloadFile, true);
+                    .StopDownloadFileAsync(downloadFile);
             }
         }
         catch (Exception ex)
@@ -326,9 +328,11 @@ public class MainWindowViewModel : ViewModelBase
             for (var i = downloadFiles.Count - 1; i >= 0; i--)
             {
                 if (downloadFiles[i].IsDownloading)
+                {
                     await AppService
                         .DownloadFileService
-                        .StopDownloadFileAsync(downloadFiles[i], true);
+                        .StopDownloadFileAsync(downloadFiles[i]);
+                }
 
                 await AppService
                     .DownloadFileService
@@ -393,7 +397,7 @@ public class MainWindowViewModel : ViewModelBase
 
             AppService
                 .DownloadQueueService
-                .StartDownloadQueueAsync(downloadQueue);
+                .StartDownloadQueue(downloadQueue);
         }
         catch (Exception ex)
         {
@@ -556,13 +560,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             Console.WriteLine(ex);
         }
-    }
-
-    private void UpdateDownloadList()
-    {
-        DownloadFiles = AppService
-            .DownloadFileService
-            .DownloadFiles;
     }
 
     protected override void OnDownloadFileServiceDataChanged()

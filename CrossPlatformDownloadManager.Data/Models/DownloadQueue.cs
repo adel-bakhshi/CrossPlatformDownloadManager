@@ -1,15 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class DownloadQueue
+public class DownloadQueue : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required] [MaxLength(100)] public string Title { get; set; } = string.Empty;
 
     [Required] public bool StartOnApplicationStartup { get; set; }
@@ -40,14 +35,17 @@ public class DownloadQueue
 
     [Required] public int DownloadCountAtSameTime { get; set; }
 
-    public ICollection<DownloadFile> DownloadFiles { get; set; } = [];
+    public ICollection<DownloadFile> DownloadFiles { get; } = [];
 
     public DownloadQueue()
     {
     }
 
-    public void UpdateData(DownloadQueue downloadQueue)
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not DownloadQueue downloadQueue)
+            return;
+        
         Title = downloadQueue.Title;
         StartOnApplicationStartup = downloadQueue.StartOnApplicationStartup;
         StartDownloadSchedule = downloadQueue.StartDownloadSchedule;
@@ -63,5 +61,7 @@ public class DownloadQueue
         TurnOffComputerMode = downloadQueue.TurnOffComputerMode;
         IsDefault = downloadQueue.IsDefault;
         DownloadCountAtSameTime = downloadQueue.DownloadCountAtSameTime;
+        
+        DownloadFiles.Clear();
     }
 }

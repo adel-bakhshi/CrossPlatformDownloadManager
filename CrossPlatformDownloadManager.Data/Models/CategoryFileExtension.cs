@@ -4,12 +4,8 @@ using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class CategoryFileExtension
+public class CategoryFileExtension : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required]
     [MaxLength(100)]
     [JsonProperty("extension")]
@@ -27,9 +23,12 @@ public class CategoryFileExtension
     public CategoryFileExtension()
     {
     }
-
-    public void UpdateData(CategoryFileExtension categoryFileExtension)
+    
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not CategoryFileExtension categoryFileExtension)
+            return;
+        
         Extension = categoryFileExtension.Extension;
         Alias = categoryFileExtension.Alias;
         CategoryId = categoryFileExtension.CategoryId;

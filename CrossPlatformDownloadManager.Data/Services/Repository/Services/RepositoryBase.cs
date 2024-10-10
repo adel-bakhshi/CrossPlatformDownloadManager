@@ -1,28 +1,22 @@
 using System.Linq.Expressions;
 using CrossPlatformDownloadManager.Data.DbContext;
+using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrossPlatformDownloadManager.Data.Services.Repository.Services;
 
-public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
+public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
 {
     #region Private Fields
 
-    private readonly DownloadManagerDbContext _dbContext;
-
-    #endregion
-
-    #region Properties
-
-    protected DbSet<T> Table { get; }
+    private readonly DbSet<T> _table;
 
     #endregion
 
     public RepositoryBase(DownloadManagerDbContext dbContext)
     {
-        _dbContext = dbContext;
-        Table = _dbContext.Set<T>();
+        _table = dbContext.Set<T>() ?? throw new InvalidOperationException("Entity not found.");
     }
 
     public async Task AddAsync(T? entity)
@@ -30,23 +24,23 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (entity == null)
             return;
 
-        await Table.AddAsync(entity);
+        await _table.AddAsync(entity);
     }
 
     public async Task AddRangeAsync(IEnumerable<T>? entities)
     {
         var objects = entities?.ToList() ?? [];
-        if (!objects.Any())
+        if (objects.Count == 0)
             return;
 
-        await Table.AddRangeAsync(objects);
+        await _table.AddRangeAsync(objects);
     }
 
     public async Task<T?> GetAsync(Expression<Func<T, bool>>? where = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         params string[] includeProperties)
     {
-        var query = Table.AsQueryable();
+        var query = _table.AsQueryable();
 
         if (includeProperties.Length != 0)
         {
@@ -71,7 +65,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (select == null)
             return default;
 
-        var query = Table.AsQueryable();
+        var query = _table.AsQueryable();
 
         if (includeProperties.Length != 0)
         {
@@ -94,7 +88,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         bool distinct = false,
         params string[] includeProperties)
     {
-        var query = Table.AsQueryable();
+        var query = _table.AsQueryable();
 
         if (includeProperties.Length != 0)
         {
@@ -123,7 +117,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (select == null)
             return [];
 
-        var query = Table.AsQueryable();
+        var query = _table.AsQueryable();
 
         if (includeProperties.Length != 0)
         {
@@ -149,22 +143,52 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         if (entity == null)
             return;
 
-        Table.Remove(entity);
+        _table.Remove(entity);
     }
 
     public void DeleteAll(IEnumerable<T>? entities)
     {
         var objects = entities?.ToList() ?? [];
-        if (!objects.Any())
+        if (objects.Count == 0)
             return;
 
-        Table.RemoveRange(objects);
+        _table.RemoveRange(objects);
+    }
+
+    public async Task UpdateAsync(T? entity)
+    {
+        if (entity == null)
+            return;
+
+        var entityInDb = await GetAsync(where: e => e.Id == entity.Id);
+        entityInDb?.UpdateDbModel(entity);
+    }
+
+    public async Task UpdateAllAsync(IEnumerable<T>? entities)
+    {
+        var objects = entities?.ToList() ?? [];
+        if (objects.Count == 0)
+            return;
+
+        var primaryKeys = objects
+            .Select(o => o.Id)
+            .ToList();
+
+        var entitiesInDb = await GetAllAsync(where: e => primaryKeys.Contains(e.Id));
+        if (entitiesInDb.Count == 0)
+            return;
+
+        foreach (var dbModel in entitiesInDb)
+        {
+            var updatedEntity = objects.Find(o => o.Id == dbModel.Id);
+            dbModel.UpdateDbModel(updatedEntity);
+        }
     }
 
     public async Task<int> GetCountAsync(Expression<Func<T, bool>>? where = null, bool distinct = false,
         params string[] includeProperties)
     {
-        var query = Table.AsQueryable();
+        var query = _table.AsQueryable();
 
         if (where != null)
             query = query.Where(where);
@@ -180,8 +204,8 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class, new()
         bool distinct = false,
         params string[] includeProperties)
     {
-        var query = Table.AsQueryable();
-        
+        var query = _table.AsQueryable();
+
         if (includeProperties.Length != 0)
         {
             foreach (var includeProperty in includeProperties)

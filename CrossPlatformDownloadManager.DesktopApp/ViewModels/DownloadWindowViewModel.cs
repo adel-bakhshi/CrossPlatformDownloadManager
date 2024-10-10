@@ -106,78 +106,17 @@ public class DownloadWindowViewModel : ViewModelBase
         SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         OptionsTurnOffModes = Constants.TurnOffComputerModes.ToObservableCollection();
 
-        ChangeViewCommand = ReactiveCommand.Create<object?>(ChangeView);
+        ChangeViewCommand = ReactiveCommand.Create<ToggleButton?>(ChangeView);
         ResumePauseDownloadCommand = ReactiveCommand.Create(ResumePauseDownload);
         CancelDownloadCommand = ReactiveCommand.Create<Window?>(CancelDownload);
     }
 
-    private async void CancelDownload(Window? owner)
+    private void ChangeView(ToggleButton? toggleButton)
     {
-        // TODO: Show message box
-        try
-        {
-            if (owner == null)
-                return;
+        if (toggleButton == null)
+            return;
 
-            await AppService
-                .DownloadFileService
-                .StopDownloadFileAsync(DownloadFile);
-            
-            owner.Close();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private void ResumePauseDownload()
-    {
-        // TODO: Show message box
-        try
-        {
-            if (IsPaused)
-            {
-                AppService
-                    .DownloadFileService
-                    .ResumeDownloadFile(DownloadFile);
-                
-                IsPaused = false;
-            }
-            else
-            {
-                AppService
-                    .DownloadFileService
-                    .PauseDownloadFile(DownloadFile);
-                
-                IsPaused = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    public async Task StartDownloadAsync(Window? window)
-    {
-        // TODO: Show message box
-        try
-        {
-            await AppService
-                .DownloadFileService
-                .StartDownloadFileAsync(DownloadFile, window);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private void ChangeView(object? obj)
-    {
-        var buttonName = (obj as ToggleButton)?.Name;
-        switch (buttonName)
+        switch (toggleButton.Name)
         {
             case "BtnStatus":
             {
@@ -199,6 +138,62 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
+    private void ResumePauseDownload()
+    {
+        // TODO: Show message box
+        try
+        {
+            if (IsPaused)
+            {
+                AppService
+                    .DownloadFileService
+                    .ResumeDownloadFile(DownloadFile);
+
+                IsPaused = false;
+            }
+            else
+            {
+                AppService
+                    .DownloadFileService
+                    .PauseDownloadFile(DownloadFile);
+
+                IsPaused = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void CancelDownload(Window? owner)
+    {
+        await StopDownloadAsync(owner);
+    }
+
+    public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (owner == null)
+                return;
+            
+            await AppService
+                .DownloadFileService
+                .StopDownloadFileAsync(DownloadFile);
+
+            if (closeWindow)
+                owner.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    #region Helpers
+
     private void ChangeViewsVisibility(string propName)
     {
         ShowStatusView = ShowSpeedLimiterView = ShowOptionsView = false;
@@ -216,6 +211,7 @@ public class DownloadWindowViewModel : ViewModelBase
             var unit = _speedUnit.IsNullOrEmpty() ? 0 :
                 _speedUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
             var speed = (long)(_limitSpeed == null ? 0 : _limitSpeed.Value * unit);
+
             AppService
                 .DownloadFileService
                 .LimitDownloadFileSpeed(DownloadFile, speed);
@@ -235,4 +231,6 @@ public class DownloadWindowViewModel : ViewModelBase
         _turnOffComputerAfterDownloadFinished = eventArgs.TurnOffComputerAfterDownloadFinished;
         _turnOffComputerMode = eventArgs.TurnOffComputerMode;
     }
+
+    #endregion
 }

@@ -1,8 +1,5 @@
 using System.Collections.ObjectModel;
-using System.Reflection;
 using AutoMapper;
-using Avalonia.Controls;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -21,10 +18,7 @@ public class DownloadFileService : IDownloadFileService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    private readonly Dictionary<int, DownloadService> _downloadServices;
-    private readonly Dictionary<int, DownloadConfiguration> _downloadConfigurations;
-    private readonly Dictionary<int, Window> _downloadFileWindows;
-    private readonly Dictionary<int, bool> _windowClosingStates;
+    private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
 
     #endregion
 
@@ -45,12 +39,9 @@ public class DownloadFileService : IDownloadFileService
         _unitOfWork = unitOfWork;
         _mapper = mapper;
 
-        DownloadFiles = [];
+        _downloadFileTasks = [];
 
-        _downloadServices = [];
-        _downloadConfigurations = [];
-        _downloadFileWindows = [];
-        _windowClosingStates = [];
+        DownloadFiles = [];
     }
 
     public async Task LoadDownloadFilesAsync()
@@ -74,7 +65,7 @@ public class DownloadFileService : IDownloadFileService
             var oldDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
             var vm = _mapper.Map<DownloadFileViewModel>(downloadFile);
             if (oldDownloadFile != null)
-                UpdateDownloadFileViewModel(oldDownloadFile, vm);
+                oldDownloadFile.UpdateViewModel(vm, nameof(oldDownloadFile.Id));
             else
                 DownloadFiles.Add(vm);
         }
@@ -98,24 +89,8 @@ public class DownloadFileService : IDownloadFileService
 
     public async Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel)
     {
-        var downloadFileInDb = await _unitOfWork
-            .DownloadFileRepository
-            .GetAsync(where: df => df.Id == viewModel.Id);
-        
-        if (downloadFileInDb == null)
-            return;
-
         var downloadFile = _mapper.Map<DownloadFile>(viewModel);
-        var properties = downloadFile
-            .GetType()
-            .GetProperties()
-            .Where(p =>!p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && p.CanWrite)
-            .ToList();
-        
-        foreach (var property in properties)
-            property.SetValue(downloadFileInDb, property.GetValue(downloadFile));
-
-        await UpdateDownloadFileAsync(downloadFileInDb);
+        await UpdateDownloadFileAsync(downloadFile);
     }
 
     public async Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles)
@@ -131,101 +106,44 @@ public class DownloadFileService : IDownloadFileService
         await UpdateDownloadFilesAsync(downloadFiles);
     }
 
-    public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile, Window? window)
+    public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFileViewModel)
     {
-        if (downloadFile == null || window == null)
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
+        if (downloadFile == null)
             return;
 
-        window.Tag = downloadFile.Id;
-        window.Closing += WindowOnClosing;
-
-        var downloadConfiguration = new DownloadConfiguration
+        var configuration = new DownloadConfiguration
         {
             ChunkCount = 8,
             MaximumBytesPerSecond = 64 * 1024,
             ParallelDownload = true,
         };
 
-        var downloadService = new DownloadService(downloadConfiguration);
+        var service = new DownloadService(configuration);
 
-        _downloadServices.Add(downloadFile.Id, downloadService);
-        _downloadConfigurations.Add(downloadFile.Id, downloadConfiguration);
-        _downloadFileWindows.Add(downloadFile.Id, window);
-        _windowClosingStates.Add(downloadFile.Id, false);
+        _downloadFileTasks.Add(new DownloadFileTaskViewModel
+        {
+            Key = downloadFile.Id,
+            Configuration = configuration,
+            Service = service,
+        });
 
         downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
-        await downloadFile.StartDownloadFileAsync(downloadService, downloadConfiguration, _unitOfWork);
+        await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork);
     }
 
-    private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
+    public async Task StopDownloadFileAsync(DownloadFileViewModel? downloadFileViewModel)
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
-            if (downloadFile == null)
-                return;
-
-            downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-
-            var window = _downloadFileWindows.FirstOrDefault(dw => dw.Key == e.Id).Value;
-            if (window == null)
-                return;
-
-            RemoveDownloadOptions(downloadFile).GetAwaiter();
-            window.Closing -= WindowOnClosing;
-            window.Close();
-        });
-    }
-
-    private async void WindowOnClosing(object? sender, WindowClosingEventArgs e)
-    {
-        // TODO: Show message box
-        try
-        {
-            var window = sender as Window;
-            if (window == null)
-                return;
-
-            var tag = window.Tag?.ToString();
-            if (tag.IsNullOrEmpty() || !int.TryParse(tag, out var id))
-                return;
-
-            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == id);
-            if (downloadFile == null)
-                return;
-
-            var state = _windowClosingStates.FirstOrDefault(wcs => wcs.Key == downloadFile.Id).Value;
-            if (state)
-                return;
-
-            _windowClosingStates.Remove(downloadFile.Id);
-            _windowClosingStates.Add(downloadFile.Id, true);
-
-            await StopDownloadFileAsync(downloadFile);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    public async Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile, bool closeWindow = false)
-    {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
         if (downloadFile == null)
             return;
 
-        var downloadService = _downloadServices.FirstOrDefault(ds => ds.Key == downloadFile.Id).Value;
-        var window = _downloadFileWindows.FirstOrDefault(dw => dw.Key == downloadFile.Id).Value;
-        if (downloadService == null || window == null)
+        var downloadFileTask = _downloadFileTasks.Find(t => t.Key == downloadFile.Id);
+        var service = downloadFileTask?.Service;
+        if (service == null || service.Status == DownloadStatus.Stopped)
             return;
 
-        await downloadFile.StopDownloadFileAsync(downloadService);
-        await RemoveDownloadOptions(downloadFile);
-
-        window.Closing -= WindowOnClosing;
-
-        if (closeWindow)
-            window.Close();
+        await downloadFile.StopDownloadFileAsync(service);
     }
 
     public void ResumeDownloadFile(DownloadFileViewModel? downloadFile)
@@ -233,11 +151,11 @@ public class DownloadFileService : IDownloadFileService
         if (downloadFile == null)
             return;
 
-        var downloadService = _downloadServices.FirstOrDefault(ds => ds.Key == downloadFile.Id).Value;
-        if (downloadService == null)
+        var service = _downloadFileTasks.Find(task => task.Key == downloadFile.Id)?.Service;
+        if (service == null)
             return;
 
-        downloadFile.ResumeDownloadFile(downloadService);
+        downloadFile.ResumeDownloadFile(service);
     }
 
     public void PauseDownloadFile(DownloadFileViewModel? downloadFile)
@@ -245,11 +163,11 @@ public class DownloadFileService : IDownloadFileService
         if (downloadFile == null)
             return;
 
-        var downloadService = _downloadServices.FirstOrDefault(ds => ds.Key == downloadFile.Id).Value;
-        if (downloadService == null)
+        var service = _downloadFileTasks.Find(task => task.Key == downloadFile.Id)?.Service;
+        if (service == null)
             return;
 
-        downloadFile.PauseDownloadFile(downloadService);
+        downloadFile.PauseDownloadFile(service);
     }
 
     public void LimitDownloadFileSpeed(DownloadFileViewModel? downloadFile, long speed)
@@ -257,11 +175,11 @@ public class DownloadFileService : IDownloadFileService
         if (downloadFile == null)
             return;
 
-        var downloadConfiguration = _downloadConfigurations.FirstOrDefault(dc => dc.Key == downloadFile.Id).Value;
-        if (downloadConfiguration == null)
+        var configuration = _downloadFileTasks.Find(task => task.Key == downloadFile.Id)?.Configuration;
+        if (configuration == null)
             return;
 
-        downloadConfiguration.MaximumBytesPerSecond = speed;
+        configuration.MaximumBytesPerSecond = speed;
     }
 
     public async Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile,
@@ -274,7 +192,7 @@ public class DownloadFileService : IDownloadFileService
             .GetAsync(where: df => df.Id == downloadFile.Id);
 
         if (downloadFile.IsDownloading)
-            await StopDownloadFileAsync(downloadFile, true);
+            await StopDownloadFileAsync(downloadFile);
 
         var shouldReturn = false;
         if (downloadFileInDb == null)
@@ -308,32 +226,21 @@ public class DownloadFileService : IDownloadFileService
 
     #region Helpers
 
-    private void UpdateDownloadFileViewModel(DownloadFileViewModel? oldDownloadFile,
-        DownloadFileViewModel? newDownloadFile)
+    private async void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {
-        if (oldDownloadFile == null || newDownloadFile == null)
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
+        if (downloadFile == null)
             return;
 
-        var properties = newDownloadFile
-            .GetType()
-            .GetProperties()
-            .Where(pi => !pi.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) && pi.CanWrite)
-            .ToList();
+        downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
 
-        foreach (var property in properties)
-        {
-            var value = property.GetValue(newDownloadFile);
-            property.SetValue(oldDownloadFile, value);
-        }
-    }
+        if (!e.IsSuccess && !e.Error.IsNullOrEmpty())
+            downloadFile.CountOfError++;
 
-    private async Task RemoveDownloadOptions(DownloadFileViewModel downloadFile)
-    {
-        _downloadConfigurations.Remove(downloadFile.Id);
-        _downloadServices.Remove(downloadFile.Id);
-        _downloadFileWindows.Remove(downloadFile.Id);
-        _windowClosingStates.Remove(downloadFile.Id);
-
+        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+        if (downloadFileTask != null)
+            _downloadFileTasks.Remove(downloadFileTask);
+        
         await UpdateDownloadFileAsync(downloadFile);
     }
 

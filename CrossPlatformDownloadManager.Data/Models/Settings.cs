@@ -1,15 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
-public class Settings
+public class Settings : DbModelBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required] public bool StartOnSystemStartup { get; set; }
 
     [Required] public bool UseBrowserExtension { get; set; }
@@ -49,8 +44,11 @@ public class Settings
         
     }
 
-    public void UpdateData(Settings settings)
+    public override void UpdateDbModel(DbModelBase? model)
     {
+        if (model is not Settings settings)
+            return;
+        
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
         DarkMode = settings.DarkMode;

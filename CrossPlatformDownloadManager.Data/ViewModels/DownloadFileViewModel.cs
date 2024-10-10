@@ -23,6 +23,10 @@ public sealed class DownloadFileViewModel
     // UpdateChunksData timer
     private DispatcherTimer? _updateChunksDataTimer;
     private List<ChunkProgressViewModel>? _chunkProgresses;
+    
+    // DownloadFinished timer
+    private DispatcherTimer? _downloadFinishedTimer;
+    private DownloadFileEventArgs? _downloadFinishedEventArgs;
 
     #endregion
 
@@ -65,6 +69,7 @@ public sealed class DownloadFileViewModel
     public string? SaveLocation { get; set; }
     public string? DownloadPackage { get; set; }
     public ObservableCollection<ChunkDataViewModel> ChunksData { get; set; } = [];
+    public int CountOfError { get; set; }
 
     #endregion
 
@@ -103,9 +108,26 @@ public sealed class DownloadFileViewModel
         var fileName = Path.Combine(downloadPath!, FileName!);
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
         if (downloadPackage == null)
+        {
             await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName);
+        }
         else
+        {
+            var urls = downloadPackage
+                .Urls
+                .ToList();
+            
+            var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
+            if (currentUrl.IsNullOrEmpty())
+            {
+                urls.Clear();
+                urls.Add(Url!);
+
+                downloadPackage.Urls = urls.ToArray();
+            }
+            
             await downloadService.DownloadFileTaskAsync(downloadPackage);
+        }
     }
 
     public async Task StopDownloadFileAsync(DownloadService? downloadService)
@@ -146,7 +168,7 @@ public sealed class DownloadFileViewModel
         _elapsedTimeTimer?.Stop();
         _updateChunksDataTimer?.Stop();
         Status = DownloadFileStatus.Paused;
-        UpdateChunksDataTimerOnTick(null, null);
+        UpdateChunksDataTimerOnTick(null, EventArgs.Empty);
         SaveDownloadPackage(downloadService.Package);
     }
 
@@ -160,23 +182,50 @@ public sealed class DownloadFileViewModel
 
     private void DownloadServiceOnDownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
     {
+        bool isSuccess;
+        string? error = null;
+        
         // TODO: Show error
-        if (e.Error != null && !e.Cancelled)
+        if (e is { Error: not null, Cancelled: false })
         {
             Status = DownloadFileStatus.Error;
-            return;
+            isSuccess = false;
+            error = e.Error.Message;
         }
-
-        if (e.Cancelled)
+        else if (e.Cancelled)
         {
             Status = DownloadFileStatus.Paused;
+            isSuccess = false;
         }
         else
         {
             Status = DownloadFileStatus.Completed;
-            var eventArgs = new DownloadFileEventArgs { Id = Id };
-            DownloadFinished?.Invoke(this, eventArgs);
+            isSuccess = true;
         }
+
+        _downloadFinishedEventArgs = new DownloadFileEventArgs
+        {
+            Id = Id,
+            IsSuccess = isSuccess,
+            Error = error,
+        };
+
+        _downloadFinishedTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _downloadFinishedTimer.Tick += DownloadFinishedTimerOnTick;
+        _downloadFinishedTimer.Start();
+    }
+
+    private void DownloadFinishedTimerOnTick(object? sender, EventArgs e)
+    {
+        if (_downloadFinishedTimer == null || _downloadFinishedEventArgs == null)
+            return;
+        
+        _downloadFinishedTimer.Stop();
+        _downloadFinishedTimer.Tick -= DownloadFinishedTimerOnTick;
+        _downloadFinishedTimer = null;
+        
+        DownloadFinished?.Invoke(this, _downloadFinishedEventArgs);
+        _downloadFinishedEventArgs = null;
     }
 
     private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
@@ -185,7 +234,7 @@ public sealed class DownloadFileViewModel
         TransferRate = (float)e.BytesPerSecondSpeed;
         DownloadedSizeAsString = e.ReceivedBytesSize.ToFileSize();
 
-        TimeSpan timeLeft = TimeSpan.Zero;
+        var timeLeft = TimeSpan.Zero;
         var remainSizeToReceive = (Size ?? 0) - e.ReceivedBytesSize;
         var remainSeconds = remainSizeToReceive / e.BytesPerSecondSpeed;
         if (!double.IsInfinity(remainSeconds))
@@ -212,7 +261,7 @@ public sealed class DownloadFileViewModel
         var chunks = new List<ChunkDataViewModel>();
         _chunkProgresses ??= [];
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             chunks.Add(new ChunkDataViewModel { ChunkIndex = i });
             _chunkProgresses.Add(new ChunkProgressViewModel { ProgressId = i.ToString() });
@@ -242,7 +291,7 @@ public sealed class DownloadFileViewModel
         _updateChunksDataTimer.Start();
     }
 
-    private void UpdateChunksDataTimerOnTick(object? sender, EventArgs? e)
+    private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
         if (_chunkProgresses == null || _chunkProgresses.Count == 0)
             return;

@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -147,7 +148,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(IAppService appService) : base(appService)
     {
-        _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
         _updateSpeedTimer.Start();
 
@@ -293,6 +294,19 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
+            var runningDownloadQueues = AppService
+                .DownloadQueueService
+                .DownloadQueues
+                .Where(dq => dq.IsRunning)
+                .ToList();
+
+            foreach (var downloadQueue in runningDownloadQueues)
+            {
+                await AppService
+                    .DownloadQueueService
+                    .StopDownloadQueueAsync(downloadQueue);
+            }
+
             var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles
@@ -395,9 +409,18 @@ public class MainWindowViewModel : ViewModelBase
             if (downloadQueue == null)
                 return;
 
-            AppService
-                .DownloadQueueService
-                .StartDownloadQueue(downloadQueue);
+            if (!downloadQueue.IsRunning)
+            {
+                _ = AppService
+                    .DownloadQueueService
+                    .StartDownloadQueueAsync(downloadQueue);
+            }
+            else
+            {
+                _ = AppService
+                    .DownloadQueueService
+                    .StopDownloadQueueAsync(downloadQueue);
+            }
         }
         catch (Exception ex)
         {

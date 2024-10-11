@@ -19,10 +19,6 @@ public class CategoryFileExtension : DbModelBase
     public int? CategoryId { get; set; }
 
     [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
-
-    public CategoryFileExtension()
-    {
-    }
     
     public override void UpdateDbModel(DbModelBase? model)
     {

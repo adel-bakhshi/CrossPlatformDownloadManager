@@ -28,10 +28,6 @@ public class Category : DbModelBase
     [JsonProperty("fileExtensions")] public ICollection<CategoryFileExtension> FileExtensions { get; set; } = [];
 
     public ICollection<DownloadFile> DownloadFiles { get; } = [];
-
-    public Category()
-    {
-    }
     
     public override void UpdateDbModel(DbModelBase? model)
     {
@@ -43,7 +39,5 @@ public class Category : DbModelBase
         IsDefault = category.IsDefault;
         AutoAddLinkFromSites = category.AutoAddLinkFromSites;
         CategorySaveDirectoryId = category.CategorySaveDirectoryId;
-        
-        DownloadFiles.Clear();
     }
 }

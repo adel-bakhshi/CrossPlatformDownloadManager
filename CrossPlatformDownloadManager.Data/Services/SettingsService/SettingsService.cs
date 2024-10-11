@@ -1,25 +1,30 @@
 using AutoMapper;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
-using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.Utils;
-using PropertyChanged;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
 namespace CrossPlatformDownloadManager.Data.Services.SettingsService;
 
-[AddINotifyPropertyChangedInterface]
-public class SettingsService : ISettingsService
+public class SettingsService : PropertyChangedBase, ISettingsService
 {
     #region Private Fields
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
+    private SettingsViewModel _settings;
+
     #endregion
 
     #region Properties
 
-    public SettingsViewModel Settings { get; private set; }
+    public SettingsViewModel Settings
+    {
+        get => _settings;
+        private set => SetField(ref _settings, value);
+    }
 
     #endregion
 
@@ -55,7 +60,8 @@ public class SettingsService : ISettingsService
             }
 
             var settingsViewModel = _mapper.Map<SettingsViewModel>(settings);
-            Settings.UpdateViewModel(settingsViewModel, nameof(Settings.Id));
+            Settings.UpdateViewModel(settingsViewModel);
+            OnPropertyChanged(nameof(Settings));
         }
         catch (Exception ex)
         {

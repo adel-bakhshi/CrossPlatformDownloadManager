@@ -1,10 +1,50 @@
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
+
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-public class ProxySettingsViewModel
+public class ProxySettingsViewModel : PropertyChangedBase
 {
-    public string? Type { get; set; }
-    public string? Host { get; set; }
-    public string? Port { get; set; }
-    public string? Username { get; set; }
-    public string? Password { get; set; }
+    #region Private Fields
+
+    private string? _type;
+    private string? _host;
+    private string? _port;
+    private string? _username;
+    private string? _password;
+
+    #endregion
+
+    #region Properties
+
+    public string? Type
+    {
+        get => _type;
+        set => SetField(ref _type, value);
+    }
+
+    public string? Host
+    {
+        get => _host;
+        set => SetField(ref _host, value);
+    }
+
+    public string? Port
+    {
+        get => _port;
+        set => SetField(ref _port, value);
+    }
+
+    public string? Username
+    {
+        get => _username;
+        set => SetField(ref _username, value);
+    }
+
+    public string? Password
+    {
+        get => _password;
+        set => SetField(ref _password, value);
+    }
+
+    #endregion
 }

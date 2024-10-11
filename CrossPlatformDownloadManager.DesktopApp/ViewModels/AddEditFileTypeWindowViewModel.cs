@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 

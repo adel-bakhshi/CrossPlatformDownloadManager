@@ -11,10 +11,6 @@ public class CategorySaveDirectory : DbModelBase
 
     [MaxLength(500)] public string SaveDirectory { get; set; } = string.Empty;
 
-    public CategorySaveDirectory()
-    {
-    }
-
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not CategorySaveDirectory categorySaveDirectory)

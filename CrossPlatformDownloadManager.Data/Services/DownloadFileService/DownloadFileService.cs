@@ -4,14 +4,14 @@ using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
-using PropertyChanged;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
-[AddINotifyPropertyChangedInterface]
-public class DownloadFileService : IDownloadFileService
+public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 {
     #region Private Fields
 
@@ -19,6 +19,8 @@ public class DownloadFileService : IDownloadFileService
     private readonly IMapper _mapper;
 
     private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
+
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles;
 
     #endregion
 
@@ -30,7 +32,11 @@ public class DownloadFileService : IDownloadFileService
 
     #region Properties
 
-    public ObservableCollection<DownloadFileViewModel> DownloadFiles { get; }
+    public ObservableCollection<DownloadFileViewModel> DownloadFiles
+    {
+        get => _downloadFiles;
+        private set => SetField(ref _downloadFiles, value);
+    }
 
     #endregion
 
@@ -41,7 +47,7 @@ public class DownloadFileService : IDownloadFileService
 
         _downloadFileTasks = [];
 
-        DownloadFiles = [];
+        _downloadFiles = [];
     }
 
     public async Task LoadDownloadFilesAsync()
@@ -65,11 +71,12 @@ public class DownloadFileService : IDownloadFileService
             var oldDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
             var vm = _mapper.Map<DownloadFileViewModel>(downloadFile);
             if (oldDownloadFile != null)
-                oldDownloadFile.UpdateViewModel(vm, nameof(oldDownloadFile.Id));
+                oldDownloadFile.UpdateViewModel(vm);
             else
                 DownloadFiles.Add(vm);
         }
 
+        OnPropertyChanged(nameof(DownloadFiles));
         DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -89,7 +96,12 @@ public class DownloadFileService : IDownloadFileService
 
     public async Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel)
     {
-        var downloadFile = _mapper.Map<DownloadFile>(viewModel);
+        var downloadFileViewModel = DownloadFiles.FirstOrDefault(df => df.Id == viewModel.Id);
+        if (downloadFileViewModel == null)
+            return;
+
+        downloadFileViewModel.UpdateViewModel(viewModel);
+        var downloadFile = _mapper.Map<DownloadFile>(downloadFileViewModel);
         await UpdateDownloadFileAsync(downloadFile);
     }
 
@@ -102,13 +114,24 @@ public class DownloadFileService : IDownloadFileService
 
     public async Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels)
     {
-        var downloadFiles = _mapper.Map<List<DownloadFile>>(viewModels);
+        var downloadFileViewModel = viewModels
+            .Select(vm => DownloadFiles.FirstOrDefault(df => df.Id == vm.Id))
+            .Where(df => df != null)
+            .ToList();
+
+        foreach (var downloadFile in downloadFileViewModel)
+        {
+            var viewModel = viewModels.Find(vm => vm.Id == downloadFile!.Id);
+            downloadFile!.UpdateViewModel(viewModel);
+        }
+
+        var downloadFiles = _mapper.Map<List<DownloadFile>>(downloadFileViewModel);
         await UpdateDownloadFilesAsync(downloadFiles);
     }
 
-    public async Task StartDownloadFileAsync(DownloadFileViewModel? downloadFileViewModel)
+    public async Task StartDownloadFileAsync(DownloadFileViewModel? viewModel)
     {
-        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
@@ -132,9 +155,9 @@ public class DownloadFileService : IDownloadFileService
         await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork);
     }
 
-    public async Task StopDownloadFileAsync(DownloadFileViewModel? downloadFileViewModel)
+    public async Task StopDownloadFileAsync(DownloadFileViewModel? viewModel)
     {
-        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
@@ -146,8 +169,9 @@ public class DownloadFileService : IDownloadFileService
         await downloadFile.StopDownloadFileAsync(service);
     }
 
-    public void ResumeDownloadFile(DownloadFileViewModel? downloadFile)
+    public void ResumeDownloadFile(DownloadFileViewModel? viewModel)
     {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
@@ -158,8 +182,9 @@ public class DownloadFileService : IDownloadFileService
         downloadFile.ResumeDownloadFile(service);
     }
 
-    public void PauseDownloadFile(DownloadFileViewModel? downloadFile)
+    public void PauseDownloadFile(DownloadFileViewModel? viewModel)
     {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
@@ -170,8 +195,9 @@ public class DownloadFileService : IDownloadFileService
         downloadFile.PauseDownloadFile(service);
     }
 
-    public void LimitDownloadFileSpeed(DownloadFileViewModel? downloadFile, long speed)
+    public void LimitDownloadFileSpeed(DownloadFileViewModel? viewModel, long speed)
     {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
@@ -182,13 +208,15 @@ public class DownloadFileService : IDownloadFileService
         configuration.MaximumBytesPerSecond = speed;
     }
 
-    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile,
+    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile,
         bool reloadData = true)
     {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
-        var downloadFileInDb = await _unitOfWork.DownloadFileRepository
+        var downloadFileInDb = await _unitOfWork
+            .DownloadFileRepository
             .GetAsync(where: df => df.Id == downloadFile.Id);
 
         if (downloadFile.IsDownloading)
@@ -198,6 +226,7 @@ public class DownloadFileService : IDownloadFileService
         if (downloadFileInDb == null)
         {
             DownloadFiles.Remove(downloadFile);
+            OnPropertyChanged(nameof(DownloadFiles));
             shouldReturn = true;
         }
 
@@ -240,7 +269,7 @@ public class DownloadFileService : IDownloadFileService
         var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
         if (downloadFileTask != null)
             _downloadFileTasks.Remove(downloadFileTask);
-        
+
         await UpdateDownloadFileAsync(downloadFile);
     }
 

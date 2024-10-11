@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
@@ -31,15 +32,15 @@ public interface IDownloadFileService
     
     Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels);
 
-    Task StartDownloadFileAsync(DownloadFileViewModel? downloadFile);
+    Task StartDownloadFileAsync(DownloadFileViewModel? viewModel);
 
-    Task StopDownloadFileAsync(DownloadFileViewModel? downloadFile);
+    Task StopDownloadFileAsync(DownloadFileViewModel? viewModel);
 
-    void ResumeDownloadFile(DownloadFileViewModel? downloadFile);
+    void ResumeDownloadFile(DownloadFileViewModel? viewModel);
 
-    void PauseDownloadFile(DownloadFileViewModel? downloadFile);
+    void PauseDownloadFile(DownloadFileViewModel? viewModel);
 
-    void LimitDownloadFileSpeed(DownloadFileViewModel? downloadFile, long speed);
+    void LimitDownloadFileSpeed(DownloadFileViewModel? viewModel, long speed);
 
-    Task DeleteDownloadFileAsync(DownloadFileViewModel? downloadFile, bool alsoDeleteFile, bool reloadData = true);
+    Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile, bool reloadData = true);
 }

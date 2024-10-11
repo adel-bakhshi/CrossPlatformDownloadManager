@@ -6,6 +6,7 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        xmlns:dbViewModels="clr-namespace:CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;assembly=CrossPlatformDownloadManager.Data"
         mc:Ignorable="d"
         d:DesignWidth="1280"
         d:DesignHeight="720"
@@ -119,7 +120,7 @@
 
                     <!-- ItemTemplate -->
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="viewModels:DownloadQueueViewModel">
+                        <DataTemplate DataType="dbViewModels:DownloadQueueViewModel">
                             <Border Name="DownloadQueueMainBorder"
                                     Padding="8, 5">
                                 <!-- Styles -->
@@ -493,6 +494,19 @@
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:00.00}%}" />
                                                 <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                                             Background="{DynamicResource TextColor}"
+                                                             Value="{Binding DownloadProgress}"
+                                                             Classes="customProgressBar dataGridProgressBar" />
+                                            </StackPanel>
+
+                                            <StackPanel VerticalAlignment="Center"
+                                                        HorizontalAlignment="Stretch"
+                                                        Margin="5, 0"
+                                                        IsVisible="{Binding IsStopped}"
+                                                        Spacing="3">
+                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Stopped - {0:00.00}%}"
+                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />

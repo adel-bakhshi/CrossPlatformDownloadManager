@@ -7,69 +7,257 @@ using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using Downloader;
-using PropertyChanged;
 
-namespace CrossPlatformDownloadManager.Data.ViewModels;
+namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 
-[AddINotifyPropertyChangedInterface]
-public sealed class DownloadFileViewModel
+public sealed class DownloadFileViewModel : DbViewModelBase
 {
     #region Private Fields
 
     // ElapsedTime timer
     private DispatcherTimer? _elapsedTimeTimer;
-    private TimeSpan? _elapsedTime;
+    private TimeSpan? _elapsedTimeOfStartingDownload;
 
     // UpdateChunksData timer
     private DispatcherTimer? _updateChunksDataTimer;
     private List<ChunkProgressViewModel>? _chunkProgresses;
-    
+
     // DownloadFinished timer
     private DispatcherTimer? _downloadFinishedTimer;
     private DownloadFileEventArgs? _downloadFinishedEventArgs;
+
+    private int _id;
+    private string? _url;
+    private string? _fileName;
+    private string? _fileType;
+    private int? _downloadQueueId;
+    private string? _downloadQueueName;
+    private double? _size;
+    private DownloadFileStatus? _status;
+    private DateTime? _lastTryDate;
+    private DateTime _dateAdded;
+    private int? _downloadQueuePriority;
+    private int? _categoryId;
+    private float? _downloadProgress;
+    private string? _downloadedSizeAsString;
+    private TimeSpan? _elapsedTime;
+    private TimeSpan? _timeLeft;
+    private float? _transferRate;
+    private string? _saveLocation;
+    private string? _downloadPackage;
+    private ObservableCollection<ChunkDataViewModel> _chunksData = [];
+    private int _countOfError;
 
     #endregion
 
     #region Events
 
     public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
+    public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
+    public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
 
     #endregion
 
     #region Properties
 
-    public int Id { get; set; }
-    public string? Url { get; set; }
-    public string? FileName { get; set; }
-    public string? FileType { get; set; }
-    public int? DownloadQueueId { get; set; }
-    public string? DownloadQueueName { get; set; }
-    public double? Size { get; set; }
-    public string? SizeAsString => Size.ToFileSize();
-    public DownloadFileStatus? Status { get; set; }
+    public int Id
+    {
+        get => _id;
+        set => SetField(ref _id, value);
+    }
+
+    public string? Url
+    {
+        get => _url;
+        set => SetField(ref _url, value);
+    }
+
+    public string? FileName
+    {
+        get => _fileName;
+        set => SetField(ref _fileName, value);
+    }
+
+    public string? FileType
+    {
+        get => _fileType;
+        set => SetField(ref _fileType, value);
+    }
+
+    public int? DownloadQueueId
+    {
+        get => _downloadQueueId;
+        set => SetField(ref _downloadQueueId, value);
+    }
+
+    public string? DownloadQueueName
+    {
+        get => _downloadQueueName;
+        set => SetField(ref _downloadQueueName, value);
+    }
+
+    public double? Size
+    {
+        get => _size;
+        set
+        {
+            if (!SetField(ref _size, value))
+                return;
+
+            OnPropertyChanged(nameof(SizeAsString));
+        }
+    }
+
+    public string SizeAsString => Size.ToFileSize();
+
+    public DownloadFileStatus? Status
+    {
+        get => _status;
+        set
+        {
+            if (!SetField(ref _status, value))
+                return;
+
+            OnPropertyChanged(nameof(IsCompleted));
+            OnPropertyChanged(nameof(IsDownloading));
+            OnPropertyChanged(nameof(IsStopped));
+            OnPropertyChanged(nameof(IsPaused));
+            OnPropertyChanged(nameof(IsError));
+        }
+    }
+
     public bool IsCompleted => Status == DownloadFileStatus.Completed;
     public bool IsDownloading => Status == DownloadFileStatus.Downloading;
+    public bool IsStopped => Status == DownloadFileStatus.Stopped;
     public bool IsPaused => Status == DownloadFileStatus.Paused;
     public bool IsError => Status == DownloadFileStatus.Error;
-    public DateTime? LastTryDate { get; set; }
-    public string? LastTryDateAsString => LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-    public DateTime DateAdded { get; set; }
+
+    public DateTime? LastTryDate
+    {
+        get => _lastTryDate;
+        set
+        {
+            if (!SetField(ref _lastTryDate, value))
+                return;
+
+            OnPropertyChanged(nameof(LastTryDateAsString));
+        }
+    }
+
+    public string LastTryDateAsString => LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+
+    public DateTime DateAdded
+    {
+        get => _dateAdded;
+        set
+        {
+            if (!SetField(ref _dateAdded, value))
+                return;
+
+            OnPropertyChanged(nameof(DateAddedAsString));
+        }
+    }
+
     public string DateAddedAsString => DateAdded.ToString(CultureInfo.InvariantCulture);
-    public int? DownloadQueuePriority { get; set; }
-    public int? CategoryId { get; set; }
-    public float? DownloadProgress { get; set; }
-    public string? DownloadProgressAsString => DownloadProgress == null ? string.Empty : $"{DownloadProgress:00.00}%";
-    public string? DownloadedSizeAsString { get; set; }
-    public TimeSpan? ElapsedTime { get; set; }
-    public string? ElapsedTimeAsString => ElapsedTime.GetShortTime();
-    public TimeSpan? TimeLeft { get; set; }
-    public string? TimeLeftAsString => TimeLeft.GetShortTime();
-    public float? TransferRate { get; set; }
-    public string? TransferRateAsString => TransferRate.ToFileSize();
-    public string? SaveLocation { get; set; }
-    public string? DownloadPackage { get; set; }
-    public ObservableCollection<ChunkDataViewModel> ChunksData { get; set; } = [];
-    public int CountOfError { get; set; }
+
+    public int? DownloadQueuePriority
+    {
+        get => _downloadQueuePriority;
+        set => SetField(ref _downloadQueuePriority, value);
+    }
+
+    public int? CategoryId
+    {
+        get => _categoryId;
+        set => SetField(ref _categoryId, value);
+    }
+
+    public float? DownloadProgress
+    {
+        get => _downloadProgress;
+        set
+        {
+            if (!SetField(ref _downloadProgress, value))
+                return;
+
+            OnPropertyChanged(nameof(DownloadProgressAsString));
+        }
+    }
+
+    public string DownloadProgressAsString =>
+        DownloadProgress == null ? string.Empty : $"{DownloadProgress ?? 0:00.00}%";
+
+    public string? DownloadedSizeAsString
+    {
+        get => _downloadedSizeAsString;
+        set => SetField(ref _downloadedSizeAsString, value);
+    }
+
+    public TimeSpan? ElapsedTime
+    {
+        get => _elapsedTime;
+        set
+        {
+            if (!SetField(ref _elapsedTime, value))
+                return;
+
+            OnPropertyChanged(nameof(ElapsedTimeAsString));
+        }
+    }
+
+    public string ElapsedTimeAsString => ElapsedTime.GetShortTime();
+
+    public TimeSpan? TimeLeft
+    {
+        get => _timeLeft;
+        set
+        {
+            if (!SetField(ref _timeLeft, value))
+                return;
+
+            OnPropertyChanged(nameof(TimeLeftAsString));
+        }
+    }
+
+    public string TimeLeftAsString => TimeLeft.GetShortTime();
+
+    public float? TransferRate
+    {
+        get => _transferRate;
+        set
+        {
+            if (!SetField(ref _transferRate, value))
+                return;
+
+            OnPropertyChanged(nameof(TransferRateAsString));
+        }
+    }
+
+    public string TransferRateAsString => TransferRate.ToFileSize();
+
+    public string? SaveLocation
+    {
+        get => _saveLocation;
+        set => SetField(ref _saveLocation, value);
+    }
+
+    public string? DownloadPackage
+    {
+        get => _downloadPackage;
+        set => SetField(ref _downloadPackage, value);
+    }
+
+    public ObservableCollection<ChunkDataViewModel> ChunksData
+    {
+        get => _chunksData;
+        set => SetField(ref _chunksData, value);
+    }
+
+    public int CountOfError
+    {
+        get => _countOfError;
+        set => SetField(ref _countOfError, value);
+    }
 
     #endregion
 
@@ -116,7 +304,7 @@ public sealed class DownloadFileViewModel
             var urls = downloadPackage
                 .Urls
                 .ToList();
-            
+
             var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
             if (currentUrl.IsNullOrEmpty())
             {
@@ -125,7 +313,7 @@ public sealed class DownloadFileViewModel
 
                 downloadPackage.Urls = urls.ToArray();
             }
-            
+
             await downloadService.DownloadFileTaskAsync(downloadPackage);
         }
     }
@@ -139,13 +327,12 @@ public sealed class DownloadFileViewModel
         _updateChunksDataTimer?.Stop();
 
         _elapsedTimeTimer = null;
-        _elapsedTime = null;
+        _elapsedTimeOfStartingDownload = null;
         _updateChunksDataTimer = null;
         _chunkProgresses = null;
 
-        var pack = downloadService.Package;
         await downloadService.CancelTaskAsync();
-        SaveDownloadPackage(pack);
+        SaveDownloadPackage(downloadService.Package);
     }
 
     public void ResumeDownloadFile(DownloadService? downloadService)
@@ -157,6 +344,8 @@ public sealed class DownloadFileViewModel
         _elapsedTimeTimer?.Start();
         _updateChunksDataTimer?.Start();
         Status = DownloadFileStatus.Downloading;
+
+        DownloadResumed?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
     public void PauseDownloadFile(DownloadService? downloadService)
@@ -170,6 +359,35 @@ public sealed class DownloadFileViewModel
         Status = DownloadFileStatus.Paused;
         UpdateChunksDataTimerOnTick(null, EventArgs.Empty);
         SaveDownloadPackage(downloadService.Package);
+
+        DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = Id });
+    }
+
+    public override void UpdateViewModel(DbViewModelBase? viewModel)
+    {
+        if (viewModel is not DownloadFileViewModel downloadFileViewModel || Id != downloadFileViewModel.Id)
+            return;
+
+        Url = downloadFileViewModel.Url;
+        FileName = downloadFileViewModel.FileName;
+        FileType = downloadFileViewModel.FileType;
+        DownloadQueueId = downloadFileViewModel.DownloadQueueId;
+        DownloadQueueName = downloadFileViewModel.DownloadQueueName;
+        Size = downloadFileViewModel.Size;
+        Status = downloadFileViewModel.Status;
+        LastTryDate = downloadFileViewModel.LastTryDate;
+        DateAdded = downloadFileViewModel.DateAdded;
+        DownloadQueuePriority = downloadFileViewModel.DownloadQueuePriority;
+        CategoryId = downloadFileViewModel.CategoryId;
+        DownloadProgress = downloadFileViewModel.DownloadProgress;
+        DownloadedSizeAsString = downloadFileViewModel.DownloadedSizeAsString;
+        ElapsedTime = downloadFileViewModel.ElapsedTime;
+        TimeLeft = downloadFileViewModel.TimeLeft;
+        TransferRate = downloadFileViewModel.TransferRate;
+        SaveLocation = downloadFileViewModel.SaveLocation;
+        DownloadPackage = downloadFileViewModel.DownloadPackage;
+        ChunksData = downloadFileViewModel.ChunksData;
+        CountOfError = downloadFileViewModel.CountOfError;
     }
 
     #region Helpers
@@ -184,7 +402,7 @@ public sealed class DownloadFileViewModel
     {
         bool isSuccess;
         string? error = null;
-        
+
         // TODO: Show error
         if (e is { Error: not null, Cancelled: false })
         {
@@ -194,7 +412,7 @@ public sealed class DownloadFileViewModel
         }
         else if (e.Cancelled)
         {
-            Status = DownloadFileStatus.Paused;
+            Status = DownloadFileStatus.Stopped;
             isSuccess = false;
         }
         else
@@ -219,11 +437,11 @@ public sealed class DownloadFileViewModel
     {
         if (_downloadFinishedTimer == null || _downloadFinishedEventArgs == null)
             return;
-        
+
         _downloadFinishedTimer.Stop();
         _downloadFinishedTimer.Tick -= DownloadFinishedTimerOnTick;
         _downloadFinishedTimer = null;
-        
+
         DownloadFinished?.Invoke(this, _downloadFinishedEventArgs);
         _downloadFinishedEventArgs = null;
     }
@@ -279,9 +497,9 @@ public sealed class DownloadFileViewModel
 
     private void ElapsedTimeTimerOnTick(object? sender, EventArgs e)
     {
-        _elapsedTime ??= TimeSpan.Zero;
-        _elapsedTime = TimeSpan.FromSeconds(_elapsedTime.Value.TotalSeconds + 1);
-        ElapsedTime = _elapsedTime;
+        _elapsedTimeOfStartingDownload ??= TimeSpan.Zero;
+        _elapsedTimeOfStartingDownload = TimeSpan.FromSeconds(_elapsedTimeOfStartingDownload.Value.TotalSeconds + 1);
+        ElapsedTime = _elapsedTimeOfStartingDownload;
     }
 
     private void UpdateChunksData()

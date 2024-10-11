@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -70,6 +71,7 @@ public class FilesViewModel : ViewModelBase
             .DownloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId != null && df.DownloadQueueId == DownloadQueue?.Id)
+            .OrderBy(df => df.DownloadQueuePriority)
             .ToObservableCollection();
     }
 

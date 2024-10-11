@@ -39,16 +39,11 @@ public class Settings : DbModelBase
 
     [Required] public bool UseSystemNotifications { get; set; }
 
-    public Settings()
-    {
-        
-    }
-
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not Settings settings)
             return;
-        
+
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
         DarkMode = settings.DarkMode;

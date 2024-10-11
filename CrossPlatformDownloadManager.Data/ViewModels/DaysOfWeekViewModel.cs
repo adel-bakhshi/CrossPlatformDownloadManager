@@ -1,22 +1,72 @@
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Newtonsoft.Json;
-using PropertyChanged;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-[AddINotifyPropertyChangedInterface]
-public class DaysOfWeekViewModel
+public class DaysOfWeekViewModel : PropertyChangedBase
 {
-    [JsonProperty("saturday")] public bool Saturday { get; set; }
+    #region Private Fields
 
-    [JsonProperty("sunday")] public bool Sunday { get; set; }
+    private bool _saturday;
+    private bool _sunday;
+    private bool _monday;
+    private bool _tuesday;
+    private bool _wednesday;
+    private bool _thursday;
+    private bool _friday;
 
-    [JsonProperty("monday")] public bool Monday { get; set; }
+    #endregion
 
-    [JsonProperty("tuesday")] public bool Tuesday { get; set; }
+    #region Properties
 
-    [JsonProperty("wednesday")] public bool Wednesday { get; set; }
+    [JsonProperty("saturday")]
+    public bool Saturday
+    {
+        get => _saturday;
+        set => SetField(ref _saturday, value);
+    }
 
-    [JsonProperty("thursday")] public bool Thursday { get; set; }
+    [JsonProperty("sunday")]
+    public bool Sunday
+    {
+        get => _sunday;
+        set => SetField(ref _sunday, value);
+    }
 
-    [JsonProperty("friday")] public bool Friday { get; set; }
+    [JsonProperty("monday")]
+    public bool Monday
+    {
+        get => _monday;
+        set => SetField(ref _monday, value);
+    }
+
+    [JsonProperty("tuesday")]
+    public bool Tuesday
+    {
+        get => _tuesday;
+        set => SetField(ref _tuesday, value);
+    }
+
+    [JsonProperty("wednesday")]
+    public bool Wednesday
+    {
+        get => _wednesday;
+        set => SetField(ref _wednesday, value);
+    }
+
+    [JsonProperty("thursday")]
+    public bool Thursday
+    {
+        get => _thursday;
+        set => SetField(ref _thursday, value);
+    }
+
+    [JsonProperty("friday")]
+    public bool Friday
+    {
+        get => _friday;
+        set => SetField(ref _friday, value);
+    }
+
+    #endregion
 }

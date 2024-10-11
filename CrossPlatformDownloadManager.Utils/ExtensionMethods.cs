@@ -122,22 +122,4 @@ public static class ExtensionMethods
 
         return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }
-
-    public static void UpdateViewModel<T>(this T? viewModel, T? newViewModel, params string[] ignoreProperties)
-        where T : class
-    {
-        if (viewModel == null || newViewModel == null)
-            return;
-
-        var properties = typeof(T)
-            .GetProperties()
-            .Where(p => !ignoreProperties.Contains(p.Name) && p.CanWrite)
-            .ToList();
-
-        foreach (var property in properties)
-        {
-            var value = property.GetValue(newViewModel);
-            property.SetValue(viewModel, value);
-        }
-    }
 }

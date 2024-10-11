@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -99,7 +100,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
     {
         if (!IsEditMode)
             return;
-        
+
         DownloadQueue.LoadViewData();
         this.RaisePropertyChanged(nameof(DownloadQueue));
         OptionsViewModel!.DownloadQueue = DownloadQueue;
@@ -189,7 +190,9 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             DownloadQueue.JustForDate = DownloadQueue.IsDaily ? null : DateTime.Now;
             DownloadQueue.DaysOfWeek = DownloadQueue.IsDaily ? DownloadQueue.DaysOfWeekViewModel.ConvertToJson() : null;
             DownloadQueue.TurnOffComputerMode = turnOffComputerMode;
-            DownloadQueue.IsDefault = false;
+
+            if (!IsEditMode)
+                DownloadQueue.IsDefault = false;
 
             var downloadQueue = AppService
                 .Mapper
@@ -218,8 +221,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 if (oldDownloadFiles.Count > 0)
                 {
                     foreach (var downloadFile in oldDownloadFiles)
+                    {
                         downloadFile.DownloadQueueId = null;
-                    
+                        downloadFile.DownloadQueuePriority = null;
+                    }
+
                     await AppService
                         .DownloadFileService
                         .UpdateDownloadFilesAsync(oldDownloadFiles);

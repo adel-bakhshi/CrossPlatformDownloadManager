@@ -42,10 +42,6 @@ public class DownloadFile : DbModelBase
 
     [MaxLength(5000)] public string? DownloadPackage { get; set; }
 
-    public DownloadFile()
-    {
-    }
-
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not DownloadFile downloadFile)

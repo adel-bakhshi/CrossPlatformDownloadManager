@@ -18,10 +18,6 @@ public class CategoryHeader : DbModelBase
 
     [NotMapped] public ICollection<Category> Categories { get; set; } = [];
 
-    public CategoryHeader()
-    {
-    }
-
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not CategoryHeader categoryHeader)
@@ -29,7 +25,5 @@ public class CategoryHeader : DbModelBase
         
         Title = categoryHeader.Title;
         Icon = categoryHeader.Icon;
-        
-        Categories.Clear();
     }
 }

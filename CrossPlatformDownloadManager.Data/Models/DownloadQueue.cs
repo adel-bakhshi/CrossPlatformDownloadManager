@@ -34,12 +34,10 @@ public class DownloadQueue : DbModelBase
     [Required] public bool IsDefault { get; set; }
 
     [Required] public int DownloadCountAtSameTime { get; set; }
+    
+    [Required] public bool IncludePausedFiles { get; set; }
 
     public ICollection<DownloadFile> DownloadFiles { get; } = [];
-
-    public DownloadQueue()
-    {
-    }
 
     public override void UpdateDbModel(DbModelBase? model)
     {
@@ -61,7 +59,6 @@ public class DownloadQueue : DbModelBase
         TurnOffComputerMode = downloadQueue.TurnOffComputerMode;
         IsDefault = downloadQueue.IsDefault;
         DownloadCountAtSameTime = downloadQueue.DownloadCountAtSameTime;
-        
-        DownloadFiles.Clear();
+        IncludePausedFiles = downloadQueue.IncludePausedFiles;
     }
 }

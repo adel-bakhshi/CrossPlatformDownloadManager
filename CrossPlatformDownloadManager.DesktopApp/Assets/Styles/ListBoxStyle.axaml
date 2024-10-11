@@ -3,7 +3,8 @@
         xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
-        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels">
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:dbViewModels="clr-namespace:CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;assembly=CrossPlatformDownloadManager.Data">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -163,7 +164,7 @@
             </Setter>
 
             <Setter Property="ItemTemplate">
-                <DataTemplate DataType="viewModels:CategoryFileExtensionViewModel">
+                <DataTemplate DataType="dbViewModels:CategoryFileExtensionViewModel">
                     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                             Padding="10"
                             Background="{DynamicResource PrimaryColor}">

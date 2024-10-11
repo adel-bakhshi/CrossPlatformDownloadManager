@@ -1,6 +1,7 @@
 using AutoMapper;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.Utils;
 
 namespace CrossPlatformDownloadManager.Data.Profiles;

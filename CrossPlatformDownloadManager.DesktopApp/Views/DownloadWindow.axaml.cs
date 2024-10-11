@@ -31,53 +31,6 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
     }
 
-    private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
-    {
-        if (ViewModel == null)
-            return;
-
-        var chunksData = ViewModel.DownloadFile.ChunksData;
-        var bounds = ChunksProgressBarsCanvas.Bounds;
-        var chunksCount = chunksData.Count;
-        var divisionsWidth = bounds.Width / chunksCount;
-
-        if (_chunksDataRectangles.Count == 0)
-        {
-            var heightBinding = new Binding
-            {
-                Path = "Bounds.Height",
-                Mode = BindingMode.OneWay,
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor)
-                {
-                    AncestorType = typeof(Border),
-                },
-            };
-
-            for (var i = 0; i < chunksCount; i++)
-            {
-                var rect = new Rectangle();
-                rect.Bind(Rectangle.HeightProperty, heightBinding);
-                rect.Fill = this.FindResource("ChunkProgressGradientBrush") as IBrush;
-                rect.Width = chunksData[i].TotalSize == 0
-                    ? 0
-                    : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
-
-                Canvas.SetLeft(rect, divisionsWidth * i);
-                Canvas.SetTop(rect, 0);
-
-                ChunksProgressBarsCanvas.Children.Add(rect);
-                _chunksDataRectangles.Add(rect);
-            }
-        }
-
-        for (var i = 0; i < chunksCount; i++)
-        {
-            _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0
-                ? 0
-                : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
-        }
-    }
-
     private void DownloadSpeedLimiterView_OnSpeedLimiterStateChanged(object? sender,
         DownloadSpeedLimiterViewEventArgs e)
     {
@@ -111,6 +64,50 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     }
 
     #region Helpers
+    
+    private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
+    {
+        if (ViewModel == null)
+            return;
+
+        var chunksData = ViewModel.DownloadFile.ChunksData;
+        var bounds = ChunksProgressBarsCanvas.Bounds;
+        var chunksCount = chunksData.Count;
+        var divisionsWidth = bounds.Width / chunksCount;
+
+        if (_chunksDataRectangles.Count == 0)
+        {
+            var heightBinding = new Binding
+            {
+                Path = "Bounds.Height",
+                Mode = BindingMode.OneWay,
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor)
+                {
+                    AncestorType = typeof(Border),
+                },
+            };
+
+            for (var i = 0; i < chunksCount; i++)
+            {
+                var rect = new Rectangle();
+                rect.Bind(Rectangle.HeightProperty, heightBinding);
+                rect.Fill = this.FindResource("ChunkProgressGradientBrush") as IBrush;
+
+                Canvas.SetLeft(rect, divisionsWidth * i);
+                Canvas.SetTop(rect, 0);
+
+                ChunksProgressBarsCanvas.Children.Add(rect);
+                _chunksDataRectangles.Add(rect);
+            }
+        }
+
+        for (var i = 0; i < chunksCount; i++)
+        {
+            _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0
+                ? 0
+                : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
+        }
+    }
 
     private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {

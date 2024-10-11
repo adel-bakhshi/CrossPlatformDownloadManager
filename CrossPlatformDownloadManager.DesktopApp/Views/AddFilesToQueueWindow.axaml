@@ -74,15 +74,15 @@
                                     MinWidth="150" />
 
                 <DataGridTextColumn Header="Size"
-                                    Binding="{Binding SizeAsString, FallbackValue='', TargetNullValue=''}"
+                                    Binding="{Binding SizeAsString}"
                                     MinWidth="100" />
 
                 <DataGridTextColumn Header="Status"
                                     MinWidth="150"
-                                    Binding="{Binding DownloadProgress, StringFormat={}{0:N2}%, FallbackValue='', TargetNullValue=''}" />
+                                    Binding="{Binding DownloadProgressAsString}" />
 
                 <DataGridTextColumn Header="Time Left"
-                                    Binding="{Binding TimeLeftAsString, FallbackValue='', TargetNullValue=''}"
+                                    Binding="{Binding TimeLeftAsString}"
                                     MinWidth="100" />
             </DataGrid.Columns>
         </DataGrid>

@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 

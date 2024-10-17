@@ -1,6 +1,8 @@
-namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
-public class CategoryViewModel : DbViewModelBase
+namespace CrossPlatformDownloadManager.Data.ViewModels;
+
+public class CategoryViewModel : PropertyChangedBase
 {
     #region Private Fields
 
@@ -31,13 +33,4 @@ public class CategoryViewModel : DbViewModelBase
     }
 
     #endregion
-    
-    public override void UpdateViewModel(DbViewModelBase? viewModel)
-    {
-        if (viewModel is not CategoryViewModel categoryViewModel || Id != categoryViewModel.Id)
-            return;
-        
-        Title = categoryViewModel.Title;
-        CategorySaveDirectory = categoryViewModel.CategorySaveDirectory;
-    }
 }

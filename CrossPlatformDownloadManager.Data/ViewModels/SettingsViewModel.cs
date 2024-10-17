@@ -1,8 +1,9 @@
 using CrossPlatformDownloadManager.Utils.Enums;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
-namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
+namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-public class SettingsViewModel : DbViewModelBase
+public class SettingsViewModel : PropertyChangedBase
 {
     #region Private Fields
 
@@ -138,28 +139,4 @@ public class SettingsViewModel : DbViewModelBase
     }
 
     #endregion
-
-    public override void UpdateViewModel(DbViewModelBase? viewModel)
-    {
-        if (viewModel is not SettingsViewModel settingsViewModel || Id != settingsViewModel.Id)
-            return;
-
-        StartOnSystemStartup = settingsViewModel.StartOnSystemStartup;
-        UseBrowserExtension = settingsViewModel.UseBrowserExtension;
-        DarkMode = settingsViewModel.DarkMode;
-        ShowStartDownloadDialog = settingsViewModel.ShowStartDownloadDialog;
-        ShowCompleteDownloadDialog = settingsViewModel.ShowCompleteDownloadDialog;
-        DuplicateDownloadLinkAction = settingsViewModel.DuplicateDownloadLinkAction;
-        MaximumConnectionsCount = settingsViewModel.MaximumConnectionsCount;
-        ProxyMode = settingsViewModel.ProxyMode;
-        ProxyType = settingsViewModel.ProxyType;
-        CustomProxySettings = settingsViewModel.CustomProxySettings;
-        UseDownloadCompleteSound = settingsViewModel.UseDownloadCompleteSound;
-        UseDownloadStoppedSound = settingsViewModel.UseDownloadStoppedSound;
-        UseDownloadFailedSound = settingsViewModel.UseDownloadFailedSound;
-        UseQueueStartedSound = settingsViewModel.UseQueueStartedSound;
-        UseQueueStoppedSound = settingsViewModel.UseQueueStoppedSound;
-        UseQueueFinishedSound = settingsViewModel.UseQueueFinishedSound;
-        UseSystemNotifications = settingsViewModel.UseSystemNotifications;
-    }
 }

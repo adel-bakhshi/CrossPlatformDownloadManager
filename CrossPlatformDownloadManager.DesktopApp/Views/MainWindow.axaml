@@ -6,7 +6,6 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
-        xmlns:dbViewModels="clr-namespace:CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;assembly=CrossPlatformDownloadManager.Data"
         mc:Ignorable="d"
         d:DesignWidth="1280"
         d:DesignHeight="720"
@@ -120,7 +119,7 @@
 
                     <!-- ItemTemplate -->
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="dbViewModels:DownloadQueueViewModel">
+                        <DataTemplate DataType="viewModels:DownloadQueueViewModel">
                             <Border Name="DownloadQueueMainBorder"
                                     Padding="8, 5">
                                 <!-- Styles -->

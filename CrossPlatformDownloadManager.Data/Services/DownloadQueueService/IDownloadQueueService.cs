@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadQueueService;
 
@@ -28,7 +27,7 @@ public interface IDownloadQueueService
 
     Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue);
 
-    Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel);
+    Task StartOrContinueDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
     Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 

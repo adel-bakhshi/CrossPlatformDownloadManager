@@ -1,12 +1,19 @@
 using System.Collections.ObjectModel;
+using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
+using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
-namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
+namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-public class DownloadQueueViewModel : DbViewModelBase
+public class DownloadQueueViewModel : PropertyChangedBase
 {
     #region Private Fields
+
+    private IUnitOfWork? _unitOfWork;
+    private IDownloadFileService? _downloadFileService;
 
     private int _id;
     private string? _title;
@@ -39,6 +46,8 @@ public class DownloadQueueViewModel : DbViewModelBase
     private string? _selectedTurnOffComputerMode;
     private DaysOfWeekViewModel? _daysOfWeekViewModel;
     private bool _isRunning;
+
+    private List<DownloadFileViewModel> _downloadingFiles = [];
 
     #endregion
 
@@ -230,6 +239,12 @@ public class DownloadQueueViewModel : DbViewModelBase
         set => SetField(ref _isRunning, value);
     }
 
+    public List<DownloadFileViewModel> DownloadingFiles
+    {
+        get => _downloadingFiles;
+        set => SetField(ref _downloadingFiles, value);
+    }
+
     #endregion
 
     public DownloadQueueViewModel()
@@ -243,37 +258,105 @@ public class DownloadQueueViewModel : DbViewModelBase
         DaysOfWeekViewModel = new DaysOfWeekViewModel();
     }
 
-    public override void UpdateViewModel(DbViewModelBase? viewModel)
+    public async Task StartDownloadQueueAsync(IUnitOfWork? unitOfWork, IDownloadFileService? downloadFileService)
     {
-        if (viewModel is not DownloadQueueViewModel downloadQueueViewModel || Id != downloadQueueViewModel.Id)
+        if (unitOfWork == null || downloadFileService == null)
             return;
 
-        Title = downloadQueueViewModel.Title;
-        StartOnApplicationStartup = downloadQueueViewModel.StartOnApplicationStartup;
-        StartDownloadSchedule = downloadQueueViewModel.StartDownloadSchedule;
-        StopDownloadSchedule = downloadQueueViewModel.StopDownloadSchedule;
-        IsDaily = downloadQueueViewModel.IsDaily;
-        JustForDate = downloadQueueViewModel.JustForDate;
-        DaysOfWeek = downloadQueueViewModel.DaysOfWeek;
-        RetryOnDownloadingFailed = downloadQueueViewModel.RetryOnDownloadingFailed;
-        RetryCount = downloadQueueViewModel.RetryCount;
-        ShowAlarmWhenDone = downloadQueueViewModel.ShowAlarmWhenDone;
-        ExitProgramWhenDone = downloadQueueViewModel.ExitProgramWhenDone;
-        TurnOffComputerWhenDone = downloadQueueViewModel.TurnOffComputerWhenDone;
-        IsDefault = downloadQueueViewModel.IsDefault;
-        DownloadCountAtSameTime = downloadQueueViewModel.DownloadCountAtSameTime;
-        IncludePausedFiles = downloadQueueViewModel.IncludePausedFiles;
-        DownloadFiles = downloadQueueViewModel.DownloadFiles;
-        StartDownloadScheduleEnabled = downloadQueueViewModel.StartDownloadScheduleEnabled;
-        StartDownloadHour = downloadQueueViewModel.StartDownloadHour;
-        StartDownloadMinute = downloadQueueViewModel.StartDownloadMinute;
-        StopDownloadScheduleEnabled = downloadQueueViewModel.StopDownloadScheduleEnabled;
-        StopDownloadHour = downloadQueueViewModel.StopDownloadHour;
-        StopDownloadMinute = downloadQueueViewModel.StopDownloadMinute;
-        DaysOfWeekViewModel = downloadQueueViewModel.DaysOfWeekViewModel;
+        _unitOfWork = unitOfWork;
+        _downloadFileService = downloadFileService;
+
+        await ContinueDownloadQueueAsync();
     }
 
-    #region Helpers
+    public async Task ContinueDownloadQueueAsync()
+    {
+        if (_unitOfWork == null || _downloadFileService == null)
+            return;
+
+        var primaryKeys = await _unitOfWork
+            .DownloadFileRepository
+            .GetAllAsync(where: df => df.DownloadQueueId == Id, select: df => df.Id, distinct: true);
+
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == Id
+                         && primaryKeys.Contains(df.Id)
+                         && df is { IsDownloading: false, IsPaused: false, IsCompleted: false }
+                         && (!RetryOnDownloadingFailed || df.CountOfError < RetryCount))
+            .ToList();
+
+        if (IncludePausedFiles)
+        {
+            var pausedDownloadFiles = _downloadFileService
+                .DownloadFiles
+                .Where(df => df.DownloadQueueId == Id
+                             && primaryKeys.Contains(df.Id)
+                             && df.IsPaused
+                             && (!RetryOnDownloadingFailed || df.CountOfError < RetryCount))
+                .ToList();
+
+            downloadFiles = downloadFiles
+                .Union(pausedDownloadFiles)
+                .ToList();
+        }
+
+        downloadFiles = downloadFiles
+            .OrderBy(df => df.DownloadQueuePriority)
+            .ToList();
+
+        if (downloadFiles.Count == 0 && DownloadingFiles.Count == 0)
+        {
+            await StopDownloadQueueAsync();
+            return;
+        }
+
+        if (!IsRunning)
+            IsRunning = true;
+
+        var taskIndex = 0;
+        while (DownloadingFiles.Count < DownloadCountAtSameTime && taskIndex < downloadFiles.Count)
+        {
+            var downloadFile = downloadFiles[taskIndex];
+            downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+            downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
+
+            _ = _downloadFileService.StartDownloadFileAsync(downloadFile);
+
+            DownloadingFiles.Add(downloadFile);
+
+            taskIndex++;
+        }
+
+        if (DownloadingFiles.Count == 0)
+            await StopDownloadQueueAsync();
+    }
+
+    public async Task StopDownloadQueueAsync()
+    {
+        if (_downloadFileService == null)
+            return;
+
+        IsRunning = false;
+
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == Id && df.IsDownloading)
+            .ToList();
+
+        foreach (var downloadFile in downloadFiles)
+            await _downloadFileService.StopDownloadFileAsync(downloadFile);
+
+        downloadFiles = downloadFiles
+            .Select(df =>
+            {
+                df.CountOfError = 0;
+                return df;
+            })
+            .ToList();
+
+        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
+    }
 
     public void LoadViewData()
     {
@@ -330,6 +413,64 @@ public class DownloadQueueViewModel : DbViewModelBase
             return;
 
         DaysOfWeekViewModel = daysOfWeek;
+    }
+
+    #region Helpers
+
+    private async void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
+    {
+        if (_unitOfWork == null || _downloadFileService == null)
+            return;
+
+        var downloadFile = DownloadingFiles.Find(df => df.Id == e.Id);
+        if (downloadFile == null)
+        {
+            if (sender is not DownloadFileViewModel downloadFileViewModel)
+                return;
+
+            downloadFileViewModel.DownloadFinished -= DownloadFileOnDownloadFinished;
+            downloadFileViewModel.DownloadPaused -= DownloadFileOnDownloadPaused;
+
+            return;
+        }
+
+        downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+        downloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
+
+        if (downloadFile.IsCompleted)
+        {
+            downloadFile.DownloadQueueId = null;
+            downloadFile.DownloadQueueName = null;
+            downloadFile.DownloadQueuePriority = null;
+        }
+        else if ((downloadFile.IsError || downloadFile.IsStopped) && IsRunning)
+        {
+            var maxPriority = await _unitOfWork
+                .DownloadFileRepository
+                .GetMaxAsync(selector: df => df.DownloadQueuePriority,
+                    where: df => df.DownloadQueueId == Id);
+
+            downloadFile.DownloadQueuePriority = maxPriority + 1;
+
+            if (downloadFile.IsError)
+                downloadFile.CountOfError++;
+        }
+
+        if (downloadFile.IsCompleted || downloadFile.IsError || downloadFile.IsStopped)
+            DownloadingFiles.Remove(downloadFile);
+
+        await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
+
+        if (IsRunning)
+            _ = ContinueDownloadQueueAsync();
+    }
+
+    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
+    {
+        if (IncludePausedFiles || !IsRunning)
+            return;
+
+        _ = ContinueDownloadQueueAsync();
     }
 
     #endregion

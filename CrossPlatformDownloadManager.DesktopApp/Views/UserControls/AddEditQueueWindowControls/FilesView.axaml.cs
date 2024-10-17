@@ -2,7 +2,6 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 

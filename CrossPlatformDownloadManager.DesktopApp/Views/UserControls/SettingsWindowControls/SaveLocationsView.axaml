@@ -6,7 +6,6 @@
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
              xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
              xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
-             xmlns:dbViewModels="clr-namespace:CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;assembly=CrossPlatformDownloadManager.Data"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -50,7 +49,7 @@
                                            HorizontalAlignment="Left"
                                            Width="250">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="dbViewModels:CategoryViewModel">
+                                <DataTemplate DataType="viewModels:CategoryViewModel">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>

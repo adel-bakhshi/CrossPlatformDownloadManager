@@ -6,11 +6,12 @@ using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
 
-namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
+namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-public sealed class DownloadFileViewModel : DbViewModelBase
+public sealed class DownloadFileViewModel : PropertyChangedBase
 {
     #region Private Fields
 
@@ -361,33 +362,6 @@ public sealed class DownloadFileViewModel : DbViewModelBase
         SaveDownloadPackage(downloadService.Package);
 
         DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = Id });
-    }
-
-    public override void UpdateViewModel(DbViewModelBase? viewModel)
-    {
-        if (viewModel is not DownloadFileViewModel downloadFileViewModel || Id != downloadFileViewModel.Id)
-            return;
-
-        Url = downloadFileViewModel.Url;
-        FileName = downloadFileViewModel.FileName;
-        FileType = downloadFileViewModel.FileType;
-        DownloadQueueId = downloadFileViewModel.DownloadQueueId;
-        DownloadQueueName = downloadFileViewModel.DownloadQueueName;
-        Size = downloadFileViewModel.Size;
-        Status = downloadFileViewModel.Status;
-        LastTryDate = downloadFileViewModel.LastTryDate;
-        DateAdded = downloadFileViewModel.DateAdded;
-        DownloadQueuePriority = downloadFileViewModel.DownloadQueuePriority;
-        CategoryId = downloadFileViewModel.CategoryId;
-        DownloadProgress = downloadFileViewModel.DownloadProgress;
-        DownloadedSizeAsString = downloadFileViewModel.DownloadedSizeAsString;
-        ElapsedTime = downloadFileViewModel.ElapsedTime;
-        TimeLeft = downloadFileViewModel.TimeLeft;
-        TransferRate = downloadFileViewModel.TransferRate;
-        SaveLocation = downloadFileViewModel.SaveLocation;
-        DownloadPackage = downloadFileViewModel.DownloadPackage;
-        ChunksData = downloadFileViewModel.ChunksData;
-        CountOfError = downloadFileViewModel.CountOfError;
     }
 
     #region Helpers

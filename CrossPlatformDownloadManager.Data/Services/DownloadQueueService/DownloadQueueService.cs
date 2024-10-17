@@ -1,12 +1,9 @@
 using System.Collections.ObjectModel;
 using AutoMapper;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
-using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
@@ -19,7 +16,6 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IDownloadFileService _downloadFileService;
-    private readonly List<DownloadQueueTaskViewModel> _downloadQueueTasks;
 
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues;
 
@@ -48,8 +44,6 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         _downloadFileService = downloadFileService;
         _downloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
 
-        _downloadQueueTasks = [];
-
         _downloadQueues = [];
     }
 
@@ -66,22 +60,20 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .Select(df => df.Id)
             .ToList();
 
-        var exceptDownloadQueues = DownloadQueues
+        var deletedDownloadQueues = DownloadQueues
             .Where(df => !primaryKeys.Contains(df.Id))
             .ToList();
 
-        foreach (var downloadQueue in exceptDownloadQueues)
+        foreach (var downloadQueue in deletedDownloadQueues)
             await DeleteDownloadQueueAsync(viewModel: downloadQueue, reloadData: false);
 
-        var downloadQueueViewModels = _mapper.Map<List<DownloadQueueViewModel>>(downloadQueues);
-        foreach (var downloadQueue in downloadQueueViewModels)
-        {
-            var oldDownloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueue.Id);
-            if (oldDownloadQueue != null)
-                oldDownloadQueue.UpdateViewModel(downloadQueue);
-            else
-                DownloadQueues.Add(downloadQueue);
-        }
+        var addDownloadQueues = downloadQueues
+            .Where(dq => DownloadQueues.All(odq => odq.Id != dq.Id))
+            .Select(dq => _mapper.Map<DownloadQueueViewModel>(dq))
+            .ToList();
+
+        foreach (var downloadQueue in addDownloadQueues)
+            DownloadQueues.Add(downloadQueue);
 
         OnPropertyChanged(nameof(DownloadQueues));
         DataChanged?.Invoke(this, EventArgs.Empty);
@@ -112,13 +104,19 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         if (downloadQueueInDb == null)
             return;
 
-        foreach (var downloadFile in downloadQueueInDb.DownloadFiles)
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == downloadQueueInDb.Id)
+            .ToList();
+
+        foreach (var downloadFile in downloadFiles)
         {
             downloadFile.DownloadQueueId = null;
+            downloadFile.DownloadQueueName = null;
             downloadFile.DownloadQueuePriority = null;
         }
 
-        await _downloadFileService.UpdateDownloadFilesAsync(downloadQueueInDb.DownloadFiles.ToList());
+        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
 
         _unitOfWork.DownloadQueueRepository.Delete(downloadQueueInDb);
         await _unitOfWork.SaveAsync();
@@ -134,85 +132,17 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
         await _unitOfWork.DownloadQueueRepository.UpdateAsync(downloadQueue);
         await _unitOfWork.SaveAsync();
+
         await LoadDownloadQueuesAsync();
     }
 
-    public async Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task StartOrContinueDownloadQueueAsync(DownloadQueueViewModel? viewModel)
     {
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
         if (downloadQueue == null)
             return;
 
-        var primaryKeys = await _unitOfWork
-            .DownloadFileRepository
-            .GetAllAsync(where: df => df.DownloadQueueId == downloadQueue.Id, select: df => df.Id, distinct: true);
-
-        var downloadFiles = _downloadFileService
-            .DownloadFiles
-            .Where(df => df.DownloadQueueId == downloadQueue.Id
-                         && primaryKeys.Contains(df.Id)
-                         && df is { IsDownloading: false, IsPaused: false }
-                         && (!downloadQueue.RetryOnDownloadingFailed || df.CountOfError < downloadQueue.RetryCount))
-            .ToList();
-
-        if (downloadQueue.IncludePausedFiles)
-        {
-            var pausedDownloadFiles = _downloadFileService
-                .DownloadFiles
-                .Where(df => df.DownloadQueueId == downloadQueue.Id
-                             && primaryKeys.Contains(df.Id)
-                             && df.IsPaused
-                             && (!downloadQueue.RetryOnDownloadingFailed || df.CountOfError < downloadQueue.RetryCount))
-                .ToList();
-
-            downloadFiles = downloadFiles
-                .Union(pausedDownloadFiles)
-                .ToList();
-        }
-
-        downloadFiles = downloadFiles
-            .OrderBy(df => df.DownloadQueuePriority)
-            .ToList();
-
-        if (downloadFiles.Count == 0)
-        {
-            await StopDownloadQueueAsync(downloadQueue);
-            return;
-        }
-
-        if (!downloadQueue.IsRunning)
-            downloadQueue.IsRunning = true;
-
-        var downloadQueueTasks = _downloadQueueTasks
-            .Where(task => task.DownloadFile?.IsCompleted == true
-                           || task.DownloadFile?.IsError == true
-                           || task.DownloadFile?.IsStopped == true)
-            .ToList();
-
-        foreach (var task in downloadQueueTasks)
-            _downloadQueueTasks.Remove(task);
-
-        var taskIndex = 0;
-        while (_downloadQueueTasks.Count < downloadQueue.DownloadCountAtSameTime && taskIndex < downloadFiles.Count)
-        {
-            var downloadFile = downloadFiles[taskIndex];
-            downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
-            downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
-
-            _ = _downloadFileService.StartDownloadFileAsync(downloadFile);
-
-            _downloadQueueTasks.Add(new DownloadQueueTaskViewModel
-            {
-                DownloadQueueId = downloadQueue.Id,
-                DownloadFileId = downloadFile.Id,
-                DownloadFile = downloadFile,
-            });
-
-            taskIndex++;
-        }
-
-        if (_downloadQueueTasks.Count == 0)
-            await StopDownloadQueueAsync(downloadQueue);
+        await downloadQueue.StartDownloadQueueAsync(_unitOfWork, _downloadFileService);
     }
 
     public async Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel)
@@ -221,28 +151,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         if (downloadQueue == null)
             return;
 
-        downloadQueue.IsRunning = false;
-
-        var downloadFiles = _downloadFileService
-            .DownloadFiles
-            .Where(df => df.DownloadQueueId == downloadQueue.Id && df.IsDownloading)
-            .ToList();
-
-        foreach (var downloadFile in downloadFiles)
-        {
-            await _downloadFileService.StopDownloadFileAsync(downloadFile);
-            await Task.Delay(500);
-        }
-
-        downloadFiles = downloadFiles
-            .Select(df =>
-            {
-                df.CountOfError = 0;
-                return df;
-            })
-            .ToList();
-
-        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
+        await downloadQueue.StopDownloadQueueAsync();
     }
 
     public async Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
@@ -283,99 +192,34 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await AddNewDownloadQueueAsync(downloadQueue, reloadData: false);
     }
 
-    private async void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
-    {
-        if (sender is DownloadFileViewModel originalDownloadFile)
-        {
-            originalDownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-            originalDownloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
-        }
-
-        var downloadQueueTask = _downloadQueueTasks.Find(t => t.DownloadFileId == e.Id);
-        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueTask?.DownloadQueueId);
-        if (downloadQueue == null || downloadQueueTask?.DownloadFile == null)
-            return;
-
-        if (downloadQueueTask.DownloadFile.IsCompleted)
-        {
-            downloadQueueTask.DownloadFile.DownloadQueueId = null;
-            downloadQueueTask.DownloadFile.DownloadQueuePriority = null;
-        }
-        else if ((downloadQueueTask.DownloadFile.IsError || downloadQueueTask.DownloadFile.IsStopped)
-                 && downloadQueue.IsRunning)
-        {
-            var maxPriority = await _unitOfWork
-                .DownloadFileRepository
-                .GetMaxAsync(selector: df => df.DownloadQueuePriority,
-                    where: df => df.DownloadQueueId == downloadQueue.Id);
-
-            downloadQueueTask.DownloadFile.DownloadQueuePriority = maxPriority + 1;
-
-            if (downloadQueueTask.DownloadFile.IsError)
-                downloadQueueTask.DownloadFile.CountOfError++;
-        }
-
-        await _downloadFileService.UpdateDownloadFileAsync(downloadQueueTask.DownloadFile);
-
-        downloadQueueTask.ContinueDownloadQueueTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        downloadQueueTask.ContinueDownloadQueueTimer.Tick += ContinueDownloadQueueTimerOnTick;
-        downloadQueueTask.ContinueDownloadQueueTimer.Tag = downloadQueueTask;
-        downloadQueueTask.ContinueDownloadQueueTimer.Start();
-    }
-
-    private void ContinueDownloadQueueTimerOnTick(object? sender, EventArgs e)
-    {
-        if (sender is not DispatcherTimer { Tag: DownloadQueueTaskViewModel downloadQueueTask } timer
-            || !timer.Equals(downloadQueueTask.ContinueDownloadQueueTimer)
-            || downloadQueueTask.DownloadFile == null)
-        {
-            return;
-        }
-
-        downloadQueueTask.ContinueDownloadQueueTimer.Stop();
-        downloadQueueTask.ContinueDownloadQueueTimer.Tick -= ContinueDownloadQueueTimerOnTick;
-        downloadQueueTask.ContinueDownloadQueueTimer = null;
-
-        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueTask.DownloadQueueId);
-        if (downloadQueue?.IsRunning == true)
-            _ = StartDownloadQueueAsync(downloadQueue);
-    }
-
-    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
-    {
-        var downloadQueueTask = _downloadQueueTasks.Find(task => task.DownloadFileId == e.Id);
-        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueTask?.DownloadQueueId);
-        switch (downloadQueue)
-        {
-            case null:
-                return;
-
-            case { IncludePausedFiles: false, IsRunning: true }:
-                _ = StartDownloadQueueAsync(downloadQueue);
-                break;
-        }
-    }
-
     private async void DownloadFileServiceOnDataChanged(object? sender, EventArgs e)
     {
         // Update DownloadQueue data
         await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
 
         // Remove DownloadFile from DownloadQueueTasks list when DownloadFile does not exist anymore
-        var downloadFiles = _downloadFileService
+        var primaryKeys = _downloadFileService
             .DownloadFiles
-            .ToList();
-
-        var primaryKeys = downloadFiles
             .Select(df => df.Id)
             .ToList();
 
-        var exceptDownloadQueueTasks = _downloadQueueTasks
-            .Where(task => !primaryKeys.Contains(task.DownloadFileId))
+        var downloadQueues = DownloadQueues
+            .Where(dq => dq.DownloadingFiles.Any(df => !primaryKeys.Contains(df.Id)))
             .ToList();
 
-        foreach (var downloadQueueTask in exceptDownloadQueueTasks)
-            _downloadQueueTasks.Remove(downloadQueueTask);
+        foreach (var downloadQueue in downloadQueues)
+        {
+            var downloadFiles = downloadQueue
+                .DownloadingFiles
+                .Where(df => !primaryKeys.Contains(df.Id))
+                .ToList();
+
+            foreach (var downloadFile in downloadFiles)
+                downloadQueue.DownloadingFiles.Remove(downloadFile);
+
+            if (downloadQueue.IsRunning)
+                _ = downloadQueue.ContinueDownloadQueueAsync();
+        }
     }
 
     #endregion

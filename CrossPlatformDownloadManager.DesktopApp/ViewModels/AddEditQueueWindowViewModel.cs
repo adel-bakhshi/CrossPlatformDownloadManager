@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -243,6 +242,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 .Select((df, i) =>
                 {
                     df.DownloadQueueId = downloadQueue.Id;
+                    df.DownloadQueueName = downloadQueue.Title;
                     df.DownloadQueuePriority = maxQueuePriority + 1 + i;
                     return df;
                 })

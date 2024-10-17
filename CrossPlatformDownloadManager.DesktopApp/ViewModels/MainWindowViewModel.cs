@@ -9,7 +9,6 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -413,7 +412,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 _ = AppService
                     .DownloadQueueService
-                    .StartDownloadQueueAsync(downloadQueue);
+                    .StartOrContinueDownloadQueueAsync(downloadQueue);
             }
             else
             {

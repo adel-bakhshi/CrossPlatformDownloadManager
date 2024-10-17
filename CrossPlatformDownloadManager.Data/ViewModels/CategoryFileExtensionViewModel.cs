@@ -1,6 +1,8 @@
-namespace CrossPlatformDownloadManager.Data.ViewModels.DbViewModels;
+using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
-public class CategoryFileExtensionViewModel : DbViewModelBase
+namespace CrossPlatformDownloadManager.Data.ViewModels;
+
+public class CategoryFileExtensionViewModel : PropertyChangedBase
 {
     #region Private Fields
 
@@ -38,17 +40,4 @@ public class CategoryFileExtensionViewModel : DbViewModelBase
     }
 
     #endregion
-
-    public override void UpdateViewModel(DbViewModelBase? viewModel)
-    {
-        if (viewModel is not CategoryFileExtensionViewModel categoryFileExtensionViewModel ||
-            Id != categoryFileExtensionViewModel.Id)
-        {
-            return;
-        }
-
-        Extension = categoryFileExtensionViewModel.Extension;
-        Alias = categoryFileExtensionViewModel.Alias;
-        CategoryTitle = categoryFileExtensionViewModel.CategoryTitle;
-    }
 }

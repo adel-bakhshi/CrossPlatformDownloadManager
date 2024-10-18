@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.TrayIconWindow"
+        x:DataType="vm:TrayIconWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Tray Icon"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Width="140"
+        Height="40"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CornerRadius="8"
+        ClipToBounds="True"
+        CanResize="False"
+        WindowStartupLocation="Manual"
+        PointerPressed="Window_OnPointerPressed">
+    <StackPanel Orientation="Horizontal"
+                Spacing="15">
+        <!-- Brand -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Background="{DynamicResource DangerGradientBrush}"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Left"
+                Width="56"
+                Height="32"
+                Margin="4, 0, 0, 0">
+            <TextBlock Text="CDM"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+        </Border>
+
+        <!-- Is ready text -->
+        <TextBlock Text="is ready"
+                   FontStyle="Italic"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+    </StackPanel>
+</Window>

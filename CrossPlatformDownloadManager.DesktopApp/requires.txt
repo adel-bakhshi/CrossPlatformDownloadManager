@@ -13,3 +13,4 @@ Beautiful icons: https://www.svgrepo.com/collection/scarlab-solid-oval-interface
 DownloadFilesDataGrid on MainWindow cells align top
 Add icon for MenuItems?
 Add LastChoice to DownloadQueue model for download later option in DownloadWindow
+In settings add a list of proxies to use and after that add proxies to TrayMenu

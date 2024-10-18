@@ -18,51 +18,6 @@
         MinWidth="1280"
         MinHeight="720">
 
-    <!-- Styles -->
-    <Window.Styles>
-        <Style Selector="Button.queueListAction">
-            <Setter Property="Padding"
-                    Value="0" />
-            <Setter Property="Margin"
-                    Value="0" />
-            <Setter Property="BorderThickness"
-                    Value="0" />
-            <Setter Property="CornerRadius"
-                    Value="0" />
-            <Setter Property="MinWidth"
-                    Value="0" />
-            <Setter Property="MinHeight"
-                    Value="0" />
-            <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
-
-            <!-- Template -->
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <Border Background="{TemplateBinding Background}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            CornerRadius="{TemplateBinding CornerRadius}">
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          Margin="{TemplateBinding Padding}" />
-                    </Border>
-                </ControlTemplate>
-            </Setter>
-
-            <Style Selector="^:pointerover">
-                <Setter Property="Opacity"
-                        Value="0.8" />
-            </Style>
-
-            <Style Selector="^:pressed">
-                <Setter Property="Opacity"
-                        Value="0.7" />
-            </Style>
-        </Style>
-    </Window.Styles>
-
     <!-- Resources -->
     <Window.Resources>
         <Flyout x:Key="QueuesListFlyout"
@@ -149,7 +104,7 @@
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center">
                                         <!-- Start/Stop queue button -->
-                                        <Button Classes="queueListAction"
+                                        <Button Classes="smallIconButton"
                                                 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding}">
                                             <PathIcon Width="16"
@@ -174,7 +129,7 @@
                                         </Button>
 
                                         <!-- Show details button -->
-                                        <Button Classes="queueListAction"
+                                        <Button Classes="smallIconButton"
                                                 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowDownloadQueueDetailsCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding $self}"
                                                 Tag="{Binding Id}">

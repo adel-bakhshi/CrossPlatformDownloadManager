@@ -1,10 +1,14 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
+using Microsoft.Extensions.DependencyInjection;
+using RolandK.AvaloniaExtensions.DependencyInjection;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -40,5 +44,17 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             Console.WriteLine(ex);
             ViewModel.SelectedFilesTotalSize = "0 KB";
         }
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        var serviceProvider = this.GetServiceProvider();
+        var appService = serviceProvider.GetService<IAppService>();
+        var trayMenuWindow = serviceProvider.GetService<TrayMenuWindow>();
+        var vm = new TrayIconWindowViewModel(appService!, trayMenuWindow!);
+        var window = new TrayIconWindow { DataContext = vm };
+        window.Show();
     }
 }

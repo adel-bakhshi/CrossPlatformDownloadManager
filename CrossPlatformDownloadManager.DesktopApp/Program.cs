@@ -47,8 +47,10 @@ sealed class Program
                 services.AddSingleton<IAppService, AppService>();
                 // Add ViewModels to services
                 services.AddSingleton<MainWindowViewModel>();
+                services.AddSingleton<TrayMenuWindowViewModel>();
                 // Add Windows to services
                 services.AddSingleton<MainWindow>();
+                services.AddSingleton<TrayMenuWindow>();
                 // Add AppInitializer to services
                 services.AddSingleton<IAppInitializer, AppInitializer>();
             })

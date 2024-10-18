@@ -7,7 +7,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
     #region Private Fields
 
-    private string _dbPath;
+    private readonly string _dbPath;
 
     #endregion
 
@@ -20,6 +20,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<DownloadFile> DownloadFiles { get; set; }
     public DbSet<DownloadQueue> DownloadQueues { get; set; }
     public DbSet<Settings> Settings { get; set; }
+    public DbSet<ProxySettings> ProxySettings { get; set; }
 
     #endregion
 

@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     public ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
     public IDownloadFileRepository DownloadFileRepository { get; }
     public ISettingsRepository SettingsRepository { get; }
+    public IProxySettingsRepository ProxySettingsRepository { get; }
 
     #endregion
 
@@ -38,6 +39,7 @@ public class UnitOfWork : IUnitOfWork
         DownloadQueueRepository = new DownloadQueueRepository(_dbContext!);
         DownloadFileRepository = new DownloadFileRepository(_dbContext!);
         SettingsRepository = new SettingsRepository(_dbContext!);
+        ProxySettingsRepository = new ProxySettingsRepository(_dbContext!);
     }
 
     public async Task SaveAsync()

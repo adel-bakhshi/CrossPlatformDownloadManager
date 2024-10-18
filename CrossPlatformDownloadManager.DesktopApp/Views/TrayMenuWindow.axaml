@@ -1,0 +1,480 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="600"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.TrayMenuWindow"
+        x:DataType="vm:TrayMenuWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CDM - Tray Menu"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Width="200"
+        Height="200"
+        MinWidth="200"
+        MinHeight="200"
+        MaxWidth="200"
+        MaxHeight="400"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        Background="{DynamicResource MenuBackgroundColor}"
+        ClipToBounds="True"
+        CanResize="False"
+        BorderThickness="0"
+        WindowStartupLocation="Manual">
+
+    <!-- Styles -->
+    <Window.Styles>
+        <!-- Menu item button style -->
+        <Style Selector="Button.menuItemButton">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TextColor}" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="Padding"
+                    Value="8, 5" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="MinWidth"
+                    Value="0" />
+            <Setter Property="MinHeight"
+                    Value="0" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Stretch" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:pressed">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:disabled">
+                <Setter Property="Background"
+                        Value="{DynamicResource TertiaryColor}" />
+            </Style>
+        </Style>
+    </Window.Styles>
+
+    <!-- Content -->
+    <Border Padding="0, 8"
+            CornerRadius="{DynamicResource DefaultCornerRadius}"
+            Background="{DynamicResource MenuBackgroundColor}"
+            ClipToBounds="True">
+        <ScrollViewer Name="MainScrollViewer"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden">
+            <StackPanel Orientation="Vertical"
+                        Spacing="0">
+                <!-- Download queues -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="0"
+                            IsVisible="{Binding IsQueuesNotEmpty}">
+                    <!-- Queues list -->
+                    <ItemsControl ItemsSource="{Binding DownloadQueues}">
+                        <ItemsControl.Styles>
+                            <Style Selector="ItemsControl">
+                                <Setter Property="Margin"
+                                        Value="0" />
+                                <Setter Property="Padding"
+                                        Value="0" />
+                                <Setter Property="BorderThickness"
+                                        Value="0" />
+                                <Setter Property="Background"
+                                        Value="{DynamicResource TransparentColor}" />
+                                <Setter Property="MinHeight"
+                                        Value="0" />
+                                <Setter Property="MinWidth"
+                                        Value="0" />
+                                <Setter Property="CornerRadius"
+                                        Value="0" />
+                                <Setter Property="ClipToBounds"
+                                        Value="False" />
+                                <Setter Property="HorizontalAlignment"
+                                        Value="Stretch" />
+                            </Style>
+                        </ItemsControl.Styles>
+
+                        <!-- ItemsPanel -->
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"
+                                            Spacing="0" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <!-- ItemTemplate -->
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="viewModels:DownloadQueueViewModel">
+                                <Border Name="DownloadQueueMainBorder"
+                                        Padding="8, 5">
+                                    <!-- Styles -->
+                                    <Border.Styles>
+                                        <Style Selector="Border#DownloadQueueMainBorder">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+
+                                            <Style Selector="^:pointerover">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                            </Style>
+                                        </Style>
+                                    </Border.Styles>
+
+                                    <!-- Content -->
+                                    <Grid ColumnDefinitions="Auto, *, Auto">
+                                        <!-- Queue icon -->
+                                        <PathIcon Grid.Column="0"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0, 0, 4, 0"
+                                                  Width="16"
+                                                  Height="16"
+                                                  Data="{DynamicResource ActiveQueue}"
+                                                  Foreground="{DynamicResource TextColor}" />
+
+                                        <!-- Queue title -->
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Title}"
+                                                   HorizontalAlignment="Stretch"
+                                                   VerticalAlignment="Center" />
+
+                                        <!-- Start/Stop queue button -->
+                                        <Button Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Classes="smallIconButton"
+                                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                                CommandParameter="{Binding}">
+                                            <PathIcon Width="16"
+                                                      Height="16"
+                                                      Classes.isRunning="{Binding IsRunning}">
+                                                <PathIcon.Styles>
+                                                    <Style Selector="PathIcon">
+                                                        <Setter Property="Data"
+                                                                Value="{DynamicResource StartQueueIcon}" />
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SuccessGradientBrush}" />
+
+                                                        <Style Selector="^.isRunning">
+                                                            <Setter Property="Data"
+                                                                    Value="{DynamicResource StopQueueIcon}" />
+                                                            <Setter Property="Foreground"
+                                                                    Value="{DynamicResource DangerGradientBrush}" />
+                                                        </Style>
+                                                    </Style>
+                                                </PathIcon.Styles>
+                                            </PathIcon>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Separator -->
+                    <Rectangle Height="1"
+                               HorizontalAlignment="Stretch"
+                               Fill="{DynamicResource SecondaryColor}"
+                               Margin="8, 4" />
+                </StackPanel>
+
+                <!-- Add new file -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource Plus}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Add new file"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- Add new queue -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource Plus}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Add new queue"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 4" />
+
+                <!-- Settings -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource Settings}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Settings"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 4" />
+
+                <!-- Proxies -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="0"
+                            IsVisible="{Binding IsProxiesNotEmpty}">
+                    <!-- Proxy list -->
+                    <ListBox Name="ProxyList"
+                             ItemsSource="{Binding Proxies}"
+                             SelectedItem="{Binding SelectedProxy}"
+                             Tapped="ProxyList_OnTapped">
+                        <ListBox.Styles>
+                            <Style Selector="ListBox">
+                                <Setter Property="Margin"
+                                        Value="0" />
+                                <Setter Property="Padding"
+                                        Value="0" />
+                                <Setter Property="BorderThickness"
+                                        Value="0" />
+                                <Setter Property="Background"
+                                        Value="{DynamicResource TransparentColor}" />
+                                <Setter Property="MinHeight"
+                                        Value="0" />
+                                <Setter Property="MinWidth"
+                                        Value="0" />
+                                <Setter Property="CornerRadius"
+                                        Value="0" />
+                                <Setter Property="ClipToBounds"
+                                        Value="False" />
+                                <Setter Property="HorizontalAlignment"
+                                        Value="Stretch" />
+                                <Setter Property="SelectionMode"
+                                        Value="Single" />
+
+                                <Style Selector="^ ListBoxItem">
+                                    <Setter Property="Padding"
+                                            Value="0" />
+                                    <Setter Property="Margin"
+                                            Value="0" />
+                                    <Setter Property="BorderThickness"
+                                            Value="0" />
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TransparentColor}" />
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TextColor}" />
+
+                                    <Style Selector="^:selected">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                    </Style>
+
+                                    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                    </Style>
+
+                                    <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource TransparentColor}" />
+                                    </Style>
+
+                                    <Style
+                                        Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource TransparentColor}" />
+                                    </Style>
+
+                                    <Style
+                                        Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource TransparentColor}" />
+                                    </Style>
+
+                                    <Style
+                                        Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                    </Style>
+                                </Style>
+                            </Style>
+                        </ListBox.Styles>
+
+                        <!-- ItemsPanel -->
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"
+                                            Spacing="0" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <!-- ItemTemplate -->
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="viewModels:ProxySettingsViewModel">
+                                <Border Padding="8, 5">
+                                    <!-- Content -->
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <!-- Proxy icon -->
+                                        <PathIcon Grid.Column="0"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0, 0, 4, 0"
+                                                  Width="16"
+                                                  Height="16"
+                                                  Data="{DynamicResource ArrowsLeftRightToLine}"
+                                                  Foreground="{Binding $parent[ListBoxItem].Foreground}" />
+
+                                        <!-- Proxy title -->
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Title}"
+                                                   Foreground="{Binding $parent[ListBoxItem].Foreground}"
+                                                   HorizontalAlignment="Stretch"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Separator -->
+                    <Rectangle Height="1"
+                               HorizontalAlignment="Stretch"
+                               Fill="{DynamicResource SecondaryColor}"
+                               Margin="8, 4" />
+                </StackPanel>
+
+                <!-- Help -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource CircleQuestion}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Help"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- About us -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource CircleInfo}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="About us"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 4" />
+
+                <!-- About us -->
+                <Button Classes="menuItemButton">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <PathIcon Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0, 0, 4, 0"
+                                  Width="16"
+                                  Height="16"
+                                  Data="{DynamicResource CircleXMark}"
+                                  Foreground="{DynamicResource TextColor}" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Exit"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>

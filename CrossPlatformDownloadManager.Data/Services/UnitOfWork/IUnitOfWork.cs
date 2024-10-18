@@ -11,6 +11,7 @@ public interface IUnitOfWork : IDisposable
     ICategorySaveDirectoryRepository CategorySaveDirectoryRepository { get; }
     IDownloadFileRepository DownloadFileRepository { get; }
     ISettingsRepository SettingsRepository { get; }
+    IProxySettingsRepository ProxySettingsRepository { get; }
 
     Task SaveAsync();
 

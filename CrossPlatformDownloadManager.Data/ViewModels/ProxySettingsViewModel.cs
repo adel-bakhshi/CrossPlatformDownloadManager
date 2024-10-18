@@ -6,6 +6,8 @@ public class ProxySettingsViewModel : PropertyChangedBase
 {
     #region Private Fields
 
+    private int _id;
+    private string? _title;
     private string? _type;
     private string? _host;
     private string? _port;
@@ -16,6 +18,18 @@ public class ProxySettingsViewModel : PropertyChangedBase
 
     #region Properties
 
+    public int Id
+    {
+        get => _id;
+        set => SetField(ref _id, value);
+    }
+    
+    public string? Title
+    {
+        get => _title;
+        set => SetField(ref _title, value);
+    }
+    
     public string? Type
     {
         get => _type;

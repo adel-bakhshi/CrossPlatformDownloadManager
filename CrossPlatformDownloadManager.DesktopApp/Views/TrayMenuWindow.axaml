@@ -101,7 +101,7 @@
                 <!-- Download queues -->
                 <StackPanel Orientation="Vertical"
                             Spacing="0"
-                            IsVisible="{Binding IsQueuesNotEmpty}">
+                            IsVisible="{Binding !IsDownloadQueuesEmpty}">
                     <!-- Queues list -->
                     <ItemsControl ItemsSource="{Binding DownloadQueues}">
                         <ItemsControl.Styles>
@@ -174,7 +174,7 @@
                                         <Button Grid.Column="2"
                                                 VerticalAlignment="Center"
                                                 Classes="smallIconButton"
-                                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                                Command="{Binding $parent[Window].((vm:TrayMenuWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding}">
                                             <PathIcon Width="16"
                                                       Height="16"
@@ -210,7 +210,8 @@
                 </StackPanel>
 
                 <!-- Add new file -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding AddNewDownloadLinkCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -224,14 +225,15 @@
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
-                                   Text="Add new file"
+                                   Text="Add new link"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center" />
                     </Grid>
                 </Button>
 
                 <!-- Add new queue -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding AddNewDownloadQueueCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -258,7 +260,8 @@
                            Margin="8, 4" />
 
                 <!-- Settings -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding OpenSettingsWindowCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -287,7 +290,7 @@
                 <!-- Proxies -->
                 <StackPanel Orientation="Vertical"
                             Spacing="0"
-                            IsVisible="{Binding IsProxiesNotEmpty}">
+                            IsVisible="{Binding !IsProxiesEmpty}">
                     <!-- Proxy list -->
                     <ListBox Name="ProxyList"
                              ItemsSource="{Binding Proxies}"
@@ -407,7 +410,8 @@
                 </StackPanel>
 
                 <!-- Help -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding OpenHelpWindowCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -428,7 +432,8 @@
                 </Button>
 
                 <!-- About us -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding OpenAboutUsWindowCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -455,7 +460,8 @@
                            Margin="8, 4" />
 
                 <!-- About us -->
-                <Button Classes="menuItemButton">
+                <Button Classes="menuItemButton"
+                        Command="{Binding ExitProgramCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
@@ -19,6 +20,9 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     // Update chunks data
     private readonly List<Rectangle> _chunksDataRectangles;
     private readonly DispatcherTimer _updateChunksDataTimer;
+
+    // Is window closing flag
+    private bool _isClosing;
 
     #endregion
 
@@ -42,13 +46,16 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         ViewModel?.ChangeOptions(e);
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
         if (ViewModel == null)
             return;
 
         ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
         _updateChunksDataTimer.Start();
+
+        // Wait for 0.5s to focus the window
+        await Task.Delay(500);
         Focus();
     }
 
@@ -57,14 +64,17 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         if (ViewModel == null)
             return;
 
+        _isClosing = true;
         ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-        await ViewModel.StopDownloadAsync(this, closeWindow: false);
+
+        if (ViewModel.DownloadFile.IsDownloading)
+            await ViewModel.StopDownloadAsync(this, closeWindow: false);
 
         base.OnClosing(e);
     }
 
     #region Helpers
-    
+
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
         if (ViewModel == null)
@@ -111,10 +121,15 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {
-        if (!e.IsSuccess || ViewModel == null)
-            return;
-        
-        Close();
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (ViewModel == null)
+                return;
+
+            ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+            if (!_isClosing)
+                Close();
+        });
     }
 
     #endregion

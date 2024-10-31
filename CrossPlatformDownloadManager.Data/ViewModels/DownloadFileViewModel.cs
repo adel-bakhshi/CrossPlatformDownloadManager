@@ -23,10 +23,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private DispatcherTimer? _updateChunksDataTimer;
     private List<ChunkProgressViewModel>? _chunkProgresses;
 
-    // DownloadFinished timer
-    private DispatcherTimer? _downloadFinishedTimer;
-    private DownloadFileEventArgs? _downloadFinishedEventArgs;
-
     private int _id;
     private string? _url;
     private string? _fileName;
@@ -395,29 +391,14 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             isSuccess = true;
         }
 
-        _downloadFinishedEventArgs = new DownloadFileEventArgs
+        var eventArgs = new DownloadFileEventArgs
         {
             Id = Id,
             IsSuccess = isSuccess,
             Error = error,
         };
 
-        _downloadFinishedTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
-        _downloadFinishedTimer.Tick += DownloadFinishedTimerOnTick;
-        _downloadFinishedTimer.Start();
-    }
-
-    private void DownloadFinishedTimerOnTick(object? sender, EventArgs e)
-    {
-        if (_downloadFinishedTimer == null || _downloadFinishedEventArgs == null)
-            return;
-
-        _downloadFinishedTimer.Stop();
-        _downloadFinishedTimer.Tick -= DownloadFinishedTimerOnTick;
-        _downloadFinishedTimer = null;
-
-        DownloadFinished?.Invoke(this, _downloadFinishedEventArgs);
-        _downloadFinishedEventArgs = null;
+        DownloadFinished?.Invoke(this, eventArgs);
     }
 
     private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)

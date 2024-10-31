@@ -6,6 +6,12 @@
         </Border>
     </Design.PreviewWith>
 
+    <Styles.Resources>
+        <ResourceDictionary>
+            <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
+        </ResourceDictionary>
+    </Styles.Resources>
+
     <Style Selector="DataGrid">
         <Setter Property="AutoGenerateColumns"
                 Value="False" />
@@ -106,8 +112,22 @@
                         Value="10, 15" />
                 <Setter Property="Margin"
                         Value="0" />
+                <Setter Property="MinHeight"
+                        Value="62" />
                 <Setter Property="CornerRadius"
                         Value="{DynamicResource DefaultCornerRadius}" />
+                <Setter Property="ClipToBounds"
+                        Value="True" />
+            </Style>
+
+            <Style Selector="^ DataGridCell">
+                <Setter Property="VerticalAlignment"
+                        Value="Top" />
+
+                <Style Selector="^ /template/ Border#CellBorder">
+                    <Setter Property="Padding"
+                            Value="0, 0, 10, 0" />
+                </Style>
             </Style>
         </Style>
     </Style>

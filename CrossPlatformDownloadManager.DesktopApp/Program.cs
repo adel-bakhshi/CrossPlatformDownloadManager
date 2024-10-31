@@ -7,7 +7,9 @@ using CrossPlatformDownloadManager.Data.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.Data.Services.SettingsService;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,8 +53,12 @@ sealed class Program
                 // Add Windows to services
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<TrayMenuWindow>();
+                // Add BrowserExtension to services
+                services.AddSingleton<IBrowserExtension, BrowserExtension>();
                 // Add AppInitializer to services
                 services.AddSingleton<IAppInitializer, AppInitializer>();
+                // Add AppFinisher to services
+                services.AddSingleton<IAppFinisher, AppFinisher>();
             })
             .InitializeApp();
 

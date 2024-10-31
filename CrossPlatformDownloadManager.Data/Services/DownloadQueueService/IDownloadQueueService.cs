@@ -27,7 +27,7 @@ public interface IDownloadQueueService
 
     Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue);
 
-    Task StartOrContinueDownloadQueueAsync(DownloadQueueViewModel? viewModel);
+    Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
     Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 

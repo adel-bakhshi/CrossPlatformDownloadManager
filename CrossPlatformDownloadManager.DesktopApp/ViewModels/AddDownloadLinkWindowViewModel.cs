@@ -156,10 +156,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
         AddFileToQueueCommand = ReactiveCommand.Create<Window?>(AddFileToQueue);
         AddToDefaultQueueCommand = ReactiveCommand.Create<Window?>(AddToDefaultQueue);
-        StartDownloadCommand = ReactiveCommand.Create<Window?>(StartDownload);
+        StartDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(StartDownloadAsync);
     }
 
-    private void StartDownload(Window? owner)
+    private async Task StartDownloadAsync(Window? owner)
     {
         // TODO: Show message box
         try
@@ -167,7 +167,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null || !ValidateDownloadFile())
                 return;
 
-            var result = AddDownloadFileAsync(null).Result;
+            var result = await AddDownloadFileAsync(null);
             if (!result)
                 return;
 
@@ -178,6 +178,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             if (downloadFile == null)
                 return;
+
+            // Start download before DownloadWindow opened
+            _ = AppService
+                .DownloadFileService
+                .StartDownloadFileAsync(downloadFile);
 
             var vm = new DownloadWindowViewModel(AppService, downloadFile);
             var window = new DownloadWindow { DataContext = vm };
@@ -450,17 +455,22 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
         try
         {
+            // Make sure url is valid
             if (!Url.CheckUrlValidation())
             {
                 IsLoadingUrl = false;
                 return;
             }
 
+            Url = Url!.Replace("\\", "/").Trim();
+
+            // Find a download file with the same url
             var downloadFileWithSameUrl = await AppService
                 .UnitOfWork
                 .DownloadFileRepository
                 .GetAsync(where: df => df.Url == Url);
 
+            // If download file exist, don't add this url
             if (downloadFileWithSameUrl != null)
             {
                 // TODO: Show message box
@@ -482,38 +492,27 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             var contentType = response.Content.Headers.ContentType?.MediaType;
             if (contentType != null && (contentType.StartsWith("application/") || contentType.StartsWith("image/") ||
                                         contentType.StartsWith("video/") || contentType.StartsWith("audio/") ||
-                                        contentType == "text/plain"))
+                                        contentType.StartsWith("text/plain")))
             {
+                // Get file name from header if possible
                 if (response.Content.Headers.ContentDisposition != null)
                     fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('\"') ?? string.Empty;
 
                 // Fallback to using the URL to guess the file name if Content-Disposition is not present
                 if (fileName.IsNullOrEmpty())
                 {
-                    var uri = new Uri(Url!);
-                    if (uri.IsFile)
-                    {
-                        fileName = Path.GetFileName(uri.LocalPath);
-                    }
-                    else
-                    {
-                        var extensions = await AppService
-                            .UnitOfWork
-                            .CategoryFileExtensionRepository
-                            .GetAllAsync(select: fe => fe.Extension, distinct: true);
+                    fileName = Url!.GetFileName();
 
-                        var url = Url!.Replace("\\", "/");
-                        var startIndex = url.LastIndexOf('/') + 1;
-                        var name = url.Substring(startIndex);
-                        var extension = extensions.FirstOrDefault(e => name.Contains(e, StringComparison.Ordinal));
-                        if (!extension.IsNullOrEmpty())
-                        {
-                            var endIndex = url.IndexOf(extension!, startIndex, StringComparison.Ordinal) +
-                                           extension!.Length;
-                            var length = endIndex - startIndex;
-                            fileName = url.Substring(startIndex, length);
-                        }
-                    }
+                    var extensions = await AppService
+                        .UnitOfWork
+                        .CategoryFileExtensionRepository
+                        .GetAllAsync(select: fe => fe.Extension, distinct: true);
+
+                    var extension = extensions
+                        .Find(e => fileName?.EndsWith(e, StringComparison.Ordinal) == true);
+
+                    if (extension.IsNullOrEmpty())
+                        fileName = null;
                 }
 
                 // Get the content length
@@ -525,7 +524,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             FileSize = fileSize;
 
             // find category item by file extension
-            var ext = Path.GetExtension(FileName);
+            var ext = Path.GetExtension(FileName) ?? string.Empty;
 
             var defaultCategories = await AppService
                 .UnitOfWork
@@ -534,13 +533,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             CategoryFileExtension? fileExtension;
             var defaultCategory = defaultCategories
-                .FirstOrDefault(c => c.FileExtensions
-                    .Any(fe => fe.Extension.ToLower().Equals(ext, StringComparison.CurrentCultureIgnoreCase)));
+                .Find(c => c.FileExtensions.Any(fe =>
+                    fe.Extension.Equals(ext, StringComparison.CurrentCultureIgnoreCase)));
 
             if (defaultCategory != null)
             {
                 fileExtension = defaultCategory.FileExtensions
-                    .FirstOrDefault(fe => fe.Extension.ToLower() == ext.ToLower());
+                    .FirstOrDefault(fe => fe.Extension.Equals(ext, StringComparison.CurrentCultureIgnoreCase));
             }
             else
             {

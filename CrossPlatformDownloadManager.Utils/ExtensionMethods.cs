@@ -99,6 +99,51 @@ public static class ExtensionMethods
         return json.ConvertFromJson<T>();
     }
 
+    public static string? GetFileName(this string? url)
+    {
+        if (url.IsNullOrEmpty())
+            return null;
+        
+        var uri = new Uri(url!);
+        var fileExtension = string.Empty;
+        if (uri.IsFile)
+            fileExtension = Path.GetFileName(uri.LocalPath);
+
+        var tempBaseUri = new Uri("https://localhost/temp");
+        if (fileExtension.IsNullOrEmpty())
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                uri = new Uri(tempBaseUri, url);
+
+            fileExtension = Path.GetFileName(uri.LocalPath);
+        }
+
+        if (!fileExtension.IsNullOrEmpty())
+            return fileExtension;
+        
+        var startIndex = url!.LastIndexOf('/') + 1;
+        var path = url.Substring(startIndex);
+        if (path.Contains('.'))
+        {
+            var endIndex = path.LastIndexOf('.');
+            if (path.Substring(endIndex).Contains('?'))
+            {
+                endIndex = path.LastIndexOf('?');
+                fileExtension = path.Substring(0, endIndex);
+            }
+            else
+            {
+                fileExtension = path;
+            }
+        }
+        else
+        {
+            fileExtension = null;
+        }
+
+        return fileExtension;
+    }
+
     public static bool HasFileExtension(this string? fileName)
     {
         if (fileName.IsNullOrEmpty())

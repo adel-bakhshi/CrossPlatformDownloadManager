@@ -10,6 +10,8 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
     private int _key;
     private DownloadConfiguration? _configuration;
     private DownloadService? _service;
+    private bool _stopOperationFinished;
+    private bool _stopping;
 
     #endregion
 
@@ -31,6 +33,18 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
     {
         get => _service;
         set => SetField(ref _service, value);
+    }
+
+    public bool StopOperationFinished
+    {
+        get => _stopOperationFinished;
+        set => SetField(ref _stopOperationFinished, value);
+    }
+    
+    public bool Stopping
+    {
+        get => _stopping;
+        set => SetField(ref _stopping, value);
     }
 
     #endregion

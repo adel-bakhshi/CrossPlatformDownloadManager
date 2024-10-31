@@ -33,16 +33,21 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
     {
         base.OnLoaded(e);
 
-        var scrollViewer = this.FindControl<ScrollViewer>("MainScrollViewer");
-        if (scrollViewer == null)
+        if (ViewModel == null)
             return;
 
-        Height = scrollViewer.Extent.Height;
+        var scrollViewer = this.FindControl<ScrollViewer>("MainScrollViewer");
+        if (scrollViewer != null)
+        {
+            Height = scrollViewer.Extent.Height;
 
-        if (OwnerWindow != null)
-            OwnerWindow.PositionChanged += OwnerWindowOnPositionChanged;
+            if (OwnerWindow != null)
+                OwnerWindow.PositionChanged += OwnerWindowOnPositionChanged;
 
-        ChangeWindowPosition();
+            ChangeWindowPosition();
+        }
+
+        ViewModel.TrayMenuWindow = this;
     }
 
     private void OwnerWindowOnPositionChanged(object? sender, PixelPointEventArgs e)

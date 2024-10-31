@@ -136,10 +136,10 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await LoadDownloadQueuesAsync();
     }
 
-    public async Task StartOrContinueDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel)
     {
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
-        if (downloadQueue == null)
+        if (downloadQueue == null || downloadQueue.IsRunning)
             return;
 
         await downloadQueue.StartDownloadQueueAsync(_unitOfWork, _downloadFileService);

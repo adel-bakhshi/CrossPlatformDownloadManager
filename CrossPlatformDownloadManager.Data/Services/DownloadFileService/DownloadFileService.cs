@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using AutoMapper;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -129,7 +130,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             if (downloadFile is { IsPaused: true })
                 ResumeDownloadFile(downloadFile);
-            
+
             return;
         }
 
@@ -164,7 +165,11 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (service == null || service.Status == DownloadStatus.Stopped)
             return;
 
+        // Set the stopping flag to true
+        downloadFileTask!.Stopping = true;
         await downloadFile.StopDownloadFileAsync(service);
+        // Wait for the service to stop
+        await EnsureStopDownloadFileCompletedAsync(downloadFile.Id);
     }
 
     public void ResumeDownloadFile(DownloadFileViewModel? viewModel)
@@ -273,11 +278,47 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             downloadFile.DownloadQueuePriority = null;
         }
 
+        await UpdateDownloadFileAsync(downloadFile);
+
+        // Find task from the list
         var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+        if (downloadFileTask == null)
+            return;
+
+        // Check if the task is stopping
+        if (downloadFileTask.Stopping)
+        {
+            // Set the stopping flag to false
+            downloadFileTask.Stopping = false;
+            // Set the stop operation finished flag to true
+            downloadFileTask.StopOperationFinished = true;
+        }
+        else
+        {
+            // Remove the task from the list
+            _downloadFileTasks.Remove(downloadFileTask);
+        }
+    }
+
+    private async Task EnsureStopDownloadFileCompletedAsync(int downloadFileId)
+    {
+        // Find tasks from the list
+        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
+
+        // Wait for the service to stop
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            // Check if the stop operation is finished
+            while (downloadFileTask?.StopOperationFinished != true)
+            {
+                await Task.Delay(20);
+                downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
+            }
+        });
+
+        // Remove the task
         if (downloadFileTask != null)
             _downloadFileTasks.Remove(downloadFileTask);
-
-        await UpdateDownloadFileAsync(downloadFile);
     }
 
     #endregion

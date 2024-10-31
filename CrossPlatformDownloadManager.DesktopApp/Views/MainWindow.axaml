@@ -315,19 +315,19 @@
                                 <uc:ActionButton Text="Resume"
                                                  IconData="{DynamicResource Resume}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
-                                                 Command="{Binding ResumeDownloadCommand}"
+                                                 Command="{Binding ResumeDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop"
                                                  IconData="{DynamicResource Stop}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
-                                                 Command="{Binding StopDownloadCommand}"
+                                                 Command="{Binding StopDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop All"
                                                  IconData="{DynamicResource StopAll}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
-                                                 Command="{Binding StopAllDownloadsCommand}" />
+                                                 Command="{Binding StopAllDownloadFilesCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryColor}"
@@ -385,7 +385,7 @@
                               ItemsSource="{Binding DownloadFiles}"
                               SelectionChanged="DownloadFilesDataGrid_OnSelectionChanged">
                         <DataGrid.Columns>
-                            <!-- Checkbox for selecting rows -->
+                            <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">
                                 <DataGridTemplateColumn.Header>
                                     <CheckBox IsChecked="{Binding SelectAllDownloadFiles}"
@@ -394,6 +394,7 @@
                                               CommandParameter="{Binding $parent[DataGrid]}" />
                                 </DataGridTemplateColumn.Header>
 
+                                <!-- Checkbox for select current row -->
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox Classes="dataGridCheckBox"
@@ -434,58 +435,63 @@
                                                     MinWidth="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
+                                        <StackPanel VerticalAlignment="Top">
                                             <TextBlock Text="Completed"
                                                        Foreground="{DynamicResource SuccessGradientBrush}"
                                                        IsVisible="{Binding IsCompleted}"
-                                                       VerticalAlignment="Center"
+                                                       VerticalAlignment="Top"
                                                        HorizontalAlignment="Stretch" />
 
-                                            <StackPanel VerticalAlignment="Center"
+                                            <StackPanel VerticalAlignment="Top"
                                                         HorizontalAlignment="Stretch"
-                                                        Margin="5, 0"
                                                         IsVisible="{Binding IsDownloading}"
                                                         Spacing="3">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}{0:00.00}%}" />
-                                                <ProgressBar Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Downloading - {0}}"
+                                                    Foreground="{DynamicResource InfoGradientBrush}" />
+
+                                                <ProgressBar Foreground="{DynamicResource InfoGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
-                                            <StackPanel VerticalAlignment="Center"
+                                            <StackPanel VerticalAlignment="Top"
                                                         HorizontalAlignment="Stretch"
-                                                        Margin="5, 0"
                                                         IsVisible="{Binding IsStopped}"
                                                         Spacing="3">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Stopped - {0:00.00}%}"
-                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Stopped - {0}}"
+                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
-                                            <StackPanel VerticalAlignment="Center"
+                                            <StackPanel VerticalAlignment="Top"
                                                         HorizontalAlignment="Stretch"
-                                                        Margin="5, 0"
                                                         IsVisible="{Binding IsPaused}"
                                                         Spacing="3">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Paused - {0:00.00}%}"
-                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Paused - {0}}"
+                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
-                                            <StackPanel VerticalAlignment="Center"
+                                            <StackPanel VerticalAlignment="Top"
                                                         HorizontalAlignment="Stretch"
-                                                        Margin="5, 0"
                                                         IsVisible="{Binding IsError}"
                                                         Spacing="3">
-                                                <TextBlock Text="{Binding DownloadProgress, StringFormat={}Error - {0:00.00}%}"
-                                                           Foreground="{DynamicResource DangerGradientBrush}" />
+                                                <TextBlock
+                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Error - {0}}"
+                                                    Foreground="{DynamicResource DangerGradientBrush}" />
+
                                                 <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
                                                              Value="{Binding DownloadProgress}"
@@ -530,7 +536,7 @@
                         Spacing="20"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
-                <!-- Size and Active Queue -->
+                <!-- Size and Active Queues -->
                 <StackPanel Orientation="Horizontal"
                             Spacing="10"
                             VerticalAlignment="Center">

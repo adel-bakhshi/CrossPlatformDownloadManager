@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 
@@ -9,12 +10,14 @@ public class AppInitializer : IAppInitializer
     #region Private Fields
 
     private readonly IAppService _appService;
+    private readonly IBrowserExtension _browserExtension;
 
     #endregion
 
-    public AppInitializer(IAppService appService)
+    public AppInitializer(IAppService appService, IBrowserExtension browserExtension)
     {
         _appService = appService;
+        _browserExtension = browserExtension;
     }
 
     public async Task InitializeAsync()
@@ -34,6 +37,9 @@ public class AppInitializer : IAppInitializer
             
             // Initialize DownloadQueueService
             await _appService.DownloadQueueService.LoadDownloadQueuesAsync(addDefaultDownloadQueue: true);
+            
+            // Start listening for URLs
+            await _browserExtension.StartListeningAsync();
         }
         catch (Exception ex)
         {

@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 

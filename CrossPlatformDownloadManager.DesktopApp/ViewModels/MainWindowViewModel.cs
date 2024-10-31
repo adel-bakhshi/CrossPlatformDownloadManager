@@ -125,11 +125,11 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand? AddNewLinkCommand { get; }
 
-    public ICommand? ResumeDownloadCommand { get; }
+    public ICommand? ResumeDownloadFileCommand { get; }
 
-    public ICommand? StopDownloadCommand { get; }
+    public ICommand? StopDownloadFileCommand { get; }
 
-    public ICommand? StopAllDownloadsCommand { get; }
+    public ICommand? StopAllDownloadFilesCommand { get; }
 
     public ICommand? DeleteDownloadFilesCommand { get; }
 
@@ -161,13 +161,14 @@ public class MainWindowViewModel : ViewModelBase
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.Create<Window?>(AddNewLink);
-        ResumeDownloadCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownload);
-        StopDownloadCommand = ReactiveCommand.Create<DataGrid?>(StopDownload);
-        StopAllDownloadsCommand = ReactiveCommand.Create(StopAllDownloads);
+        ResumeDownloadFileCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownloadFile);
+        StopDownloadFileCommand = ReactiveCommand.Create<DataGrid?>(StopDownloadFile);
+        StopAllDownloadFilesCommand = ReactiveCommand.Create(StopAllDownloadFiles);
         DeleteDownloadFilesCommand = ReactiveCommand.Create<DataGrid?>(DeleteDownloadFiles);
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
         OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
-        StartStopDownloadQueueCommand = ReactiveCommand.Create<DownloadQueueViewModel?>(StartStopDownloadQueue);
+        StartStopDownloadQueueCommand =
+            ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Button?>(ShowDownloadQueueDetails);
         AddNewDownloadQueueCommand = ReactiveCommand.Create<Window?>(AddNewDownloadQueue);
     }
@@ -230,7 +231,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void ResumeDownload(DataGrid? dataGrid)
+    private void ResumeDownloadFile(DataGrid? dataGrid)
     {
         // TODO: Show message box
         try
@@ -241,14 +242,23 @@ public class MainWindowViewModel : ViewModelBase
             var downloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => !df.IsDownloading || !df.IsCompleted)
+                .Where(df => df is { IsDownloading: false, IsCompleted: false })
                 .ToList();
 
             foreach (var downloadFile in downloadFiles)
             {
-                AppService
-                    .DownloadFileService
-                    .StartDownloadFileAsync(downloadFile);
+                if (downloadFile.IsPaused)
+                {
+                    AppService
+                        .DownloadFileService
+                        .ResumeDownloadFile(downloadFile);
+                }
+                else
+                {
+                    _ = AppService
+                        .DownloadFileService
+                        .StartDownloadFileAsync(downloadFile);
+                }
 
                 var vm = new DownloadWindowViewModel(AppService, downloadFile);
                 var window = new DownloadWindow { DataContext = vm };
@@ -261,7 +271,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async void StopDownload(DataGrid? dataGrid)
+    private void StopDownloadFile(DataGrid? dataGrid)
     {
         // TODO: Show message box
         try
@@ -277,7 +287,7 @@ public class MainWindowViewModel : ViewModelBase
 
             foreach (var downloadFile in downloadFiles)
             {
-                await AppService
+                _ = AppService
                     .DownloadFileService
                     .StopDownloadFileAsync(downloadFile);
             }
@@ -288,7 +298,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async void StopAllDownloads()
+    private async void StopAllDownloadFiles()
     {
         // TODO: Show message box
         try
@@ -400,7 +410,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void StartStopDownloadQueue(DownloadQueueViewModel? downloadQueue)
+    private async Task StartStopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue)
     {
         // TODO: Show message box
         try
@@ -410,13 +420,13 @@ public class MainWindowViewModel : ViewModelBase
 
             if (!downloadQueue.IsRunning)
             {
-                _ = AppService
+                await AppService
                     .DownloadQueueService
-                    .StartOrContinueDownloadQueueAsync(downloadQueue);
+                    .StartDownloadQueueAsync(downloadQueue);
             }
             else
             {
-                _ = AppService
+                await AppService
                     .DownloadQueueService
                     .StopDownloadQueueAsync(downloadQueue);
             }

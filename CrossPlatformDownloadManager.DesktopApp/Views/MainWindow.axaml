@@ -11,15 +11,118 @@
         d:DesignHeight="720"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM"
         Width="1280"
         Height="720"
         MinWidth="1280"
         MinHeight="720">
 
+    <!-- Styles -->
+    <Window.Styles>
+        <!-- Download queues items control style -->
+        <Style Selector="ItemsControl.downloadQueuesItemsControl">
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="MinHeight"
+                    Value="0" />
+            <Setter Property="MinWidth"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="ClipToBounds"
+                    Value="False" />
+            <Setter Property="HorizontalAlignment"
+                    Value="Stretch" />
+
+            <!-- ItemsPanel -->
+            <Setter Property="ItemsPanel">
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"
+                                Spacing="0" />
+                </ItemsPanelTemplate>
+            </Setter>
+
+            <Style Selector="^ /template/ Border#DownloadQueueMainBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <BrushTransition Duration="00:00:00.3"
+                                             Property="Background" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background"
+                            Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                </Style>
+            </Style>
+        </Style>
+
+        <!-- Context menu buttons style -->
+        <Style Selector="Button.contextMenuButton">
+            <Setter Property="Padding"
+                    Value="15, 5" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuBackgroundColor}" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Left" />
+
+            <!-- Template -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                ClipToBounds="{TemplateBinding ClipToBounds}">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Transitions -->
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <BrushTransition Duration="00:00:00.3"
+                                         Property="Background" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+            </Style>
+        </Style>
+    </Window.Styles>
+
     <!-- Resources -->
     <Window.Resources>
+        <!-- Queues list flyout -->
         <Flyout x:Key="QueuesListFlyout"
                 Placement="BottomEdgeAlignedRight"
                 ShowMode="Transient"
@@ -95,6 +198,9 @@
                                     <!-- Queue title -->
                                     <TextBlock Grid.Column="0"
                                                Text="{Binding Title}"
+                                               TextAlignment="Left"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0, 0, 10, 0"
                                                HorizontalAlignment="Stretch"
                                                VerticalAlignment="Center" />
 
@@ -160,6 +266,238 @@
                 </Button>
             </StackPanel>
         </Flyout>
+
+        <!-- Active queues list flyout -->
+        <Flyout x:Key="ActiveQueuesListFlyout"
+                Placement="Top"
+                ShowMode="Transient"
+                VerticalOffset="-15">
+            <!-- Queues list -->
+            <ItemsControl ItemsSource="{Binding ActiveDownloadQueues}"
+                          Margin="0, 8"
+                          Width="200">
+                <ItemsControl.Styles>
+                    <Style Selector="ItemsControl">
+                        <Setter Property="Margin"
+                                Value="0" />
+                        <Setter Property="Padding"
+                                Value="0" />
+                        <Setter Property="BorderThickness"
+                                Value="0" />
+                        <Setter Property="Background"
+                                Value="{DynamicResource TransparentColor}" />
+                        <Setter Property="MinHeight"
+                                Value="0" />
+                        <Setter Property="MinWidth"
+                                Value="0" />
+                        <Setter Property="CornerRadius"
+                                Value="0" />
+                        <Setter Property="ClipToBounds"
+                                Value="False" />
+                        <Setter Property="HorizontalAlignment"
+                                Value="Stretch" />
+                    </Style>
+                </ItemsControl.Styles>
+
+                <!-- ItemsPanel -->
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"
+                                    Spacing="0" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <!-- ItemTemplate -->
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="viewModels:DownloadQueueViewModel">
+                        <Border Name="DownloadQueueMainBorder"
+                                Padding="8, 5">
+                            <!-- Styles -->
+                            <Border.Styles>
+                                <Style Selector="Border#DownloadQueueMainBorder">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TransparentColor}" />
+
+                                    <Style Selector="^:pointerover">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                    </Style>
+                                </Style>
+                            </Border.Styles>
+
+                            <!-- Content -->
+                            <Grid ColumnDefinitions="*, Auto">
+                                <!-- Queue title -->
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Title}"
+                                           TextAlignment="Left"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0, 0, 10, 0"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Center" />
+
+                                <!-- Stop queue button -->
+                                <Button Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Classes="smallIconButton"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                        CommandParameter="{Binding}">
+                                    <PathIcon Width="16"
+                                              Height="16"
+                                              Data="{DynamicResource StopQueueIcon}"
+                                              Foreground="{DynamicResource DangerGradientBrush}" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Flyout>
+
+        <!-- Add to queue flyout -->
+        <Flyout x:Key="AddToQueueFlyout"
+                Placement="Right"
+                ShowMode="Transient"
+                HorizontalOffset="5">
+            <!-- Queues list -->
+            <ItemsControl ItemsSource="{Binding AddToQueueDownloadQueues}"
+                          Margin="0, 8"
+                          Width="200"
+                          MaxHeight="400"
+                          Classes="downloadQueuesItemsControl"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <!-- ItemTemplate -->
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="viewModels:DownloadQueueViewModel">
+                        <Button Content="{Binding Title}"
+                                Classes="contextMenuButton" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Flyout>
+
+        <!-- Download queues DataGrid ContextMenu  -->
+        <Flyout x:Key="DownloadQueuesDataGridContextMenu"
+                Placement="Pointer"
+                ShowMode="Transient">
+            <StackPanel Orientation="Vertical"
+                        Margin="0, 8"
+                        Width="200">
+                <!-- Select all button -->
+                <Button Content="Select all"
+                        Classes="contextMenuButton"
+                        Command="{Binding SelectAllRowsContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Open file button -->
+                <Button Content="Open file"
+                        Classes="contextMenuButton"
+                        Command="{Binding OpenFileContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                <!-- Open folder button -->
+                <Button Content="Open folder"
+                        Classes="contextMenuButton"
+                        Command="{Binding OpenFolderContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Rename button -->
+                <Button Content="Rename"
+                        Classes="contextMenuButton" />
+
+                <!-- Change folder button -->
+                <Button Content="Change folder"
+                        Classes="contextMenuButton" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Redownload button -->
+                <Button Content="Redownload"
+                        Classes="contextMenuButton" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Resume button -->
+                <Button Content="Resume"
+                        Classes="contextMenuButton" />
+
+                <!-- Stop button -->
+                <Button Content="Stop"
+                        Classes="contextMenuButton" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Refresh download address button -->
+                <Button Content="Refresh download address"
+                        Classes="contextMenuButton" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Remove button -->
+                <Button Content="Remove"
+                        Classes="contextMenuButton" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryColor}" />
+
+                <!-- Add to queue button -->
+                <Button Classes="contextMenuButton"
+                        HorizontalContentAlignment="Stretch"
+                        Flyout="{StaticResource AddToQueueFlyout}"
+                        Command="{Binding AddToQueueContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Add to queue"
+                                   VerticalAlignment="Center" />
+
+                        <PathIcon Grid.Column="1"
+                                  Data="{DynamicResource ChevronDown}"
+                                  Foreground="{DynamicResource TextColor}"
+                                  Width="8"
+                                  Height="8"
+                                  VerticalAlignment="Center"
+                                  RenderTransform="rotate(-90deg)" />
+                    </Grid>
+                </Button>
+
+                <!-- Remove from queue button -->
+                <Button Content="Remove from queue"
+                        Classes="contextMenuButton" />
+            </StackPanel>
+        </Flyout>
     </Window.Resources>
 
     <!-- Main Content -->
@@ -177,18 +515,11 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left">
                     <!-- Logo -->
-                    <Grid VerticalAlignment="Center">
-                        <Ellipse Width="36"
-                                 Height="36"
-                                 Fill="{DynamicResource DangerGradientBrush}"
-                                 VerticalAlignment="Center"
-                                 HorizontalAlignment="Center" />
-
-                        <TextBlock Text="CDM"
-                                   FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Center" />
-                    </Grid>
+                    <Image Width="36"
+                           Height="36"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"
+                           Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/AppIcons/icon-128.png" />
 
                     <!-- Menu Items -->
                     <Menu VerticalAlignment="Center">
@@ -196,46 +527,44 @@
                         <MenuItem Header="Task"
                                   Classes="header">
                             <MenuItem Header="Add Url"
-                                      Classes="listItem">
-                            </MenuItem>
+                                      Classes="listItem"
+                                      Width="250" />
 
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Export"
-                                      Classes="listItem">
-                            </MenuItem>
+                                      Classes="listItem"
+                                      Width="250" />
+
                             <MenuItem Header="Import"
-                                      Classes="listItem">
-                            </MenuItem>
+                                      Classes="listItem"
+                                      Width="250" />
 
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Exit"
-                                      Classes="listItem">
-                            </MenuItem>
+                                      Classes="listItem"
+                                      Command="{Binding ExitProgramCommand}"
+                                      Width="250" />
                         </MenuItem>
 
                         <!-- File -->
                         <MenuItem Header="File"
-                                  Classes="header">
-                        </MenuItem>
+                                  Classes="header" />
 
                         <!-- Downloads -->
                         <MenuItem Header="Downloads"
-                                  Classes="header">
-                        </MenuItem>
+                                  Classes="header" />
 
                         <!-- View -->
                         <MenuItem Header="View"
-                                  Classes="header">
-                        </MenuItem>
+                                  Classes="header" />
 
                         <!-- Help -->
                         <MenuItem Header="Help"
-                                  Classes="header">
-                        </MenuItem>
+                                  Classes="header" />
                     </Menu>
                 </StackPanel>
 
@@ -279,7 +608,7 @@
                         Background="{DynamicResource SecondaryColor}"
                         Padding="20"
                         Width="250">
-                    <ListBox ItemsSource="{Binding Categories}"
+                    <ListBox ItemsSource="{Binding CategoryHeaders}"
                              Classes="categoryList"
                              SelectedItem="{Binding SelectedCategoryHeader}"
                              Name="LstCategories" />
@@ -382,8 +711,10 @@
                     <!-- Download list -->
                     <DataGrid Name="DownloadFilesDataGrid"
                               Grid.Row="1"
+                              Classes="mainDataGrid"
                               ItemsSource="{Binding DownloadFiles}"
-                              SelectionChanged="DownloadFilesDataGrid_OnSelectionChanged">
+                              ContextFlyout="{StaticResource DownloadQueuesDataGridContextMenu}"
+                              SelectionChanged="DownloadFilesDataGridOnSelectionChanged">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">
@@ -536,15 +867,56 @@
                         Spacing="20"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
-                <!-- Size and Active Queues -->
+                <!-- Size and active queues -->
                 <StackPanel Orientation="Horizontal"
                             Spacing="10"
                             VerticalAlignment="Center">
-                    <PathIcon Data="{DynamicResource ActiveQueue}"
-                              Foreground="{DynamicResource TertiaryColor}"
-                              Width="16"
-                              Height="16" />
+                    <!-- Active queues -->
+                    <Button ToolTip.Tip="{Binding ActiveDownloadQueuesToolTipText}"
+                            IsVisible="{Binding ActiveDownloadQueueExists}"
+                            Flyout="{StaticResource ActiveQueuesListFlyout}">
+                        <!-- Styles -->
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Padding"
+                                        Value="0" />
+                                <Setter Property="Margin"
+                                        Value="0" />
+                                <Setter Property="Background"
+                                        Value="{DynamicResource TransparentColor}" />
+                                <Setter Property="BorderThickness"
+                                        Value="0" />
+                                <Setter Property="CornerRadius"
+                                        Value="0" />
 
+                                <!-- Template -->
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                                    ClipToBounds="{TemplateBinding ClipToBounds}">
+                                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  Margin="{TemplateBinding Padding}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Styles>
+
+                        <!-- Button content -->
+                        <PathIcon Data="{DynamicResource ActiveQueue}"
+                                  Foreground="{DynamicResource TertiaryColor}"
+                                  Width="16"
+                                  Height="16" />
+                    </Button>
+
+                    <!-- Size -->
                     <StackPanel Orientation="Horizontal"
                                 Spacing="5"
                                 VerticalAlignment="Center">

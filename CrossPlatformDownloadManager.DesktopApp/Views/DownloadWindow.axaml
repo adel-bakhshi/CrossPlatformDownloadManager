@@ -4,12 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
+        xmlns:converters="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="600"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DownloadWindow"
         x:DataType="vm:DownloadWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Download"
         Width="800"
         Height="600"
@@ -17,36 +18,22 @@
         MinHeight="600"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0">
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Main content -->
     <Border Padding="20">
-        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
-            <!-- Tab Items -->
-            <StackPanel Grid.Row="0"
-                        Orientation="Horizontal"
-                        Spacing="10"
-                        Margin="0, 0, 0, 15">
-                <ToggleButton Classes="tabItemToggleButton"
-                              IsChecked="{Binding ShowStatusView}"
-                              Command="{Binding ChangeViewCommand}"
-                              CommandParameter="{Binding $self}"
-                              Name="BtnStatus">
-                    <TextBlock Text="Status" />
-                </ToggleButton>
-                <ToggleButton Classes="tabItemToggleButton"
-                              IsChecked="{Binding ShowSpeedLimiterView}"
-                              Command="{Binding ChangeViewCommand}"
-                              CommandParameter="{Binding $self}"
-                              Name="BtnSpeedLimiter">
-                    <TextBlock Text="Speed Limiter" />
-                </ToggleButton>
-                <ToggleButton Classes="tabItemToggleButton"
-                              IsChecked="{Binding ShowOptionsView}"
-                              Command="{Binding ChangeViewCommand}"
-                              CommandParameter="{Binding $self}"
-                              Name="BtnOptions">
-                    <TextBlock Text="Options" />
-                </ToggleButton>
-            </StackPanel>
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
+            <!-- Tabs -->
+            <ListBox Grid.Row="0"
+                     Classes="tabsListBox"
+                     ItemsSource="{Binding TabItems}"
+                     SelectedItem="{Binding SelectedTabItem}" />
 
             <!-- Selected View -->
             <Border Grid.Row="1"
@@ -57,28 +44,31 @@
                     Margin="0, 0, 0, 10">
                 <Grid>
                     <!-- Download Status View -->
-                    <uc:DownloadStatusView IsVisible="{Binding ShowStatusView}"
-                                           Url="{Binding DownloadFile.Url}"
-                                           FileName="{Binding DownloadFile.FileName}"
-                                           SaveLocation="{Binding DownloadFile.SaveLocation}"
-                                           FileSize="{Binding DownloadFile.SizeAsString}"
-                                           DownloadProgress="{Binding DownloadFile.DownloadProgressAsString}"
-                                           DownloadSize="{Binding DownloadFile.DownloadedSizeAsString}"
-                                           Speed="{Binding DownloadFile.TransferRateAsString}"
-                                           ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
-                                           TimeLeft="{Binding DownloadFile.TimeLeftAsString}"
-                                           ResumeCapability="Yes" />
+                    <uc:DownloadStatusView
+                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Status', FallbackValue=False, TargetNullValue=False}"
+                        Url="{Binding DownloadFile.Url}"
+                        FileName="{Binding DownloadFile.FileName}"
+                        SaveLocation="{Binding DownloadFile.SaveLocation}"
+                        FileSize="{Binding DownloadFile.SizeAsString}"
+                        DownloadProgress="{Binding DownloadFile.DownloadProgressAsString}"
+                        DownloadSize="{Binding DownloadFile.DownloadedSizeAsString}"
+                        Speed="{Binding DownloadFile.TransferRateAsString}"
+                        ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
+                        TimeLeft="{Binding DownloadFile.TimeLeftAsString}"
+                        ResumeCapability="Yes" />
 
                     <!-- Download Speed Limiter View  -->
-                    <uc:DownloadSpeedLimiterView IsVisible="{Binding ShowSpeedLimiterView}"
-                                                 UnitsDropDownItemsSource="{Binding SpeedLimiterUnits}"
-                                                 SpeedLimiterEnabled="False"
-                                                 SpeedLimiterStateChanged="DownloadSpeedLimiterView_OnSpeedLimiterStateChanged" />
+                    <uc:DownloadSpeedLimiterView
+                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Speed Limiter', FallbackValue=False, TargetNullValue=False}"
+                        UnitsDropDownItemsSource="{Binding SpeedLimiterUnits}"
+                        SpeedLimiterEnabled="False"
+                        SpeedLimiterStateChanged="DownloadSpeedLimiterView_OnSpeedLimiterStateChanged" />
 
                     <!-- Download Options View -->
-                    <uc:DownloadOptionsView IsVisible="{Binding ShowOptionsView}"
-                                            TurnOffModesDropDownItemsSource="{Binding OptionsTurnOffModes}"
-                                            OptionsStateChanged="DownloadOptionsView_OnOptionsStateChanged" />
+                    <uc:DownloadOptionsView
+                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
+                        TurnOffModesDropDownItemsSource="{Binding OptionsTurnOffModes}"
+                        OptionsStateChanged="DownloadOptionsView_OnOptionsStateChanged" />
                 </Grid>
             </Border>
 
@@ -94,9 +84,10 @@
                   Margin="0, 0, 0, 15">
                 <Button Classes="button info"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Center">
-                    Hide Details
-                </Button>
+                        VerticalAlignment="Center"
+                        Content="{Binding HideDetailsButtonContent}"
+                        Command="{Binding ShowHideDetailsCommand}"
+                        CommandParameter="{Binding $parent[Window]}" />
 
                 <StackPanel Orientation="Horizontal"
                             Spacing="10"
@@ -120,39 +111,43 @@
 
                     <Button Classes="button danger"
                             Command="{Binding CancelDownloadCommand}"
-                            CommandParameter="{Binding $parent[Window]}">
-                        Cancel
-                    </Button>
+                            CommandParameter="{Binding $parent[Window]}"
+                            Content="Cancel" />
                 </StackPanel>
             </Grid>
 
-            <!-- Chunks progress bars -->
-            <Border Grid.Row="4"
-                    CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource MenuItemOnHoverBackgroundColor}"
-                    ClipToBounds="True"
-                    HorizontalAlignment="Stretch"
-                    Height="24"
-                    Margin="0, 0, 0, 15">
-                <Canvas Name="ChunksProgressBarsCanvas" />
-            </Border>
+            <!-- Chunks details -->
+            <Grid Name="ChunksDetailsGrid"
+                  Grid.Row="4"
+                  RowDefinitions="Auto, *">
+                <!-- Chunks progress bars -->
+                <Border Grid.Row="0"
+                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Background="{DynamicResource MenuItemOnHoverBackgroundColor}"
+                        ClipToBounds="True"
+                        HorizontalAlignment="Stretch"
+                        Height="24"
+                        Margin="0, 0, 0, 15">
+                    <Canvas Name="ChunksProgressBarsCanvas" />
+                </Border>
 
-            <!-- Chunks DataGrid -->
-            <DataGrid Grid.Row="5"
-                      ItemsSource="{Binding DownloadFile.ChunksData}"
-                      Classes="chunksDataGrid">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="#"
-                                        Binding="{Binding RowIndex}"
-                                        MinWidth="50" />
-                    <DataGridTextColumn Header="Downloaded"
-                                        Binding="{Binding DownloadedSizeAsString}"
-                                        MinWidth="180" />
-                    <DataGridTextColumn Header="Info"
-                                        Binding="{Binding Info}"
-                                        MinWidth="180" />
-                </DataGrid.Columns>
-            </DataGrid>
+                <!-- Chunks DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding DownloadFile.ChunksData}"
+                          Classes="minimalDataGrid">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="#"
+                                            Binding="{Binding RowIndex}"
+                                            MinWidth="50" />
+                        <DataGridTextColumn Header="Downloaded"
+                                            Binding="{Binding DownloadedSizeAsString}"
+                                            MinWidth="180" />
+                        <DataGridTextColumn Header="Info"
+                                            Binding="{Binding Info}"
+                                            MinWidth="180" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
         </Grid>
     </Border>
 </Window>

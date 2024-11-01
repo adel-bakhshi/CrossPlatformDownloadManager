@@ -8,7 +8,7 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddFilesToQueueWindow"
         x:DataType="vm:AddFilesToQueueWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add Files to Queue"
         Width="800"
         Height="600"
@@ -26,7 +26,7 @@
         <DataGrid Name="FilesDataGrid"
                   Grid.Row="0"
                   ItemsSource="{Binding DownloadFiles}"
-                  Classes="chunksDataGrid"
+                  Classes="minimalDataGrid"
                   Background="{DynamicResource SecondaryColor}"
                   SelectionMode="Extended"
                   SelectionChanged="FilesDataGrid_OnSelectionChanged">

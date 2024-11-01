@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -27,35 +28,34 @@ public class DownloadWindowViewModel : ViewModelBase
     private bool _turnOffComputerAfterDownloadFinished;
     private string? _turnOffComputerMode;
 
+    // Show/Hide details
+    private bool _detailsIsVisible = true;
+    private double _detailsHeight;
+
+    // Properties
+    private ObservableCollection<string> _tabItems = [];
+    private string? _selectedTabItem;
+    private ObservableCollection<string> _speedLimiterUnits = [];
+    private ObservableCollection<string> _optionsTurnOffModes = [];
+    private DownloadFileViewModel _downloadFile = new();
+    private bool _isPaused;
+    private string? _hideDetailsButtonContent;
+
     #endregion
 
     #region Properties
 
-    private bool _showStatusView;
-
-    public bool ShowStatusView
+    public ObservableCollection<string> TabItems
     {
-        get => _showStatusView;
-        set => this.RaiseAndSetIfChanged(ref _showStatusView, value);
+        get => _tabItems;
+        set => this.RaiseAndSetIfChanged(ref _tabItems, value);
     }
 
-    private bool _showSpeedLimiterView;
-
-    public bool ShowSpeedLimiterView
+    public string? SelectedTabItem
     {
-        get => _showSpeedLimiterView;
-        set => this.RaiseAndSetIfChanged(ref _showSpeedLimiterView, value);
+        get => _selectedTabItem;
+        set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
     }
-
-    private bool _showOptionsView;
-
-    public bool ShowOptionsView
-    {
-        get => _showOptionsView;
-        set => this.RaiseAndSetIfChanged(ref _showOptionsView, value);
-    }
-
-    private ObservableCollection<string> _speedLimiterUnits = [];
 
     public ObservableCollection<string> SpeedLimiterUnits
     {
@@ -63,15 +63,11 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _speedLimiterUnits, value);
     }
 
-    private ObservableCollection<string> _optionsTurnOffModes = [];
-
     public ObservableCollection<string> OptionsTurnOffModes
     {
         get => _optionsTurnOffModes;
         set => this.RaiseAndSetIfChanged(ref _optionsTurnOffModes, value);
     }
-
-    private DownloadFileViewModel _downloadFile = new();
 
     public DownloadFileViewModel DownloadFile
     {
@@ -79,63 +75,49 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
     }
 
-    private bool _isPaused;
-
     public bool IsPaused
     {
         get => _isPaused;
         set => this.RaiseAndSetIfChanged(ref _isPaused, value);
+    }
+    
+    public string? HideDetailsButtonContent
+    {
+        get => _hideDetailsButtonContent;
+        set => this.RaiseAndSetIfChanged(ref _hideDetailsButtonContent, value);
     }
 
     #endregion
 
     #region Commands
 
-    public ICommand ChangeViewCommand { get; }
-
     public ICommand ResumePauseDownloadCommand { get; }
 
     public ICommand CancelDownloadCommand { get; }
+
+    public ICommand ShowHideDetailsCommand { get; }
 
     #endregion
 
     public DownloadWindowViewModel(IAppService appService, DownloadFileViewModel downloadFile) : base(appService)
     {
         DownloadFile = downloadFile;
-        ShowStatusView = true;
         SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         OptionsTurnOffModes = Constants.TurnOffComputerModes.ToObservableCollection();
 
-        ChangeViewCommand = ReactiveCommand.Create<ToggleButton?>(ChangeView);
+        TabItems =
+        [
+            "Status",
+            "Speed Limiter",
+            "Options"
+        ];
+
+        SelectedTabItem = TabItems.FirstOrDefault();
+        HideDetailsButtonContent = "Hide Details";
+
         ResumePauseDownloadCommand = ReactiveCommand.Create(ResumePauseDownload);
-        CancelDownloadCommand = ReactiveCommand.Create<Window?>(CancelDownload);
-    }
-
-    private void ChangeView(ToggleButton? toggleButton)
-    {
-        if (toggleButton == null)
-            return;
-
-        switch (toggleButton.Name)
-        {
-            case "BtnStatus":
-            {
-                ChangeViewsVisibility(nameof(ShowStatusView));
-                break;
-            }
-
-            case "BtnSpeedLimiter":
-            {
-                ChangeViewsVisibility(nameof(ShowSpeedLimiterView));
-                break;
-            }
-
-            case "BtnOptions":
-            {
-                ChangeViewsVisibility(nameof(ShowOptionsView));
-                break;
-            }
-        }
+        CancelDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(CancelDownloadAsync);
+        ShowHideDetailsCommand = ReactiveCommand.Create<Window?>(ShowHideDetails);
     }
 
     private void ResumePauseDownload()
@@ -166,9 +148,47 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    private async void CancelDownload(Window? owner)
+    private async Task CancelDownloadAsync(Window? owner)
     {
         await StopDownloadAsync(owner);
+    }
+
+    private void ShowHideDetails(Window? owner)
+    {
+        // TODO: Show message box
+        try
+        {
+            var detailsGrid = owner?.FindControl<Grid>("ChunksDetailsGrid");
+            if (detailsGrid == null)
+                return;
+
+            if (_detailsIsVisible)
+            {
+                _detailsIsVisible = false;
+                _detailsHeight = detailsGrid.Bounds.Height + 15;
+
+                detailsGrid.IsVisible = false;
+                owner!.MinHeight -= _detailsHeight;
+                owner.Height -= _detailsHeight;
+                
+                HideDetailsButtonContent = "Show Details";
+            }
+            else
+            {
+                detailsGrid.IsVisible = true;
+                owner!.MinHeight += _detailsHeight;
+                owner.Height += _detailsHeight;
+                
+                HideDetailsButtonContent = "Hide Details";
+
+                _detailsIsVisible = true;
+                _detailsHeight = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
@@ -178,7 +198,7 @@ public class DownloadWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-            
+
             await AppService
                 .DownloadFileService
                 .StopDownloadFileAsync(DownloadFile);
@@ -193,12 +213,6 @@ public class DownloadWindowViewModel : ViewModelBase
     }
 
     #region Helpers
-
-    private void ChangeViewsVisibility(string propName)
-    {
-        ShowStatusView = ShowSpeedLimiterView = ShowOptionsView = false;
-        GetType().GetProperty(propName)?.SetValue(this, true);
-    }
 
     public void ChangeSpeedLimiterState(DownloadSpeedLimiterViewEventArgs eventArgs)
     {

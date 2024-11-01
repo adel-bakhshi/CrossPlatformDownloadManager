@@ -26,6 +26,12 @@ public interface IDownloadQueueService
     Task DeleteDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true);
 
     Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue);
+    
+    Task UpdateDownloadQueueAsync(DownloadQueueViewModel? viewModel);
+    
+    Task UpdateDownloadQueuesAsync(List<DownloadQueue>? downloadQueues);
+    
+    Task UpdateDownloadQueuesAsync(List<DownloadQueueViewModel>? viewModels);
 
     Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
@@ -36,4 +42,8 @@ public interface IDownloadQueueService
 
     Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
         DownloadFileViewModel? downloadFileViewModel);
+    
+    Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel);
+
+    Task ChangeLastSelectedDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 }

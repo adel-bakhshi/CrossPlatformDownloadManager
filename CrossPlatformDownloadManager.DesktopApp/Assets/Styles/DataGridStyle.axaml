@@ -9,9 +9,18 @@
     <Styles.Resources>
         <ResourceDictionary>
             <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
+
+            <SolidColorBrush x:Key="MinimalDataGridOnHoverBackground"
+                             Color="{DynamicResource MenuBackgroundColor}"
+                             Opacity="0.5" />
+
+            <SolidColorBrush x:Key="MinimalDataGridOnSelectedBackground"
+                             Color="{DynamicResource MenuBackgroundColor}"
+                             Opacity="1" />
         </ResourceDictionary>
     </Styles.Resources>
 
+    <!-- Base styles for DataGrid -->
     <Style Selector="DataGrid">
         <Setter Property="AutoGenerateColumns"
                 Value="False" />
@@ -25,21 +34,15 @@
                 Value="Stretch" />
         <Setter Property="VerticalAlignment"
                 Value="Stretch" />
-        <Setter Property="Background"
-                Value="{DynamicResource TransparentColor}" />
         <Setter Property="Margin"
                 Value="0" />
         <Setter Property="Padding"
                 Value="0" />
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
-        <Setter Property="SelectionMode"
-                Value="Extended" />
-        <Setter Property="CanUserResizeColumns"
-                Value="True" />
         <Setter Property="CanUserReorderColumns"
                 Value="False" />
-        <Setter Property="CanUserSortColumns"
+        <Setter Property="ClipToBounds"
                 Value="True" />
 
         <Style Selector="^ DataGridColumnHeader">
@@ -53,6 +56,26 @@
                     Value="False" />
             <Setter Property="SeparatorBrush"
                     Value="{DynamicResource TertiaryColor}" />
+        </Style>
+
+        <Style Selector="^ /template/ Border#DataGridBorder">
+            <Setter Property="ClipToBounds"
+                    Value="{Binding $parent[DataGrid].ClipToBounds}" />
+        </Style>
+    </Style>
+
+    <!-- Style for Main DataGrid  -->
+    <Style Selector="DataGrid.mainDataGrid">
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="SelectionMode"
+                Value="Extended" />
+        <Setter Property="CanUserResizeColumns"
+                Value="True" />
+        <Setter Property="CanUserSortColumns"
+                Value="True" />
+
+        <Style Selector="^ DataGridColumnHeader">
             <Setter Property="Padding"
                     Value="10, 15" />
             <Setter Property="Background"
@@ -132,53 +155,22 @@
         </Style>
     </Style>
 
-    <Style Selector="DataGrid.chunksDataGrid">
-        <Setter Property="AutoGenerateColumns"
-                Value="False" />
-        <Setter Property="IsReadOnly"
-                Value="True" />
-        <Setter Property="GridLinesVisibility"
-                Value="None" />
-        <Setter Property="BorderThickness"
-                Value="0" />
-        <Setter Property="HorizontalAlignment"
-                Value="Stretch" />
-        <Setter Property="VerticalAlignment"
-                Value="Stretch" />
+    <!-- Style for Minimal DataGrid  -->
+    <Style Selector="DataGrid.minimalDataGrid">
         <Setter Property="Background"
                 Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
-        <Setter Property="Margin"
-                Value="0" />
-        <Setter Property="Padding"
-                Value="0" />
-        <Setter Property="CornerRadius"
-                Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="SelectionMode"
                 Value="Single" />
         <Setter Property="CanUserResizeColumns"
-                Value="True" />
-        <Setter Property="CanUserReorderColumns"
                 Value="False" />
         <Setter Property="CanUserSortColumns"
                 Value="False" />
-        <Setter Property="ClipToBounds"
-                Value="True" />
         <Setter Property="VerticalScrollBarVisibility"
                 Value="Hidden" />
 
         <Style Selector="^ DataGridColumnHeader">
-            <Setter Property="Foreground"
-                    Value="{DynamicResource TextColor}" />
             <Setter Property="FontWeight"
                     Value="Bold" />
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Left" />
-            <Setter Property="VerticalContentAlignment"
-                    Value="Center" />
-            <Setter Property="AreSeparatorsVisible"
-                    Value="False" />
-            <Setter Property="SeparatorBrush"
-                    Value="{DynamicResource TertiaryColor}" />
             <Setter Property="Padding"
                     Value="10, 9" />
             <Setter Property="Background"
@@ -186,43 +178,37 @@
         </Style>
 
         <Style Selector="^ DataGridRow">
-            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
-                <Setter Property="IsVisible"
-                        Value="False" />
-                <Setter Property="RadiusX"
-                        Value="0" />
-                <Setter Property="RadiusY"
-                        Value="0" />
-                <Setter Property="Margin"
-                        Value="-10, -9" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
             </Style>
 
-            <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
-                <Setter Property="Fill"
+            <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                <Setter Property="Background"
                         Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
             </Style>
 
-            <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
-                <Setter Property="Fill"
+            <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                <Setter Property="Background"
                         Value="{DynamicResource MenuBackgroundColor}" />
             </Style>
 
-            <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
-                <Setter Property="Fill"
-                        Value="{DynamicResource MenuBackgroundColor}" />
-                <Setter Property="IsVisible"
-                        Value="True" />
-                <Setter Property="Opacity"
-                        Value="0.5" />
+            <Style Selector="^:pointerover /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MinimalDataGridOnHoverBackground}" />
             </Style>
 
-            <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
-                <Setter Property="Fill"
-                        Value="{DynamicResource MenuBackgroundColor}" />
+            <Style Selector="^:selected /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MinimalDataGridOnSelectedBackground}" />
+            </Style>
+
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
                 <Setter Property="IsVisible"
-                        Value="True" />
-                <Setter Property="Opacity"
-                        Value="1" />
+                        Value="False" />
             </Style>
 
             <Style Selector="^:selected">

@@ -3,14 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
-        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
+        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add New Category"
         Width="800"
         Height="600"
@@ -33,134 +33,39 @@
           Margin="20">
         <!-- Tabs -->
         <ListBox Grid.Row="0"
+                 Classes="tabsListBox"
                  ItemsSource="{Binding TabItems}"
-                 SelectedItem="{Binding SelectedTabItem}">
-            <!-- Styles -->
-            <ListBox.Styles>
-                <Style Selector="ListBox">
-                    <Setter Property="Padding"
-                            Value="0" />
-                    <Setter Property="Margin"
-                            Value="0, 0, 0, 15" />
-                    <Setter Property="MinWidth"
-                            Value="0" />
-                    <Setter Property="MinHeight"
-                            Value="0" />
-                    <Setter Property="BorderThickness"
-                            Value="0" />
-                    <Setter Property="CornerRadius"
-                            Value="0" />
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
-                    <Setter Property="SelectionMode"
-                            Value="Single" />
-
-                    <!-- ListBoxItem Styles -->
-                    <Style Selector="^ ListBoxItem">
-                        <Setter Property="Padding"
-                                Value="10" />
-                        <Setter Property="Margin"
-                                Value="0" />
-                        <Setter Property="MinWidth"
-                                Value="0" />
-                        <Setter Property="MinHeight"
-                                Value="0" />
-                        <Setter Property="BorderThickness"
-                                Value="0" />
-                        <Setter Property="CornerRadius"
-                                Value="{DynamicResource DefaultCornerRadius}" />
-                        <Setter Property="Background"
-                                Value="{DynamicResource TransparentColor}" />
-
-                        <!-- ContentPresenter Style -->
-                        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource TransparentColor}" />
-
-                            <Setter Property="Transitions">
-                                <Setter.Value>
-                                    <Transitions>
-                                        <BrushTransition Duration="00:00:00.3"
-                                                         Property="Background" />
-                                    </Transitions>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <!-- Pseudo classes  -->
-                        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryColor}" />
-                        </Style>
-
-                        <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryColor}" />
-                        </Style>
-
-                        <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryColor}" />
-                        </Style>
-
-                        <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryColor}" />
-                        </Style>
-
-                        <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background"
-                                    Value="{DynamicResource SecondaryColor}" />
-                        </Style>
-                    </Style>
-                </Style>
-            </ListBox.Styles>
-
-            <!-- ItemsPanel -->
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="10" />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-
-            <!-- ItemTemplate -->
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type x:String}">
-                    <TextBlock Text="{Binding}" />
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                 SelectedItem="{Binding SelectedTabItem}" />
 
         <!-- Main content -->
         <Grid Grid.Row="1">
             <!-- Generals view -->
-            <controls:GeneralsView
+            <uc:GeneralsView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).GeneralsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- FileTypes view -->
-            <controls:FileTypesView
+            <uc:FileTypesView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).FileTypesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- SaveLocations view -->
-            <controls:SaveLocationsView
+            <uc:SaveLocationsView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SaveLocationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- Downloads view -->
-            <controls:DownloadsView
+            <uc:DownloadsView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).DownloadsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- Proxy view -->
-            <controls:ProxyView
+            <uc:ProxyView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).ProxyViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- Notifications view -->
-            <controls:NotificationsView
+            <uc:NotificationsView
                 IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications', FallbackValue=False, TargetNullValue=False}"
                 DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).NotificationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
         </Grid>

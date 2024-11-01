@@ -33,8 +33,10 @@ public class DownloadQueue : DbModelBase
 
     [Required] public bool IsDefault { get; set; }
 
+    [Required] public bool IsLastChoice { get; set; }
+
     [Required] public int DownloadCountAtSameTime { get; set; }
-    
+
     [Required] public bool IncludePausedFiles { get; set; }
 
     public ICollection<DownloadFile> DownloadFiles { get; } = [];
@@ -43,7 +45,7 @@ public class DownloadQueue : DbModelBase
     {
         if (model is not DownloadQueue downloadQueue)
             return;
-        
+
         Title = downloadQueue.Title;
         StartOnApplicationStartup = downloadQueue.StartOnApplicationStartup;
         StartDownloadSchedule = downloadQueue.StartDownloadSchedule;
@@ -58,6 +60,7 @@ public class DownloadQueue : DbModelBase
         TurnOffComputerWhenDone = downloadQueue.TurnOffComputerWhenDone;
         TurnOffComputerMode = downloadQueue.TurnOffComputerMode;
         IsDefault = downloadQueue.IsDefault;
+        IsLastChoice = downloadQueue.IsLastChoice;
         DownloadCountAtSameTime = downloadQueue.DownloadCountAtSameTime;
         IncludePausedFiles = downloadQueue.IncludePausedFiles;
     }

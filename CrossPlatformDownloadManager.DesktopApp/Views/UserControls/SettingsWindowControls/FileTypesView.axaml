@@ -100,7 +100,7 @@
             <DataGrid Grid.Row="2"
                       ItemsSource="{Binding FileExtensions}"
                       SelectedItem="{Binding SelectedFileExtension}"
-                      Classes="chunksDataGrid"
+                      Classes="minimalDataGrid"
                       Background="{DynamicResource PrimaryColor}"
                       SelectionMode="Single"
                       Height="{Binding $parent[local:FileTypesView].DataGridHeight}">

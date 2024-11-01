@@ -10,7 +10,7 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditFileTypeWindow"
         x:DataType="vm:AddEditFileTypeWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="{Binding Title}"
         Width="450"
         Height="200"

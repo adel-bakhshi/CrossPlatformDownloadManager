@@ -5,14 +5,14 @@
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
-        xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
+        xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLinkWindow"
         x:DataType="vm:AddDownloadLinkWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add Download Link"
         Width="570"
         Height="270"
@@ -48,11 +48,11 @@
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
                                            MaxDropDownHeight="120"
-                                           ItemsSource="{Binding Queues}"
-                                           SelectedItem="{Binding SelectedQueue}"
+                                           ItemsSource="{Binding DownloadQueues}"
+                                           SelectedItem="{Binding SelectedDownloadQueue}"
                                            PopupBackground="{DynamicResource SecondaryColor}">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="models:DownloadQueue">
+                                <DataTemplate DataType="viewModels:DownloadQueueViewModel">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>
@@ -162,7 +162,7 @@
                                            ItemsSource="{Binding Categories}"
                                            MaxDropDownHeight="150">
                             <cc:CustomComboBox.ItemTemplate>
-                                <DataTemplate DataType="models:Category">
+                                <DataTemplate DataType="viewModels:CategoryViewModel">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </cc:CustomComboBox.ItemTemplate>

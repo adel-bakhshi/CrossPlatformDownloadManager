@@ -30,6 +30,7 @@ public class DownloadQueueViewModel : PropertyChangedBase
     private bool _turnOffComputerWhenDone;
     private TurnOffComputerMode? _turnOffComputerMode;
     private bool _isDefault;
+    private bool _isLastChoice;
     private int _downloadCountAtSameTime = 1;
     private bool _includePausedFiles;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
@@ -141,6 +142,12 @@ public class DownloadQueueViewModel : PropertyChangedBase
     {
         get => _isDefault;
         set => SetField(ref _isDefault, value);
+    }
+    
+    public bool IsLastChoice
+    {
+        get => _isLastChoice;
+        set => SetField(ref _isLastChoice, value);
     }
 
     public int DownloadCountAtSameTime

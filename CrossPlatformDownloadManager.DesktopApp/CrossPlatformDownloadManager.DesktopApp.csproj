@@ -7,6 +7,9 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
@@ -60,5 +63,9 @@
 
     <ItemGroup>
       <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\Images\Logos\" />
     </ItemGroup>
 </Project>

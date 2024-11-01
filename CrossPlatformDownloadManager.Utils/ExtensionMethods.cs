@@ -103,45 +103,56 @@ public static class ExtensionMethods
     {
         if (url.IsNullOrEmpty())
             return null;
+
+        url = url!.Replace('\\', '/').Trim();
         
         var uri = new Uri(url!);
-        var fileExtension = string.Empty;
+        var fileName = string.Empty;
         if (uri.IsFile)
-            fileExtension = Path.GetFileName(uri.LocalPath);
+            fileName = Path.GetFileName(uri.LocalPath);
 
         var tempBaseUri = new Uri("https://localhost/temp");
-        if (fileExtension.IsNullOrEmpty())
+        if (fileName.IsNullOrEmpty())
         {
             if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                 uri = new Uri(tempBaseUri, url);
 
-            fileExtension = Path.GetFileName(uri.LocalPath);
+            fileName = Path.GetFileName(uri.LocalPath);
         }
 
-        if (!fileExtension.IsNullOrEmpty())
-            return fileExtension;
-        
-        var startIndex = url!.LastIndexOf('/') + 1;
-        var path = url.Substring(startIndex);
-        if (path.Contains('.'))
+        if (fileName.IsNullOrEmpty())
         {
-            var endIndex = path.LastIndexOf('.');
-            if (path.Substring(endIndex).Contains('?'))
+            var startIndex = url!.LastIndexOf('/') + 1;
+            var path = url.Substring(startIndex);
+            if (path.Contains('.'))
             {
-                endIndex = path.LastIndexOf('?');
-                fileExtension = path.Substring(0, endIndex);
+                var endIndex = path.LastIndexOf('.');
+                if (path.Substring(endIndex).Contains('?'))
+                {
+                    endIndex = path.LastIndexOf('?');
+                    fileName = path.Substring(0, endIndex);
+                }
+                else
+                {
+                    fileName = path;
+                }
             }
             else
             {
-                fileExtension = path;
+                fileName = null;
             }
         }
-        else
-        {
-            fileExtension = null;
-        }
 
-        return fileExtension;
+        if (fileName.IsNullOrEmpty())
+            return fileName;
+        
+        if (fileName!.Contains('/'))
+            fileName = fileName.Substring(fileName.LastIndexOf('/') + 1);
+        
+        if (fileName.Contains('?'))
+            fileName = fileName.Substring(0, fileName.IndexOf('?'));
+
+        return fileName;
     }
 
     public static bool HasFileExtension(this string? fileName)

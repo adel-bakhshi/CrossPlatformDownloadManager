@@ -10,7 +10,7 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueueWindow"
         x:DataType="vm:AddEditQueueWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="{Binding Title}"
         Width="800"
         Height="600"
@@ -33,7 +33,7 @@
           Margin="20">
         <!-- Tabs -->
         <ListBox Grid.Row="0"
-                 Classes="menuListBox"
+                 Classes="tabsListBox"
                  ItemsSource="{Binding TabItems}"
                  SelectedItem="{Binding SelectedTabItem}" />
 

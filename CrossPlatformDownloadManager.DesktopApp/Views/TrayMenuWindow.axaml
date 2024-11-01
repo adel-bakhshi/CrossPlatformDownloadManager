@@ -9,7 +9,7 @@
         d:DesignHeight="600"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.TrayMenuWindow"
         x:DataType="vm:TrayMenuWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Tray Menu"
         ShowInTaskbar="False"
         Topmost="True"

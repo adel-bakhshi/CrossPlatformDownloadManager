@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -20,7 +21,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         DataContext = mainWindowViewModel;
     }
 
-    private void DownloadFilesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void DownloadFilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         // TODO: Show message box
         if (ViewModel == null)

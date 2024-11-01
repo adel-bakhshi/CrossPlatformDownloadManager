@@ -8,7 +8,7 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.TrayIconWindow"
         x:DataType="vm:TrayIconWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Tray Icon"
         ShowInTaskbar="False"
         Topmost="True"

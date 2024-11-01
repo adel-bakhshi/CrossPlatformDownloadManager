@@ -10,9 +10,7 @@ https://code.google.com/archive/p/portaudiosharp/
 https://github.com/CryShana/CryMedia
 https://gitlab.com/define-private-public/Bassoon
 Beautiful icons: https://www.svgrepo.com/collection/scarlab-solid-oval-interface-icons/1
-Add LastChoice to DownloadQueue model for download later option in DownloadWindow
 In settings add a list of proxies to use and after that add proxies to TrayMenu
 Right click menu for DownloadFiles DataGrid in MainWindow
-Add exit item to MainWindow menu items
-Add .svg to images category for download this file type also
-DataGrid in DownloadWindow very bad change style of it
+Add progress bar to windows toolbar for downloading files
+create other right menu commands

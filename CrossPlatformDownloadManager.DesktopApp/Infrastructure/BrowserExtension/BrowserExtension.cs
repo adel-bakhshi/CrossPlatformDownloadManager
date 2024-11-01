@@ -26,8 +26,8 @@ public class BrowserExtension : IBrowserExtension
 
         // Initialize HttpListener
         _httpListener = new HttpListener();
-        _httpListener.Prefixes.Add("http://localhost:5000/download/check/");
-        _httpListener.Prefixes.Add("http://localhost:5000/download/add/");
+        _httpListener.Prefixes.Add(Constants.CheckFileTypeSupportUrl);
+        _httpListener.Prefixes.Add(Constants.AddDownloadFileUrl);
     }
 
     public async Task StartListeningAsync()
@@ -84,7 +84,7 @@ public class BrowserExtension : IBrowserExtension
         var responseViewModel = new ResponseViewModel();
         switch (request.Url?.OriginalString.ToLower())
         {
-            case "http://localhost:5000/download/check/":
+            case Constants.CheckFileTypeSupportUrl:
             {
                 if (requestViewModel.Url.IsNullOrEmpty())
                 {
@@ -93,7 +93,14 @@ public class BrowserExtension : IBrowserExtension
                 }
                 else
                 {
-                    var fileExtension = requestViewModel.Url!.GetFileName();
+                    var fileName = requestViewModel.Url!.GetFileName();
+                    var fileExtension = Path.GetExtension(fileName);
+                    if (fileExtension.IsNullOrEmpty())
+                    {
+                        responseViewModel.IsSuccessful = false;
+                        responseViewModel.Message = "Can't get file extension.";
+                        break;
+                    }
 
                     var fileExtensions = await _appService
                         .UnitOfWork
@@ -115,7 +122,7 @@ public class BrowserExtension : IBrowserExtension
                 break;
             }
 
-            case "http://localhost:5000/download/add/":
+            case Constants.AddDownloadFileUrl:
             {
                 var urlIsValid = requestViewModel.Url.CheckUrlValidation();
                 if (!urlIsValid)

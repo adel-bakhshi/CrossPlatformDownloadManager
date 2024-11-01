@@ -26,6 +26,15 @@
         <Style Selector="^ /template/ Border#root">
             <Setter Property="Background"
                     Value="{DynamicResource TransparentColor}" />
+
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <BrushTransition Duration="00:00:00.3"
+                                         Property="Background" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style Selector="^:pointerover /template/ Border#root">
@@ -67,7 +76,7 @@
     <!-- Menu list items -->
     <Style Selector="MenuItem.listItem">
         <Setter Property="Background"
-                Value="{DynamicResource TransparentColor}" />
+                Value="{DynamicResource MenuBackgroundColor}" />
         <Setter Property="Padding"
                 Value="15, 5" />
         <Setter Property="BorderThickness"
@@ -75,7 +84,16 @@
 
         <Style Selector="^ /template/ Border#root">
             <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
+                    Value="{DynamicResource MenuBackgroundColor}" />
+
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <BrushTransition Duration="00:00:00.3"
+                                         Property="Background" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style Selector="^:pointerover /template/ Border#root">

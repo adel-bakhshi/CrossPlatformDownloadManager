@@ -34,7 +34,6 @@
             Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/RadioButtonStyles.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CheckBoxStyles.axaml" />
-        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuListBoxStyle.axaml" />
 
         <!-- Custom Controls Themes -->
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" />

@@ -132,7 +132,7 @@
         <DataGrid Name="FilesDataGrid"
                   Grid.Row="2"
                   ItemsSource="{Binding DownloadFiles}"
-                  Classes="chunksDataGrid"
+                  Classes="minimalDataGrid"
                   Background="{DynamicResource SecondaryColor}"
                   SelectionMode="Extended"
                   SelectionChanged="FilesDataGrid_OnSelectionChanged"

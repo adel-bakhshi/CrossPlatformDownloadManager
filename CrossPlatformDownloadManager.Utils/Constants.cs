@@ -70,4 +70,8 @@ public static class Constants
         .ToList();
 
     public const string DefaultDownloadQueueTitle = "Main Queue";
+    
+    // Listening urls
+    public const string CheckFileTypeSupportUrl = "http://localhost:5000/cdm/download/check/";
+    public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
 }

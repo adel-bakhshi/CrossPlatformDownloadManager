@@ -136,6 +136,35 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await LoadDownloadQueuesAsync();
     }
 
+    public async Task UpdateDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    {
+        if (viewModel == null)
+            return;
+
+        var downloadQueue = _mapper.Map<DownloadQueue>(viewModel);
+        await UpdateDownloadQueueAsync(downloadQueue);
+    }
+
+    public async Task UpdateDownloadQueuesAsync(List<DownloadQueue>? downloadQueues)
+    {
+        if (downloadQueues == null || downloadQueues.Count == 0)
+            return;
+
+        await _unitOfWork.DownloadQueueRepository.UpdateAllAsync(downloadQueues);
+        await _unitOfWork.SaveAsync();
+
+        await LoadDownloadQueuesAsync();
+    }
+
+    public async Task UpdateDownloadQueuesAsync(List<DownloadQueueViewModel>? viewModels)
+    {
+        if (viewModels == null || viewModels.Count == 0)
+            return;
+
+        var downloadQueues = _mapper.Map<List<DownloadQueue>>(viewModels);
+        await UpdateDownloadQueuesAsync(downloadQueues);
+    }
+
     public async Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel)
     {
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
@@ -166,6 +195,72 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     {
         if (downloadQueueViewModel == null || downloadFileViewModel == null)
             return;
+    }
+
+    public async Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    {
+        // Make sure given download queue is not null
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
+        if (downloadQueue == null)
+            return;
+
+        // Get all download queues that are set as default
+        var viewModels = DownloadQueues
+            .Where(dq => dq.IsDefault)
+            .ToList();
+
+        // Download queue already set as default and no need to set it again
+        if (viewModels.Count == 1 && viewModels[0].Id == downloadQueue.Id)
+            return;
+
+        // Unset all download queues that are set as default
+        viewModels = viewModels
+            .Select(dq =>
+            {
+                dq.IsDefault = false;
+                return dq;
+            })
+            .ToList();
+
+        // Update all download queues
+        await UpdateDownloadQueuesAsync(viewModels);
+
+        // Set given download queue as default and update it
+        downloadQueue.IsDefault = true;
+        await UpdateDownloadQueueAsync(downloadQueue);
+    }
+
+    public async Task ChangeLastSelectedDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    {
+        // Make sure given download queue is not null
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
+        if (downloadQueue == null)
+            return;
+
+        // Get all download queues that are set as last choice
+        var viewModels = DownloadQueues
+            .Where(dq => dq.IsLastChoice)
+            .ToList();
+        
+        // Download queue already set as last choice and no need to set it again
+        if (viewModels.Count == 1 && viewModels[0].Id == downloadQueue.Id)
+            return;
+        
+        // Unset all download queues that are set as last choice
+        viewModels = viewModels
+            .Select(dq =>
+            {
+                dq.IsLastChoice = false;
+                return dq;
+            })
+            .ToList();
+
+        // Update all download queues
+        await UpdateDownloadQueuesAsync(viewModels);
+
+        // Set given download queue as last choice and update it
+        downloadQueue.IsLastChoice = true;
+        await UpdateDownloadQueueAsync(downloadQueue);
     }
 
     #region Helpers

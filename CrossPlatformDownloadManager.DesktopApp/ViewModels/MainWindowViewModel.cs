@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -9,6 +11,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -20,23 +23,33 @@ public class MainWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
+    private readonly IAppFinisher _appFinisher;
+
     private readonly DispatcherTimer _updateSpeedTimer;
+    private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
+
+    // Properties
+    private ObservableCollection<CategoryHeader> _categoryHeaders = [];
+    private CategoryHeader? _selectedCategoryHeader;
+    private Category? _selectedCategory;
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
+    private bool _selectAllDownloadFiles;
+    private string? _totalSpeed;
+    private string? _selectedFilesTotalSize;
+    private string? _searchText;
+    private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
+    private ObservableCollection<DownloadQueueViewModel> _activeDownloadQueues = [];
+    private ObservableCollection<DownloadQueueViewModel> _addToQueueDownloadQueues = [];
 
     #endregion
 
     #region Properties
 
-    // Categories list data
-    private ObservableCollection<CategoryHeader> _categories = [];
-
-    public ObservableCollection<CategoryHeader> Categories
+    public ObservableCollection<CategoryHeader> CategoryHeaders
     {
-        get => _categories;
-        set => this.RaiseAndSetIfChanged(ref _categories, value);
+        get => _categoryHeaders;
+        set => this.RaiseAndSetIfChanged(ref _categoryHeaders, value);
     }
-
-    // Selected category
-    private CategoryHeader? _selectedCategoryHeader = null;
 
     public CategoryHeader? SelectedCategoryHeader
     {
@@ -51,9 +64,6 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    // Selected category item
-    private Category? _selectedCategory = null;
-
     public Category? SelectedCategory
     {
         get => _selectedCategory;
@@ -64,16 +74,11 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    // Download list items
-    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
-
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
         get => _downloadFiles;
         set => this.RaiseAndSetIfChanged(ref _downloadFiles, value);
     }
-
-    private bool _selectAllDownloadFiles = false;
 
     public bool SelectAllDownloadFiles
     {
@@ -81,23 +86,17 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectAllDownloadFiles, value);
     }
 
-    private string? _totalSpeed;
-
     public string? TotalSpeed
     {
         get => _totalSpeed;
         set => this.RaiseAndSetIfChanged(ref _totalSpeed, value);
     }
 
-    private string? _selectedFilesTotalSize;
-
     public string? SelectedFilesTotalSize
     {
         get => _selectedFilesTotalSize;
         set => this.RaiseAndSetIfChanged(ref _selectedFilesTotalSize, value);
     }
-
-    private string? _searchText;
 
     public string? SearchText
     {
@@ -109,50 +108,84 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
-
     public ObservableCollection<DownloadQueueViewModel> DownloadQueues
     {
         get => _downloadQueues;
         set => this.RaiseAndSetIfChanged(ref _downloadQueues, value);
     }
 
+    public ObservableCollection<DownloadQueueViewModel> ActiveDownloadQueues
+    {
+        get => _activeDownloadQueues;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _activeDownloadQueues, value);
+            this.RaisePropertyChanged(nameof(ActiveDownloadQueueExists));
+            this.RaisePropertyChanged(nameof(ActiveDownloadQueuesToolTipText));
+        }
+    }
+
+    public bool ActiveDownloadQueueExists => ActiveDownloadQueues.Any();
+
+    public string ActiveDownloadQueuesToolTipText => GetToolTipText();
+
+    public ObservableCollection<DownloadQueueViewModel> AddToQueueDownloadQueues
+    {
+        get => _addToQueueDownloadQueues;
+        set => this.RaiseAndSetIfChanged(ref _addToQueueDownloadQueues, value);
+    }
+
     #endregion
 
     #region Commands
 
-    public ICommand? SelectAllRowsCommand { get; }
+    public ICommand SelectAllRowsCommand { get; }
 
-    public ICommand? AddNewLinkCommand { get; }
+    public ICommand AddNewLinkCommand { get; }
 
-    public ICommand? ResumeDownloadFileCommand { get; }
+    public ICommand ResumeDownloadFileCommand { get; }
 
-    public ICommand? StopDownloadFileCommand { get; }
+    public ICommand StopDownloadFileCommand { get; }
 
-    public ICommand? StopAllDownloadFilesCommand { get; }
+    public ICommand StopAllDownloadFilesCommand { get; }
 
-    public ICommand? DeleteDownloadFilesCommand { get; }
+    public ICommand DeleteDownloadFilesCommand { get; }
 
-    public ICommand? DeleteCompletedDownloadFilesCommand { get; }
+    public ICommand DeleteCompletedDownloadFilesCommand { get; }
 
-    public ICommand? OpenSettingsWindowCommand { get; }
+    public ICommand OpenSettingsWindowCommand { get; }
 
-    public ICommand? StartStopDownloadQueueCommand { get; }
+    public ICommand StartStopDownloadQueueCommand { get; }
 
-    public ICommand? ShowDownloadQueueDetailsCommand { get; }
+    public ICommand ShowDownloadQueueDetailsCommand { get; }
 
-    public ICommand? AddNewDownloadQueueCommand { get; }
+    public ICommand AddNewDownloadQueueCommand { get; }
+
+    public ICommand ExitProgramCommand { get; }
+
+    public ICommand SelectAllRowsContextMenuCommand { get; }
+
+    public ICommand OpenFileContextMenuCommand { get; }
+
+    public ICommand OpenFolderContextMenuCommand { get; }
+
+    public ICommand AddToQueueContextMenuCommand { get; }
 
     #endregion
 
-    public MainWindowViewModel(IAppService appService) : base(appService)
+    public MainWindowViewModel(IAppService appService, IAppFinisher appFinisher) : base(appService)
     {
+        _appFinisher = appFinisher;
+
         _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
         _updateSpeedTimer.Start();
 
+        _updateActiveDownloadQueuesTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _updateActiveDownloadQueuesTimer.Tick += UpdateActiveDownloadQueuesTimerOnTick;
+        _updateActiveDownloadQueuesTimer.Start();
+
         LoadCategoriesAsync().GetAwaiter();
-        SelectedCategoryHeader = Categories.FirstOrDefault();
         FilterDownloadList();
         LoadDownloadQueues();
 
@@ -171,6 +204,11 @@ public class MainWindowViewModel : ViewModelBase
             ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Button?>(ShowDownloadQueueDetails);
         AddNewDownloadQueueCommand = ReactiveCommand.Create<Window?>(AddNewDownloadQueue);
+        ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
+        SelectAllRowsContextMenuCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRowsContextMenu);
+        OpenFileContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFileContextMenu);
+        OpenFolderContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFolderContextMenu);
+        AddToQueueContextMenuCommand = ReactiveCommand.Create<DataGrid?>(AddToQueueContextMenu);
     }
 
     private void LoadDownloadQueues()
@@ -486,23 +524,157 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
+    private async Task ExitProgramAsync()
     {
         // TODO: Show message box
         try
         {
-            var totalSpeed = AppService
-                .DownloadFileService
-                .DownloadFiles
-                .Where(df => df.IsDownloading)
-                .Sum(df => df.TransferRate ?? 0);
-
-            TotalSpeed = totalSpeed == 0 ? "0 KB" : totalSpeed.ToFileSize();
+            await _appFinisher.FinishAppAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
+    }
+
+    private void SelectAllRowsContextMenu(DataGrid? dataGrid)
+    {
+        dataGrid?.SelectAll();
+    }
+
+    private void OpenFileContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null)
+                return;
+
+            var filePaths = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => df.IsCompleted && !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Distinct()
+                .Where(File.Exists)
+                .ToList();
+
+            foreach (var filePath in filePaths)
+            {
+                var process = new Process();
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true,
+                };
+
+                process.Start();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void OpenFolderContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null)
+                return;
+
+            var folderPaths = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && Directory.Exists(df.SaveLocation!))
+                .Select(df => df.SaveLocation!)
+                .Distinct()
+                .ToList();
+
+            foreach (var folderPath in folderPaths)
+            {
+                var process = new Process();
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = folderPath,
+                    UseShellExecute = true
+                };
+
+                process.Start();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void AddToQueueContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            AddToQueueDownloadQueues = [];
+            if (dataGrid?.SelectedItem is not DownloadFileViewModel downloadFile)
+                return;
+
+            var downloadQueues = AppService
+                .DownloadQueueService
+                .DownloadQueues;
+
+            var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFile.DownloadQueueId);
+            if (downloadQueue == null)
+            {
+                AddToQueueDownloadQueues = downloadQueues;
+            }
+            else
+            {
+                AddToQueueDownloadQueues = downloadQueues
+                    .Where(dq => dq.Id != downloadQueue.Id)
+                    .ToObservableCollection();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
+    {
+        var totalSpeed = AppService
+            .DownloadFileService
+            .DownloadFiles
+            .Where(df => df.IsDownloading)
+            .Sum(df => df.TransferRate ?? 0);
+
+        TotalSpeed = totalSpeed == 0 ? "0 KB" : totalSpeed.ToFileSize();
+    }
+
+    private void UpdateActiveDownloadQueuesTimerOnTick(object? sender, EventArgs e)
+    {
+        var downloadQueues = AppService
+            .DownloadQueueService
+            .DownloadQueues
+            .Where(dq => dq.IsRunning)
+            .ToObservableCollection();
+
+        bool isChanged;
+        if (ActiveDownloadQueues.Count != downloadQueues.Count)
+        {
+            isChanged = true;
+        }
+        else
+        {
+            isChanged = downloadQueues
+                .Where((t, i) => t.Id != ActiveDownloadQueues[i].Id)
+                .Any();
+        }
+
+        if (isChanged)
+            ActiveDownloadQueues = downloadQueues;
     }
 
     private async Task LoadCategoriesAsync()
@@ -527,11 +699,12 @@ public class MainWindowViewModel : ViewModelBase
                 })
                 .ToList();
 
-            Categories = categoryHeaders.ToObservableCollection();
+            CategoryHeaders = categoryHeaders.ToObservableCollection();
+            SelectedCategoryHeader = CategoryHeaders.FirstOrDefault();
         }
         catch
         {
-            Categories = [];
+            CategoryHeaders = [];
         }
     }
 
@@ -602,5 +775,18 @@ public class MainWindowViewModel : ViewModelBase
     protected override void OnDownloadQueueServiceDataChanged()
     {
         LoadDownloadQueues();
+    }
+
+    private string GetToolTipText()
+    {
+        if (!ActiveDownloadQueueExists)
+            return string.Empty;
+
+        var titles = ActiveDownloadQueues
+            .Select(dq => dq.Title)
+            .ToList();
+
+        var text = string.Join(", ", titles);
+        return $"Active queues: {text}";
     }
 }

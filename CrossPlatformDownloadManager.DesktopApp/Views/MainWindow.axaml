@@ -380,13 +380,15 @@
         <!-- Download queues DataGrid ContextMenu  -->
         <Flyout x:Key="DownloadQueuesDataGridContextMenu"
                 Placement="Pointer"
-                ShowMode="Transient">
+                ShowMode="Transient"
+                Opening="DownloadQueuesDataGridContextMenuOnOpening">
             <StackPanel Orientation="Vertical"
                         Margin="0, 8"
                         Width="200">
                 <!-- Select all button -->
                 <Button Content="Select all"
                         Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanSelectAllRows}"
                         Command="{Binding SelectAllRowsContextMenuCommand}"
                         CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
@@ -399,12 +401,14 @@
                 <!-- Open file button -->
                 <Button Content="Open file"
                         Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanOpenFile}"
                         Command="{Binding OpenFileContextMenuCommand}"
                         CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Open folder button -->
                 <Button Content="Open folder"
                         Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanOpenFolder}"
                         Command="{Binding OpenFolderContextMenuCommand}"
                         CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
@@ -416,11 +420,13 @@
 
                 <!-- Rename button -->
                 <Button Content="Rename"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRename}" />
 
                 <!-- Change folder button -->
                 <Button Content="Change folder"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanChangeFolder}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -430,7 +436,8 @@
 
                 <!-- Redownload button -->
                 <Button Content="Redownload"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRedownload}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -440,11 +447,13 @@
 
                 <!-- Resume button -->
                 <Button Content="Resume"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanResume}" />
 
                 <!-- Stop button -->
                 <Button Content="Stop"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanStop}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -454,7 +463,8 @@
 
                 <!-- Refresh download address button -->
                 <Button Content="Refresh download address"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRefreshDownloadAddress}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -464,7 +474,8 @@
 
                 <!-- Remove button -->
                 <Button Content="Remove"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemove}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -476,6 +487,7 @@
                 <Button Classes="contextMenuButton"
                         HorizontalContentAlignment="Stretch"
                         Flyout="{StaticResource AddToQueueFlyout}"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanAddToQueue}"
                         Command="{Binding AddToQueueContextMenuCommand}"
                         CommandParameter="{Binding #DownloadFilesDataGrid}">
                     <Grid ColumnDefinitions="*, Auto">
@@ -495,7 +507,8 @@
 
                 <!-- Remove from queue button -->
                 <Button Content="Remove from queue"
-                        Classes="contextMenuButton" />
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemoveFromQueue}" />
             </StackPanel>
         </Flyout>
     </Window.Resources>

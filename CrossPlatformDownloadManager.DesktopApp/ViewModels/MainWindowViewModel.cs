@@ -25,8 +25,10 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly IAppFinisher _appFinisher;
 
-    private readonly DispatcherTimer _updateSpeedTimer;
+    private readonly DispatcherTimer _updateDownloadSpeedTimer;
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
+
+    private MainWindow? _mainWindow;
 
     // Properties
     private ObservableCollection<CategoryHeader> _categoryHeaders = [];
@@ -40,6 +42,7 @@ public class MainWindowViewModel : ViewModelBase
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
     private ObservableCollection<DownloadQueueViewModel> _activeDownloadQueues = [];
     private ObservableCollection<DownloadQueueViewModel> _addToQueueDownloadQueues = [];
+    private ContextFlyoutEnableStateViewMode _contextFlyoutEnableState = new();
 
     #endregion
 
@@ -135,6 +138,12 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _addToQueueDownloadQueues, value);
     }
 
+    public ContextFlyoutEnableStateViewMode ContextFlyoutEnableState
+    {
+        get => _contextFlyoutEnableState;
+        set => this.RaiseAndSetIfChanged(ref _contextFlyoutEnableState, value);
+    }
+
     #endregion
 
     #region Commands
@@ -177,9 +186,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         _appFinisher = appFinisher;
 
-        _updateSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _updateSpeedTimer.Tick += UpdateSpeedTimerOnTick;
-        _updateSpeedTimer.Start();
+        _updateDownloadSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _updateDownloadSpeedTimer.Tick += UpdateDownloadSpeedTimerOnTick;
+        _updateDownloadSpeedTimer.Start();
 
         _updateActiveDownloadQueuesTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _updateActiveDownloadQueuesTimer.Tick += UpdateActiveDownloadQueuesTimerOnTick;
@@ -540,6 +549,7 @@ public class MainWindowViewModel : ViewModelBase
     private void SelectAllRowsContextMenu(DataGrid? dataGrid)
     {
         dataGrid?.SelectAll();
+        HideContextMenu();
     }
 
     private void OpenFileContextMenu(DataGrid? dataGrid)
@@ -570,6 +580,8 @@ public class MainWindowViewModel : ViewModelBase
 
                 process.Start();
             }
+
+            HideContextMenu();
         }
         catch (Exception ex)
         {
@@ -604,6 +616,8 @@ public class MainWindowViewModel : ViewModelBase
 
                 process.Start();
             }
+
+            HideContextMenu();
         }
         catch (Exception ex)
         {
@@ -617,23 +631,86 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             AddToQueueDownloadQueues = [];
-            if (dataGrid?.SelectedItem is not DownloadFileViewModel downloadFile)
+            if (dataGrid == null)
                 return;
+
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .ToList();
 
             var downloadQueues = AppService
                 .DownloadQueueService
                 .DownloadQueues;
 
-            var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFile.DownloadQueueId);
-            if (downloadQueue == null)
+            if (downloadQueues.Count == 0)
             {
-                AddToQueueDownloadQueues = downloadQueues;
+                HideContextMenu();
+                return;
             }
-            else
+
+            switch (downloadFiles.Count)
             {
-                AddToQueueDownloadQueues = downloadQueues
-                    .Where(dq => dq.Id != downloadQueue.Id)
-                    .ToObservableCollection();
+                case 0:
+                {
+                    HideContextMenu();
+                    return;
+                }
+
+                case 1:
+                {
+                    var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFiles[0].DownloadQueueId);
+                    if (downloadQueue == null)
+                    {
+                        AddToQueueDownloadQueues = downloadQueues;
+                    }
+                    else
+                    {
+                        AddToQueueDownloadQueues = downloadQueues
+                            .Where(dq => dq.Id != downloadQueue.Id)
+                            .ToObservableCollection();
+                    }
+
+                    break;
+                }
+
+                default:
+                {
+                    var primaryKeys = downloadFiles
+                        .Where(df => df is { IsCompleted: false, DownloadQueueId: not null })
+                        .Select(df => df.DownloadQueueId!.Value)
+                        .Distinct()
+                        .ToList();
+
+                    switch (primaryKeys.Count)
+                    {
+                        case 0:
+                        {
+                            HideContextMenu();
+                            return;
+                        }
+
+                        case 1:
+                        {
+                            AddToQueueDownloadQueues = downloadQueues
+                                .Where(dq => !primaryKeys.Contains(dq.Id))
+                                .ToObservableCollection();
+
+                            if (AddToQueueDownloadQueues.Count == 0)
+                                HideContextMenu();
+
+                            break;
+                        }
+
+                        default:
+                        {
+                            AddToQueueDownloadQueues = downloadQueues;
+                            break;
+                        }
+                    }
+
+                    break;
+                }
             }
         }
         catch (Exception ex)
@@ -642,7 +719,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void UpdateSpeedTimerOnTick(object? sender, EventArgs e)
+    private void UpdateDownloadSpeedTimerOnTick(object? sender, EventArgs e)
     {
         var totalSpeed = AppService
             .DownloadFileService
@@ -788,5 +865,75 @@ public class MainWindowViewModel : ViewModelBase
 
         var text = string.Join(", ", titles);
         return $"Active queues: {text}";
+    }
+
+    public void ChangeContextFlyoutEnableState(MainWindow? mainWindow)
+    {
+        // TODO: Show message box
+        try
+        {
+            var dataGrid = mainWindow?.FindControl<DataGrid>("DownloadFilesDataGrid");
+            if (dataGrid == null)
+                return;
+
+            _mainWindow = mainWindow;
+
+            if (DownloadFiles.Count == 0)
+            {
+                ContextFlyoutEnableState.ChangeAllPropertiesToFalse();
+                return;
+            }
+
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .ToList();
+
+            var downloadQueues = AppService
+                .DownloadQueueService
+                .DownloadQueues;
+
+            ContextFlyoutEnableState.CanSelectAllRows =
+                DownloadFiles.Count > 0 && downloadFiles.Count != DownloadFiles.Count;
+
+            ContextFlyoutEnableState.CanOpenFile = downloadFiles is [{ IsCompleted: true }];
+            ContextFlyoutEnableState.CanOpenFolder = downloadFiles.Count > 0;
+            ContextFlyoutEnableState.CanRename = downloadFiles is [{ IsCompleted: true }];
+            ContextFlyoutEnableState.CanChangeFolder = downloadFiles is [{ IsCompleted: true }];
+            ContextFlyoutEnableState.CanRedownload =
+                downloadFiles.Exists(df => df is { IsDownloading: false, DownloadProgress: > 0 });
+
+            ContextFlyoutEnableState.CanResume =
+                downloadFiles.Exists(df => df is { IsDownloading: false, IsCompleted: false });
+
+            ContextFlyoutEnableState.CanStop = downloadFiles.Exists(df => df.IsDownloading);
+            ContextFlyoutEnableState.CanRefreshDownloadAddress =
+                downloadFiles is [{ IsDownloading: false, IsCompleted: false }];
+
+            ContextFlyoutEnableState.CanRemove = downloadFiles.Exists(df => !df.IsDownloading);
+            ContextFlyoutEnableState.CanAddToQueue = downloadFiles.Count > 0 &&
+                                                     downloadFiles.Exists(df => !df.IsCompleted &&
+                                                         downloadQueues
+                                                             .FirstOrDefault(dq => dq.Id == df.DownloadQueueId)
+                                                             ?.IsRunning != true);
+
+            ContextFlyoutEnableState.CanRemoveFromQueue = downloadFiles.Count > 0 &&
+                                                          downloadFiles.TrueForAll(df =>
+                                                              df is { DownloadQueueId: not null, IsCompleted: false } &&
+                                                              downloadQueues
+                                                                  .FirstOrDefault(dq => dq.Id == df.DownloadQueueId)
+                                                                  ?.IsRunning != true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void HideContextMenu()
+    {
+        await Task.Delay(100);
+        _mainWindow?.HideDownloadFilesDataGridContextMenu();
+        _mainWindow = null;
     }
 }

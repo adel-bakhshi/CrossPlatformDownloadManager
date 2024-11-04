@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -15,10 +14,22 @@ namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
 public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 {
+    #region Private Fields
+
+    private Flyout? _downloadFilesDataGridContextMenuFlyout;
+
+    #endregion
+    
     public MainWindow(MainWindowViewModel mainWindowViewModel)
     {
         InitializeComponent();
         DataContext = mainWindowViewModel;
+    }
+
+    public void HideDownloadFilesDataGridContextMenu()
+    {
+        _downloadFilesDataGridContextMenuFlyout?.Hide();
+        _downloadFilesDataGridContextMenuFlyout = null;
     }
 
     private void DownloadFilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -57,5 +68,14 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         var vm = new TrayIconWindowViewModel(appService!, trayMenuWindow!);
         var window = new TrayIconWindow { DataContext = vm };
         window.Show();
+    }
+
+    private void DownloadQueuesDataGridContextMenuOnOpening(object? sender, EventArgs e)
+    {
+        if (sender is not Flyout flyout)
+            return;
+
+        ViewModel?.ChangeContextFlyoutEnableState(this);
+        _downloadFilesDataGridContextMenuFlyout = flyout;
     }
 }

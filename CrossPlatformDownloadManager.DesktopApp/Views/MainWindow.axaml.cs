@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
@@ -77,5 +79,22 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 
         ViewModel?.ChangeContextFlyoutEnableState(this);
         _downloadFilesDataGridContextMenuFlyout = flyout;
+    }
+    
+    public async Task<string?> ChangeSaveLocationAsync(string startDirectory)
+    {
+        var topLevel = GetTopLevel(this);
+        if (topLevel == null)
+            return null;
+
+        var options = new FolderPickerOpenOptions
+        {
+            Title = "Select Directory",
+            AllowMultiple = false,
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync(startDirectory),
+        };
+
+        var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+        return !directories.Any() ? null : directories[0].Path.AbsolutePath;
     }
 }

@@ -1,0 +1,85 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.ChangeFileNameWindow"
+        x:DataType="vm:ChangeFileNameWindowViewModel"
+        Icon="/Assets/Images/cdm-logo.ico"
+        Title="CDM - Change file name"
+        Width="450"
+        Height="200"
+        MinWidth="450"
+        MinHeight="200"
+        MaxWidth="450"
+        MaxHeight="200"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        CanResize="False">
+    <!-- Main content -->
+    <Grid Margin="20"
+          RowDefinitions="*, Auto">
+        <!-- Current and new file name -->
+        <StackPanel Grid.Row="0"
+                    Orientation="Vertical"
+                    Spacing="10">
+            <!-- Current file name -->
+            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+                              Watermark="Current file name"
+                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource FileCircleCheck}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
+                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryColor}"
+                              Text="{Binding CurrentFileName}"
+                              IsReadOnly="True" />
+
+            <!-- New file name -->
+            <cc:CustomTextBox Name="NewFileNameTextBox"
+                              Background="{DynamicResource SecondaryColor}"
+                              Watermark="Current file name"
+                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource FileCircleQuestion}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
+                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryColor}"
+                              Text="{Binding NewFileName}" />
+        </StackPanel>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -421,12 +421,16 @@
                 <!-- Rename button -->
                 <Button Content="Rename"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanRename}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRename}"
+                        Command="{Binding RenameContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Change folder button -->
                 <Button Content="Change folder"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanChangeFolder}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanChangeFolder}"
+                        Command="{Binding ChangeFolderContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"

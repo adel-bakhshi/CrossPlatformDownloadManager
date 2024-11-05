@@ -14,3 +14,4 @@ In settings add a list of proxies to use and after that add proxies to TrayMenu
 Right click menu for DownloadFiles DataGrid in MainWindow
 Add progress bar to windows toolbar for downloading files
 create other right menu commands
+The background color of chunks why is so bad?

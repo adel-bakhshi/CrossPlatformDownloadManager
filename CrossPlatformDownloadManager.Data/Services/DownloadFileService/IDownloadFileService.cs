@@ -41,4 +41,6 @@ public interface IDownloadFileService
     void LimitDownloadFileSpeed(DownloadFileViewModel? viewModel, long speed);
 
     Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile, bool reloadData = true);
+
+    Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel);
 }

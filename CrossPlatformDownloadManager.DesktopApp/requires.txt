@@ -15,3 +15,4 @@ Right click menu for DownloadFiles DataGrid in MainWindow
 Add progress bar to windows toolbar for downloading files
 create other right menu commands
 The background color of chunks why is so bad?
+اگه چندتا فایل رو با هم بگیری و بخوای Stop کنی آیا برنامه ارور میده؟

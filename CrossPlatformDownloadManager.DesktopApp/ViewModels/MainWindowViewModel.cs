@@ -182,6 +182,12 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand ChangeFolderContextMenuCommand { get; }
 
+    public ICommand RedownloadContextMenuCommand { get; }
+    
+    public ICommand ResumeContextMenuCommand { get; }
+    
+    public ICommand StopContextMenuCommand { get; }
+
     public ICommand AddToQueueContextMenuCommand { get; }
 
     #endregion
@@ -222,7 +228,10 @@ public class MainWindowViewModel : ViewModelBase
         OpenFileContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFileContextMenu);
         OpenFolderContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFolderContextMenu);
         RenameContextMenuCommand = ReactiveCommand.Create<DataGrid?>(RenameContextMenu);
-        ChangeFolderContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ChangeFolderContextMenu);
+        ChangeFolderContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ChangeFolderContextMenuAsync);
+        RedownloadContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RedownloadContextMenuAsync);
+        ResumeContextMenuCommand = ReactiveCommand.Create<DataGrid?>(ResumeContextMenu);
+        StopContextMenuCommand = ReactiveCommand.Create<DataGrid?>(StopContextMenu);
         AddToQueueContextMenuCommand = ReactiveCommand.Create<DataGrid?>(AddToQueueContextMenu);
     }
 
@@ -599,11 +608,10 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            if (dataGrid == null)
-            {
-                HideContextMenu();
+            HideContextMenu();
+
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
-            }
 
             var folderPaths = dataGrid
                 .SelectedItems
@@ -624,8 +632,6 @@ public class MainWindowViewModel : ViewModelBase
 
                 process.Start();
             }
-
-            HideContextMenu();
         }
         catch (Exception ex)
         {
@@ -665,13 +671,13 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task ChangeFolderContextMenu(DataGrid? dataGrid)
+    private async Task ChangeFolderContextMenuAsync(DataGrid? dataGrid)
     {
         // TODO: Show message box
         try
         {
             HideContextMenu();
-            
+
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
                 downloadFile.FileName.IsNullOrEmpty() ||
                 downloadFile.SaveLocation.IsNullOrEmpty() ||
@@ -687,11 +693,11 @@ public class MainWindowViewModel : ViewModelBase
             var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
             if (newSaveLocation.IsNullOrEmpty())
                 return;
-            
+
             var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
             if (File.Exists(newFilePath))
                 return;
-            
+
             File.Move(filePath, newFilePath);
 
             downloadFile.SaveLocation = newSaveLocation;
@@ -706,6 +712,74 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task RedownloadContextMenuAsync(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            HideContextMenu();
+
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => df is { IsDownloading: false, IsPaused: false, DownloadProgress: > 0 })
+                .ToList();
+
+            if (downloadFiles.Count == 0)
+                return;
+
+            foreach (var downloadFile in downloadFiles)
+            {
+                await AppService
+                    .DownloadFileService
+                    .RedownloadDownloadFileAsync(downloadFile);
+                
+                var vm = new DownloadWindowViewModel(AppService, downloadFile);
+                var window = new DownloadWindow { DataContext = vm };
+                window.Show();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void ResumeContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            ResumeDownloadFile(dataGrid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void StopContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            StopDownloadFile(dataGrid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
     private void AddToQueueContextMenu(DataGrid? dataGrid)
     {
         // TODO: Show message box
@@ -713,7 +787,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             // Clear previous data stored in AddToQueueDownloadQueues
             AddToQueueDownloadQueues = [];
-            if (dataGrid == null)
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
             {
                 HideContextMenu();
                 return;
@@ -957,11 +1031,10 @@ public class MainWindowViewModel : ViewModelBase
         // TODO: Show message box
         try
         {
-            var dataGrid = mainWindow?.FindControl<DataGrid>("DownloadFilesDataGrid");
+            _mainWindow = mainWindow;
+            var dataGrid = _mainWindow?.FindControl<DataGrid>("DownloadFilesDataGrid");
             if (dataGrid == null)
                 return;
-
-            _mainWindow = mainWindow;
 
             if (DownloadFiles.Count == 0)
             {
@@ -986,7 +1059,7 @@ public class MainWindowViewModel : ViewModelBase
             ContextFlyoutEnableState.CanRename = downloadFiles is [{ IsCompleted: true }];
             ContextFlyoutEnableState.CanChangeFolder = downloadFiles is [{ IsCompleted: true }];
             ContextFlyoutEnableState.CanRedownload =
-                downloadFiles.Exists(df => df is { IsDownloading: false, DownloadProgress: > 0 });
+                downloadFiles.Exists(df => df is { IsDownloading: false, IsPaused: false, DownloadProgress: > 0 });
 
             ContextFlyoutEnableState.CanResume =
                 downloadFiles.Exists(df => df is { IsDownloading: false, IsCompleted: false });

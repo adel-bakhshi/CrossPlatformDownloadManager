@@ -6,6 +6,7 @@ using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
 
@@ -255,6 +256,31 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         if (reloadData)
             await LoadDownloadFilesAsync();
+    }
+
+    public async Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel)
+    {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
+        if (downloadFile == null)
+            return;
+
+        downloadFile.Status = DownloadFileStatus.None;
+        downloadFile.LastTryDate = null;
+        downloadFile.DownloadProgress = 0;
+        downloadFile.ElapsedTime = null;
+        downloadFile.TimeLeft = null;
+        downloadFile.TransferRate = null;
+        downloadFile.DownloadPackage = null;
+
+        if (!downloadFile.SaveLocation.IsNullOrEmpty() && !downloadFile.FileName.IsNullOrEmpty())
+        {
+            var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+        }
+
+        await UpdateDownloadFileAsync(downloadFile);
+        _ = StartDownloadFileAsync(downloadFile);
     }
 
     #region Helpers

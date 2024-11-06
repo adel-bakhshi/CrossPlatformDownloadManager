@@ -441,7 +441,9 @@
                 <!-- Redownload button -->
                 <Button Content="Redownload"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanRedownload}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRedownload}"
+                        Command="{Binding RedownloadContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -452,12 +454,16 @@
                 <!-- Resume button -->
                 <Button Content="Resume"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanResume}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanResume}"
+                        Command="{Binding ResumeContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Stop button -->
                 <Button Content="Stop"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanStop}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanStop}"
+                        Command="{Binding StopContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"

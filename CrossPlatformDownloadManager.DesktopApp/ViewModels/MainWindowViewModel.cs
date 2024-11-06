@@ -183,10 +183,12 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand ChangeFolderContextMenuCommand { get; }
 
     public ICommand RedownloadContextMenuCommand { get; }
-    
+
     public ICommand ResumeContextMenuCommand { get; }
-    
+
     public ICommand StopContextMenuCommand { get; }
+
+    public ICommand RefreshDownloadAddressContextMenuCommand { get; }
 
     public ICommand AddToQueueContextMenuCommand { get; }
 
@@ -232,6 +234,7 @@ public class MainWindowViewModel : ViewModelBase
         RedownloadContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RedownloadContextMenuAsync);
         ResumeContextMenuCommand = ReactiveCommand.Create<DataGrid?>(ResumeContextMenu);
         StopContextMenuCommand = ReactiveCommand.Create<DataGrid?>(StopContextMenu);
+        RefreshDownloadAddressContextMenuCommand = ReactiveCommand.Create<DataGrid?>(RefreshDownloadAddressContextMenu);
         AddToQueueContextMenuCommand = ReactiveCommand.Create<DataGrid?>(AddToQueueContextMenu);
     }
 
@@ -736,7 +739,7 @@ public class MainWindowViewModel : ViewModelBase
                 await AppService
                     .DownloadFileService
                     .RedownloadDownloadFileAsync(downloadFile);
-                
+
                 var vm = new DownloadWindowViewModel(AppService, downloadFile);
                 var window = new DownloadWindow { DataContext = vm };
                 window.Show();
@@ -773,6 +776,30 @@ public class MainWindowViewModel : ViewModelBase
                 return;
 
             StopDownloadFile(dataGrid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void RefreshDownloadAddressContextMenu(DataGrid? dataGrid)
+    {
+        // TODO: Show message box
+        try
+        {
+            if (dataGrid?.SelectedItem is not DownloadFileViewModel
+                {
+                    IsDownloading: false,
+                    IsCompleted: false
+                } downloadFile)
+            {
+                return;
+            }
+
+            var vm = new RefreshDownloadAddressWindowViewModel(AppService, downloadFile);
+            var window = new RefreshDownloadAddressWindow { DataContext = vm };
+            window.Show();
         }
         catch (Exception ex)
         {

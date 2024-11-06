@@ -474,7 +474,9 @@
                 <!-- Refresh download address button -->
                 <Button Content="Refresh download address"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanRefreshDownloadAddress}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRefreshDownloadAddress}"
+                        Command="{Binding RefreshDownloadAddressContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"

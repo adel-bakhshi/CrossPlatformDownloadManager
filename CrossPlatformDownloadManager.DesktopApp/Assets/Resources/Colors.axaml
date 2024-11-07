@@ -80,8 +80,8 @@
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="ChunkProgressGradientBrush"
-                         StartPoint="0%, 50%"
-                         EndPoint="100%, 50%">
+                         StartPoint="50%, 0%"
+                         EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
             <GradientStop Color="#0F8814"
                           Offset="0" />

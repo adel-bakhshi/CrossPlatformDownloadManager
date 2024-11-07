@@ -56,24 +56,43 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var downloadFiles = await _unitOfWork.DownloadFileRepository
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
 
-        var primaryKeys = downloadFiles
+        var viewModels = _mapper.Map<List<DownloadFileViewModel>>(downloadFiles);
+        var primaryKeys = viewModels
             .Select(df => df.Id)
             .ToList();
 
-        var deleteDownloadFiles = DownloadFiles
+        var deletedDownloadFiles = DownloadFiles
             .Where(df => !primaryKeys.Contains(df.Id))
             .ToList();
 
-        foreach (var downloadFile in deleteDownloadFiles)
+        foreach (var downloadFile in deletedDownloadFiles)
             await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: true, reloadData: false);
 
-        var addDownloadFiles = downloadFiles
-            .Where(df => DownloadFiles.All(odf => odf.Id != df.Id))
-            .Select(df => _mapper.Map<DownloadFileViewModel>(df))
+        primaryKeys = DownloadFiles
+            .Select(df => df.Id)
             .ToList();
 
-        foreach (var downloadFile in addDownloadFiles)
+        var addedDownloadFiles = viewModels
+            .Where(df => !primaryKeys.Contains(df.Id))
+            .ToList();
+
+        foreach (var downloadFile in addedDownloadFiles)
             DownloadFiles.Add(downloadFile);
+
+        var previousDownloadFiles = viewModels
+            .Except(addedDownloadFiles)
+            .ToList();
+
+        foreach (var downloadFile in previousDownloadFiles)
+        {
+            var previousDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
+            if (previousDownloadFile == null)
+                continue;
+
+            previousDownloadFile.DownloadQueueId = downloadFile.DownloadQueueId;
+            previousDownloadFile.DownloadQueueName = downloadFile.DownloadQueueName;
+            previousDownloadFile.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
+        }
 
         OnPropertyChanged(nameof(DownloadFiles));
         DataChanged?.Invoke(this, EventArgs.Empty);
@@ -223,7 +242,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             .DownloadFileRepository
             .GetAsync(where: df => df.Id == downloadFile.Id);
 
-        if (downloadFile.IsDownloading)
+        if (downloadFile.IsDownloading || downloadFile.IsPaused)
             await StopDownloadFileAsync(downloadFile);
 
         var shouldReturn = false;
@@ -253,6 +272,19 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         _unitOfWork.DownloadFileRepository.Delete(downloadFileInDb);
         await _unitOfWork.SaveAsync();
+
+        if (reloadData)
+            await LoadDownloadFilesAsync();
+    }
+
+    public async Task DeleteDownloadFilesAsync(List<DownloadFileViewModel>? viewModels, bool alsoDeleteFile,
+        bool reloadData = true)
+    {
+        if (viewModels == null || viewModels.Count == 0)
+            return;
+
+        foreach (var viewModel in viewModels)
+            await DeleteDownloadFileAsync(viewModel, alsoDeleteFile, reloadData: false);
 
         if (reloadData)
             await LoadDownloadFilesAsync();

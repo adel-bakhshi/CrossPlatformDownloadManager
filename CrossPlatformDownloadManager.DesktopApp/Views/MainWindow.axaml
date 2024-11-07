@@ -371,7 +371,9 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="viewModels:DownloadQueueViewModel">
                         <Button Content="{Binding Title}"
-                                Classes="contextMenuButton" />
+                                Classes="contextMenuButton"
+                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).AddDownloadFileToDownloadQueueContextMenuCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                CommandParameter="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -487,7 +489,9 @@
                 <!-- Remove button -->
                 <Button Content="Remove"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemove}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemove}"
+                        Command="{Binding RemoveContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -520,7 +524,9 @@
                 <!-- Remove from queue button -->
                 <Button Content="Remove from queue"
                         Classes="contextMenuButton"
-                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemoveFromQueue}" />
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanRemoveFromQueue}"
+                        Command="{Binding RemoveFromQueueContextMenuCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
             </StackPanel>
         </Flyout>
     </Window.Resources>

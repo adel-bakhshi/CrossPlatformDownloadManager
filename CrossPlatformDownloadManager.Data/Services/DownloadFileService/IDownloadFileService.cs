@@ -27,7 +27,7 @@ public interface IDownloadFileService
     Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel);
 
     Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles);
-    
+
     Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels);
 
     Task StartDownloadFileAsync(DownloadFileViewModel? viewModel);
@@ -41,6 +41,8 @@ public interface IDownloadFileService
     void LimitDownloadFileSpeed(DownloadFileViewModel? viewModel, long speed);
 
     Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile, bool reloadData = true);
+
+    Task DeleteDownloadFilesAsync(List<DownloadFileViewModel>? viewModels, bool alsoDeleteFile, bool reloadData = true);
 
     Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel);
 }

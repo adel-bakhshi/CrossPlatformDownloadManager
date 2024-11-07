@@ -141,10 +141,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         LoadCategoriesAsync().GetAwaiter();
         LoadDownloadQueues();
 
-        AddNewCategoryCommand = ReactiveCommand.Create<Window?>(AddNewCategory);
-        AddNewQueueCommand = ReactiveCommand.Create<Window?>(AddNewQueue);
-        AddFileToQueueCommand = ReactiveCommand.Create<Window?>(AddFileToQueue);
-        AddToDefaultQueueCommand = ReactiveCommand.Create<Window?>(AddToDefaultQueue);
+        AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
+        AddNewQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewQueueAsync);
+        AddFileToQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddFileToQueueAsync);
+        AddToDefaultQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddToDefaultQueueAsync);
         StartDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(StartDownloadAsync);
     }
 
@@ -185,7 +185,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async void AddNewCategory(Window? owner)
+    private async Task AddNewCategoryAsync(Window? owner)
     {
         try
         {
@@ -206,7 +206,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async void AddNewQueue(Window? owner)
+    private async Task AddNewQueueAsync(Window? owner)
     {
         try
         {
@@ -227,7 +227,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async void AddFileToQueue(Window? owner)
+    private async Task AddFileToQueueAsync(Window? owner)
     {
         // TODO: Show message box
         try
@@ -274,11 +274,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async void AddToDefaultQueue(Window? owner)
+    private async Task AddToDefaultQueueAsync(Window? owner)
     {
         try
         {
             if (owner == null)
+                return;
+
+            if (!ValidateDownloadFile())
                 return;
 
             var defaultDownloadQueue = AppService
@@ -286,13 +289,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 .DownloadQueues
                 .FirstOrDefault(dq => dq.IsDefault);
 
-            if (defaultDownloadQueue == null)
-            {
-                DefaultQueueIsExist = false;
+            DefaultQueueIsExist = defaultDownloadQueue != null;
+            if (!DefaultQueueIsExist)
                 return;
-            }
-
-            DefaultQueueIsExist = true;
 
             var result = await AddDownloadFileAsync(defaultDownloadQueue);
             if (!result)
@@ -329,7 +328,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 .UnitOfWork
                 .DownloadFileRepository
                 .GetMaxAsync(selector: df => df.DownloadQueuePriority,
-                    where: df => df.DownloadQueueId == downloadQueue.Id);
+                    where: df => df.DownloadQueueId == downloadQueue.Id) ?? 0;
 
             maxDownloadQueuePriority++;
         }

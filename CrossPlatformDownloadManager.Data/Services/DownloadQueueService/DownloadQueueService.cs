@@ -186,15 +186,68 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     public async Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
         DownloadFileViewModel? downloadFileViewModel)
     {
-        if (downloadQueueViewModel == null || downloadFileViewModel == null)
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueViewModel?.Id);
+        var downloadFile = _downloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
+        if (downloadQueue == null || downloadFile == null || downloadFile.IsCompleted)
             return;
+
+        downloadFile.DownloadQueueId = downloadQueue.Id;
+        downloadFile.DownloadQueuePriority = (_downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == downloadQueue.Id)
+            .Max(df => df.DownloadQueuePriority) ?? 0) + 1;
+        
+        await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
+        await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
+    }
+
+    public async Task AddDownloadFilesToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
+        List<DownloadFileViewModel>? downloadFilesViewModels)
+    {
+        if (downloadFilesViewModels == null || downloadFilesViewModels.Count == 0)
+            return;
+
+        var primaryKeys = downloadFilesViewModels
+            .Select(df => df.Id)
+            .Distinct()
+            .ToList();
+
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueViewModel?.Id);
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => primaryKeys.Contains(df.Id) && !df.IsCompleted)
+            .ToList();
+
+        if (downloadQueue == null || downloadFiles.Count == 0)
+            return;
+
+        var maxDownloadQueuePriority = (_downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == downloadQueue.Id)
+            .Max(df => df.DownloadQueuePriority) ?? 0) + 1;
+
+        foreach (var downloadFile in downloadFiles)
+        {
+            downloadFile.DownloadQueueId = downloadQueue.Id;
+            downloadFile.DownloadQueuePriority = maxDownloadQueuePriority;
+            maxDownloadQueuePriority++;
+        }
+
+        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
+        await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }
 
     public async Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
         DownloadFileViewModel? downloadFileViewModel)
     {
-        if (downloadQueueViewModel == null || downloadFileViewModel == null)
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueViewModel?.Id);
+        var downloadFile = _downloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == downloadFileViewModel?.Id);
+        if (downloadQueue == null || downloadFile == null || downloadFile.IsDownloading || downloadFile.IsPaused)
             return;
+
+        downloadFile.DownloadQueueId = null;
+        await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
+        await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }
 
     public async Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel)
@@ -241,11 +294,11 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         var viewModels = DownloadQueues
             .Where(dq => dq.IsLastChoice)
             .ToList();
-        
+
         // Download queue already set as last choice and no need to set it again
         if (viewModels.Count == 1 && viewModels[0].Id == downloadQueue.Id)
             return;
-        
+
         // Unset all download queues that are set as last choice
         viewModels = viewModels
             .Select(dq =>
@@ -299,7 +352,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .ToList();
 
         var downloadQueues = DownloadQueues
-            .Where(dq => dq.DownloadingFiles.Any(df => !primaryKeys.Contains(df.Id)))
+            .Where(dq => dq.DownloadingFiles.Exists(df => !primaryKeys.Contains(df.Id)))
             .ToList();
 
         foreach (var downloadQueue in downloadQueues)

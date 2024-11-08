@@ -11,6 +11,10 @@
     <Color x:Key="MenuItemOnHoverBackgroundColor">#201824</Color>
     <Color x:Key="LoadingColor">#980C0C</Color>
     <Color x:Key="IconColor">#3A58C2</Color>
+    <Color x:Key="DialogOkButtonColor">#303F9F</Color>
+    <Color x:Key="DialogYesButtonColor">#10BA18</Color>
+    <Color x:Key="DialogNoButtonColor">#F44336</Color>
+    <Color x:Key="DialogCancelButtonColor">#FF9800</Color>
 
     <!-- Gradients -->
     <LinearGradientBrush x:Key="SuccessGradientBrush"

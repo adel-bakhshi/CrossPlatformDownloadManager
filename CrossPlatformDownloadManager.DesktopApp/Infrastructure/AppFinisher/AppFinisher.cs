@@ -65,14 +65,11 @@ public class AppFinisher : IAppFinisher
             {
                 await _appService
                     .SettingsService
-                    .SaveSettingsAsync(settings);
+                    .SaveSettingsAsync(settings, reloadData: false);
             }
-            
+
             // Stop listening for URLs
             _browserExtension.StopListening();
-            
-            // Exit the application
-            Environment.Exit(0);
         }
         catch (Exception ex)
         {

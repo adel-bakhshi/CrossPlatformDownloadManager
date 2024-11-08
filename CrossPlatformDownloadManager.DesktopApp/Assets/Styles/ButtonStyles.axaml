@@ -20,15 +20,37 @@
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
 
-        <Style Selector="^:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource PrimaryColor}" />
-        </Style>
+        <!-- Template -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            ClipToBounds="{TemplateBinding ClipToBounds}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Margin="{TemplateBinding Padding}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
 
-        <Style Selector="^:pressed /template/ ContentPresenter">
-            <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
-        </Style>
+        <!-- Transitions -->
+        <Setter Property="Transitions">
+            <Setter.Value>
+                <Transitions>
+                    <BrushTransition Property="Background"
+                                     Duration="00:00:00.3" />
+
+                    <DoubleTransition Property="Opacity"
+                                      Duration="00:00:00.3" />
+                </Transitions>
+            </Setter.Value>
+        </Setter>
 
         <Style Selector="^.success">
             <Setter Property="Background"
@@ -42,7 +64,7 @@
                     Value="0.9" />
         </Style>
 
-        <Style Selector="^.success:pressed /template/ ContentPresenter">
+        <Style Selector="^.success:pressed">
             <Setter Property="Background"
                     Value="{DynamicResource SuccessGradientBrush}" />
             <Setter Property="Opacity"
@@ -61,7 +83,7 @@
                     Value="0.9" />
         </Style>
 
-        <Style Selector="^.danger:pressed /template/ ContentPresenter">
+        <Style Selector="^.danger:pressed">
             <Setter Property="Background"
                     Value="{DynamicResource DangerGradientBrush}" />
             <Setter Property="Opacity"
@@ -80,7 +102,7 @@
                     Value="0.9" />
         </Style>
 
-        <Style Selector="^.warning:pressed /template/ ContentPresenter">
+        <Style Selector="^.warning:pressed">
             <Setter Property="Background"
                     Value="{DynamicResource WarningGradientBrush}" />
             <Setter Property="Opacity"
@@ -99,7 +121,7 @@
                     Value="0.9" />
         </Style>
 
-        <Style Selector="^.info:pressed /template/ ContentPresenter">
+        <Style Selector="^.info:pressed">
             <Setter Property="Background"
                     Value="{DynamicResource InfoGradientBrush}" />
             <Setter Property="Opacity"
@@ -120,11 +142,6 @@
         </Style>
 
         <Style Selector="^.none:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
-        </Style>
-
-        <Style Selector="^.none:pressed /template/ ContentPresenter">
             <Setter Property="Background"
                     Value="{DynamicResource TransparentColor}" />
         </Style>

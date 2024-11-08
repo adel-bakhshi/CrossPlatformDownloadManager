@@ -41,7 +41,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         {
             if (Settings != null)
                 return;
-            
+
             var settingsList = await _unitOfWork.SettingsRepository.GetAllAsync();
             Settings? settings;
             if (settingsList.Count == 0)
@@ -68,12 +68,13 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         }
     }
 
-    public async Task SaveSettingsAsync(SettingsViewModel settings)
+    public async Task SaveSettingsAsync(SettingsViewModel viewModel, bool reloadData = true)
     {
         // TODO: Show message box
         try
         {
-            await LoadSettingsAsync();
+            if (reloadData)
+                await LoadSettingsAsync();
         }
         catch (Exception ex)
         {

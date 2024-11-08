@@ -12,9 +12,9 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -22,8 +22,6 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     #region Private Fields
-
-    private readonly IAppFinisher _appFinisher;
 
     private readonly DispatcherTimer _updateDownloadSpeedTimer;
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
@@ -201,10 +199,8 @@ public class MainWindowViewModel : ViewModelBase
 
     #endregion
 
-    public MainWindowViewModel(IAppService appService, IAppFinisher appFinisher) : base(appService)
+    public MainWindowViewModel(IAppService appService) : base(appService)
     {
-        _appFinisher = appFinisher;
-
         _updateDownloadSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _updateDownloadSpeedTimer.Tick += UpdateDownloadSpeedTimerOnTick;
         _updateDownloadSpeedTimer.Start();
@@ -220,30 +216,31 @@ public class MainWindowViewModel : ViewModelBase
         TotalSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
 
-        SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
-        AddNewLinkCommand = ReactiveCommand.Create<Window?>(AddNewLink);
-        ResumeDownloadFileCommand = ReactiveCommand.Create<DataGrid?>(ResumeDownloadFile);
+        SelectAllRowsCommand = ReactiveCommand.CreateFromTask<DataGrid?>(SelectAllRowsAsync);
+        AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
+        ResumeDownloadFileCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ResumeDownloadFileAsync);
         StopDownloadFileCommand = ReactiveCommand.CreateFromTask<DataGrid?>(StopDownloadFileAsync);
         StopAllDownloadFilesCommand = ReactiveCommand.CreateFromTask(StopAllDownloadFilesAsync);
-        DeleteDownloadFilesCommand = ReactiveCommand.Create<DataGrid?>(DeleteDownloadFiles);
-        DeleteCompletedDownloadFilesCommand = ReactiveCommand.Create(DeleteCompletedDownloadFiles);
-        OpenSettingsWindowCommand = ReactiveCommand.Create<Window?>(OpenSettingsWindow);
+        DeleteDownloadFilesCommand = ReactiveCommand.CreateFromTask<DataGrid?>(DeleteDownloadFilesAsync);
+        DeleteCompletedDownloadFilesCommand = ReactiveCommand.CreateFromTask(DeleteCompletedDownloadFilesAsync);
+        OpenSettingsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsWindowAsync);
         StartStopDownloadQueueCommand =
             ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
-        ShowDownloadQueueDetailsCommand = ReactiveCommand.Create<Button?>(ShowDownloadQueueDetails);
-        AddNewDownloadQueueCommand = ReactiveCommand.Create<Window?>(AddNewDownloadQueue);
+        ShowDownloadQueueDetailsCommand = ReactiveCommand.CreateFromTask<Button?>(ShowDownloadQueueDetailsAsync);
+        AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewDownloadQueueAsync);
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
-        SelectAllRowsContextMenuCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRowsContextMenu);
-        OpenFileContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFileContextMenu);
-        OpenFolderContextMenuCommand = ReactiveCommand.Create<DataGrid?>(OpenFolderContextMenu);
-        RenameContextMenuCommand = ReactiveCommand.Create<DataGrid?>(RenameContextMenu);
+        SelectAllRowsContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(SelectAllRowsContextMenuAsync);
+        OpenFileContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(OpenFileContextMenuAsync);
+        OpenFolderContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(OpenFolderContextMenuAsync);
+        RenameContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RenameContextMenuAsync);
         ChangeFolderContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ChangeFolderContextMenuAsync);
         RedownloadContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RedownloadContextMenuAsync);
-        ResumeContextMenuCommand = ReactiveCommand.Create<DataGrid?>(ResumeContextMenu);
+        ResumeContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ResumeContextMenuAsync);
         StopContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(StopContextMenuAsync);
-        RefreshDownloadAddressContextMenuCommand = ReactiveCommand.Create<DataGrid?>(RefreshDownloadAddressContextMenu);
+        RefreshDownloadAddressContextMenuCommand =
+            ReactiveCommand.CreateFromTask<DataGrid?>(RefreshDownloadAddressContextMenuAsync);
         RemoveContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveContextMenuAsync);
-        AddToQueueContextMenuCommand = ReactiveCommand.Create<DataGrid?>(AddToQueueContextMenu);
+        AddToQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(AddToQueueContextMenuAsync);
         RemoveFromQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveFromQueueContextMenuAsync);
         AddDownloadFileToDownloadQueueContextMenuCommand =
             ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(AddDownloadFileToDownloadQueueContextMenuAsync);
@@ -256,25 +253,32 @@ public class MainWindowViewModel : ViewModelBase
             .DownloadQueues;
     }
 
-    private void SelectAllRows(DataGrid? dataGrid)
+    private async Task SelectAllRowsAsync(DataGrid? dataGrid)
     {
-        if (dataGrid == null)
-            return;
-
-        if (DownloadFiles.Count == 0)
+        try
         {
-            SelectAllDownloadFiles = false;
-            dataGrid.SelectedIndex = -1;
-            return;
-        }
+            if (dataGrid == null)
+                return;
 
-        if (!SelectAllDownloadFiles)
-            dataGrid.SelectedIndex = -1;
-        else
-            dataGrid.SelectAll();
+            if (DownloadFiles.Count == 0)
+            {
+                SelectAllDownloadFiles = false;
+                dataGrid.SelectedIndex = -1;
+                return;
+            }
+
+            if (!SelectAllDownloadFiles)
+                dataGrid.SelectedIndex = -1;
+            else
+                dataGrid.SelectAll();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 
-    private async void AddNewLink(Window? owner)
+    private async Task AddNewLinkAsync(Window? owner)
     {
         // TODO: Show message box
         try
@@ -294,22 +298,18 @@ public class MainWindowViewModel : ViewModelBase
             };
 
             var window = new AddDownloadLinkWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool>(owner);
-            if (!result)
-                return;
+            await window.ShowDialog(owner);
 
-            // TODO: Why I'm comment this code???
-            // await LoadCategoriesAsync();
+            await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void ResumeDownloadFile(DataGrid? dataGrid)
+    private async Task ResumeDownloadFileAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
@@ -343,13 +343,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task StopDownloadFileAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
@@ -370,13 +369,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task StopAllDownloadFilesAsync()
     {
-        // TODO: Show message box
         try
         {
             var runningDownloadQueues = AppService
@@ -407,13 +405,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void DeleteDownloadFiles(DataGrid? dataGrid)
+    private async Task DeleteDownloadFilesAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
@@ -423,6 +420,23 @@ public class MainWindowViewModel : ViewModelBase
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
                 .ToList();
+
+            var isFileExists = downloadFiles
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
+                .ToList();
+
+            var deleteFile = false;
+            if (isFileExists.Count > 0)
+            {
+                var result = await ShowWarningDialogAsync("Delete files",
+                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    deleteFile = true;
+            }
 
             for (var i = downloadFiles.Count - 1; i >= 0; i--)
             {
@@ -435,18 +449,17 @@ public class MainWindowViewModel : ViewModelBase
 
                 await AppService
                     .DownloadFileService
-                    .DeleteDownloadFileAsync(downloadFiles[i], true);
+                    .DeleteDownloadFileAsync(downloadFiles[i], deleteFile);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void DeleteCompletedDownloadFiles()
+    private async Task DeleteCompletedDownloadFilesAsync()
     {
-        // TODO: Show message box and ask user for deleting file
         try
         {
             var downloadFiles = AppService
@@ -455,22 +468,38 @@ public class MainWindowViewModel : ViewModelBase
                 .Where(df => df.IsCompleted)
                 .ToList();
 
+            var isFileExists = downloadFiles
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
+                .ToList();
+
+            var deleteFile = false;
+            if (isFileExists.Count > 0)
+            {
+                var result = await ShowWarningDialogAsync("Delete files",
+                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    deleteFile = true;
+            }
+
             foreach (var downloadFile in downloadFiles)
             {
                 await AppService
                     .DownloadFileService
-                    .DeleteDownloadFileAsync(downloadFile, false);
+                    .DeleteDownloadFileAsync(downloadFile, deleteFile);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void OpenSettingsWindow(Window? owner)
+    private async Task OpenSettingsWindowAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -482,13 +511,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task StartStopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue)
     {
-        // TODO: Show message box
         try
         {
             if (downloadQueue == null)
@@ -509,13 +537,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void ShowDownloadQueueDetails(Button? button)
+    private async Task ShowDownloadQueueDetailsAsync(Button? button)
     {
-        // TODO: Show message box
         try
         {
             var owner = button?.FindLogicalAncestorOfType<Window>();
@@ -524,7 +551,10 @@ public class MainWindowViewModel : ViewModelBase
 
             var tag = button?.Tag?.ToString();
             if (tag.IsNullOrEmpty() || !int.TryParse(tag, out var downloadQueueId))
+            {
+                await ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
                 return;
+            }
 
             var downloadQueue = AppService
                 .DownloadQueueService
@@ -532,7 +562,10 @@ public class MainWindowViewModel : ViewModelBase
                 .FirstOrDefault(dq => dq.Id == downloadQueueId);
 
             if (downloadQueue == null)
+            {
+                await ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
                 return;
+            }
 
             var vm = new AddEditQueueWindowViewModel(AppService) { IsEditMode = true, DownloadQueue = downloadQueue };
             var window = new AddEditQueueWindow { DataContext = vm };
@@ -540,13 +573,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void AddNewDownloadQueue(Window? owner)
+    private async Task AddNewDownloadQueueAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -558,46 +590,62 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task ExitProgramAsync()
     {
-        // TODO: Show message box
         try
         {
-            await _appFinisher.FinishAppAsync();
+            if (App.Desktop == null)
+                return;
+
+            var result = await ShowWarningDialogAsync("Exit",
+                "Are you sure you want to exit the app?",
+                DialogButtons.YesNo);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            App.Desktop.Shutdown();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void SelectAllRowsContextMenu(DataGrid? dataGrid)
+    private async Task SelectAllRowsContextMenuAsync(DataGrid? dataGrid)
     {
-        dataGrid?.SelectAll();
-        HideContextMenu();
-    }
-
-    private void OpenFileContextMenu(DataGrid? dataGrid)
-    {
-        // TODO: Show message box
         try
         {
+            HideContextMenu();
+            dataGrid?.SelectAll();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task OpenFileContextMenuAsync(DataGrid? dataGrid)
+    {
+        try
+        {
+            HideContextMenu();
+
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsDownloading: true } downloadFile ||
                 downloadFile.SaveLocation.IsNullOrEmpty() ||
                 downloadFile.FileName.IsNullOrEmpty())
             {
-                HideContextMenu();
                 return;
             }
 
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                HideContextMenu();
+                await ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
                 return;
             }
 
@@ -609,17 +657,15 @@ public class MainWindowViewModel : ViewModelBase
             };
 
             process.Start();
-            HideContextMenu();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void OpenFolderContextMenu(DataGrid? dataGrid)
+    private async Task OpenFolderContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -635,6 +681,12 @@ public class MainWindowViewModel : ViewModelBase
                 .Distinct()
                 .ToList();
 
+            if (folderPaths.Count == 0)
+            {
+                await ShowInfoDialogAsync("Open folder", "Folder not found", DialogButtons.Ok);
+                return;
+            }
+
             foreach (var folderPath in folderPaths)
             {
                 var process = new Process();
@@ -649,45 +701,42 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void RenameContextMenu(DataGrid? dataGrid)
+    private async Task RenameContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
+            HideContextMenu();
+
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
                 downloadFile.FileName.IsNullOrEmpty() ||
                 downloadFile.SaveLocation.IsNullOrEmpty())
             {
-                HideContextMenu();
                 return;
             }
 
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                HideContextMenu();
+                await ShowInfoDialogAsync("Rename", "File not found", DialogButtons.Ok);
                 return;
             }
 
             var vm = new ChangeFileNameWindowViewModel(AppService, downloadFile);
             var window = new ChangeFileNameWindow { DataContext = vm };
             window.Show();
-
-            HideContextMenu();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task ChangeFolderContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -702,15 +751,24 @@ public class MainWindowViewModel : ViewModelBase
 
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
+            {
+                await ShowInfoDialogAsync("Change folder", "File not found", DialogButtons.Ok);
                 return;
+            }
 
             var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
             if (newSaveLocation.IsNullOrEmpty())
+            {
+                await ShowInfoDialogAsync("Change folder", "Folder not found", DialogButtons.Ok);
                 return;
+            }
 
             var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
             if (File.Exists(newFilePath))
+            {
+                await ShowInfoDialogAsync("Change folder", "File already exists", DialogButtons.Ok);
                 return;
+            }
 
             File.Move(filePath, newFilePath);
 
@@ -722,13 +780,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task RedownloadContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -758,29 +815,27 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void ResumeContextMenu(DataGrid? dataGrid)
+    private async Task ResumeContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            ResumeDownloadFile(dataGrid);
+            await ResumeDownloadFileAsync(dataGrid);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task StopContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
@@ -790,13 +845,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void RefreshDownloadAddressContextMenu(DataGrid? dataGrid)
+    private async Task RefreshDownloadAddressContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             if (dataGrid?.SelectedItem is not DownloadFileViewModel
@@ -814,13 +868,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task RemoveContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -833,19 +886,35 @@ public class MainWindowViewModel : ViewModelBase
                 .OfType<DownloadFileViewModel>()
                 .ToList();
 
+            var isFileExists = downloadFiles
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
+                .ToList();
+
+            var deleteFile = false;
+            if (isFileExists.Count > 0)
+            {
+                var result = await ShowWarningDialogAsync("Delete files",
+                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    deleteFile = true;
+            }
+
             await AppService
                 .DownloadFileService
-                .DeleteDownloadFilesAsync(downloadFiles, alsoDeleteFile: true);
+                .DeleteDownloadFilesAsync(downloadFiles, alsoDeleteFile: deleteFile);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private void AddToQueueContextMenu(DataGrid? dataGrid)
+    private async Task AddToQueueContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             // Clear previous data stored in AddToQueueDownloadQueues
@@ -939,13 +1008,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task RemoveFromQueueContextMenuAsync(DataGrid? dataGrid)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -987,13 +1055,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task AddDownloadFileToDownloadQueueContextMenuAsync(DownloadQueueViewModel? viewModel)
     {
-        // TODO: Show message box
         try
         {
             HideContextMenu();
@@ -1015,7 +1082,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1077,7 +1144,13 @@ public class MainWindowViewModel : ViewModelBase
                 .ToList();
 
             CategoryHeaders = categoryHeaders.ToObservableCollection();
-            SelectedCategoryHeader = CategoryHeaders.FirstOrDefault();
+            SelectedCategoryHeader ??= CategoryHeaders.FirstOrDefault();
+
+            if (CategoryHeaders.FirstOrDefault(ch => ch.Id == SelectedCategoryHeader?.Id) == null)
+            {
+                SelectedCategoryHeader = CategoryHeaders.FirstOrDefault();
+                FilterDownloadList();
+            }
         }
         catch
         {
@@ -1087,7 +1160,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private void FilterDownloadList()
     {
-        // TODO: Show message box
         try
         {
             var downloadFiles = AppService
@@ -1129,9 +1201,11 @@ public class MainWindowViewModel : ViewModelBase
 
             DownloadFiles = downloadFiles.ToObservableCollection();
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine(ex);
+            DownloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles;
         }
     }
 
@@ -1158,9 +1232,8 @@ public class MainWindowViewModel : ViewModelBase
         return $"Active queues: {text}";
     }
 
-    public void ChangeContextFlyoutEnableState(MainWindow? mainWindow)
+    public async Task ChangeContextFlyoutEnableStateAsync(MainWindow? mainWindow)
     {
-        // TODO: Show message box
         try
         {
             _mainWindow = mainWindow;
@@ -1218,7 +1291,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 

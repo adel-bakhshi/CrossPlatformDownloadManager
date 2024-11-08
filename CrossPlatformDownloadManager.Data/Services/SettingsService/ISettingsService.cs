@@ -12,5 +12,5 @@ public interface ISettingsService
 
     Task LoadSettingsAsync();
 
-    Task SaveSettingsAsync(SettingsViewModel settings);
+    Task SaveSettingsAsync(SettingsViewModel viewModel, bool reloadData = true);
 }

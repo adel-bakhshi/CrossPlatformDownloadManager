@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
-using Microsoft.Extensions.DependencyInjection;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
-using RolandK.AvaloniaExtensions.DependencyInjection;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -92,7 +89,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         OpenSettingsWindowCommand = ReactiveCommand.Create(OpenSettingsWindow);
         OpenHelpWindowCommand = ReactiveCommand.Create(OpenHelpWindow);
         OpenAboutUsWindowCommand = ReactiveCommand.Create(OpenAboutUsWindow);
-        ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
+        ExitProgramCommand = ReactiveCommand.Create(ExitProgram);
     }
 
     private async Task StartStopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue)
@@ -194,23 +191,18 @@ public class TrayMenuWindowViewModel : ViewModelBase
         throw new NotImplementedException();
     }
 
-    private async Task ExitProgramAsync()
+    private async void ExitProgram()
     {
         // TODO: Show message box
         try
         {
             HideTrayMenu();
-            
+
+            if (App.Desktop == null)
+                return;
+
             // TODO: Ask user if he wants to exit
-            var serviceProvider = Application.Current?.TryGetServiceProvider();
-            if (serviceProvider == null)
-                throw new InvalidOperationException("Service provider not found.");
-
-            var appFinisher = serviceProvider.GetService<IAppFinisher>();
-            if (appFinisher == null)
-                throw new InvalidOperationException("App finisher service not found.");
-
-            await appFinisher.FinishAppAsync();
+            App.Desktop.Shutdown();
         }
         catch (Exception ex)
         {

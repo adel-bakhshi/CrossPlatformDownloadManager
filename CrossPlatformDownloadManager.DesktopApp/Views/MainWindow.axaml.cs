@@ -21,7 +21,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     private Flyout? _downloadFilesDataGridContextMenuFlyout;
 
     #endregion
-    
+
     public MainWindow(MainWindowViewModel mainWindowViewModel)
     {
         InitializeComponent();
@@ -72,15 +72,15 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         window.Show();
     }
 
-    private void DownloadQueuesDataGridContextMenuOnOpening(object? sender, EventArgs e)
+    private async void DownloadQueuesDataGridContextMenuOnOpening(object? sender, EventArgs e)
     {
-        if (sender is not Flyout flyout)
+        if (sender is not Flyout flyout || ViewModel == null)
             return;
 
-        ViewModel?.ChangeContextFlyoutEnableState(this);
+        await ViewModel.ChangeContextFlyoutEnableStateAsync(this);
         _downloadFilesDataGridContextMenuFlyout = flyout;
     }
-    
+
     public async Task<string?> ChangeSaveLocationAsync(string startDirectory)
     {
         var topLevel = GetTopLevel(this);

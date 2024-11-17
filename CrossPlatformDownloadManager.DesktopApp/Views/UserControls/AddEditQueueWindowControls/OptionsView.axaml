@@ -4,11 +4,189 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels"
+             xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls.OptionsView"
              x:DataType="vm:OptionsViewModel">
+
+    <!-- Resources -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:StartDownloadScheduleVisibilityConverter x:Key="StartDownloadScheduleVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- Styles -->
+    <UserControl.Styles>
+        <!-- Calendar style -->
+        <Style Selector="Calendar">
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource DefaultCornerRadius}" />
+            <Setter Property="ClipToBounds"
+                    Value="True" />
+        </Style>
+
+        <!-- CalendarItem style -->
+        <Style Selector="CalendarItem">
+            <!-- Template -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Panel>
+                            <Border Margin="0"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                    ClipToBounds="{TemplateBinding ClipToBounds}">
+                                <Border BorderBrush="{DynamicResource ThemeBackgroundBrush}"
+                                        BorderThickness="0"
+                                        CornerRadius="0">
+                                    <Grid RowDefinitions="Auto,*"
+                                          ColumnDefinitions="Auto,*,Auto">
+                                        <!-- Styles -->
+                                        <Grid.Styles>
+                                            <Style Selector="Button.CalendarHeader">
+                                                <Setter Property="Cursor"
+                                                        Value="Hand" />
+                                                <Setter Property="Background"
+                                                        Value="Transparent" />
+                                                <Setter Property="BorderThickness"
+                                                        Value="0" />
+                                            </Style>
+
+                                            <Style
+                                                Selector="Button.CalendarHeader:pressed  /template/ ContentPresenter">
+                                                <Setter Property="Background"
+                                                        Value="Transparent" />
+                                            </Style>
+
+                                            <Style Selector="Button.CalendarNavigation">
+                                                <Setter Property="Height"
+                                                        Value="20" />
+                                                <Setter Property="Width"
+                                                        Value="28" />
+                                            </Style>
+
+                                            <Style Selector="Button.CalendarNavigation > Path">
+                                                <Setter Property="Fill"
+                                                        Value="{DynamicResource ThemeForegroundBrush}" />
+                                            </Style>
+
+                                            <Style Selector="Button.CalendarNavigation:pointerover > Path">
+                                                <Setter Property="Fill"
+                                                        Value="{DynamicResource HighlightBrush}" />
+                                            </Style>
+
+                                            <Style Selector="Button#HeaderButton:pointerover">
+                                                <Setter Property="Foreground"
+                                                        Value="{DynamicResource HighlightBrush}" />
+                                            </Style>
+                                        </Grid.Styles>
+
+                                        <Rectangle Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Grid.ColumnSpan="3"
+                                                   Height="22"
+                                                   VerticalAlignment="Top"
+                                                   Fill="{DynamicResource IconColor}"
+                                                   Stretch="Fill" />
+
+                                        <Button Name="PART_PreviousButton"
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                Classes="CalendarHeader CalendarNavigation"
+                                                IsVisible="False">
+                                            <Path Width="6"
+                                                  Height="10"
+                                                  Margin="14,-6,0,0"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Center"
+                                                  Data="M288.75,232.25 L288.75,240.625 L283,236.625 z"
+                                                  Stretch="Fill" />
+                                        </Button>
+
+                                        <Button Name="PART_HeaderButton"
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Padding="1,5,1,9"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Classes="CalendarHeader"
+                                                FontSize="10.5"
+                                                FontWeight="Bold" />
+
+                                        <Button Name="PART_NextButton"
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Right"
+                                                Classes="CalendarHeader CalendarNavigation"
+                                                IsVisible="False">
+                                            <Path Width="6"
+                                                  Height="10"
+                                                  Margin="0,-6,14,0"
+                                                  HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"
+                                                  Data="M282.875,231.875 L282.875,240.375 L288.625,236 z"
+                                                  Stretch="Fill" />
+                                        </Button>
+
+                                        <Grid Name="PART_MonthView"
+                                              Grid.Row="1"
+                                              Grid.Column="0"
+                                              Grid.ColumnSpan="3"
+                                              Margin="6,-1,6,6"
+                                              IsVisible="False"
+                                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                                              ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" />
+
+                                        <Grid Name="PART_YearView"
+                                              Grid.Row="1"
+                                              Grid.Column="0"
+                                              Grid.ColumnSpan="3"
+                                              Margin="6,-3,7,6"
+                                              IsVisible="False"
+                                              RowDefinitions="Auto,Auto,Auto"
+                                              ColumnDefinitions="Auto,Auto,Auto,Auto" />
+                                    </Grid>
+                                </Border>
+                            </Border>
+
+                            <Rectangle Name="DisabledVisual"
+                                       Margin="0,2,0,2"
+                                       Fill="{DynamicResource ThemeControlLowBrush}"
+                                       IsVisible="False"
+                                       Opacity="{DynamicResource ThemeDisabledOpacity}"
+                                       Stretch="Fill" />
+
+                        </Panel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- CalendarDayButton style -->
+        <Style Selector="CalendarDayButton">
+            <Setter Property="CornerRadius"
+                    Value="4" />
+            <Setter Property="ClipToBounds"
+                    Value="True" />
+
+            <Style Selector="^ /template/ Rectangle">
+                <Setter Property="RadiusX"
+                        Value="4" />
+                <Setter Property="RadiusY"
+                        Value="4" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical"
@@ -90,7 +268,8 @@
                                 Spacing="10"
                                 HorizontalAlignment="Left"
                                 IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
-                        <cc:CustomNumericUpDown Padding="12, 10"
+                        <cc:CustomNumericUpDown Name="StartDownloadScheduleHour"
+                                                Padding="12, 10"
                                                 Background="{DynamicResource PrimaryColor}"
                                                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                                                 Watermark="Hour"
@@ -105,12 +284,16 @@
                                                 Minimum="1"
                                                 Maximum="12"
                                                 ClipValueToMinMax="True"
-                                                FormatString="00" />
+                                                FormatString="00"
+                                                SizeChanged="StartDownloadScheduleControlOnSizeChanged" />
 
-                        <TextBlock Text=":"
-                                   VerticalAlignment="Center" />
+                        <TextBlock Name="StartDownloadScheduleColon"
+                                   Text=":"
+                                   VerticalAlignment="Center"
+                                   SizeChanged="StartDownloadScheduleControlOnSizeChanged" />
 
-                        <cc:CustomNumericUpDown Padding="12, 10"
+                        <cc:CustomNumericUpDown Name="StartDownloadScheduleMinute"
+                                                Padding="12, 10"
                                                 Background="{DynamicResource PrimaryColor}"
                                                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                                                 Watermark="Minute"
@@ -125,9 +308,11 @@
                                                 Minimum="0"
                                                 Maximum="59"
                                                 ClipValueToMinMax="True"
-                                                FormatString="00" />
+                                                FormatString="00"
+                                                SizeChanged="StartDownloadScheduleControlOnSizeChanged" />
 
-                        <cc:CustomComboBox PlaceholderText="AM / PM"
+                        <cc:CustomComboBox Name="StartDownloadScheduleTimeOfDay"
+                                           PlaceholderText="AM / PM"
                                            MinWidth="80"
                                            Background="{DynamicResource PrimaryColor}"
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
@@ -135,7 +320,8 @@
                                            ItemsSource="{Binding DownloadQueue.TimesOfDay}"
                                            SelectedItem="{Binding DownloadQueue.SelectedStartTimeOfDay}"
                                            VerticalAlignment="Center"
-                                           Margin="10, 0, 0, 0">
+                                           Margin="10, 0, 0, 0"
+                                           SizeChanged="StartDownloadScheduleControlOnSizeChanged">
                             <cc:CustomComboBox.ItemTemplate>
                                 <DataTemplate DataType="x:String">
                                     <TextBlock Text="{Binding}" />
@@ -145,68 +331,146 @@
                     </StackPanel>
 
                     <!-- Start download date -->
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="10"
-                                HorizontalAlignment="Left"
-                                Margin="0, 5, 0, 0"
-                                IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
-                        <RadioButton GroupName="StartDownloadDate"
-                                     Classes="startDownloadDate"
-                                     Command="{Binding ChangeStartDownloadDateCommand}"
-                                     CommandParameter="Today"
-                                     IsChecked="{Binding !DownloadQueue.IsDaily}">
-                            Today
-                        </RadioButton>
+                    <!-- <StackPanel Orientation="Horizontal" -->
+                    <!--             Spacing="10" -->
+                    <!--             HorizontalAlignment="Left" -->
+                    <!--             Margin="0, 5, 0, 0" -->
+                    <!--             IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"> -->
+                    <!--     <RadioButton GroupName="StartDownloadDate" -->
+                    <!--                  Classes="startDownloadDate" -->
+                    <!--                  Command="{Binding ChangeStartDownloadDateCommand}" -->
+                    <!--                  CommandParameter="Today" -->
+                    <!--                  IsChecked="{Binding !DownloadQueue.IsDaily}"> -->
+                    <!--         Today -->
+                    <!--     </RadioButton> -->
+                    <!-- -->
+                    <!--     <RadioButton GroupName="StartDownloadDate" -->
+                    <!--                  Classes="startDownloadDate" -->
+                    <!--                  Command="{Binding ChangeStartDownloadDateCommand}" -->
+                    <!--                  CommandParameter="Daily" -->
+                    <!--                  IsChecked="{Binding DownloadQueue.IsDaily}"> -->
+                    <!--         Daily -->
+                    <!--     </RadioButton> -->
+                    <!-- </StackPanel> -->
+                    <!-- Select Box -->
+                    <cc:CustomSelectBox ItemsSource="{Binding StartDownloadDateOptions}"
+                                        SelectedItem="{Binding SelectedStartDownloadDateOption}"
+                                        ItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnHoverItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnFocusItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}"
+                                        Margin="0, 5, 0, 0"
+                                        IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"
+                                        ItemsMinWidth="80">
+                        <cc:CustomSelectBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type x:String}">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomSelectBox.ItemTemplate>
+                    </cc:CustomSelectBox>
 
-                        <RadioButton GroupName="StartDownloadDate"
-                                     Classes="startDownloadDate"
-                                     Command="{Binding ChangeStartDownloadDateCommand}"
-                                     CommandParameter="Daily"
-                                     IsChecked="{Binding DownloadQueue.IsDaily}">
-                            Daily
-                        </RadioButton>
-                    </StackPanel>
+                    <!-- Once a day -->
+                    <Border Name="StartDownloadDatePickerBorder"
+                            IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"
+                            IsVisible="{Binding SelectedStartDownloadDateOption, Converter={StaticResource StartDownloadScheduleVisibilityConverter}, ConverterParameter='Once'}"
+                            Width="274"
+                            CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            ClipToBounds="True"
+                            HorizontalAlignment="Left"
+                            Background="{DynamicResource PrimaryColor}"
+                            Padding="12, 10">
+                        <Grid>
+                            <!-- Date picker -->
+                            <CalendarDatePicker Name="StartDownloadDatePicker"
+                                                BorderThickness="0"
+                                                Background="{DynamicResource TransparentColor}"
+                                                SelectedDateFormat="Long"
+                                                Watermark="Choose a date"
+                                                IsTodayHighlighted="True"
+                                                Padding="0"
+                                                Margin="0"
+                                                MinWidth="0"
+                                                MinHeight="0"
+                                                SelectedDate="{Binding StartDownloadDate}"
+                                                IsEnabled="False">
+                                <CalendarDatePicker.Styles>
+                                    <Style Selector="CalendarDatePicker /template/ Button#PART_Button">
+                                        <Setter Property="IsVisible"
+                                                Value="False" />
+                                    </Style>
+                                </CalendarDatePicker.Styles>
+                            </CalendarDatePicker>
+
+                            <!-- Select date button -->
+                            <Button Classes="smallIconButton"
+                                    Command="{Binding SelectStartDownloadDateCommand}"
+                                    CommandParameter="{Binding #StartDownloadDatePicker}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                                <PathIcon Width="16"
+                                          Height="16"
+                                          Data="{DynamicResource CalendarDays}"
+                                          Foreground="{DynamicResource IconColor}" />
+                            </Button>
+                        </Grid>
+                    </Border>
 
                     <!-- Days of week -->
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="5"
-                                IsVisible="{Binding DownloadQueue.IsDaily}"
-                                IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}">
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Saturday}">
-                            Saturday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Sunday}">
-                            Sunday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Monday}">
-                            Monday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Tuesday}">
-                            Tuesday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Wednesday}">
-                            Wednesday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Thursday}">
-                            Thursday
-                        </CheckBox>
-
-                        <CheckBox Classes="dayOfWeek"
-                                  IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Friday}">
-                            Friday
-                        </CheckBox>
-                    </StackPanel>
+                    <!-- <StackPanel Orientation="Horizontal" -->
+                    <!--             Spacing="5" -->
+                    <!--             IsVisible="{Binding DownloadQueue.IsDaily}" -->
+                    <!--             IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"> -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Saturday}"> -->
+                    <!--         Saturday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Sunday}"> -->
+                    <!--         Sunday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Monday}"> -->
+                    <!--         Monday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Tuesday}"> -->
+                    <!--         Tuesday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Wednesday}"> -->
+                    <!--         Wednesday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Thursday}"> -->
+                    <!--         Thursday -->
+                    <!--     </CheckBox> -->
+                    <!-- -->
+                    <!--     <CheckBox Classes="dayOfWeek" -->
+                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Friday}"> -->
+                    <!--         Friday -->
+                    <!--     </CheckBox> -->
+                    <!-- </StackPanel> -->
+                    <cc:CustomSelectBox ItemsSource="{Binding DaysOfWeekOptions}"
+                                        SelectedItem="{Binding SelectedDaysOfWeekOption}"
+                                        ItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnHoverItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnFocusItemsBackground="{DynamicResource PrimaryColor}"
+                                        OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}"
+                                        IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"
+                                        IsVisible="{Binding SelectedStartDownloadDateOption, Converter={StaticResource StartDownloadScheduleVisibilityConverter}, ConverterParameter='Daily'}"
+                                        ItemsMinWidth="80"
+                                        SelectionMode="Multiple">
+                        <cc:CustomSelectBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type x:String}">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomSelectBox.ItemTemplate>
+                    </cc:CustomSelectBox>
                 </StackPanel>
             </Border>
 

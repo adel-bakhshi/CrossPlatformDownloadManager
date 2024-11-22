@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
@@ -6,7 +7,7 @@ public class ProxySettings : DbModelBase
 {
     #region Properties
 
-    [Required] [MaxLength(50)] public string Title { get; set; } = string.Empty;
+    [Required] [MaxLength(50)] public string Name { get; set; } = string.Empty;
 
     [Required] [MaxLength(50)] public string Type { get; set; } = string.Empty;
 
@@ -14,9 +15,13 @@ public class ProxySettings : DbModelBase
 
     [Required] [MaxLength(50)] public string Port { get; set; } = string.Empty;
 
-    [Required] [MaxLength(200)] public string Username { get; set; } = string.Empty;
+    [MaxLength(200)] public string? Username { get; set; }
 
-    [Required] [MaxLength(200)] public string Password { get; set; } = string.Empty;
+    [MaxLength(200)] public string? Password { get; set; }
+
+    public int? SettingsId { get; set; }
+
+    [ForeignKey(nameof(SettingsId))] public Settings? Settings { get; set; }
 
     #endregion
 
@@ -25,11 +30,12 @@ public class ProxySettings : DbModelBase
         if (model is not ProxySettings proxySettings)
             return;
 
-        Title = proxySettings.Title;
+        Name = proxySettings.Name;
         Type = proxySettings.Type;
         Host = proxySettings.Host;
         Port = proxySettings.Port;
         Username = proxySettings.Username;
         Password = proxySettings.Password;
+        SettingsId = proxySettings.SettingsId;
     }
 }

@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
@@ -14,7 +13,7 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
     public Window? OwnerWindow { get; set; }
 
     #endregion
-    
+
     public TrayMenuWindow(TrayMenuWindowViewModel viewModel)
     {
         InitializeComponent();
@@ -53,11 +52,6 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
     private void OwnerWindowOnPositionChanged(object? sender, PixelPointEventArgs e)
     {
         ChangeWindowPosition();
-    }
-
-    private void ProxyList_OnTapped(object? sender, TappedEventArgs e)
-    {
-        ViewModel?.UnselectProxyIfNotChanged();
     }
 
     public override void Render(DrawingContext context)

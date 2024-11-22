@@ -117,5 +117,27 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<Settings>(options =>
+        {
+            options.HasMany(s => s.Proxies)
+                .WithOne(p => p.Settings)
+                .HasForeignKey(p => p.SettingsId)
+                .HasPrincipalKey(s => s.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ProxySettings>(options =>
+        {
+            options.HasOne(p => p.Settings)
+                .WithMany(s => s.Proxies)
+                .HasForeignKey(p => p.SettingsId)
+                .HasPrincipalKey(s => s.Id)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            options.HasIndex(p => p.SettingsId);
+        });
     }
 }

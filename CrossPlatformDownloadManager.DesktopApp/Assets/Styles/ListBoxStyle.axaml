@@ -258,7 +258,7 @@
 
         <!-- ItemTemplate -->
         <Setter Property="ItemTemplate">
-            <DataTemplate DataType="{x:Type x:String}">
+            <DataTemplate DataType="x:String">
                 <TextBlock Text="{Binding}" />
             </DataTemplate>
         </Setter>

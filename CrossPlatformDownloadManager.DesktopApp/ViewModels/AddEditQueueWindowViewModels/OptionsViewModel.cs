@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,7 +7,6 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
@@ -20,7 +20,7 @@ public class OptionsViewModel : ViewModelBase
     private string? _selectedStartDownloadDateOption;
     private ObservableCollection<string> _daysOfWeekOptions;
     private string? _selectedDaysOfWeekOption;
-    private DateTime? _startDownloadDate;
+    private DateTime? _selectedDate;
 
     #endregion
 
@@ -41,7 +41,11 @@ public class OptionsViewModel : ViewModelBase
     public string? SelectedStartDownloadDateOption
     {
         get => _selectedStartDownloadDateOption;
-        set => this.RaiseAndSetIfChanged(ref _selectedStartDownloadDateOption, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedStartDownloadDateOption, value);
+            ChangeStartDownloadDateOption();
+        }
     }
 
     public ObservableCollection<string> DaysOfWeekOptions
@@ -55,18 +59,20 @@ public class OptionsViewModel : ViewModelBase
         get => _selectedDaysOfWeekOption;
         set => this.RaiseAndSetIfChanged(ref _selectedDaysOfWeekOption, value);
     }
-
-    public DateTime? StartDownloadDate
+    
+    public DateTime? SelectedDate
     {
-        get => _startDownloadDate;
-        set => this.RaiseAndSetIfChanged(ref _startDownloadDate, value);
+        get => _selectedDate;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedDate, value);
+            DownloadQueue.JustForDate = value;
+        }
     }
 
     #endregion
 
     #region Commands
-
-    public ICommand ChangeStartDownloadDateCommand { get; }
 
     public ICommand SelectStartDownloadDateCommand { get; }
 
@@ -78,20 +84,26 @@ public class OptionsViewModel : ViewModelBase
         StartDownloadDateOptions = ["Once", "Daily"];
         SelectedStartDownloadDateOption = StartDownloadDateOptions.FirstOrDefault();
         DaysOfWeekOptions = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        StartDownloadDate = DateTime.Now;
+        SelectedDate = DateTime.Now;
 
-        ChangeStartDownloadDateCommand = ReactiveCommand.Create<string?>(ChangeStartDownloadDate);
-        SelectStartDownloadDateCommand =
-            ReactiveCommand.CreateFromTask<CalendarDatePicker?>(SelectStartDownloadDateAsync);
+        SelectStartDownloadDateCommand = ReactiveCommand.CreateFromTask<CalendarDatePicker?>(SelectStartDownloadDateAsync);
     }
 
-    private void ChangeStartDownloadDate(string? value)
+    public void ChangeDaysOfWeek(List<string> selectedItems)
     {
-        if (value.IsNullOrEmpty())
-            return;
+        if (DownloadQueue.DaysOfWeekViewModel == null)
+            throw new InvalidOperationException("An error occured while trying to change days of week.");
 
-        DownloadQueue.IsDaily = value!.Equals("Daily");
+        DownloadQueue.DaysOfWeekViewModel.Saturday = selectedItems.Contains("Saturday");
+        DownloadQueue.DaysOfWeekViewModel.Sunday = selectedItems.Contains("Sunday");
+        DownloadQueue.DaysOfWeekViewModel.Monday = selectedItems.Contains("Monday");
+        DownloadQueue.DaysOfWeekViewModel.Tuesday = selectedItems.Contains("Tuesday");
+        DownloadQueue.DaysOfWeekViewModel.Wednesday = selectedItems.Contains("Wednesday");
+        DownloadQueue.DaysOfWeekViewModel.Thursday = selectedItems.Contains("Thursday");
+        DownloadQueue.DaysOfWeekViewModel.Friday = selectedItems.Contains("Friday");
     }
+
+    #region Helpers
 
     private async Task SelectStartDownloadDateAsync(CalendarDatePicker? datePicker)
     {
@@ -107,4 +119,11 @@ public class OptionsViewModel : ViewModelBase
             await ShowErrorDialogAsync(ex);
         }
     }
+
+    private void ChangeStartDownloadDateOption()
+    {
+        DownloadQueue.IsDaily = SelectedStartDownloadDateOption?.Equals("Daily") ?? false;
+    }
+
+    #endregion
 }

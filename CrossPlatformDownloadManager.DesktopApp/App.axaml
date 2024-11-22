@@ -25,21 +25,16 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ToolTipStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/DataGridStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/GridCheckBoxStyle.axaml" />
-        <StyleInclude
-            Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/TabItemToggleButtonStyle.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/TabItemToggleButtonStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ButtonStyles.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ToggleSwitchStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ProgressBarStyle.axaml" />
-        <StyleInclude
-            Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" />
-        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/RadioButtonStyles.axaml" />
-        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/CheckBoxStyles.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" />
 
         <!-- Custom Controls Themes -->
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomComboBox.axaml" />
-        <StyleInclude
-            Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomNumericUpDown.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomNumericUpDown.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomSelectBox.axaml" />
     </Application.Styles>
 
@@ -47,14 +42,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Fonts.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Colors.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" />
-                <MergeResourceInclude
-                    Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Fonts.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Colors.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/Icons.axaml" />
+                <MergeResourceInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Resources/StaticData.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

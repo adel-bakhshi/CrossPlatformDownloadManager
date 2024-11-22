@@ -4,88 +4,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
+             xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+             xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.ProxyView"
              x:DataType="vm:ProxyViewModel">
-    <StackPanel Orientation="Vertical"
-                Spacing="15">
-        <!-- Disable proxy -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Disable proxy"
-                           FontWeight="Bold" />
 
-                <ToggleSwitch Name="DisableProxyToggleSwitch"
-                              Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding DisableProxy}"
-                              Command="{Binding ChangeProxyModeCommand}"
-                              CommandParameter="{Binding $self.Name}" />
-            </Grid>
-        </Border>
+    <!-- Resources -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:ProxyViewAvailableProxyListItemMarginConverter x:Key="ProxyViewAvailableProxyListItemMarginConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
 
-        <!-- Use system proxy settings -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Use system proxy settings"
-                           FontWeight="Bold" />
-
-                <ToggleSwitch Name="UseSystemProxySettingsToggleSwitch"
-                              Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding UseSystemProxySettings}"
-                              Command="{Binding ChangeProxyModeCommand}"
-                              CommandParameter="{Binding $self.Name}" />
-            </Grid>
-        </Border>
-
-        <!-- Use custom proxy -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <StackPanel Orientation="Vertical"
-                        Spacing="10">
-                <!-- Title -->
-                <Grid ColumnDefinitions="*, Auto"
-                      Margin="0, 0, 0, 10">
+    <!-- Main content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Hidden">
+        <StackPanel Orientation="Vertical"
+                    Spacing="15">
+            <!-- Disable proxy -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
                                HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
                                TextAlignment="Left"
-                               Text="Use custom proxy"
+                               Text="Disable proxy"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Name="UseCustomProxyToggleSwitch"
+                    <ToggleSwitch Name="DisableProxyToggleSwitch"
                                   Grid.Column="1"
                                   OffContent="{x:Null}"
                                   OnContent="{x:Null}"
@@ -96,85 +47,245 @@
                                   HorizontalContentAlignment="Right"
                                   VerticalContentAlignment="Center"
                                   Width="40"
-                                  IsChecked="{Binding UseCustomProxy}"
+                                  IsChecked="{Binding DisableProxy}"
                                   Command="{Binding ChangeProxyModeCommand}"
-                                  CommandParameter="{Binding $self.Name}" />
+                                  CommandParameter="{Binding $self}" />
                 </Grid>
+            </Border>
 
-                <!-- Content -->
-                <StackPanel Orientation="Vertical"
-                            Spacing="10"
-                            HorizontalAlignment="Left"
-                            IsEnabled="{Binding UseCustomProxy}">
-                    <!-- Select Box -->
-                    <cc:CustomSelectBox ItemsSource="{Binding ProxyTypes}"
-                                        SelectedItem="{Binding SelectedProxyType}"
-                                        ItemsBackground="{DynamicResource PrimaryColor}"
-                                        OnHoverItemsBackground="{DynamicResource PrimaryColor}"
-                                        OnFocusItemsBackground="{DynamicResource PrimaryColor}"
-                                        OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}">
-                        <cc:CustomSelectBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type x:String}">
-                                <TextBlock Text="{Binding}" />
-                            </DataTemplate>
-                        </cc:CustomSelectBox.ItemTemplate>
-                    </cc:CustomSelectBox>
-
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="10">
-                        <!-- Host -->
-                        <cc:CustomTextBox Width="260"
-                                          Background="{DynamicResource PrimaryColor}"
-                                          Watermark="Host"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
-                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                          IconData="{DynamicResource Server}"
-                                          IconColor="{DynamicResource IconColor}"
-                                          IconSize="{DynamicResource SmallIconSize}"
-                                          Padding="12, 10"
-                                          HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
-                                          BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding Host}" />
-
-                        <!-- Port -->
-                        <cc:CustomTextBox Width="90"
-                                          Background="{DynamicResource PrimaryColor}"
-                                          Watermark="Port"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
-                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                          IconData="{DynamicResource Ethernet}"
-                                          IconColor="{DynamicResource IconColor}"
-                                          IconSize="{DynamicResource SmallIconSize}"
-                                          Padding="12, 10"
-                                          HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
-                                          BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding Port}" />
-                    </StackPanel>
-
-                    <!-- Credentials title -->
-                    <TextBlock HorizontalAlignment="Stretch"
+            <!-- Use system proxy settings -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
                                TextAlignment="Left"
-                               Text="Credentials (Optional)"
-                               Margin="0, 5, 0, 0" />
+                               Text="Use system proxy settings"
+                               FontWeight="Bold" />
 
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="10">
+                    <ToggleSwitch Name="UseSystemProxySettingsToggleSwitch"
+                                  Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding UseSystemProxySettings}"
+                                  Command="{Binding ChangeProxyModeCommand}"
+                                  CommandParameter="{Binding $self}" />
+                </Grid>
+            </Border>
+
+            <!-- Use custom proxy -->
+            <Border Name="UseCustomProxyBorder"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <StackPanel Orientation="Vertical"
+                            Spacing="10">
+                    <!-- Title -->
+                    <Grid ColumnDefinitions="*, Auto"
+                          Margin="0, 0, 0, 10">
+                        <TextBlock Grid.Column="0"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   Text="Use custom proxy"
+                                   FontWeight="Bold" />
+
+                        <ToggleSwitch Name="UseCustomProxyToggleSwitch"
+                                      Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40"
+                                      IsChecked="{Binding UseCustomProxy}"
+                                      Command="{Binding ChangeProxyModeCommand}"
+                                      CommandParameter="{Binding $self}" />
+                    </Grid>
+
+                    <!-- Content -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="10"
+                                HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding UseCustomProxy}">
+                        <!-- Proxy type and clear button -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <!-- Proxy type select Box -->
+                            <cc:CustomSelectBox Grid.Column="0"
+                                                ItemsSource="{Binding ProxyTypes}"
+                                                SelectedItem="{Binding ProxySettings.Type}"
+                                                ItemsBackground="{DynamicResource PrimaryColor}"
+                                                OnHoverItemsBackground="{DynamicResource PrimaryColor}"
+                                                OnFocusItemsBackground="{DynamicResource PrimaryColor}"
+                                                OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}">
+                                <cc:CustomSelectBox.ItemTemplate>
+                                    <DataTemplate DataType="x:String">
+                                        <TextBlock Text="{Binding}" />
+                                    </DataTemplate>
+                                </cc:CustomSelectBox.ItemTemplate>
+                            </cc:CustomSelectBox>
+
+                            <!-- Action buttons -->
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="10"
+                                        HorizontalAlignment="Right">
+                                <!-- Delete proxy -->
+                                <Button Classes="button danger"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $self.Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding DeleteProxyCommand}"
+                                        IsEnabled="{Binding SelectedAvailableProxy, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <PathIcon Data="{DynamicResource XMark}"
+                                              Foreground="{DynamicResource TextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+
+                                <!-- Save proxy -->
+                                <Button Classes="button success"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $self.Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding SaveProxyCommand}">
+                                    <PathIcon Data="{DynamicResource Plus}"
+                                              Foreground="{DynamicResource TextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+                                
+                                <!-- Clear proxy -->
+                                <Button Classes="button warning"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $self.Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding ClearProxyCommand}">
+                                    <PathIcon Data="{DynamicResource Eraser}"
+                                              Foreground="{DynamicResource TextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="10">
+                            <!-- Host -->
+                            <cc:CustomTextBox Width="260"
+                                              Background="{DynamicResource PrimaryColor}"
+                                              Watermark="Host"
+                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource Server}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              Text="{Binding ProxySettings.Host}" />
+
+                            <!-- Port -->
+                            <cc:CustomTextBox Width="90"
+                                              Background="{DynamicResource PrimaryColor}"
+                                              Watermark="Port"
+                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource Ethernet}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              Text="{Binding ProxySettings.Port}" />
+                        </StackPanel>
+
+                        <!-- Credentials title -->
+                        <TextBlock HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   Text="Credentials (Optional)"
+                                   Margin="0, 5, 0, 0" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="10">
+                            <!-- Username -->
+                            <cc:CustomTextBox Width="175"
+                                              Background="{DynamicResource PrimaryColor}"
+                                              Watermark="Username"
+                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource User}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              Text="{Binding ProxySettings.Username}" />
+
+                            <!-- Password -->
+                            <cc:CustomTextBox Width="175"
+                                              Background="{DynamicResource PrimaryColor}"
+                                              Watermark="Password"
+                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource UnlockKeyhole}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              Text="{Binding ProxySettings.Password}" />
+                        </StackPanel>
+
+                        <!-- Proxy title for save -->
+                        <TextBlock HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   Text="Name (Optional)"
+                                   Margin="0, 5, 0, 0" />
+
                         <!-- Username -->
-                        <cc:CustomTextBox Width="175"
+                        <cc:CustomTextBox Width="360"
                                           Background="{DynamicResource PrimaryColor}"
-                                          Watermark="Username"
+                                          Watermark="Proxy name"
                                           WatermarkForeground="{DynamicResource TertiaryColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                          IconData="{DynamicResource User}"
+                                          IconData="{DynamicResource FileName}"
                                           IconColor="{DynamicResource IconColor}"
                                           IconSize="{DynamicResource SmallIconSize}"
                                           Padding="12, 10"
@@ -184,28 +295,179 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding Username}" />
+                                          Text="{Binding ProxySettings.Name}" />
+                    </StackPanel>
 
-                        <!-- Password -->
-                        <cc:CustomTextBox Width="175"
-                                          Background="{DynamicResource PrimaryColor}"
-                                          Watermark="Password"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
-                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                          IconData="{DynamicResource UnlockKeyhole}"
-                                          IconColor="{DynamicResource IconColor}"
-                                          IconSize="{DynamicResource SmallIconSize}"
-                                          Padding="12, 10"
-                                          HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
-                                          BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding Password}" />
+                    <!-- Available proxies -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="10"
+                                Margin="0, 10, 0, 0"
+                                IsVisible="{Binding IsAvailableProxiesExists}">
+                        <!-- Available proxies title -->
+                        <TextBlock HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   FontWeight="Bold"
+                                   Text="Available proxies" />
+
+                        <!-- Available proxies list -->
+                        <ListBox ItemsSource="{Binding AvailableProxies}"
+                                 SelectedItem="{Binding SelectedAvailableProxy}">
+                            <!-- Styles -->
+                            <ListBox.Styles>
+                                <Style Selector="ListBox">
+                                    <Setter Property="SelectionMode"
+                                            Value="Single" />
+                                    <Setter Property="Margin"
+                                            Value="0" />
+                                    <Setter Property="Padding"
+                                            Value="0" />
+                                    <Setter Property="BorderThickness"
+                                            Value="0" />
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource TransparentColor}" />
+                                    <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                                            Value="Hidden" />
+                                    <Setter Property="HorizontalAlignment"
+                                            Value="Stretch" />
+                                    <Setter Property="MaxWidth"
+                                            Value="{Binding #UseCustomProxyBorder.Bounds.Width}" />
+
+                                    <Style Selector="^ ListBoxItem">
+                                        <Setter Property="Padding"
+                                                Value="0" />
+                                        <Setter Property="Margin"
+                                                Value="0" />
+                                        <Setter Property="BorderThickness"
+                                                Value="0" />
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource TransparentColor}" />
+
+                                        <Style Selector="^:pointerover /template/ ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+                                        </Style>
+
+                                        <Style Selector="^:selected /template/ ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+                                        </Style>
+
+                                        <Style Selector="^:selected:focus /template/ ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+                                        </Style>
+
+                                        <Style Selector="^:selected:pointerover /template/ ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+                                        </Style>
+
+                                        <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource TransparentColor}" />
+                                        </Style>
+                                    </Style>
+                                </Style>
+                            </ListBox.Styles>
+
+                            <!-- ItemsPanel -->
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"
+                                               MaxWidth="{Binding $parent[ListBox].Bounds.Width}" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+
+                            <!-- ItemTemplate -->
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="viewModels:ProxySettingsViewModel">
+                                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                            BorderThickness="1"
+                                            Padding="12, 10"
+                                            Classes.isActive="{Binding IsActive}"
+                                            Classes.isResponsive="{Binding IsResponsive}"
+                                            Width="230">
+                                        <!-- Styles -->
+                                        <Border.Styles>
+                                            <Style Selector="Border">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource DangerGradientBrush}" />
+                                                <Setter Property="Margin">
+                                                    <Setter.Value>
+                                                        <MultiBinding>
+                                                            <MultiBinding.Bindings>
+                                                                <Binding Path="." />
+                                                                <Binding Path="$parent[ListBox].ItemsSource" />
+                                                            </MultiBinding.Bindings>
+
+                                                            <MultiBinding.Converter>
+                                                                <StaticResource ResourceKey="ProxyViewAvailableProxyListItemMarginConverter" />
+                                                            </MultiBinding.Converter>
+                                                        </MultiBinding>
+                                                    </Setter.Value>
+                                                </Setter>
+
+                                                <!-- Transitions -->
+                                                <Setter Property="Transitions">
+                                                    <Setter.Value>
+                                                        <Transitions>
+                                                            <BrushTransition Property="Background"
+                                                                             Duration="00:00:00.3" />
+
+                                                            <BrushTransition Property="BorderBrush"
+                                                                             Duration="00:00:00.3" />
+                                                        </Transitions>
+                                                    </Setter.Value>
+                                                </Setter>
+
+                                                <!-- Is active styles -->
+                                                <Style Selector="^.isActive">
+                                                    <Setter Property="Background"
+                                                            Value="{DynamicResource SuccessGradientBrush}" />
+                                                </Style>
+
+                                                <!-- Is responsive style -->
+                                                <Style Selector="^.isResponsive">
+                                                    <Setter Property="BorderBrush"
+                                                            Value="{DynamicResource SuccessGradientBrush}" />
+                                                </Style>
+                                            </Style>
+                                        </Border.Styles>
+
+                                        <!-- Content -->
+                                        <StackPanel Orientation="Vertical"
+                                                    Spacing="3">
+                                            <!-- Proxy title -->
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontWeight="Bold" />
+
+                                            <!-- Proxy type -->
+                                            <TextBlock Text="{Binding Type}"
+                                                       Classes.isActive="{Binding IsActive}">
+                                                <TextBlock.Styles>
+                                                    <Style Selector="TextBlock">
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource TertiaryColor}" />
+
+                                                        <!-- Is active styles -->
+                                                        <Style Selector="^.isActive">
+                                                            <Setter Property="Foreground"
+                                                                    Value="{DynamicResource AvailableProxyOnActiveTypeColor}" />
+                                                        </Style>
+                                                    </Style>
+                                                </TextBlock.Styles>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </Border>
-    </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

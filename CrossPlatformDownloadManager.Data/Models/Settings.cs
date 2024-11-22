@@ -23,8 +23,6 @@ public class Settings : DbModelBase
 
     [Required] public ProxyType ProxyType { get; set; }
 
-    [Required] [MaxLength(1000)] public string CustomProxySettings { get; set; } = string.Empty;
-
     [Required] public bool UseDownloadCompleteSound { get; set; }
 
     [Required] public bool UseDownloadStoppedSound { get; set; }
@@ -38,6 +36,8 @@ public class Settings : DbModelBase
     [Required] public bool UseQueueFinishedSound { get; set; }
 
     [Required] public bool UseSystemNotifications { get; set; }
+
+    public ICollection<ProxySettings> Proxies { get; } = [];
 
     public override void UpdateDbModel(DbModelBase? model)
     {
@@ -53,7 +53,6 @@ public class Settings : DbModelBase
         MaximumConnectionsCount = settings.MaximumConnectionsCount;
         ProxyMode = settings.ProxyMode;
         ProxyType = settings.ProxyType;
-        CustomProxySettings = settings.CustomProxySettings;
         UseDownloadCompleteSound = settings.UseDownloadCompleteSound;
         UseDownloadStoppedSound = settings.UseDownloadStoppedSound;
         UseDownloadFailedSound = settings.UseDownloadFailedSound;

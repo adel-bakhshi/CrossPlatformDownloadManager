@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CrossPlatformDownloadManager.Data.Services.AppService;
@@ -16,11 +17,15 @@ public class TrayMenuWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
+    private const string DisableProxySettingsName = "Disable proxy";
+    private const string SystemProxySettingsName = "System proxy settings";
+    private readonly List<ProxySettingsViewModel> _defaultProxies;
+
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
     private ProxySettingsViewModel? _selectedProxy;
 
-    private ProxySettingsViewModel? _oldSelectedProxy;
+    private bool _isFirstLoad = true;
 
     #endregion
 
@@ -51,7 +56,11 @@ public class TrayMenuWindowViewModel : ViewModelBase
     public ProxySettingsViewModel? SelectedProxy
     {
         get => _selectedProxy;
-        set => this.RaiseAndSetIfChanged(ref _selectedProxy, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedProxy, value);
+            _ = ChangeProxyAsync();
+        }
     }
 
     public bool IsProxiesEmpty => Proxies.Count == 0;
@@ -79,17 +88,22 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     public TrayMenuWindowViewModel(IAppService appService) : base(appService)
     {
-        LoadDownloadQueues();
-        LoadProxies();
+        _defaultProxies =
+        [
+            new ProxySettingsViewModel { Id = -1, Name = DisableProxySettingsName },
+            new ProxySettingsViewModel { Id = -2, Name = SystemProxySettingsName }
+        ];
 
-        StartStopDownloadQueueCommand =
-            ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
+        LoadDownloadQueues();
+        RefreshProxies();
+
+        StartStopDownloadQueueCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         AddNewDownloadLinkCommand = ReactiveCommand.CreateFromTask(AddNewDownloadLinkAsync);
         AddNewDownloadQueueCommand = ReactiveCommand.Create(AddNewDownloadQueue);
         OpenSettingsWindowCommand = ReactiveCommand.Create(OpenSettingsWindow);
         OpenHelpWindowCommand = ReactiveCommand.Create(OpenHelpWindow);
         OpenAboutUsWindowCommand = ReactiveCommand.Create(OpenAboutUsWindow);
-        ExitProgramCommand = ReactiveCommand.Create(ExitProgram);
+        ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
     }
 
     private async Task StartStopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue)
@@ -191,9 +205,8 @@ public class TrayMenuWindowViewModel : ViewModelBase
         throw new NotImplementedException();
     }
 
-    private async void ExitProgram()
+    private async Task ExitProgramAsync()
     {
-        // TODO: Show message box
         try
         {
             HideTrayMenu();
@@ -201,31 +214,28 @@ public class TrayMenuWindowViewModel : ViewModelBase
             if (App.Desktop == null)
                 return;
 
-            // TODO: Ask user if he wants to exit
+            var result = await ShowInfoDialogAsync("Exit", "Are you sure you want to exit the app?", DialogButtons.YesNo);
+            if (result != DialogResult.Yes)
+                return;
+
             App.Desktop.Shutdown();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
-    }
-
-    public void UnselectProxyIfNotChanged()
-    {
-        if (SelectedProxy == null || _oldSelectedProxy?.Id != SelectedProxy.Id)
-        {
-            _oldSelectedProxy = SelectedProxy;
-            return;
-        }
-
-        SelectedProxy = null;
-        _oldSelectedProxy = null;
     }
 
     protected override void OnDownloadQueueServiceDataChanged()
     {
         LoadDownloadQueues();
         base.OnDownloadQueueServiceDataChanged();
+    }
+
+    protected override void OnSettingsServiceDataChanged()
+    {
+        base.OnSettingsServiceDataChanged();
+        RefreshProxies();
     }
 
     #region Helpers
@@ -237,17 +247,27 @@ public class TrayMenuWindowViewModel : ViewModelBase
             .DownloadQueues;
     }
 
-    private void LoadProxies()
+    private void RefreshProxies()
     {
-        var proxies = new List<ProxySettingsViewModel>
-        {
-            new() { Id = 0, Title = "System Proxy Settings", },
-            new() { Id = 1, Title = "v2RayN", },
-            new() { Id = 2, Title = "Nekoray", },
-            new() { Id = 3, Title = "Hiddify", },
-        };
+        var proxies = AppService
+            .SettingsService
+            .Settings
+            .Proxies
+            .ToList();
+        
+        proxies.InsertRange(0, _defaultProxies);
 
+        var currentSelectedProxy = SelectedProxy;
         Proxies = proxies.ToObservableCollection();
+
+        if (_isFirstLoad)
+        {
+            _isFirstLoad = false;
+            SelectedProxy = Proxies.FirstOrDefault();
+            return;
+        }
+
+        SelectedProxy = Proxies.FirstOrDefault(p => p.Id == currentSelectedProxy?.Id);
     }
 
     private void HideTrayMenu()
@@ -257,6 +277,49 @@ public class TrayMenuWindowViewModel : ViewModelBase
             throw new InvalidOperationException("View model not found.");
 
         trayIconWindowViewModel.HideMenu();
+    }
+
+    private async Task ChangeProxyAsync()
+    {
+        try
+        {
+            if (SelectedProxy == null)
+                return;
+
+            switch (SelectedProxy.Name)
+            {
+                case DisableProxySettingsName:
+                {
+                    await AppService
+                        .SettingsService
+                        .DisableProxyAsync();
+
+                    break;
+                }
+
+                case SystemProxySettingsName:
+                {
+                    await AppService
+                        .SettingsService
+                        .UseSystemProxySettingsAsync();
+
+                    break;
+                }
+
+                default:
+                {
+                    await AppService
+                        .SettingsService
+                        .ActiveProxyAsync(SelectedProxy);
+
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 
     #endregion

@@ -294,8 +294,7 @@
                     <!-- Proxy list -->
                     <ListBox Name="ProxyList"
                              ItemsSource="{Binding Proxies}"
-                             SelectedItem="{Binding SelectedProxy}"
-                             Tapped="ProxyList_OnTapped">
+                             SelectedItem="{Binding SelectedProxy}">
                         <ListBox.Styles>
                             <Style Selector="ListBox">
                                 <Setter Property="Margin"
@@ -317,7 +316,7 @@
                                 <Setter Property="HorizontalAlignment"
                                         Value="Stretch" />
                                 <Setter Property="SelectionMode"
-                                        Value="Single" />
+                                        Value="Toggle" />
 
                                 <Style Selector="^ ListBoxItem">
                                     <Setter Property="Padding"
@@ -392,7 +391,7 @@
 
                                         <!-- Proxy title -->
                                         <TextBlock Grid.Column="1"
-                                                   Text="{Binding Title}"
+                                                   Text="{Binding Name}"
                                                    Foreground="{Binding $parent[ListBoxItem].Foreground}"
                                                    HorizontalAlignment="Stretch"
                                                    VerticalAlignment="Center" />

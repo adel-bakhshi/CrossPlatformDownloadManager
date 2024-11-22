@@ -55,77 +55,77 @@
         <Style Selector="^.success">
             <Setter Property="Background"
                     Value="{DynamicResource SuccessGradientBrush}" />
-        </Style>
 
-        <Style Selector="^.success:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource SuccessGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.9" />
-        </Style>
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource SuccessGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.9" />
+            </Style>
 
-        <Style Selector="^.success:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource SuccessGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.85" />
+            <Style Selector="^:pressed">
+                <Setter Property="Background"
+                        Value="{DynamicResource SuccessGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
         </Style>
 
         <Style Selector="^.danger">
             <Setter Property="Background"
                     Value="{DynamicResource DangerGradientBrush}" />
-        </Style>
 
-        <Style Selector="^.danger:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource DangerGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.9" />
-        </Style>
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource DangerGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.9" />
+            </Style>
 
-        <Style Selector="^.danger:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource DangerGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.85" />
+            <Style Selector="^:pressed">
+                <Setter Property="Background"
+                        Value="{DynamicResource DangerGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
         </Style>
 
         <Style Selector="^.warning">
             <Setter Property="Background"
                     Value="{DynamicResource WarningGradientBrush}" />
-        </Style>
 
-        <Style Selector="^.warning:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource WarningGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.9" />
-        </Style>
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource WarningGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.9" />
+            </Style>
 
-        <Style Selector="^.warning:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource WarningGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.85" />
+            <Style Selector="^:pressed">
+                <Setter Property="Background"
+                        Value="{DynamicResource WarningGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
         </Style>
 
         <Style Selector="^.info">
             <Setter Property="Background"
                     Value="{DynamicResource InfoGradientBrush}" />
-        </Style>
 
-        <Style Selector="^.info:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource InfoGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.9" />
-        </Style>
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource InfoGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.9" />
+            </Style>
 
-        <Style Selector="^.info:pressed">
-            <Setter Property="Background"
-                    Value="{DynamicResource InfoGradientBrush}" />
-            <Setter Property="Opacity"
-                    Value="0.85" />
+            <Style Selector="^:pressed">
+                <Setter Property="Background"
+                        Value="{DynamicResource InfoGradientBrush}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
         </Style>
 
         <Style Selector="^.none">
@@ -139,11 +139,11 @@
                     Value="0" />
             <Setter Property="CornerRadius"
                     Value="0" />
-        </Style>
 
-        <Style Selector="^.none:pointerover">
-            <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
+            </Style>
         </Style>
     </Style>
 

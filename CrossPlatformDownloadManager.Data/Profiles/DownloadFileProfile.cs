@@ -20,7 +20,7 @@ public class DownloadFileProfile : Profile
 
     #region Helpers
 
-    private string GetFileType(DownloadFile? downloadFile)
+    private static string GetFileType(DownloadFile? downloadFile)
     {
         if (downloadFile == null)
             return string.Empty;
@@ -35,12 +35,12 @@ public class DownloadFileProfile : Profile
         return fileType;
     }
 
-    private int? GetDownloadQueueId(DownloadFile downloadFile)
+    private static int? GetDownloadQueueId(DownloadFile downloadFile)
     {
         return downloadFile?.DownloadQueue?.Id;
     }
 
-    private string GetDownloadQueueName(DownloadFile? downloadFile)
+    private static string GetDownloadQueueName(DownloadFile? downloadFile)
     {
         return downloadFile?.DownloadQueue?.Title ?? string.Empty;
     }

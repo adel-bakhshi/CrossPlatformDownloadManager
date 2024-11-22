@@ -3,6 +3,7 @@ using System;
 using CrossPlatformDownloadManager.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrossPlatformDownloadManager.Data.Migrations
 {
     [DbContext(typeof(DownloadManagerDbContext))]
-    partial class DownloadManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241122063556_ChangeProxySettingsTitleToName")]
+    partial class ChangeProxySettingsTitleToName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
@@ -273,6 +276,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
@@ -290,6 +294,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
@@ -305,6 +310,11 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("CustomProxySettings")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("DarkMode")
                         .HasColumnType("INTEGER");

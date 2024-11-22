@@ -17,26 +17,26 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="13.0.1" />
-        <PackageReference Include="Avalonia" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0-rc1" />
+        <PackageReference Include="Avalonia" Version="11.2.1" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.1" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.1" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.0-rc1" />
-        <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.0-rc1" />
-        <PackageReference Include="Downloader" Version="3.2.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.1" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1" />
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.1" />
+        <PackageReference Include="Downloader" Version="3.3.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="2.1.3" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="2.1.4" />
     </ItemGroup>
 
     <ItemGroup>

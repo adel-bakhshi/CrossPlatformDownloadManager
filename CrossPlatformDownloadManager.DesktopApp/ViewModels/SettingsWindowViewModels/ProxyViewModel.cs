@@ -2,18 +2,32 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
 public class ProxyViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private bool _disableProxy;
+    private bool _useSystemProxySettings;
+    private bool _useCustomProxy;
+    private ProxySettingsViewModel _proxySettings;
+    private ObservableCollection<string> _proxyTypes = [];
+    private ObservableCollection<ProxySettingsViewModel> _availableProxies = [];
+    private ProxySettingsViewModel? _selectedAvailableProxy;
+
+    #endregion
+
+    #region Properties
 
     public bool DisableProxy
     {
@@ -21,15 +35,11 @@ public class ProxyViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _disableProxy, value);
     }
 
-    private bool _useSystemProxySettings;
-
     public bool UseSystemProxySettings
     {
         get => _useSystemProxySettings;
         set => this.RaiseAndSetIfChanged(ref _useSystemProxySettings, value);
     }
-
-    private bool _useCustomProxy;
 
     public bool UseCustomProxy
     {
@@ -37,7 +47,11 @@ public class ProxyViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _useCustomProxy, value);
     }
 
-    private ObservableCollection<string> _proxyTypes = [];
+    public ProxySettingsViewModel ProxySettings
+    {
+        get => _proxySettings;
+        set => this.RaiseAndSetIfChanged(ref _proxySettings, value);
+    }
 
     public ObservableCollection<string> ProxyTypes
     {
@@ -45,88 +59,130 @@ public class ProxyViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _proxyTypes, value);
     }
 
-    private string? _selectedProxyType;
-
-    public string? SelectedProxyType
+    public ObservableCollection<ProxySettingsViewModel> AvailableProxies
     {
-        get => _selectedProxyType;
-        set => this.RaiseAndSetIfChanged(ref _selectedProxyType, value);
+        get => _availableProxies;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _availableProxies, value);
+            this.RaisePropertyChanged(nameof(IsAvailableProxiesExists));
+        }
     }
 
-    private string? _host;
-
-    public string? Host
+    public ProxySettingsViewModel? SelectedAvailableProxy
     {
-        get => _host;
-        set => this.RaiseAndSetIfChanged(ref _host, value);
+        get => _selectedAvailableProxy;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedAvailableProxy, value);
+            SetSelectedProxy();
+        }
     }
 
-    private string? _port;
-
-    public string? Port
-    {
-        get => _port;
-        set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private string? _username;
-
-    public string? Username
-    {
-        get => _username;
-        set => this.RaiseAndSetIfChanged(ref _username, value);
-    }
-
-    private string? _password;
-
-    public string? Password
-    {
-        get => _password;
-        set => this.RaiseAndSetIfChanged(ref _password, value);
-    }
+    public bool IsAvailableProxiesExists => AvailableProxies.Any();
 
     #endregion
 
     #region Commands
 
-    public ICommand? ChangeProxyModeCommand { get; }
+    public ICommand ChangeProxyModeCommand { get; }
+
+    public ICommand ClearProxyCommand { get; }
+
+    public ICommand DeleteProxyCommand { get; }
+    
+    public ICommand SaveProxyCommand { get; }
 
     #endregion
 
     public ProxyViewModel(IAppService appService) : base(appService)
     {
+        ProxySettings = new ProxySettingsViewModel();
         ProxyTypes = Constants.ProxyTypes.ToObservableCollection();
-        SelectedProxyType = ProxyTypes.FirstOrDefault();
+        ProxySettings.Type = ProxyTypes.FirstOrDefault();
 
-        ChangeProxyModeCommand = ReactiveCommand.Create<string?>(ChangeProxyMode);
+        ChangeProxyTypeAsync().GetAwaiter();
+
+        ChangeProxyModeCommand = ReactiveCommand.Create<ToggleSwitch?>(ChangeProxyMode);
+        ClearProxyCommand = ReactiveCommand.Create(ClearProxy);
+        DeleteProxyCommand = ReactiveCommand.CreateFromTask(DeleteProxyAsync);
+        SaveProxyCommand = ReactiveCommand.CreateFromTask(SaveProxyAsync);
     }
 
-    private void ChangeProxyMode(string? toggleSwitchName)
+    public async Task LoadAvailableProxiesAsync()
     {
-        if (toggleSwitchName.IsNullOrEmpty())
-            return;
-
-        string? proxyMode = null;
-        switch (toggleSwitchName)
+        try
         {
-            case "DisableProxyToggleSwitch":
-            {
-                proxyMode = nameof(DisableProxy);
-                break;
-            }
+            var proxies = AppService
+                .SettingsService
+                .Settings
+                .Proxies;
 
-            case "UseSystemProxySettingsToggleSwitch":
-            {
-                proxyMode = nameof(UseSystemProxySettings);
-                break;
-            }
+            foreach (var proxy in proxies)
+                _ = proxy.CheckIsResponsiveAsync();
 
-            case "UseCustomProxyToggleSwitch":
+            AvailableProxies = proxies;
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task ChangeProxyTypeAsync()
+    {
+        try
+        {
+            var settings = AppService
+                .SettingsService
+                .Settings;
+
+            switch (settings.ProxyMode)
             {
-                proxyMode = nameof(UseCustomProxy);
-                break;
+                case ProxyMode.DisableProxy:
+                {
+                    DisableProxy = true;
+                    break;
+                }
+
+                case ProxyMode.UseSystemProxySettings:
+                {
+                    UseSystemProxySettings = true;
+                    break;
+                }
+
+                case ProxyMode.UseCustomProxy:
+                {
+                    UseCustomProxy = true;
+                    break;
+                }
+
+                default:
+                    throw new InvalidOperationException("Unknown proxy mode.");
             }
         }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private void ChangeProxyMode(ToggleSwitch? toggleSwitch)
+    {
+        if (toggleSwitch == null)
+            return;
+
+        var name = toggleSwitch.Name;
+        if (name.IsNullOrEmpty())
+            return;
+
+        var proxyMode = name switch
+        {
+            "DisableProxyToggleSwitch" => nameof(DisableProxy),
+            "UseSystemProxySettingsToggleSwitch" => nameof(UseSystemProxySettings),
+            "UseCustomProxyToggleSwitch" => nameof(UseCustomProxy),
+            _ => null
+        };
 
         if (proxyMode.IsNullOrEmpty())
             return;
@@ -147,5 +203,230 @@ public class ProxyViewModel : ViewModelBase
                 if (propertyValue == true)
                     GetType().GetProperty(proxy)?.SetValue(this, false);
             });
+    }
+
+    private void ClearProxy()
+    {
+        ProxySettings = new ProxySettingsViewModel
+        {
+            Type = ProxyTypes.FirstOrDefault()
+        };
+    }
+
+    private async Task DeleteProxyAsync()
+    {
+        try
+        {
+            if (SelectedAvailableProxy == null)
+                return;
+
+            await AppService
+                .SettingsService
+                .DeleteProxySettingsAsync(SelectedAvailableProxy);
+            
+            ClearProxy();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task SaveProxyAsync()
+    {
+        try
+        {
+            switch (this)
+            {
+                case { DisableProxy: true }:
+                {
+                    await AppService
+                        .SettingsService
+                        .DisableProxyAsync();
+
+                    break;
+                }
+
+                case { UseSystemProxySettings: true }:
+                {
+                    await AppService
+                        .SettingsService
+                        .UseSystemProxySettingsAsync();
+
+                    break;
+                }
+
+                case { UseCustomProxy: true }:
+                {
+                    if (ProxySettings.Type.IsNullOrEmpty())
+                    {
+                        await ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
+                        return;
+                    }
+
+                    if (ProxySettings.Host.IsNullOrEmpty())
+                    {
+                        await ShowInfoDialogAsync("Attention", "Please enter proxy host.", DialogButtons.Ok);
+                        return;
+                    }
+
+                    ProxySettings.Host = ProxySettings.Host!.Trim();
+
+                    if (ProxySettings.Port.IsNullOrEmpty())
+                    {
+                        await ShowInfoDialogAsync("Attention", "Please enter proxy port.", DialogButtons.Ok);
+                        return;
+                    }
+
+                    ProxySettings.Port = ProxySettings.Port!.Trim();
+
+                    if (!int.TryParse(ProxySettings.Port, out _))
+                    {
+                        await ShowInfoDialogAsync("Attention", "Please enter a valid port number.", DialogButtons.Ok);
+                        return;
+                    }
+
+                    ProxySettings.Username = ProxySettings.Username?.Trim();
+                    ProxySettings.Password = ProxySettings.Password?.Trim();
+                    ProxySettings.Name = ProxySettings.Name?.Trim();
+
+                    if (ProxySettings.Name.IsNullOrEmpty())
+                        ProxySettings.Name = $"{ProxySettings.Host}:{ProxySettings.Port}";
+
+                    ProxySettingsViewModel? proxySettings;
+                    // Edit proxy settings when id is not 0
+                    if (ProxySettings.Id != 0)
+                    {
+                        var proxySettingsInDb = await AppService
+                            .UnitOfWork
+                            .ProxySettingsRepository
+                            .GetAsync(where: p => p.Id == ProxySettings.Id);
+                        
+                        if (proxySettingsInDb == null)
+                            throw new InvalidOperationException("Unable to find proxy settings in database. Please try again later.");
+                        
+                        await AppService
+                            .SettingsService
+                            .UpdateProxySettingsAsync(ProxySettings);
+                        
+                        proxySettings = AppService
+                            .SettingsService
+                            .Settings
+                            .Proxies
+                            .FirstOrDefault(p => p.Id == ProxySettings.Id);
+                    }
+                    // Save new proxy settings
+                    else
+                    {
+                        var proxySettingsInDb = await AppService
+                            .UnitOfWork
+                            .ProxySettingsRepository
+                            .GetAsync(where: p => p.Host.ToLower() == ProxySettings.Host.ToLower() &&
+                                                  p.Port.ToLower() == ProxySettings.Port.ToLower() &&
+                                                  p.Type.ToLower() == ProxySettings.Type!.ToLower());
+
+                        if (proxySettingsInDb != null)
+                        {
+                            await ShowInfoDialogAsync("Attention",
+                                "Unable to save proxy. There is already another proxy with the same type, host and port. Please change the type, host or port or edit the previous proxy.",
+                                DialogButtons.Ok);
+
+                            return;
+                        }
+
+                        proxySettingsInDb = await AppService
+                            .UnitOfWork
+                            .ProxySettingsRepository
+                            .GetAsync(where: p => p.Name.ToLower() == ProxySettings.Name!.ToLower());
+
+                        if (proxySettingsInDb != null)
+                        {
+                            await ShowInfoDialogAsync("Attention",
+                                "Unable to save proxy. Another proxy with the same name already exists. Please choose a different proxy name or edit the existing proxy.",
+                                DialogButtons.Ok);
+
+                            return;
+                        }
+
+                        var id = await AppService
+                            .SettingsService
+                            .AddProxySettingsAsync(ProxySettings);
+
+                        proxySettings = AppService
+                            .SettingsService
+                            .Settings
+                            .Proxies
+                            .FirstOrDefault(p => p.Id == id);
+                    }
+
+                    if (proxySettings == null)
+                        throw new InvalidOperationException("An error occured while trying to save proxy.");
+
+                    await AppService
+                        .SettingsService
+                        .ActiveProxyAsync(proxySettings);
+
+                    break;
+                }
+
+                default:
+                    throw new InvalidOperationException("An error occured while trying to save settings.");
+            }
+            
+            ClearProxy();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private void SetSelectedProxy()
+    {
+        var activeProxies = AvailableProxies
+            .Where(p => p.IsActive)
+            .ToList();
+
+        foreach (var proxy in activeProxies)
+            proxy.IsActive = false;
+
+        var selectedProxy = AppService
+            .SettingsService
+            .Settings
+            .Proxies
+            .FirstOrDefault(p => p.Id == SelectedAvailableProxy?.Id);
+
+        if (selectedProxy == null)
+            return;
+
+        var newProxy = new ProxySettingsViewModel
+        {
+            Id = selectedProxy.Id,
+            Name = selectedProxy.Name,
+            Type = selectedProxy.Type,
+            Host = selectedProxy.Host,
+            Port = selectedProxy.Port,
+            Username = selectedProxy.Username,
+            Password = selectedProxy.Password,
+            IsActive = selectedProxy.IsActive,
+            IsResponsive = selectedProxy.IsResponsive,
+            SettingsId = selectedProxy.SettingsId
+        };
+
+        selectedProxy.IsActive = true;
+        ProxySettings = newProxy;
+    }
+
+    protected override async void OnSettingsServiceDataChanged()
+    {
+        try
+        {
+            base.OnSettingsServiceDataChanged();
+            await LoadAvailableProxiesAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 }

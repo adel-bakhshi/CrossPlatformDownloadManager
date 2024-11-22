@@ -59,8 +59,7 @@
                                                         Value="0" />
                                             </Style>
 
-                                            <Style
-                                                Selector="Button.CalendarHeader:pressed  /template/ ContentPresenter">
+                                            <Style Selector="Button.CalendarHeader:pressed  /template/ ContentPresenter">
                                                 <Setter Property="Background"
                                                         Value="Transparent" />
                                             </Style>
@@ -198,7 +197,7 @@
                               IconData="{DynamicResource Queue}"
                               IconSize="16"
                               IconColor="{DynamicResource ProgressBarGradientBrush}"
-                              Watermark="Queue Title"
+                              Watermark="Queue title"
                               WatermarkForeground="{DynamicResource TertiaryColor}"
                               Margin="0, 0, 0, 5"
                               HorizontalAlignment="Stretch"
@@ -218,7 +217,7 @@
                                HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
                                TextAlignment="Left"
-                               Text="Start Download On Application Startup"
+                               Text="Start download on application startup"
                                FontWeight="Bold" />
 
                     <ToggleSwitch Grid.Column="1"
@@ -247,7 +246,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Left"
-                                   Text="Start Download Schedule"
+                                   Text="Start download schedule"
                                    FontWeight="Bold" />
 
                         <ToggleSwitch Grid.Column="1"
@@ -331,28 +330,6 @@
                     </StackPanel>
 
                     <!-- Start download date -->
-                    <!-- <StackPanel Orientation="Horizontal" -->
-                    <!--             Spacing="10" -->
-                    <!--             HorizontalAlignment="Left" -->
-                    <!--             Margin="0, 5, 0, 0" -->
-                    <!--             IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"> -->
-                    <!--     <RadioButton GroupName="StartDownloadDate" -->
-                    <!--                  Classes="startDownloadDate" -->
-                    <!--                  Command="{Binding ChangeStartDownloadDateCommand}" -->
-                    <!--                  CommandParameter="Today" -->
-                    <!--                  IsChecked="{Binding !DownloadQueue.IsDaily}"> -->
-                    <!--         Today -->
-                    <!--     </RadioButton> -->
-                    <!-- -->
-                    <!--     <RadioButton GroupName="StartDownloadDate" -->
-                    <!--                  Classes="startDownloadDate" -->
-                    <!--                  Command="{Binding ChangeStartDownloadDateCommand}" -->
-                    <!--                  CommandParameter="Daily" -->
-                    <!--                  IsChecked="{Binding DownloadQueue.IsDaily}"> -->
-                    <!--         Daily -->
-                    <!--     </RadioButton> -->
-                    <!-- </StackPanel> -->
-                    <!-- Select Box -->
                     <cc:CustomSelectBox ItemsSource="{Binding StartDownloadDateOptions}"
                                         SelectedItem="{Binding SelectedStartDownloadDateOption}"
                                         ItemsBackground="{DynamicResource PrimaryColor}"
@@ -363,7 +340,7 @@
                                         IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"
                                         ItemsMinWidth="80">
                         <cc:CustomSelectBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type x:String}">
+                            <DataTemplate DataType="x:String">
                                 <TextBlock Text="{Binding}" />
                             </DataTemplate>
                         </cc:CustomSelectBox.ItemTemplate>
@@ -391,7 +368,7 @@
                                                 Margin="0"
                                                 MinWidth="0"
                                                 MinHeight="0"
-                                                SelectedDate="{Binding StartDownloadDate}"
+                                                SelectedDate="{Binding SelectedDate}"
                                                 IsEnabled="False">
                                 <CalendarDatePicker.Styles>
                                     <Style Selector="CalendarDatePicker /template/ Button#PART_Button">
@@ -416,46 +393,8 @@
                     </Border>
 
                     <!-- Days of week -->
-                    <!-- <StackPanel Orientation="Horizontal" -->
-                    <!--             Spacing="5" -->
-                    <!--             IsVisible="{Binding DownloadQueue.IsDaily}" -->
-                    <!--             IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"> -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Saturday}"> -->
-                    <!--         Saturday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Sunday}"> -->
-                    <!--         Sunday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Monday}"> -->
-                    <!--         Monday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Tuesday}"> -->
-                    <!--         Tuesday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Wednesday}"> -->
-                    <!--         Wednesday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Thursday}"> -->
-                    <!--         Thursday -->
-                    <!--     </CheckBox> -->
-                    <!-- -->
-                    <!--     <CheckBox Classes="dayOfWeek" -->
-                    <!--               IsChecked="{Binding DownloadQueue.DaysOfWeekViewModel.Friday}"> -->
-                    <!--         Friday -->
-                    <!--     </CheckBox> -->
-                    <!-- </StackPanel> -->
-                    <cc:CustomSelectBox ItemsSource="{Binding DaysOfWeekOptions}"
+                    <cc:CustomSelectBox Name="DaysOfWeekSelectBox"
+                                        ItemsSource="{Binding DaysOfWeekOptions}"
                                         SelectedItem="{Binding SelectedDaysOfWeekOption}"
                                         ItemsBackground="{DynamicResource PrimaryColor}"
                                         OnHoverItemsBackground="{DynamicResource PrimaryColor}"
@@ -464,9 +403,10 @@
                                         IsEnabled="{Binding DownloadQueue.StartDownloadScheduleEnabled}"
                                         IsVisible="{Binding SelectedStartDownloadDateOption, Converter={StaticResource StartDownloadScheduleVisibilityConverter}, ConverterParameter='Daily'}"
                                         ItemsMinWidth="80"
-                                        SelectionMode="Multiple">
+                                        SelectionMode="Multiple"
+                                        SelectionChanged="DaysOfWeekSelectBoxOnSelectionChanged">
                         <cc:CustomSelectBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type x:String}">
+                            <DataTemplate DataType="x:String">
                                 <TextBlock Text="{Binding}" />
                             </DataTemplate>
                         </cc:CustomSelectBox.ItemTemplate>
@@ -486,7 +426,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Left"
-                                   Text="Stop Download Schedule"
+                                   Text="Stop download schedule"
                                    FontWeight="Bold" />
 
                         <ToggleSwitch Grid.Column="1"
@@ -575,7 +515,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Left"
-                                   Text="Retry On Download Failed"
+                                   Text="Retry on download failed"
                                    FontWeight="Bold" />
 
                         <ToggleSwitch Grid.Column="1"
@@ -594,7 +534,7 @@
                     <cc:CustomNumericUpDown BorderThickness="0"
                                             Background="{DynamicResource PrimaryColor}"
                                             CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                            Watermark="Number Of Retries"
+                                            Watermark="Number of retries"
                                             WatermarkForeground="{DynamicResource TertiaryColor}"
                                             Padding="12, 10"
                                             HorizontalAlignment="Stretch"
@@ -617,7 +557,7 @@
                                HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
                                TextAlignment="Left"
-                               Text="Show Alarm When Done"
+                               Text="Show alarm when done"
                                FontWeight="Bold" />
 
                     <ToggleSwitch Grid.Column="1"
@@ -643,7 +583,7 @@
                                HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
                                TextAlignment="Left"
-                               Text="Exit Program When Done"
+                               Text="Exit program when done"
                                FontWeight="Bold" />
 
                     <ToggleSwitch Grid.Column="1"
@@ -671,7 +611,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Left"
-                                   Text="Turn Off Computer When Done"
+                                   Text="Turn off computer when done"
                                    FontWeight="Bold" />
 
                         <ToggleSwitch Name="TurnOffComputerWhenDoneToggleSwitch"

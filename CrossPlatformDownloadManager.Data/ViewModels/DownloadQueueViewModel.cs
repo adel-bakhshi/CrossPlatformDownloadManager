@@ -143,7 +143,7 @@ public class DownloadQueueViewModel : PropertyChangedBase
         get => _isDefault;
         set => SetField(ref _isDefault, value);
     }
-    
+
     public bool IsLastChoice
     {
         get => _isLastChoice;
@@ -398,24 +398,18 @@ public class DownloadQueueViewModel : PropertyChangedBase
 
         if (TurnOffComputerWhenDone)
         {
-            var turnOffComputerMode = Enum
-                .GetName(typeof(TurnOffComputerMode), TurnOffComputerMode!);
-
+            var turnOffComputerMode = Enum.GetName(typeof(TurnOffComputerMode), TurnOffComputerMode!);
             if (turnOffComputerMode.IsNullOrEmpty())
                 return;
 
             if (turnOffComputerMode!.Equals("Shutdown", StringComparison.OrdinalIgnoreCase))
                 turnOffComputerMode = "Shut down";
 
-            SelectedTurnOffComputerMode =
-                TurnOffComputerModes.FirstOrDefault(m =>
-                    m.Equals(turnOffComputerMode, StringComparison.OrdinalIgnoreCase)) ??
-                TurnOffComputerModes.FirstOrDefault();
+            SelectedTurnOffComputerMode = TurnOffComputerModes.FirstOrDefault(m => m.Equals(turnOffComputerMode, StringComparison.OrdinalIgnoreCase)) ??
+                                          TurnOffComputerModes.FirstOrDefault();
         }
 
-        var daysOfWeek = DaysOfWeek
-            .ConvertFromJson<DaysOfWeekViewModel>();
-
+        var daysOfWeek = DaysOfWeek.ConvertFromJson<DaysOfWeekViewModel>();
         if (daysOfWeek == null)
             return;
 

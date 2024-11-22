@@ -15,6 +15,7 @@
     <Color x:Key="DialogYesButtonColor">#10BA18</Color>
     <Color x:Key="DialogNoButtonColor">#F44336</Color>
     <Color x:Key="DialogCancelButtonColor">#FF9800</Color>
+    <Color x:Key="AvailableProxyOnActiveTypeColor">#CCCCCC</Color>
 
     <!-- Gradients -->
     <LinearGradientBrush x:Key="SuccessGradientBrush"

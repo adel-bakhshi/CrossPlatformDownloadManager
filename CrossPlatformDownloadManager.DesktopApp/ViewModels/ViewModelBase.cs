@@ -21,6 +21,7 @@ public abstract class ViewModelBase : ReactiveObject
         AppService = appService;
         AppService.DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
         AppService.DownloadQueueService.DataChanged += DownloadQueueServiceOnDataChanged;
+        AppService.SettingsService.DataChanged += SettingsServiceOnDataChanged;
     }
 
     public async Task<DialogResult> ShowDialogAsync(string dialogHeader, string dialogMessage,
@@ -85,15 +86,19 @@ public abstract class ViewModelBase : ReactiveObject
     {
     }
 
+    protected virtual void OnSettingsServiceDataChanged()
+    {
+    }
+
     #endregion
 
     #region Helpers
 
-    private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e) =>
-        OnDownloadFileServiceDataChanged();
+    private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e) => OnDownloadFileServiceDataChanged();
 
-    private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e) =>
-        OnDownloadQueueServiceDataChanged();
+    private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e) => OnDownloadQueueServiceDataChanged();
+
+    private void SettingsServiceOnDataChanged(object? sender, EventArgs e) => OnSettingsServiceDataChanged();
 
     #endregion
 }

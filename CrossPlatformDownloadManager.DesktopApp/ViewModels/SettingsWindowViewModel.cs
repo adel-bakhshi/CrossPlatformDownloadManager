@@ -2,17 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class SettingsWindowViewModel : ViewModelBase
 {
+    #region Private Fields
+
+    private string? _selectedTabItem;
+    private GeneralsViewModel? _generalsViewModel;
+    private FileTypesViewModel? _fileTypesViewModel;
+    private SaveLocationsViewModel? _saveLocationsViewModel;
+    private DownloadsViewModel? _downloadsViewModel;
+    private ProxyViewModel? _proxyViewModel;
+    private NotificationsViewModel? _notificationsViewModel;
+
+    #endregion
+
     #region Properties
 
     private ObservableCollection<string> _tabItems = [];
@@ -23,15 +37,11 @@ public class SettingsWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _tabItems, value);
     }
 
-    private string? _selectedTabItem;
-
     public string? SelectedTabItem
     {
         get => _selectedTabItem;
         set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
     }
-
-    private GeneralsViewModel? _generalsViewModel;
 
     public GeneralsViewModel? GeneralsViewModel
     {
@@ -39,15 +49,11 @@ public class SettingsWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
     }
 
-    private FileTypesViewModel? _fileTypesViewModel;
-
     public FileTypesViewModel? FileTypesViewModel
     {
         get => _fileTypesViewModel;
         set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
     }
-
-    private SaveLocationsViewModel? _saveLocationsViewModel;
 
     public SaveLocationsViewModel? SaveLocationsViewModel
     {
@@ -55,23 +61,17 @@ public class SettingsWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
     }
 
-    private DownloadsViewModel? _downloadsViewModel;
-
     public DownloadsViewModel? DownloadsViewModel
     {
         get => _downloadsViewModel;
         set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
     }
 
-    private ProxyViewModel? _proxyViewModel;
-
     public ProxyViewModel? ProxyViewModel
     {
         get => _proxyViewModel;
         set => this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
     }
-
-    private NotificationsViewModel? _notificationsViewModel;
 
     public NotificationsViewModel? NotificationsViewModel
     {
@@ -100,7 +100,7 @@ public class SettingsWindowViewModel : ViewModelBase
 
         GenerateTabs();
 
-        SaveCommand = ReactiveCommand.Create<Window?>(Save);
+        SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
         CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
     }
 
@@ -120,9 +120,30 @@ public class SettingsWindowViewModel : ViewModelBase
         SelectedTabItem = TabItems.FirstOrDefault();
     }
 
-    private void Save(Window? owner)
+    private async Task SaveAsync(Window? owner)
     {
-        throw new System.NotImplementedException();
+        try
+        {
+            if (owner == null ||
+                GeneralsViewModel == null ||
+                FileTypesViewModel == null ||
+                SaveLocationsViewModel == null ||
+                DownloadsViewModel == null ||
+                ProxyViewModel == null ||
+                NotificationsViewModel == null)
+            {
+                throw new InvalidOperationException("An error occured while trying to save settings.");
+            }
+
+            // Save proxy settings
+            // TODO: Save proxy settings if user not save it
+
+            owner.Close();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 
     private void Cancel(Window? owner)
@@ -132,7 +153,7 @@ public class SettingsWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-            
+
             owner.Close();
         }
         catch (Exception ex)

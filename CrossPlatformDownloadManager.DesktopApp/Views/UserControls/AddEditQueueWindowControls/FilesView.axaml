@@ -19,7 +19,7 @@
                         Orientation="Horizontal"
                         Spacing="10"
                         HorizontalAlignment="Left">
-                <TextBlock Text="How Many Files Can be Downloaded at the Same Time?"
+                <TextBlock Text="How many files can be downloaded at the same time?"
                            VerticalAlignment="Center" />
 
                 <cc:CustomNumericUpDown Padding="12, 10"

@@ -126,6 +126,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task UpdateDownloadFilesAsync(List<DownloadFile> downloadFiles)
     {
+        if (downloadFiles.Count == 0)
+            return;
+
         await _unitOfWork.DownloadFileRepository.UpdateAllAsync(downloadFiles);
         await _unitOfWork.SaveAsync();
 
@@ -134,10 +137,16 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels)
     {
+        if (viewModels.Count == 0)
+            return;
+
         var downloadFileViewModels = viewModels
             .Select(vm => DownloadFiles.FirstOrDefault(df => df.Id == vm.Id))
             .Where(df => df != null)
             .ToList();
+
+        if (downloadFileViewModels.Count == 0)
+            return;
 
         var downloadFiles = _mapper.Map<List<DownloadFile>>(downloadFileViewModels);
         await UpdateDownloadFilesAsync(downloadFiles);

@@ -196,7 +196,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .DownloadFiles
             .Where(df => df.DownloadQueueId == downloadQueue.Id)
             .Max(df => df.DownloadQueuePriority) ?? 0) + 1;
-        
+
         await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
         await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }

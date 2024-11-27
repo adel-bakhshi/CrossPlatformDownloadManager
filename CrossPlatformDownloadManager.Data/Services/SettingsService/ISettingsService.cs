@@ -34,9 +34,9 @@ public interface ISettingsService
     
     Task DeleteProxySettingsAsync(ProxySettingsViewModel? viewModel);
 
-    Task ActiveProxyAsync(ProxySettingsViewModel? viewModel);
-
     Task DisableProxyAsync();
 
     Task UseSystemProxySettingsAsync();
+
+    Task UseCustomProxyAsync(ProxySettingsViewModel? viewModel);
 }

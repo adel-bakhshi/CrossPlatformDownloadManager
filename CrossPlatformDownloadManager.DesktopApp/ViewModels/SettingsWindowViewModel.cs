@@ -124,6 +124,7 @@ public class SettingsWindowViewModel : ViewModelBase
     {
         try
         {
+            // Check required data before saving
             if (owner == null ||
                 GeneralsViewModel == null ||
                 FileTypesViewModel == null ||
@@ -136,7 +137,45 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Save proxy settings
-            // TODO: Save proxy settings if user not save it
+            switch (ProxyViewModel)
+            {
+                case { DisableProxy: true }:
+                {
+                    await AppService
+                        .SettingsService
+                        .DisableProxyAsync();
+            
+                    break;
+                }
+            
+                case { UseSystemProxySettings: true }:
+                {
+                    await AppService
+                        .SettingsService
+                        .UseSystemProxySettingsAsync();
+            
+                    break;
+                }
+            
+                case { UseCustomProxy: true }:
+                {
+                    var activeProxy = ProxyViewModel
+                        .AvailableProxies
+                        .FirstOrDefault(p => p.IsActive);
+                    
+                    if (activeProxy == null)
+                        break;
+
+                    await AppService
+                        .SettingsService
+                        .UseCustomProxyAsync(activeProxy);
+            
+                    break;
+                }
+            
+                default:
+                    throw new InvalidOperationException("An error occured while trying to save settings.");
+            }
 
             owner.Close();
         }

@@ -200,7 +200,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 if (activeProxy == null)
                     break;
 
-                configuration.RequestConfiguration.Proxy = new WebProxy(activeProxy.GetProxyUri());
+                configuration.RequestConfiguration.Proxy = new WebProxy
+                {
+                    Address = new Uri(activeProxy.GetProxyUri()),
+                    Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password),
+                };
+                
                 break;
             }
             

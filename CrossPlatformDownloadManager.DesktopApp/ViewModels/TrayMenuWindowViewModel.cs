@@ -368,7 +368,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
                     await AppService
                         .SettingsService
-                        .ActiveProxyAsync(SelectedProxy);
+                        .UseCustomProxyAsync(SelectedProxy);
 
                     break;
                 }

@@ -212,7 +212,19 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         await DeleteProxySettingsAsync(proxySettings);
     }
 
-    public async Task ActiveProxyAsync(ProxySettingsViewModel? viewModel)
+    public async Task DisableProxyAsync()
+    {
+        Settings.ProxyMode = ProxyMode.DisableProxy;
+        await SaveSettingsAsync(Settings);
+    }
+
+    public async Task UseSystemProxySettingsAsync()
+    {
+        Settings.ProxyMode = ProxyMode.UseSystemProxySettings;
+        await SaveSettingsAsync(Settings);
+    }
+
+    public async Task UseCustomProxyAsync(ProxySettingsViewModel? viewModel)
     {
         var proxySettings = Settings
             .Proxies
@@ -260,18 +272,6 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         Settings.ProxyMode = ProxyMode.UseCustomProxy;
         Settings.ProxyType = proxyType;
-        await SaveSettingsAsync(Settings);
-    }
-
-    public async Task DisableProxyAsync()
-    {
-        Settings.ProxyMode = ProxyMode.DisableProxy;
-        await SaveSettingsAsync(Settings);
-    }
-
-    public async Task UseSystemProxySettingsAsync()
-    {
-        Settings.ProxyMode = ProxyMode.UseSystemProxySettings;
         await SaveSettingsAsync(Settings);
     }
 }

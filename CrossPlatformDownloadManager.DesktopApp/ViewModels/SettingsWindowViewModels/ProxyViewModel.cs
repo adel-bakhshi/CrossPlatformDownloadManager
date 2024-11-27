@@ -226,6 +226,7 @@ public class ProxyViewModel : ViewModelBase
         };
 
         EditingProxy = false;
+        SelectedAvailableProxy = null;
     }
 
     private async Task DeleteProxyAsync()
@@ -251,145 +252,6 @@ public class ProxyViewModel : ViewModelBase
     {
         try
         {
-            // switch (this)
-            // {
-            //     case { DisableProxy: true }:
-            //     {
-            //         await AppService
-            //             .SettingsService
-            //             .DisableProxyAsync();
-            //
-            //         break;
-            //     }
-            //
-            //     case { UseSystemProxySettings: true }:
-            //     {
-            //         await AppService
-            //             .SettingsService
-            //             .UseSystemProxySettingsAsync();
-            //
-            //         break;
-            //     }
-            //
-            //     case { UseCustomProxy: true }:
-            //     {
-            //         if (ProxySettings.Type.IsNullOrEmpty())
-            //         {
-            //             await ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
-            //             return;
-            //         }
-            //
-            //         if (ProxySettings.Host.IsNullOrEmpty())
-            //         {
-            //             await ShowInfoDialogAsync("Attention", "Please enter proxy host.", DialogButtons.Ok);
-            //             return;
-            //         }
-            //
-            //         ProxySettings.Host = ProxySettings.Host!.Trim();
-            //
-            //         if (ProxySettings.Port.IsNullOrEmpty())
-            //         {
-            //             await ShowInfoDialogAsync("Attention", "Please enter proxy port.", DialogButtons.Ok);
-            //             return;
-            //         }
-            //
-            //         ProxySettings.Port = ProxySettings.Port!.Trim();
-            //
-            //         if (!int.TryParse(ProxySettings.Port, out _))
-            //         {
-            //             await ShowInfoDialogAsync("Attention", "Please enter a valid port number.", DialogButtons.Ok);
-            //             return;
-            //         }
-            //
-            //         ProxySettings.Username = ProxySettings.Username?.Trim();
-            //         ProxySettings.Password = ProxySettings.Password?.Trim();
-            //         ProxySettings.Name = ProxySettings.Name?.Trim();
-            //
-            //         if (ProxySettings.Name.IsNullOrEmpty())
-            //             ProxySettings.Name = $"{ProxySettings.Host}:{ProxySettings.Port}";
-            //
-            //         ProxySettingsViewModel? proxySettings;
-            //         // Edit proxy settings when id is not 0
-            //         if (ProxySettings.Id != 0)
-            //         {
-            //             var proxySettingsInDb = await AppService
-            //                 .UnitOfWork
-            //                 .ProxySettingsRepository
-            //                 .GetAsync(where: p => p.Id == ProxySettings.Id);
-            //             
-            //             if (proxySettingsInDb == null)
-            //                 throw new InvalidOperationException("Unable to find proxy settings in database. Please try again later.");
-            //             
-            //             await AppService
-            //                 .SettingsService
-            //                 .UpdateProxySettingsAsync(ProxySettings);
-            //             
-            //             proxySettings = AppService
-            //                 .SettingsService
-            //                 .Settings
-            //                 .Proxies
-            //                 .FirstOrDefault(p => p.Id == ProxySettings.Id);
-            //         }
-            //         // Save new proxy settings
-            //         else
-            //         {
-            //             var proxySettingsInDb = await AppService
-            //                 .UnitOfWork
-            //                 .ProxySettingsRepository
-            //                 .GetAsync(where: p => p.Host.ToLower() == ProxySettings.Host.ToLower() &&
-            //                                       p.Port.ToLower() == ProxySettings.Port.ToLower() &&
-            //                                       p.Type.ToLower() == ProxySettings.Type!.ToLower());
-            //
-            //             if (proxySettingsInDb != null)
-            //             {
-            //                 await ShowInfoDialogAsync("Attention",
-            //                     "Unable to save proxy. There is already another proxy with the same type, host and port. Please change the type, host or port or edit the previous proxy.",
-            //                     DialogButtons.Ok);
-            //
-            //                 return;
-            //             }
-            //
-            //             proxySettingsInDb = await AppService
-            //                 .UnitOfWork
-            //                 .ProxySettingsRepository
-            //                 .GetAsync(where: p => p.Name.ToLower() == ProxySettings.Name!.ToLower());
-            //
-            //             if (proxySettingsInDb != null)
-            //             {
-            //                 await ShowInfoDialogAsync("Attention",
-            //                     "Unable to save proxy. Another proxy with the same name already exists. Please choose a different proxy name or edit the existing proxy.",
-            //                     DialogButtons.Ok);
-            //
-            //                 return;
-            //             }
-            //
-            //             var id = await AppService
-            //                 .SettingsService
-            //                 .AddProxySettingsAsync(ProxySettings);
-            //
-            //             proxySettings = AppService
-            //                 .SettingsService
-            //                 .Settings
-            //                 .Proxies
-            //                 .FirstOrDefault(p => p.Id == id);
-            //         }
-            //
-            //         if (proxySettings == null)
-            //             throw new InvalidOperationException("An error occured while trying to save proxy.");
-            //
-            //         await AppService
-            //             .SettingsService
-            //             .ActiveProxyAsync(proxySettings);
-            //
-            //         break;
-            //     }
-            //
-            //     default:
-            //         throw new InvalidOperationException("An error occured while trying to save settings.");
-            // }
-            //
-            // ClearProxy();
-
             if (ProxySettings.Type.IsNullOrEmpty())
             {
                 await ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
@@ -425,27 +287,28 @@ public class ProxyViewModel : ViewModelBase
             if (ProxySettings.Name.IsNullOrEmpty())
                 ProxySettings.Name = $"{ProxySettings.Host}:{ProxySettings.Port}";
 
-            ProxySettingsViewModel? proxySettings;
             // Edit proxy settings when id is not 0
             if (ProxySettings.Id != 0)
             {
-                var proxySettingsInDb = await AppService
-                    .UnitOfWork
-                    .ProxySettingsRepository
-                    .GetAsync(where: p => p.Id == ProxySettings.Id);
-
-                if (proxySettingsInDb == null)
-                    throw new InvalidOperationException("Unable to find proxy settings in database. Please try again later.");
-
-                await AppService
-                    .SettingsService
-                    .UpdateProxySettingsAsync(ProxySettings);
-
-                proxySettings = AppService
+                var viewModel = AppService
                     .SettingsService
                     .Settings
                     .Proxies
                     .FirstOrDefault(p => p.Id == ProxySettings.Id);
+
+                if (viewModel == null)
+                    throw new InvalidOperationException("Unable to find proxy settings in database. Please try again later.");
+
+                viewModel.Name = ProxySettings.Name;
+                viewModel.Type = ProxySettings.Type;
+                viewModel.Host = ProxySettings.Host;
+                viewModel.Port = ProxySettings.Port;
+                viewModel.Username = ProxySettings.Username;
+                viewModel.Password = ProxySettings.Password;
+
+                await AppService
+                    .SettingsService
+                    .UpdateProxySettingsAsync(viewModel);
             }
             // Save new proxy settings
             else
@@ -480,23 +343,12 @@ public class ProxyViewModel : ViewModelBase
                     return;
                 }
 
-                var id = await AppService
+                await AppService
                     .SettingsService
                     .AddProxySettingsAsync(ProxySettings);
-
-                proxySettings = AppService
-                    .SettingsService
-                    .Settings
-                    .Proxies
-                    .FirstOrDefault(p => p.Id == id);
             }
-
-            if (proxySettings == null)
-                throw new InvalidOperationException("An error occured while trying to save proxy.");
-
-            await AppService
-                .SettingsService
-                .ActiveProxyAsync(proxySettings);
+            
+            ClearProxy();
         }
         catch (Exception ex)
         {

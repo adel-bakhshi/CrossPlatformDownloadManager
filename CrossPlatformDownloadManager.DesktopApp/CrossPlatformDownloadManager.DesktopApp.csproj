@@ -64,8 +64,4 @@
     <ItemGroup>
       <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Assets\Images\Logos\" />
-    </ItemGroup>
 </Project>

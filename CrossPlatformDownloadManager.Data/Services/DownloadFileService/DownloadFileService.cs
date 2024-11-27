@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Net;
 using AutoMapper;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
+using CrossPlatformDownloadManager.Data.Services.SettingsService;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
@@ -18,6 +20,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ISettingsService _settingsService;
 
     private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
 
@@ -41,10 +44,11 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     #endregion
 
-    public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper)
+    public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper, ISettingsService settingsService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _settingsService = settingsService;
 
         _downloadFileTasks = [];
 
@@ -53,7 +57,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task LoadDownloadFilesAsync()
     {
-        var downloadFiles = await _unitOfWork.DownloadFileRepository
+        var downloadFiles = await _unitOfWork
+            .DownloadFileRepository
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
 
         var viewModels = _mapper.Map<List<DownloadFileViewModel>>(downloadFiles);
@@ -167,8 +172,41 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             ChunkCount = 8,
             MaximumBytesPerSecond = 64 * 1024,
-            ParallelDownload = true,
+            ParallelDownload = true
         };
+
+        switch (_settingsService.Settings.ProxyMode)
+        {
+            case ProxyMode.DisableProxy:
+                break;
+
+            case ProxyMode.UseSystemProxySettings:
+            {
+                var systemProxy = WebRequest.DefaultWebProxy;
+                if (systemProxy == null)
+                    break;
+                
+                configuration.RequestConfiguration.Proxy = systemProxy;
+                break;
+            }
+
+            case ProxyMode.UseCustomProxy:
+            {
+                var activeProxy = _settingsService
+                    .Settings
+                    .Proxies
+                    .FirstOrDefault(p => p.IsActive);
+                
+                if (activeProxy == null)
+                    break;
+
+                configuration.RequestConfiguration.Proxy = new WebProxy(activeProxy.GetProxyUri());
+                break;
+            }
+            
+            default:
+                throw new InvalidOperationException("Invalid proxy mode.");
+        }
 
         var service = new DownloadService(configuration);
 

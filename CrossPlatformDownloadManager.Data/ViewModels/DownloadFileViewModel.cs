@@ -47,14 +47,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     #endregion
 
-    #region Events
-
-    public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
-    public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
-    public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
-
-    #endregion
-
     #region Properties
 
     public int Id
@@ -255,6 +247,14 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         get => _countOfError;
         set => SetField(ref _countOfError, value);
     }
+
+    #endregion
+
+    #region Events
+
+    public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
+    public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
+    public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
 
     #endregion
 

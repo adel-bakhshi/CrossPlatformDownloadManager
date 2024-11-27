@@ -1,8 +1,5 @@
 using System.Net;
-using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using SocksSharp;
-using SocksSharp.Proxy;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -66,7 +63,7 @@ public class ProxySettingsViewModel : PropertyChangedBase
         get => _password;
         set => SetField(ref _password, value);
     }
-    
+
     public int? SettingsId
     {
         get => _settingsId;
@@ -89,19 +86,25 @@ public class ProxySettingsViewModel : PropertyChangedBase
 
     public async Task CheckIsResponsiveAsync()
     {
+        var proxyUri = GetProxyUri();
+        IsResponsive = await CheckProxyAsync(proxyUri);
+    }
+
+    public string GetProxyUri()
+    {
         var type = Type?.ToLower();
-        IsResponsive = type switch
+        return type switch
         {
-            "http" => await CheckHttpProxy($"{type}://{Host}:{Port}"),
-            "https" => await CheckHttpsProxy($"{type}://{Host}:{Port}"),
-            "socks 5" => await CheckSocks5Proxy(Host!, int.Parse(Port!), Username, Password),
+            "http" => $"{type}://{Host}:{Port}",
+            "https" => $"{type}://{Host}:{Port}",
+            "socks 5" => $"{type.Replace(" ", "")}://{Host}:{Port}",
             _ => throw new InvalidOperationException("Invalid proxy type.")
         };
     }
 
     #region Helpers
 
-    private static async Task<bool> CheckHttpProxy(string proxyUri)
+    private static async Task<bool> CheckProxyAsync(string proxyUri)
     {
         try
         {
@@ -112,45 +115,6 @@ public class ProxySettingsViewModel : PropertyChangedBase
             };
 
             using var client = new HttpClient(handler);
-            var response = await client.GetAsync("https://www.google.com");
-            return response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static async Task<bool> CheckHttpsProxy(string proxyUri)
-    {
-        try
-        {
-            var handler = new HttpClientHandler
-            {
-                Proxy = new WebProxy(proxyUri),
-                UseProxy = true
-            };
-
-            using var client = new HttpClient(handler);
-            var response = await client.GetAsync("https://www.google.com");
-            return response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static async Task<bool> CheckSocks5Proxy(string host, int port, string? userName, string? password)
-    {
-        try
-        {
-            var settings = new ProxySettings { Host = host, Port = port };
-            if (!userName.IsNullOrEmpty() && !password.IsNullOrEmpty())
-                settings.Credentials = new NetworkCredential(userName!, password!);
-
-            using var proxyClientHandler = new ProxyClientHandler<Socks5>(settings);
-            using var client = new HttpClient(proxyClientHandler);
             var response = await client.GetAsync("https://www.google.com");
             return response.IsSuccessStatusCode;
         }
@@ -161,19 +125,4 @@ public class ProxySettingsViewModel : PropertyChangedBase
     }
 
     #endregion
-
-    public void UpdateData(ProxySettingsViewModel? proxySettings)
-    {
-        if (proxySettings == null)
-            return;
-        
-        Id = proxySettings.Id;
-        Name = proxySettings.Name;
-        Type = proxySettings.Type;
-        Host = proxySettings.Host;
-        Port = proxySettings.Port;
-        Username = proxySettings.Username;
-        Password = proxySettings.Password;
-        SettingsId = proxySettings.SettingsId;
-    }
 }

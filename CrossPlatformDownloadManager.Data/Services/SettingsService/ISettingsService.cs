@@ -8,13 +8,13 @@ public interface ISettingsService
     #region Properties
 
     SettingsViewModel Settings { get; }
-    HttpMessageHandler? ProxyHandler { get; }
 
     #endregion
 
     #region Events
 
     event EventHandler? DataChanged;
+    event EventHandler? ActiveProxyChanged;
 
     #endregion
 

@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -17,15 +17,13 @@ public class TrayMenuWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private const string DisableProxySettingsName = "Disable proxy";
     private const string SystemProxySettingsName = "System proxy settings";
-    private readonly List<ProxySettingsViewModel> _defaultProxies;
+
+    private bool _firstTimeRefreshProxies = true;
 
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
     private ProxySettingsViewModel? _selectedProxy;
-
-    private bool _isFirstLoad = true;
 
     #endregion
 
@@ -88,12 +86,6 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     public TrayMenuWindowViewModel(IAppService appService) : base(appService)
     {
-        _defaultProxies =
-        [
-            new ProxySettingsViewModel { Id = -1, Name = DisableProxySettingsName },
-            new ProxySettingsViewModel { Id = -2, Name = SystemProxySettingsName }
-        ];
-
         LoadDownloadQueues();
         RefreshProxies();
 
@@ -247,27 +239,59 @@ public class TrayMenuWindowViewModel : ViewModelBase
             .DownloadQueues;
     }
 
+    private bool _canChangeProxy = true;
+
     private void RefreshProxies()
     {
-        var proxies = AppService
-            .SettingsService
-            .Settings
-            .Proxies
-            .ToList();
-        
-        proxies.InsertRange(0, _defaultProxies);
-
-        var currentSelectedProxy = SelectedProxy;
-        Proxies = proxies.ToObservableCollection();
-
-        if (_isFirstLoad)
+        _ = Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            _isFirstLoad = false;
-            SelectedProxy = Proxies.FirstOrDefault();
-            return;
-        }
+            try
+            {
+                if (!_firstTimeRefreshProxies)
+                    await Task.Delay(1000);
 
-        SelectedProxy = Proxies.FirstOrDefault(p => p.Id == currentSelectedProxy?.Id);
+                var proxies = AppService
+                    .SettingsService
+                    .Settings
+                    .Proxies
+                    .ToList();
+
+                var systemProxySettings = new ProxySettingsViewModel { Id = -1, Name = SystemProxySettingsName, };
+                proxies.Insert(0, systemProxySettings);
+
+                if (SelectedProxy != null)
+                {
+                    _canChangeProxy = false;
+                    Proxies = proxies.ToObservableCollection();
+                    _canChangeProxy = true;
+                }
+                else
+                {
+                    if (_firstTimeRefreshProxies)
+                        _firstTimeRefreshProxies = false;
+                    else
+                        _canChangeProxy = false;
+
+                    Proxies = proxies.ToObservableCollection();
+
+                    if (!_canChangeProxy)
+                        _canChangeProxy = true;
+                }
+
+                var proxyMode = AppService.SettingsService.Settings.ProxyMode;
+                SelectedProxy = proxyMode switch
+                {
+                    ProxyMode.DisableProxy => null,
+                    ProxyMode.UseSystemProxySettings => Proxies.FirstOrDefault(p => p.Id == -1),
+                    ProxyMode.UseCustomProxy => Proxies.FirstOrDefault(p => p.IsActive),
+                    _ => throw new InvalidOperationException("Invalid proxy mode.")
+                };
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     private void HideTrayMenu()
@@ -283,22 +307,38 @@ public class TrayMenuWindowViewModel : ViewModelBase
     {
         try
         {
-            if (SelectedProxy == null)
+            if (!_canChangeProxy)
                 return;
 
-            switch (SelectedProxy.Name)
+            var isProxyDisabled = AppService
+                .SettingsService
+                .Settings
+                .ProxyMode == ProxyMode.DisableProxy;
+
+            if (SelectedProxy == null)
             {
-                case DisableProxySettingsName:
+                if (!isProxyDisabled)
                 {
                     await AppService
                         .SettingsService
                         .DisableProxyAsync();
-
-                    break;
                 }
 
+                return;
+            }
+
+            switch (SelectedProxy.Name)
+            {
                 case SystemProxySettingsName:
                 {
+                    var isSystemProxySettings = AppService
+                        .SettingsService
+                        .Settings
+                        .ProxyMode == ProxyMode.UseSystemProxySettings;
+
+                    if (isSystemProxySettings)
+                        break;
+
                     await AppService
                         .SettingsService
                         .UseSystemProxySettingsAsync();
@@ -308,6 +348,24 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
                 default:
                 {
+                    var isCustomProxy = AppService
+                        .SettingsService
+                        .Settings
+                        .ProxyMode == ProxyMode.UseCustomProxy;
+
+                    var activeProxySettings = AppService
+                        .SettingsService
+                        .Settings
+                        .Proxies
+                        .FirstOrDefault(p => p.IsActive);
+
+                    if (isCustomProxy &&
+                        activeProxySettings != null &&
+                        activeProxySettings.Id == SelectedProxy?.Id)
+                    {
+                        break;
+                    }
+
                     await AppService
                         .SettingsService
                         .ActiveProxyAsync(SelectedProxy);

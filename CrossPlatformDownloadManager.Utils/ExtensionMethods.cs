@@ -178,4 +178,10 @@ public static class ExtensionMethods
 
         return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }
+
+    public static T? DeepCopy<T>(this T? obj)
+    {
+        var json = obj.ConvertToJson();
+        return json.ConvertFromJson<T>();
+    }
 }

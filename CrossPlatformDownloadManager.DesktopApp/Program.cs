@@ -37,26 +37,36 @@ sealed class Program
             {
                 // Add AutoMapper to services
                 services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+                
                 // Add UnitOfWork to services
                 services.AddTransient<IUnitOfWork, UnitOfWork>();
-                // Add DownloadFileService to services
-                services.AddSingleton<IDownloadFileService, DownloadFileService>();
-                // Add DownloadQueueService to services
-                services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
+                
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
+                
+                // Add DownloadFileService to services
+                services.AddSingleton<IDownloadFileService, DownloadFileService>();
+                
+                // Add DownloadQueueService to services
+                services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
+                
                 // Add AppService to services
                 services.AddSingleton<IAppService, AppService>();
+                
                 // Add ViewModels to services
                 services.AddSingleton<MainWindowViewModel>();
                 services.AddSingleton<TrayMenuWindowViewModel>();
+                
                 // Add Windows to services
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<TrayMenuWindow>();
+                
                 // Add BrowserExtension to services
                 services.AddSingleton<IBrowserExtension, BrowserExtension>();
+                
                 // Add AppInitializer to services
                 services.AddSingleton<IAppInitializer, AppInitializer>();
+                
                 // Add AppFinisher to services
                 services.AddSingleton<IAppFinisher, AppFinisher>();
             })

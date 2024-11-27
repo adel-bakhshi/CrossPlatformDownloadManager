@@ -163,14 +163,27 @@
                                         Width="{Binding $self.Bounds.Height}"
                                         VerticalAlignment="Center"
                                         Command="{Binding SaveProxyCommand}">
-                                    <PathIcon Data="{DynamicResource Plus}"
-                                              Foreground="{DynamicResource TextColor}"
+                                    <PathIcon Foreground="{DynamicResource TextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
+                                              VerticalAlignment="Center"
+                                              Classes.editingProxy="{Binding EditingProxy}">
+                                        <!-- Styles -->
+                                        <PathIcon.Styles>
+                                            <Style Selector="PathIcon">
+                                                <Setter Property="Data"
+                                                        Value="{DynamicResource Plus}" />
+
+                                                <Style Selector="^.editingProxy">
+                                                    <Setter Property="Data"
+                                                            Value="{DynamicResource Finished}" />
+                                                </Style>
+                                            </Style>
+                                        </PathIcon.Styles>
+                                    </PathIcon>
                                 </Button>
-                                
+
                                 <!-- Clear proxy -->
                                 <Button Classes="button warning"
                                         Height="{Binding $parent[StackPanel].Bounds.Height}"
@@ -312,7 +325,8 @@
 
                         <!-- Available proxies list -->
                         <ListBox ItemsSource="{Binding AvailableProxies}"
-                                 SelectedItem="{Binding SelectedAvailableProxy}">
+                                 SelectedItem="{Binding SelectedAvailableProxy}"
+                                 IsEnabled="{Binding UseCustomProxy}">
                             <!-- Styles -->
                             <ListBox.Styles>
                                 <Style Selector="ListBox">

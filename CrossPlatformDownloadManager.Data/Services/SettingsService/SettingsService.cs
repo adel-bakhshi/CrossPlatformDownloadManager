@@ -1,15 +1,10 @@
-using System.Net;
 using AutoMapper;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using SocksSharp;
-using SocksSharp.Proxy;
-using ProxySettings = CrossPlatformDownloadManager.Data.Models.ProxySettings;
 
 namespace CrossPlatformDownloadManager.Data.Services.SettingsService;
 
@@ -20,8 +15,9 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    private SettingsViewModel _settings = new();
-    private HttpMessageHandler? _proxyHandler;
+    private bool _isSettingsSets;
+
+    private SettingsViewModel _settings;
 
     #endregion
 
@@ -33,17 +29,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         private set => SetField(ref _settings, value);
     }
 
-    public HttpMessageHandler? ProxyHandler
-    {
-        get => _proxyHandler;
-        private set => SetField(ref _proxyHandler, value);
-    }
-
     #endregion
 
     #region Events
 
     public event EventHandler? DataChanged;
+    public event EventHandler? ActiveProxyChanged;
 
     #endregion
 
@@ -51,6 +42,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+
+        Settings = new SettingsViewModel();
     }
 
     public async Task LoadSettingsAsync()
@@ -79,7 +72,34 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             }
 
             var viewModel = _mapper.Map<SettingsViewModel>(settings);
-            Settings.UpdateData(viewModel);
+            if (_isSettingsSets)
+            {
+                // These proxies no longer exist so they should be removed.
+                var removedProxies = Settings
+                    .Proxies
+                    .Where(p => viewModel.Proxies.FirstOrDefault(vp => vp.Id == p.Id) == null)
+                    .ToList();
+
+                foreach (var proxy in removedProxies)
+                    Settings.Proxies.Remove(proxy);
+
+                // These proxies are new so they should be added.
+                var newProxies = viewModel
+                    .Proxies
+                    .Where(vp => Settings.Proxies.FirstOrDefault(p => p.Id == vp.Id) == null)
+                    .ToList();
+
+                foreach (var proxy in newProxies)
+                    Settings.Proxies.Add(proxy);
+            }
+            else
+            {
+                _isSettingsSets = true;
+
+                viewModel.ProxyMode = ProxyMode.DisableProxy;
+                Settings = viewModel;
+            }
+
             DataChanged?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
@@ -213,48 +233,13 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (!int.TryParse(proxySettings.Port, out _))
             throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
 
-        HttpMessageHandler handler;
-        ProxyType proxyType;
-
-        var type = proxySettings.Type?.ToLower();
-        switch (type)
+        var proxyType = proxySettings.Type?.ToLower() switch
         {
-            case "http":
-            case "https":
-            {
-                proxyType = type.Equals("http") ? ProxyType.Http : ProxyType.Https;
-                handler = new HttpClientHandler
-                {
-                    Proxy = new WebProxy($"{type}://{proxySettings.Host}:{proxySettings.Port}"),
-                    UseProxy = true
-                };
-
-                break;
-            }
-
-            case "socks 5":
-            {
-                proxyType = ProxyType.Socks5;
-                var settings = new SocksSharp.Proxy.ProxySettings
-                {
-                    Host = proxySettings.Host!,
-                    Port = int.Parse(proxySettings.Port!)
-                };
-
-                if (!proxySettings.Username.IsNullOrEmpty() && !proxySettings.Password.IsNullOrEmpty())
-                    settings.Credentials = new NetworkCredential(proxySettings.Username!, proxySettings.Password!);
-
-                handler = new ProxyClientHandler<Socks5>(settings);
-                break;
-            }
-
-            default:
-                throw new InvalidOperationException("Invalid proxy type.");
-        }
-
-        Settings.ProxyMode = ProxyMode.UseCustomProxy;
-        Settings.ProxyType = proxyType;
-        await SaveSettingsAsync(Settings);
+            "http" => ProxyType.Http,
+            "https" => ProxyType.Https,
+            "socks 5" => ProxyType.Socks5,
+            _ => throw new InvalidOperationException("Invalid proxy type.")
+        };
 
         var activeProxies = Settings
             .Proxies
@@ -272,34 +257,21 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             return;
 
         proxySettings.IsActive = true;
-        ProxyHandler = handler;
+
+        Settings.ProxyMode = ProxyMode.UseCustomProxy;
+        Settings.ProxyType = proxyType;
+        await SaveSettingsAsync(Settings);
     }
 
     public async Task DisableProxyAsync()
     {
-        if (ProxyHandler == null)
-            return;
-
         Settings.ProxyMode = ProxyMode.DisableProxy;
         await SaveSettingsAsync(Settings);
-
-        ProxyHandler.Dispose();
-        ProxyHandler = null;
     }
 
     public async Task UseSystemProxySettingsAsync()
     {
-        var systemProxy = WebRequest.DefaultWebProxy;
-        if (systemProxy == null)
-            return;
-
         Settings.ProxyMode = ProxyMode.UseSystemProxySettings;
         await SaveSettingsAsync(Settings);
-
-        ProxyHandler = new HttpClientHandler
-        {
-            Proxy = systemProxy,
-            UseProxy = true
-        };
     }
 }

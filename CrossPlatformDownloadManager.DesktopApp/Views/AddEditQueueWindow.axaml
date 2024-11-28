@@ -20,7 +20,7 @@
         MaxHeight="600"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
 
     <!-- Resources -->
@@ -55,15 +55,20 @@
                     Margin="0, 15, 0, 0">
             <Button Classes="button success"
                     Command="{Binding SaveCommand}"
-                    CommandParameter="{Binding $parent[Window]}">
-                Save
-            </Button>
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
 
-            <Button Name="CancelButton"
-                    Classes="button danger"
-                    Click="CancelButton_OnClick">
-                Cancel
-            </Button>
+            <Button Classes="button warning"
+                    Command="{Binding DeleteCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Delete"
+                    IsVisible="{Binding IsEditMode}"
+                    IsEnabled="{Binding IsEditMode}" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
         </StackPanel>
     </Grid>
 </Window>

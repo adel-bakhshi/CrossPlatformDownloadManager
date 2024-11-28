@@ -8,6 +8,13 @@ namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
 public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
 {
+    #region Private Fields
+
+    private readonly Border? _menuBorder;
+    private readonly ScrollViewer? _mainScrollViewer;
+
+    #endregion
+    
     #region Properties
 
     public Window? OwnerWindow { get; set; }
@@ -17,6 +24,9 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
     public TrayMenuWindow(TrayMenuWindowViewModel viewModel)
     {
         InitializeComponent();
+        
+        _menuBorder = this.FindControl<Border>("MenuBorder");
+        _mainScrollViewer = this.FindControl<ScrollViewer>("MainScrollViewer");
 
         DataContext = viewModel;
 
@@ -35,10 +45,9 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
         if (ViewModel == null)
             return;
 
-        var scrollViewer = this.FindControl<ScrollViewer>("MainScrollViewer");
-        if (scrollViewer != null)
+        if (_mainScrollViewer != null)
         {
-            Height = scrollViewer.Extent.Height;
+            Height = _mainScrollViewer.Extent.Height + (_menuBorder?.Padding.Top ?? 0) + (_menuBorder?.Padding.Bottom ?? 0);
 
             if (OwnerWindow != null)
                 OwnerWindow.PositionChanged += OwnerWindowOnPositionChanged;
@@ -57,8 +66,19 @@ public partial class TrayMenuWindow : MyWindowBase<TrayMenuWindowViewModel>
     public override void Render(DrawingContext context)
     {
         base.Render(context);
-
         ChangeWindowPosition();
+    }
+
+    public override void Show()
+    {
+        base.Show();
+        _menuBorder?.Classes.Add("isOpened");
+    }
+
+    public override void Hide()
+    {
+        _menuBorder?.Classes.Remove("isOpened");
+        base.Hide();
     }
 
     #region Helpers

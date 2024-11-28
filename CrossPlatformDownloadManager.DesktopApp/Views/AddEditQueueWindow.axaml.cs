@@ -10,9 +10,4 @@ public partial class AddEditQueueWindow : MyWindowBase<AddEditQueueWindowViewMod
     {
         InitializeComponent();
     }
-
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close(false);
-    }
 }

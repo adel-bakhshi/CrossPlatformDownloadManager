@@ -969,7 +969,7 @@
                               Width="16"
                               Height="16"
                               VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding TotalSpeed}"
+                    <TextBlock Text="{Binding DownloadSpeed}"
                                Foreground="{DynamicResource SuccessGradientBrush}"
                                VerticalAlignment="Center" />
                 </StackPanel>

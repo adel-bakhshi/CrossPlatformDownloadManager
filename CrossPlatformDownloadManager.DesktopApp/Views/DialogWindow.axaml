@@ -17,14 +17,13 @@
         MaxWidth="450"
         MaxHeight="200"
         ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaToDecorationsHint="False"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="Transparent"
+        Background="{DynamicResource TransparentColor}"
+        SystemDecorations="None"
         CanResize="False"
         ShowInTaskbar="False"
-        Classes.information="{Binding IsInformationDialog}"
-        Classes.warning="{Binding IsWarningDialog}"
-        Classes.success="{Binding IsSuccessDialog}"
-        Classes.danger="{Binding IsDangerDialog}"
         PointerPressed="WindowOnPointerPressed">
 
     <!-- Resources -->
@@ -83,7 +82,7 @@
     <!-- Styles -->
     <Window.Styles>
         <!-- Window styles -->
-        <Style Selector="Window">
+        <Style Selector="Border.dialogBorder">
             <!-- Information styles -->
             <Style Selector="^.information">
                 <Setter Property="Background"
@@ -223,56 +222,65 @@
     </Window.Styles>
 
     <!-- Main content -->
-    <Grid Margin="20"
-          RowDefinitions="Auto, *, Auto">
-        <!-- Dialog header -->
-        <TextBlock Grid.Row="0"
-                   Text="{Binding DialogHeader}"
-                   FontWeight="Bold"
-                   TextWrapping="Wrap"
-                   Margin="0, 0, 0, 10" />
+    <Border Classes="dialogBorder"
+            Classes.information="{Binding IsInformationDialog}"
+            Classes.warning="{Binding IsWarningDialog}"
+            Classes.success="{Binding IsSuccessDialog}"
+            Classes.danger="{Binding IsDangerDialog}"
+            CornerRadius="30"
+            ClipToBounds="True"
+            BorderThickness="0">
+        <Grid Margin="20"
+              RowDefinitions="Auto, *, Auto">
+            <!-- Dialog header -->
+            <TextBlock Grid.Row="0"
+                       Text="{Binding DialogHeader}"
+                       FontWeight="Bold"
+                       TextWrapping="Wrap"
+                       Margin="0, 0, 0, 10" />
 
-        <!-- Dialog message -->
-        <ScrollViewer Grid.Row="1"
-                      HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Hidden">
-            <TextBlock Text="{Binding DialogMessage}"
-                       TextWrapping="Wrap" />
-        </ScrollViewer>
+            <!-- Dialog message -->
+            <ScrollViewer Grid.Row="1"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Hidden">
+                <TextBlock Text="{Binding DialogMessage}"
+                           TextWrapping="Wrap" />
+            </ScrollViewer>
 
-        <!-- Dialog buttons -->
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    Spacing="10"
-                    HorizontalAlignment="Right"
-                    Margin="0, 10, 0, 0">
-            <!-- Ok button -->
-            <Button Content="Ok"
-                    Classes="dialogButton okButton"
-                    IsVisible="{Binding IsOkButtonVisible}"
-                    Effect="{DynamicResource DialogButtonsShadowEffect}"
-                    Click="DialogButtonOnClick" />
+            <!-- Dialog buttons -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Right"
+                        Margin="0, 10, 0, 0">
+                <!-- Ok button -->
+                <Button Content="Ok"
+                        Classes="dialogButton okButton"
+                        IsVisible="{Binding IsOkButtonVisible}"
+                        Effect="{DynamicResource DialogButtonsShadowEffect}"
+                        Click="DialogButtonOnClick" />
 
-            <!-- Yes button -->
-            <Button Content="Yes"
-                    Classes="dialogButton yesButton"
-                    IsVisible="{Binding IsYesButtonVisible}"
-                    Effect="{DynamicResource DialogButtonsShadowEffect}"
-                    Click="DialogButtonOnClick" />
+                <!-- Yes button -->
+                <Button Content="Yes"
+                        Classes="dialogButton yesButton"
+                        IsVisible="{Binding IsYesButtonVisible}"
+                        Effect="{DynamicResource DialogButtonsShadowEffect}"
+                        Click="DialogButtonOnClick" />
 
-            <!-- No button -->
-            <Button Content="No"
-                    Classes="dialogButton noButton"
-                    IsVisible="{Binding IsNoButtonVisible}"
-                    Effect="{DynamicResource DialogButtonsShadowEffect}"
-                    Click="DialogButtonOnClick" />
+                <!-- No button -->
+                <Button Content="No"
+                        Classes="dialogButton noButton"
+                        IsVisible="{Binding IsNoButtonVisible}"
+                        Effect="{DynamicResource DialogButtonsShadowEffect}"
+                        Click="DialogButtonOnClick" />
 
-            <!-- Cancel button -->
-            <Button Content="Cancel"
-                    Classes="dialogButton cancelButton"
-                    IsVisible="{Binding IsCancelButtonVisible}"
-                    Effect="{DynamicResource DialogButtonsShadowEffect}"
-                    Click="DialogButtonOnClick" />
-        </StackPanel>
-    </Grid>
+                <!-- Cancel button -->
+                <Button Content="Cancel"
+                        Classes="dialogButton cancelButton"
+                        IsVisible="{Binding IsCancelButtonVisible}"
+                        Effect="{DynamicResource DialogButtonsShadowEffect}"
+                        Click="DialogButtonOnClick" />
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

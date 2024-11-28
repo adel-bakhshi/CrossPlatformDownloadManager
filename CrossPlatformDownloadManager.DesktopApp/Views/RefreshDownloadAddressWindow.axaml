@@ -19,7 +19,7 @@
         MaxHeight="200"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
     <!-- Main content -->
     <Grid Margin="20"

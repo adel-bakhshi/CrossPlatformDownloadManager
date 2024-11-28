@@ -16,11 +16,20 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class AddEditQueueWindowViewModel : ViewModelBase
 {
+    #region Private Fields
+
+    private bool _isEditMode;
+    private ObservableCollection<string> _tabItems = [];
+    private string? _selectedTabItem;
+    private DownloadQueueViewModel _downloadQueue = null!;
+    private OptionsViewModel? _optionsViewModel;
+    private FilesViewModel? _filesViewModel;
+
+    #endregion
+
     #region Properties
 
     public string Title => IsEditMode ? "CDM - Edit Queue" : "CDM - Add New Queue";
-
-    private bool _isEditMode;
 
     public bool IsEditMode
     {
@@ -32,23 +41,17 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
     }
 
-    private ObservableCollection<string> _tabItems = [];
-
     public ObservableCollection<string> TabItems
     {
         get => _tabItems;
         set => this.RaiseAndSetIfChanged(ref _tabItems, value);
     }
 
-    private string? _selectedTabItem;
-
     public string? SelectedTabItem
     {
         get => _selectedTabItem;
         set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
     }
-
-    private DownloadQueueViewModel _downloadQueue;
 
     public DownloadQueueViewModel DownloadQueue
     {
@@ -60,15 +63,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
     }
 
-    private OptionsViewModel? _optionsViewModel;
-
     public OptionsViewModel? OptionsViewModel
     {
         get => _optionsViewModel;
         set => this.RaiseAndSetIfChanged(ref _optionsViewModel, value);
     }
-
-    private FilesViewModel? _filesViewModel;
 
     public FilesViewModel? FilesViewModel
     {
@@ -80,7 +79,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
     #region Commands
 
-    public ICommand? SaveCommand { get; }
+    public ICommand SaveCommand { get; }
+
+    public ICommand DeleteCommand { get; }
+
+    public ICommand CancelCommand { get; }
 
     #endregion
 
@@ -94,6 +97,8 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         FilesViewModel = new FilesViewModel(appService) { DownloadQueue = DownloadQueue };
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
+        DeleteCommand = ReactiveCommand.CreateFromTask<Window?>(DeleteAsync);
+        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
     private void LoadDownloadQueueData()
@@ -149,26 +154,26 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 DownloadQueue.DownloadCountAtSameTime = 1;
             }
 
-            switch (DownloadQueue)
-            {
-                case { IsDaily: false, JustForDate: null }:
-                {
-                    await ShowInfoDialogAsync("Attention", "When you choose 'Once', please select a date.", DialogButtons.Ok);
-                    return;
-                }
-
-                case { IsDaily: true, DaysOfWeekViewModel: not { IsAnyDaySelected: true } }:
-                {
-                    await ShowInfoDialogAsync("Attention", "When you choose 'Daily', please select at least one day.", DialogButtons.Ok);
-                    return;
-                }
-            }
-
             TimeSpan? startSchedule = null;
             TimeSpan? stopSchedule = null;
 
             if (DownloadQueue.StartDownloadScheduleEnabled)
             {
+                switch (DownloadQueue)
+                {
+                    case { IsDaily: false, JustForDate: null }:
+                    {
+                        await ShowInfoDialogAsync("Attention", "When you choose 'Once', please select a date.", DialogButtons.Ok);
+                        return;
+                    }
+
+                    case { IsDaily: true, DaysOfWeekViewModel: not { IsAnyDaySelected: true } }:
+                    {
+                        await ShowInfoDialogAsync("Attention", "When you choose 'Daily', please select at least one day.", DialogButtons.Ok);
+                        return;
+                    }
+                }
+                
                 if (DownloadQueue.StartDownloadHour == null || DownloadQueue.StartDownloadMinute == null)
                 {
                     await ShowInfoDialogAsync("Attention", "Please select a start time for your queue.", DialogButtons.Ok);
@@ -303,6 +308,65 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 .UpdateDownloadFilesAsync(downloadFiles);
 
             owner.Close(true);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task DeleteAsync(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                throw new InvalidOperationException("An error occured while trying to cancel.");
+
+            if (DownloadQueue.Id == 0)
+                return;
+
+            var downloadQueue = AppService
+                .DownloadQueueService
+                .DownloadQueues
+                .FirstOrDefault(dq => dq.Id == DownloadQueue.Id);
+
+            if (downloadQueue == null)
+                return;
+
+            var result = await ShowWarningDialogAsync("Delete queue",
+                $"You are about to remove '{downloadQueue.Title}'. Do you want to confirm this action?",
+                DialogButtons.YesNo);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            if (downloadQueue.IsRunning)
+            {
+                await AppService
+                    .DownloadQueueService
+                    .StopDownloadQueueAsync(downloadQueue);
+            }
+            
+            await AppService
+                .DownloadQueueService
+                .DeleteDownloadQueueAsync(downloadQueue);
+
+            await CancelAsync(owner);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task CancelAsync(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                throw new InvalidOperationException("An error occured while trying to cancel.");
+
+            owner.Close(false);
         }
         catch (Exception ex)
         {

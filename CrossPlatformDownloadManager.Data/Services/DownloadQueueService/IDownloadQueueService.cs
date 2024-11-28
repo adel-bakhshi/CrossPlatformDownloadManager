@@ -37,14 +37,13 @@ public interface IDownloadQueueService
 
     Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
-    Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
-        DownloadFileViewModel? downloadFileViewModel);
+    Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, DownloadFileViewModel? downloadFileViewModel);
     
-    Task AddDownloadFilesToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
-        List<DownloadFileViewModel>? downloadFilesViewModels);
+    Task AddDownloadFilesToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, List<DownloadFileViewModel>? downloadFilesViewModels);
 
-    Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
-        DownloadFileViewModel? downloadFileViewModel);
+    Task RemoveDownloadFileFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, DownloadFileViewModel? downloadFileViewModel);
+    
+    Task RemoveDownloadFilesFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, List<DownloadFileViewModel> downloadFileViewModels);
     
     Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 

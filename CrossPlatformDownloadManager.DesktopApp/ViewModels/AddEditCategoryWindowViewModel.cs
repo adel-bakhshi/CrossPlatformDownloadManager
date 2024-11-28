@@ -166,10 +166,10 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
             if (IsEditMode && category.FileExtensions.Count > 0)
             {
-                AppService
+                await AppService
                     .UnitOfWork
                     .CategoryFileExtensionRepository
-                    .DeleteAll(category.FileExtensions);
+                    .DeleteAllAsync(category.FileExtensions);
 
                 await AppService
                     .UnitOfWork

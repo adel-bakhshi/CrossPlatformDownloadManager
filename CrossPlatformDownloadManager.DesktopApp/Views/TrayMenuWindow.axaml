@@ -20,9 +20,11 @@
         MaxWidth="200"
         MaxHeight="400"
         ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
-        Background="{DynamicResource MenuBackgroundColor}"
+        ExtendClientAreaToDecorationsHint="False"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="Transparent"
+        Background="{DynamicResource TransparentColor}"
+        SystemDecorations="None"
         ClipToBounds="True"
         CanResize="False"
         BorderThickness="0"
@@ -86,13 +88,54 @@
                         Value="{DynamicResource TertiaryColor}" />
             </Style>
         </Style>
+
+        <!-- Menu border style -->
+        <Style Selector="Border.menuBorder">
+            <Setter Property="Padding"
+                    Value="0, 8" />
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource DefaultCornerRadius}" />
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuBackgroundColor}" />
+            <Setter Property="ClipToBounds"
+                    Value="True" />
+            <Setter Property="RenderTransform"
+                    Value="scale(0)" />
+            <Setter Property="RenderTransformOrigin"
+                    Value="50%, 100%" />
+            <Setter Property="Opacity"
+                    Value="0" />
+            <Setter Property="IsVisible"
+                    Value="False" />
+
+            <!-- Is opened style -->
+            <Style Selector="^.isOpened">
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <TransformOperationsTransition Duration="00:00:00.3"
+                                                           Property="RenderTransform" />
+
+                            <DoubleTransition Duration="00:00:00.3"
+                                              Property="Opacity" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+                
+                <Setter Property="RenderTransform"
+                        Value="scale(1)" />
+                <Setter Property="Opacity"
+                        Value="1" />
+                <Setter Property="IsVisible"
+                        Value="True" />
+            </Style>
+        </Style>
     </Window.Styles>
 
     <!-- Content -->
-    <Border Padding="0, 8"
-            CornerRadius="{DynamicResource DefaultCornerRadius}"
-            Background="{DynamicResource MenuBackgroundColor}"
-            ClipToBounds="True">
+    <Border Name="MenuBorder"
+            Classes="menuBorder">
         <ScrollViewer Name="MainScrollViewer"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Hidden">
@@ -345,20 +388,17 @@
                                                 Value="{DynamicResource TransparentColor}" />
                                     </Style>
 
-                                    <Style
-                                        Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
                                         <Setter Property="Background"
                                                 Value="{DynamicResource TransparentColor}" />
                                     </Style>
 
-                                    <Style
-                                        Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                         <Setter Property="Background"
                                                 Value="{DynamicResource TransparentColor}" />
                                     </Style>
 
-                                    <Style
-                                        Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                         <Setter Property="Background"
                                                 Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
                                     </Style>
@@ -458,7 +498,7 @@
                            Fill="{DynamicResource SecondaryColor}"
                            Margin="8, 4" />
 
-                <!-- About us -->
+                <!-- Exit -->
                 <Button Classes="menuItemButton"
                         Command="{Binding ExitProgramCommand}">
                     <!-- Content -->

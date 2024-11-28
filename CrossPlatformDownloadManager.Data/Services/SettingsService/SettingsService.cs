@@ -193,7 +193,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (proxySettingsInDb == null)
             return;
 
-        _unitOfWork.ProxySettingsRepository.Delete(proxySettingsInDb);
+        await _unitOfWork.ProxySettingsRepository.DeleteAsync(proxySettingsInDb);
         await _unitOfWork.SaveAsync();
 
         await LoadSettingsAsync();

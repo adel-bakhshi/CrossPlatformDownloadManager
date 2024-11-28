@@ -32,15 +32,17 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 
     private async void GetUrlInfo(object? sender, EventArgs e)
     {
-        if (ViewModel == null)
-            return;
-        
-        _urlTextChangedTimer.Stop();
-        await ViewModel.GetUrlInfoAsync();
-    }
+        try
+        {
+            if (ViewModel == null)
+                return;
 
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
+            _urlTextChangedTimer.Stop();
+            await ViewModel.GetUrlInfoAsync();
+        }
+        catch (Exception ex)
+        {
+            ViewModel?.ShowErrorDialogAsync(ex);
+        }
     }
 }

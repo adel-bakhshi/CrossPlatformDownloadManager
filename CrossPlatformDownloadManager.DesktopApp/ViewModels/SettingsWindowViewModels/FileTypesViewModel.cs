@@ -165,11 +165,11 @@ public class FileTypesViewModel : ViewModelBase
             if (fileExtension == null)
                 return;
 
-            AppService
+            await AppService
                 .UnitOfWork
                 .CategoryFileExtensionRepository
-                .Delete(fileExtension);
-            
+                .DeleteAsync(fileExtension);
+
             await AppService
                 .UnitOfWork
                 .SaveAsync();
@@ -213,7 +213,7 @@ public class FileTypesViewModel : ViewModelBase
             var fileExtensionViewModels = AppService
                 .Mapper
                 .Map<List<CategoryFileExtensionViewModel>>(fileExtensions);
-            
+
             _dbFileExtensions.AddRange(fileExtensionViewModels);
             FilterFileExtensions();
         }

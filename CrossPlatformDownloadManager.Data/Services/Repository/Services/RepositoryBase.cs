@@ -14,7 +14,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
 
     #endregion
 
-    public RepositoryBase(DownloadManagerDbContext dbContext)
+    protected RepositoryBase(DownloadManagerDbContext dbContext)
     {
         _table = dbContext.Set<T>() ?? throw new InvalidOperationException("Entity not found.");
     }
@@ -138,21 +138,30 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
         return data.Select(select).ToList();
     }
 
-    public void Delete(T? entity)
+    public async Task DeleteAsync(T? entity)
     {
         if (entity == null)
             return;
+        
+        var entityInDb = await GetAsync(where: e => e.Id == entity.Id);
+        if (entityInDb == null)
+            return;
 
-        _table.Remove(entity);
+        _table.Remove(entityInDb);
     }
 
-    public void DeleteAll(IEnumerable<T>? entities)
+    public async Task DeleteAllAsync(IEnumerable<T>? entities)
     {
         var objects = entities?.ToList() ?? [];
         if (objects.Count == 0)
             return;
-
-        _table.RemoveRange(objects);
+        
+        var primaryKeys = objects.ConvertAll(o => o.Id);
+        var entitiesInDb = await GetAllAsync(where: e => primaryKeys.Contains(e.Id));
+        if (entitiesInDb.Count == 0)
+            return;
+        
+        _table.RemoveRange(entitiesInDb);
     }
 
     public async Task UpdateAsync(T? entity)
@@ -161,7 +170,11 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
             return;
 
         var entityInDb = await GetAsync(where: e => e.Id == entity.Id);
-        entityInDb?.UpdateDbModel(entity);
+        if (entityInDb == null)
+            return;
+        
+        entityInDb.UpdateDbModel(entity);
+        _table.Update(entityInDb);
     }
 
     public async Task UpdateAllAsync(IEnumerable<T>? entities)
@@ -170,10 +183,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
         if (objects.Count == 0)
             return;
 
-        var primaryKeys = objects
-            .Select(o => o.Id)
-            .ToList();
-
+        var primaryKeys = objects.ConvertAll(o => o.Id);
         var entitiesInDb = await GetAllAsync(where: e => primaryKeys.Contains(e.Id));
         if (entitiesInDb.Count == 0)
             return;
@@ -183,6 +193,8 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : DbModelBase
             var updatedEntity = objects.Find(o => o.Id == dbModel.Id);
             dbModel.UpdateDbModel(updatedEntity);
         }
+
+        _table.UpdateRange(entitiesInDb);
     }
 
     public async Task<int> GetCountAsync(Expression<Func<T, bool>>? where = null, bool distinct = false,

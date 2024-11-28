@@ -128,10 +128,6 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
                 fileExtension.Extension = Extension!;
                 fileExtension.Alias = Alias!;
-
-                await AppService
-                    .UnitOfWork
-                    .SaveAsync();
             }
             else
             {
@@ -156,11 +152,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
                     .UnitOfWork
                     .CategoryFileExtensionRepository
                     .AddAsync(fileExtension);
-                
-                await AppService
-                    .UnitOfWork
-                    .SaveAsync();
             }
+
+            await AppService
+                .UnitOfWork
+                .SaveAsync();
 
             owner.Close(true);
         }

@@ -20,7 +20,7 @@
         MinHeight="270"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0">
+        ExtendClientAreaTitleBarHeightHint="-1">
 
     <!-- Resources -->
     <Window.Resources>
@@ -257,23 +257,22 @@
                 <Button Classes="button info"
                         Flyout="{StaticResource DownloadLaterContentFlyout}"
                         Command="{Binding AddToDefaultQueueCommand}"
-                        CommandParameter="{Binding $parent[Window]}">
-                    Download Later
-                </Button>
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Download Later"
+                        IsEnabled="{Binding !IsLoadingUrl}" />
 
                 <!-- Start download button -->
                 <Button Classes="button success"
                         Command="{Binding StartDownloadCommand}"
-                        CommandParameter="{Binding $parent[Window]}">
-                    Start Download
-                </Button>
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Start Download"
+                        IsEnabled="{Binding !IsLoadingUrl}" />
 
                 <!-- Cancel button -->
-                <Button Name="CancelButton"
-                        Classes="button danger"
-                        Click="CancelButton_OnClick">
-                    Cancel
-                </Button>
+                <Button Classes="button danger"
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Cancel" />
             </StackPanel>
         </Grid>
     </Grid>

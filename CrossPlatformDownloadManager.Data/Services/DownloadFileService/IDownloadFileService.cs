@@ -15,6 +15,8 @@ public interface IDownloadFileService
     #region Properties
 
     ObservableCollection<DownloadFileViewModel> DownloadFiles { get; }
+    
+    Dictionary<int, List<Func<DownloadFileViewModel?, Task<DownloadFinishedTaskValue?>>>> DownloadFinishedTasks { get; }
 
     #endregion
 
@@ -45,4 +47,6 @@ public interface IDownloadFileService
     Task DeleteDownloadFilesAsync(List<DownloadFileViewModel>? viewModels, bool alsoDeleteFile, bool reloadData = true);
 
     Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel);
+
+    string GetDownloadSpeed();
 }

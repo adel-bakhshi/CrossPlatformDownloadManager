@@ -35,7 +35,7 @@ public class MainWindowViewModel : ViewModelBase
     private Category? _selectedCategory;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
     private bool _selectAllDownloadFiles;
-    private string? _totalSpeed;
+    private string _downloadSpeed = "0 KB";
     private string? _selectedFilesTotalSize;
     private string? _searchText;
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
@@ -88,10 +88,10 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectAllDownloadFiles, value);
     }
 
-    public string? TotalSpeed
+    public string DownloadSpeed
     {
-        get => _totalSpeed;
-        set => this.RaiseAndSetIfChanged(ref _totalSpeed, value);
+        get => _downloadSpeed;
+        set => this.RaiseAndSetIfChanged(ref _downloadSpeed, value);
     }
 
     public string? SelectedFilesTotalSize
@@ -213,7 +213,7 @@ public class MainWindowViewModel : ViewModelBase
         FilterDownloadList();
         LoadDownloadQueues();
 
-        TotalSpeed = "0 KB";
+        DownloadSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
 
         SelectAllRowsCommand = ReactiveCommand.CreateFromTask<DataGrid?>(SelectAllRowsAsync);
@@ -224,8 +224,7 @@ public class MainWindowViewModel : ViewModelBase
         DeleteDownloadFilesCommand = ReactiveCommand.CreateFromTask<DataGrid?>(DeleteDownloadFilesAsync);
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.CreateFromTask(DeleteCompletedDownloadFilesAsync);
         OpenSettingsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsWindowAsync);
-        StartStopDownloadQueueCommand =
-            ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
+        StartStopDownloadQueueCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         ShowDownloadQueueDetailsCommand = ReactiveCommand.CreateFromTask<Button?>(ShowDownloadQueueDetailsAsync);
         AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewDownloadQueueAsync);
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
@@ -237,13 +236,11 @@ public class MainWindowViewModel : ViewModelBase
         RedownloadContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RedownloadContextMenuAsync);
         ResumeContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ResumeContextMenuAsync);
         StopContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(StopContextMenuAsync);
-        RefreshDownloadAddressContextMenuCommand =
-            ReactiveCommand.CreateFromTask<DataGrid?>(RefreshDownloadAddressContextMenuAsync);
+        RefreshDownloadAddressContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RefreshDownloadAddressContextMenuAsync);
         RemoveContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveContextMenuAsync);
         AddToQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(AddToQueueContextMenuAsync);
         RemoveFromQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveFromQueueContextMenuAsync);
-        AddDownloadFileToDownloadQueueContextMenuCommand =
-            ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(AddDownloadFileToDownloadQueueContextMenuAsync);
+        AddDownloadFileToDownloadQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(AddDownloadFileToDownloadQueueContextMenuAsync);
     }
 
     private void LoadDownloadQueues()
@@ -1088,13 +1085,9 @@ public class MainWindowViewModel : ViewModelBase
 
     private void UpdateDownloadSpeedTimerOnTick(object? sender, EventArgs e)
     {
-        var totalSpeed = AppService
+        DownloadSpeed = AppService
             .DownloadFileService
-            .DownloadFiles
-            .Where(df => df.IsDownloading)
-            .Sum(df => df.TransferRate ?? 0);
-
-        TotalSpeed = totalSpeed == 0 ? "0 KB" : totalSpeed.ToFileSize();
+            .GetDownloadSpeed();
     }
 
     private void UpdateActiveDownloadQueuesTimerOnTick(object? sender, EventArgs e)

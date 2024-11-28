@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -12,36 +13,70 @@
         Title="CDM - Tray Icon"
         ShowInTaskbar="False"
         Topmost="True"
-        Width="140"
+        Width="200"
         Height="40"
         ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaToDecorationsHint="False"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="Transparent"
+        Background="{DynamicResource TransparentColor}"
+        SystemDecorations="None"
         CornerRadius="8"
         ClipToBounds="True"
         CanResize="False"
         WindowStartupLocation="Manual"
         PointerPressed="Window_OnPointerPressed">
-    <StackPanel Orientation="Horizontal"
-                Spacing="15">
-        <!-- Brand -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Background="{DynamicResource DangerGradientBrush}"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Left"
-                Width="56"
-                Height="32"
-                Margin="4, 0, 0, 0">
-            <TextBlock Text="CDM"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center" />
-        </Border>
 
-        <!-- Is ready text -->
-        <TextBlock Text="is ready"
-                   FontStyle="Italic"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center" />
-    </StackPanel>
+    <!-- Resources -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:PillCornerRadiusConverter x:Key="PillCornerRadiusConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- Main content -->
+    <Border CornerRadius="{Binding $self.Bounds.Height, Converter={StaticResource PillCornerRadiusConverter}}"
+            Background="{DynamicResource ProgressBarGradientBrush}"
+            BorderThickness="0"
+            Padding="12, 0">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <!-- Brand -->
+            <TextBlock Grid.Column="0"
+                       Text="CDM"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Width="32" />
+
+            <!-- Download speed -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="5"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <PathIcon Data="{DynamicResource Download}"
+                          Foreground="{DynamicResource TextColor}"
+                          Width="16"
+                          Height="16"
+                          VerticalAlignment="Center" />
+                <TextBlock Text="{Binding DownloadSpeed}"
+                           Foreground="{DynamicResource TextColor}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Exit button -->
+            <StackPanel Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Width="32">
+                <Button Classes="smallIconButton"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ExitProgramCommand}"
+                        ToolTip.Tip="Exit CDM">
+                    <PathIcon Width="16"
+                              Height="16"
+                              Data="{DynamicResource CircleXMark}"
+                              Foreground="{DynamicResource TextColor}" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

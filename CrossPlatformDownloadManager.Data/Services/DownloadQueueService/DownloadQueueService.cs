@@ -54,21 +54,17 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
         var downloadQueues = await _unitOfWork
             .DownloadQueueRepository
-            .GetAllAsync(includeProperties: ["DownloadFiles"]);
-
-        var primaryKeys = downloadQueues
-            .Select(df => df.Id)
-            .ToList();
+            .GetAllAsync();
 
         var deletedDownloadQueues = DownloadQueues
-            .Where(df => !primaryKeys.Contains(df.Id))
+            .Where(vm => !downloadQueues.Exists(dq => dq.Id == vm.Id))
             .ToList();
 
         foreach (var downloadQueue in deletedDownloadQueues)
-            await DeleteDownloadQueueAsync(viewModel: downloadQueue, reloadData: false);
+            DownloadQueues.Remove(downloadQueue);
 
         var addDownloadQueues = downloadQueues
-            .Where(dq => DownloadQueues.All(odq => odq.Id != dq.Id))
+            .Where(dq => DownloadQueues.All(vm => vm.Id != dq.Id))
             .Select(dq => _mapper.Map<DownloadQueueViewModel>(dq))
             .ToList();
 
@@ -99,7 +95,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
         var downloadQueueInDb = await _unitOfWork
             .DownloadQueueRepository
-            .GetAsync(dq => dq.Id == downloadQueue.Id, includeProperties: "DownloadFiles");
+            .GetAsync(dq => dq.Id == downloadQueue.Id);
 
         if (downloadQueueInDb == null)
             return;
@@ -109,16 +105,9 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .Where(df => df.DownloadQueueId == downloadQueueInDb.Id)
             .ToList();
 
-        foreach (var downloadFile in downloadFiles)
-        {
-            downloadFile.DownloadQueueId = null;
-            downloadFile.DownloadQueueName = null;
-            downloadFile.DownloadQueuePriority = null;
-        }
+        await RemoveDownloadFilesFromDownloadQueueAsync(downloadQueue, downloadFiles);
 
-        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
-
-        _unitOfWork.DownloadQueueRepository.Delete(downloadQueueInDb);
+        await _unitOfWork.DownloadQueueRepository.DeleteAsync(downloadQueueInDb);
         await _unitOfWork.SaveAsync();
 
         if (reloadData)
@@ -246,7 +235,36 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             return;
 
         downloadFile.DownloadQueueId = null;
+        downloadFile.DownloadQueueName = null;
+        downloadFile.DownloadQueuePriority = null;
+        
         await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
+        await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
+    }
+
+    public async Task RemoveDownloadFilesFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, 
+        List<DownloadFileViewModel> downloadFileViewModels)
+    {
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueViewModel?.Id);
+        if (downloadQueue == null || downloadFileViewModels.Count == 0)
+            return;
+        
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => downloadFileViewModels.Exists(vm => vm.Id == df.Id))
+            .ToList();
+
+        if (downloadFiles.Count == 0 || downloadFiles.Exists(df => df.IsDownloading || df.IsPaused))
+            return;
+
+        foreach (var downloadFile in downloadFiles)
+        {
+            downloadFile.DownloadQueueId = null;
+            downloadFile.DownloadQueueName = null;
+            downloadFile.DownloadQueuePriority = null;
+        }
+        
+        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
         await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }
 
@@ -340,11 +358,8 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await AddNewDownloadQueueAsync(downloadQueue, reloadData: false);
     }
 
-    private async void DownloadFileServiceOnDataChanged(object? sender, EventArgs e)
+    private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e)
     {
-        // Update DownloadQueue data
-        await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
-
         // Remove DownloadFile from DownloadQueueTasks list when DownloadFile does not exist anymore
         var primaryKeys = _downloadFileService
             .DownloadFiles

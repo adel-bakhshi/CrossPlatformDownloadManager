@@ -48,7 +48,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.HasIndex("CategorySaveDirectoryId")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.CategoryFileExtension", b =>
@@ -74,7 +74,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategoryFileExtensions");
+                    b.ToTable("CategoryFileExtensions", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.CategoryHeader", b =>
@@ -95,7 +95,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryHeaders");
+                    b.ToTable("CategoryHeaders", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.CategorySaveDirectory", b =>
@@ -116,7 +116,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategorySaveDirectories");
+                    b.ToTable("CategorySaveDirectories", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.DownloadFile", b =>
@@ -188,7 +188,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasIndex("DownloadQueueId");
 
-                    b.ToTable("DownloadFiles");
+                    b.ToTable("DownloadFiles", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.DownloadQueue", b =>
@@ -253,7 +253,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DownloadQueues");
+                    b.ToTable("DownloadQueues", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.ProxySettings", b =>
@@ -297,7 +297,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasIndex("SettingsId");
 
-                    b.ToTable("ProxySettings");
+                    b.ToTable("ProxySettings", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Settings", b =>
@@ -358,7 +358,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Settings");
+                    b.ToTable("Settings", (string)null);
                 });
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Category", b =>

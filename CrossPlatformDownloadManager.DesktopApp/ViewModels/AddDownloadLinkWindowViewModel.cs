@@ -133,6 +133,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     public ICommand AddToDefaultQueueCommand { get; }
 
     public ICommand StartDownloadCommand { get; }
+    
+    public ICommand CancelCommand { get; }
 
     #endregion
 
@@ -146,6 +148,22 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         AddFileToQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddFileToQueueAsync);
         AddToDefaultQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddToDefaultQueueAsync);
         StartDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(StartDownloadAsync);
+        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
+    }
+
+    private async Task CancelAsync(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                throw new InvalidOperationException("Window is null.");
+
+            owner.Close();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 
     private async Task StartDownloadAsync(Window? owner)

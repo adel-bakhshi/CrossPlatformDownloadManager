@@ -43,6 +43,7 @@
                         Orientation="Horizontal"
                         Spacing="10"
                         HorizontalAlignment="Right">
+                <!-- Higher priority button -->
                 <Button Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
@@ -57,6 +58,7 @@
                               VerticalAlignment="Center" />
                 </Button>
 
+                <!-- Lower priority button -->
                 <Button Classes="button info"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
@@ -71,6 +73,7 @@
                               VerticalAlignment="Center" />
                 </Button>
 
+                <!-- Delete file from queue button -->
                 <Button Classes="button danger"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
@@ -85,6 +88,7 @@
                               VerticalAlignment="Center" />
                 </Button>
 
+                <!-- Add file to queue button -->
                 <Button Classes="button success"
                         Height="{Binding $parent[StackPanel].Bounds.Height}"
                         Width="{Binding $self.Bounds.Height}"
@@ -112,7 +116,8 @@
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Center"
                            TextAlignment="Left"
-                           Text="Include paused files" />
+                           Text="Include paused files"
+                           ToolTip.Tip="By enabling this feature, if there is a file in your queue that is Paused, the queue will consider this file as part of the download process and include it in the count of simultaneous downloads." />
 
                 <ToggleSwitch Grid.Column="1"
                               OffContent="{x:Null}"

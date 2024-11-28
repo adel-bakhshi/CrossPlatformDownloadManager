@@ -29,9 +29,9 @@ public interface IRepositoryBase<T> where T : DbModelBase
         bool distinct = false,
         params string[] includeProperties);
 
-    void Delete(T? entity);
+    Task DeleteAsync(T? entity);
 
-    void DeleteAll(IEnumerable<T>? entities);
+    Task DeleteAllAsync(IEnumerable<T>? entities);
 
     Task UpdateAsync(T? entity);
 

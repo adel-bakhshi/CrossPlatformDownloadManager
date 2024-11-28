@@ -147,25 +147,25 @@ public class SaveLocationsViewModel : ViewModelBase
             if (category.IsDefault)
                 return;
 
-            AppService
+            await AppService
                 .UnitOfWork
                 .CategorySaveDirectoryRepository
-                .Delete(category.CategorySaveDirectory);
+                .DeleteAsync(category.CategorySaveDirectory);
 
-            AppService
+            await AppService
                 .UnitOfWork
                 .CategoryFileExtensionRepository
-                .DeleteAll(category.FileExtensions);
+                .DeleteAllAsync(category.FileExtensions);
 
-            AppService
+            await AppService
                 .UnitOfWork
                 .DownloadFileRepository
-                .DeleteAll(category.DownloadFiles);
+                .DeleteAllAsync(category.DownloadFiles);
 
-            AppService
+            await AppService
                 .UnitOfWork
                 .CategoryRepository
-                .Delete(category);
+                .DeleteAsync(category);
 
             await AppService
                 .UnitOfWork

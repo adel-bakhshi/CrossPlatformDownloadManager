@@ -24,7 +24,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
 
-    private ObservableCollection<DownloadFileViewModel> _downloadFiles;
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
 
     #endregion
 
@@ -42,6 +42,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         private set => SetField(ref _downloadFiles, value);
     }
 
+    public Dictionary<int, List<Func<DownloadFileViewModel?, Task<DownloadFinishedTaskValue?>>>> DownloadFinishedTasks { get; }
+
     #endregion
 
     public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper, ISettingsService settingsService)
@@ -52,7 +54,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         _downloadFileTasks = [];
 
-        _downloadFiles = [];
+        DownloadFiles = [];
+        DownloadFinishedTasks = [];
     }
 
     public async Task LoadDownloadFilesAsync()
@@ -185,7 +188,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 var systemProxy = WebRequest.DefaultWebProxy;
                 if (systemProxy == null)
                     break;
-                
+
                 configuration.RequestConfiguration.Proxy = systemProxy;
                 break;
             }
@@ -196,7 +199,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     .Settings
                     .Proxies
                     .FirstOrDefault(p => p.IsActive);
-                
+
                 if (activeProxy == null)
                     break;
 
@@ -205,10 +208,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     Address = new Uri(activeProxy.GetProxyUri()),
                     Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password),
                 };
-                
+
                 break;
             }
-            
+
             default:
                 throw new InvalidOperationException("Invalid proxy mode.");
         }
@@ -322,7 +325,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (shouldReturn)
             return;
 
-        _unitOfWork.DownloadFileRepository.Delete(downloadFileInDb);
+        await _unitOfWork.DownloadFileRepository.DeleteAsync(downloadFileInDb);
         await _unitOfWork.SaveAsync();
 
         if (reloadData)
@@ -367,68 +370,103 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         _ = StartDownloadFileAsync(downloadFile);
     }
 
+    public string GetDownloadSpeed()
+    {
+        var downloadSpeed = DownloadFiles
+            .Where(df => df.IsDownloading)
+            .Sum(df => df.TransferRate ?? 0);
+
+        return downloadSpeed == 0 ? "0 KB" : downloadSpeed.ToFileSize();
+    }
+
     #region Helpers
 
     private async void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {
-        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
-        if (downloadFile == null)
-            return;
-
-        downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-
-        downloadFile.TimeLeft = null;
-        downloadFile.TransferRate = null;
-
-        if (downloadFile.IsCompleted)
+        try
         {
-            downloadFile.DownloadPackage = null;
-            downloadFile.DownloadQueueId = null;
-            downloadFile.DownloadQueueName = null;
-            downloadFile.DownloadQueuePriority = null;
+            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
+            if (downloadFile == null)
+                return;
+
+            downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+
+            downloadFile.TimeLeft = null;
+            downloadFile.TransferRate = null;
+
+            if (downloadFile.IsCompleted)
+            {
+                downloadFile.DownloadPackage = null;
+                downloadFile.DownloadQueueId = null;
+                downloadFile.DownloadQueueName = null;
+                downloadFile.DownloadQueuePriority = null;
+            }
+
+            List<DownloadFinishedTaskValue?> downloadFinishedTaskValues = [];
+            if (DownloadFinishedTasks.TryGetValue(downloadFile.Id, out var downloadFinishedTasks))
+            {
+                foreach (var downloadFinishedTask in downloadFinishedTasks)
+                {
+                    var value = await downloadFinishedTask.Invoke(downloadFile);
+                    downloadFinishedTaskValues.Add(value);
+                }
+            }
+
+            DownloadFinishedTasks.Remove(downloadFile.Id);
+
+            if (downloadFinishedTaskValues.Exists(v => v?.Exception != null))
+                throw downloadFinishedTaskValues.Find(v => v!.Exception != null)!.Exception!;
+
+            if (downloadFinishedTaskValues.TrueForAll(v => v == null) ||
+                downloadFinishedTaskValues.Exists(v => v?.UpdateDownloadFile == true))
+            {
+                await UpdateDownloadFileAsync(downloadFile);
+            }
+
+            // Find task from the list
+            var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+            if (downloadFileTask == null)
+                return;
+
+            // Check if the task is stopping
+            if (downloadFileTask.Stopping)
+            {
+                // Set the stopping flag to false
+                downloadFileTask.Stopping = false;
+                // Set the stop operation finished flag to true
+                downloadFileTask.StopOperationFinished = true;
+            }
+            else
+            {
+                // Remove the task from the list
+                _downloadFileTasks.Remove(downloadFileTask);
+            }
         }
-
-        await UpdateDownloadFileAsync(downloadFile);
-
-        // Find task from the list
-        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
-        if (downloadFileTask == null)
-            return;
-
-        // Check if the task is stopping
-        if (downloadFileTask.Stopping)
+        catch (Exception ex)
         {
-            // Set the stopping flag to false
-            downloadFileTask.Stopping = false;
-            // Set the stop operation finished flag to true
-            downloadFileTask.StopOperationFinished = true;
-        }
-        else
-        {
-            // Remove the task from the list
-            _downloadFileTasks.Remove(downloadFileTask);
+            // TODO: How to handle this error???
+            Console.WriteLine(ex);
         }
     }
 
     private async Task EnsureStopDownloadFileCompletedAsync(int downloadFileId)
     {
-        // Find tasks from the list
-        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
-
         // Wait for the service to stop
         await Dispatcher.UIThread.InvokeAsync(async () =>
         {
+            // Find tasks from the list
+            var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
+
             // Check if the stop operation is finished
             while (downloadFileTask?.StopOperationFinished != true)
             {
-                await Task.Delay(20);
+                await Task.Delay(100);
                 downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
             }
-        });
 
-        // Remove the task
-        if (downloadFileTask != null)
+            // Remove the task
             _downloadFileTasks.Remove(downloadFileTask);
+        });
     }
 
     #endregion

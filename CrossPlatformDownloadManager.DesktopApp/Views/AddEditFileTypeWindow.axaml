@@ -20,7 +20,7 @@
         MaxHeight="200"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
+        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
     <Grid RowDefinitions="*, Auto"
           Margin="20">

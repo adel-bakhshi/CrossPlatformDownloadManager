@@ -48,15 +48,27 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
-        if (ViewModel == null)
-            return;
+        try
+        {
+            if (ViewModel == null)
+                return;
 
-        ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
-        _updateChunksDataTimer.Start();
+            ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+            _updateChunksDataTimer.Start();
 
-        // Wait for 0.5s to focus the window
-        await Task.Delay(500);
-        Focus();
+            // Wait for 0.5s to focus the window
+            await Task.Delay(1000);
+            Focus();
+
+            await ViewModel.CheckResumeCapabilityAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+        }
     }
 
     protected override async void OnClosing(WindowClosingEventArgs e)

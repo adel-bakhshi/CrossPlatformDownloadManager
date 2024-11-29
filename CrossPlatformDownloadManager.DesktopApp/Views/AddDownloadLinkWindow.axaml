@@ -113,7 +113,7 @@
                     </Grid>
 
                     <Button Classes="button success"
-                            Command="{Binding AddFileToQueueCommand}"
+                            Command="{Binding AddDownloadFileToDownloadQueueCommand}"
                             CommandParameter="{Binding $parent[Window]}">
                         Add To Queue
                     </Button>

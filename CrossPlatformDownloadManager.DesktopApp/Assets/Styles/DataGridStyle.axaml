@@ -17,6 +17,14 @@
             <SolidColorBrush x:Key="MinimalDataGridOnSelectedBackground"
                              Color="{DynamicResource MenuBackgroundColor}"
                              Opacity="1" />
+
+            <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnHoverBackground"
+                             Color="{DynamicResource PrimaryColor}"
+                             Opacity="0.5" />
+
+            <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnSelectedBackground"
+                             Color="{DynamicResource PrimaryColor}"
+                             Opacity="1" />
         </ResourceDictionary>
     </Styles.Resources>
 
@@ -223,6 +231,30 @@
                         Value="0" />
                 <Setter Property="CornerRadius"
                         Value="0" />
+            </Style>
+        </Style>
+
+        <Style Selector="^.darkRows">
+            <Style Selector="^ DataGridRow">
+                <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource SecondaryColor}" />
+                </Style>
+
+                <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource PrimaryColor}" />
+                </Style>
+
+                <Style Selector="^:pointerover /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                </Style>
+
+                <Style Selector="^:selected /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                </Style>
             </Style>
         </Style>
     </Style>

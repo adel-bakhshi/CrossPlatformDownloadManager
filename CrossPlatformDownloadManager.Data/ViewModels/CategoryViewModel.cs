@@ -8,6 +8,7 @@ public class CategoryViewModel : PropertyChangedBase
 
     private int? _id;
     private string? _title;
+    private string? _icon;
     private string? _categorySaveDirectory;
 
     #endregion
@@ -24,6 +25,12 @@ public class CategoryViewModel : PropertyChangedBase
     {
         get => _title;
         set => SetField(ref _title, value);
+    }
+    
+    public string? Icon
+    {
+        get => _icon;
+        set => SetField(ref _icon, value);
     }
 
     public string? CategorySaveDirectory

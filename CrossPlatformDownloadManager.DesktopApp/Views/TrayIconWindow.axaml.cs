@@ -22,8 +22,8 @@ public partial class TrayIconWindow : MyWindowBase<TrayIconWindowViewModel>
         if (Screens.Primary == null)
             return;
 
-        var screenWidth = Screens.Primary.Bounds.Width;
-        var screenHeight = Screens.Primary.Bounds.Height;
+        var screenWidth = Screens.Primary.WorkingArea.Width;
+        var screenHeight = Screens.Primary.WorkingArea.Height;
 
         var x = (int)Math.Clamp(Position.X, 0, screenWidth - Bounds.Width);
         var y = (int)Math.Clamp(Position.Y, 0, screenHeight - Bounds.Height);

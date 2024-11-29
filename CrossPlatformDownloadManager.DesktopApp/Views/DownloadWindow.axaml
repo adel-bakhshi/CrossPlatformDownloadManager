@@ -55,7 +55,8 @@
                         Speed="{Binding DownloadFile.TransferRateAsString}"
                         ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
                         TimeLeft="{Binding DownloadFile.TimeLeftAsString}"
-                        ResumeCapability="Yes" />
+                        OpenSaveLocationCommand="{Binding OpenSaveLocationCommand}"
+                        ResumeCapability="{Binding ResumeCapabilityState}" />
 
                     <!-- Download Speed Limiter View  -->
                     <uc:DownloadSpeedLimiterView
@@ -82,6 +83,7 @@
             <!-- Action buttons -->
             <Grid Grid.Row="3"
                   Margin="0, 0, 0, 15">
+                <!-- Details button -->
                 <Button Classes="button info"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
@@ -89,13 +91,16 @@
                         Command="{Binding ShowHideDetailsCommand}"
                         CommandParameter="{Binding $parent[Window]}" />
 
+                <!-- Pause and cancel buttons -->
                 <StackPanel Orientation="Horizontal"
                             Spacing="10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
+                    <!-- Pause button -->
                     <Button Classes="button warning"
                             Classes.paused="{Binding IsPaused}"
-                            Command="{Binding ResumePauseDownloadCommand}">
+                            Command="{Binding ResumePauseDownloadCommand}"
+                            IsEnabled="{Binding CanResumeFile}">
                         <Button.Styles>
                             <Style Selector="Button">
                                 <Setter Property="Content"
@@ -109,6 +114,7 @@
                         </Button.Styles>
                     </Button>
 
+                    <!-- Cancel button -->
                     <Button Classes="button danger"
                             Command="{Binding CancelDownloadCommand}"
                             CommandParameter="{Binding $parent[Window]}"

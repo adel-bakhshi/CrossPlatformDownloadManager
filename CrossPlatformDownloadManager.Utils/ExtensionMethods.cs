@@ -24,7 +24,7 @@ public static class ExtensionMethods
 
     public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T>? items)
     {
-        return items == null ? new ObservableCollection<T>() : new ObservableCollection<T>(items);
+        return items == null ? [] : new ObservableCollection<T>(items);
     }
 
     public static string ToFileSize(this double bytes)
@@ -53,7 +53,8 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this double? bytes)
     {
-        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
+        bytes ??= 0;
+        return bytes.Value.ToFileSize();
     }
 
     public static string ToFileSize(this long bytes)
@@ -63,7 +64,8 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this long? bytes)
     {
-        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
+        bytes ??= 0;
+        return bytes.Value.ToFileSize();
     }
 
     public static string ToFileSize(this float bytes)
@@ -73,7 +75,8 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this float? bytes)
     {
-        return bytes == null ? string.Empty : bytes.Value.ToFileSize();
+        bytes ??= 0;
+        return bytes.Value.ToFileSize();
     }
 
     public static bool CheckUrlValidation(this string? url)
@@ -105,8 +108,8 @@ public static class ExtensionMethods
             return null;
 
         url = url!.Replace('\\', '/').Trim();
-        
-        var uri = new Uri(url!);
+
+        var uri = new Uri(url);
         var fileName = string.Empty;
         if (uri.IsFile)
             fileName = Path.GetFileName(uri.LocalPath);
@@ -122,7 +125,7 @@ public static class ExtensionMethods
 
         if (fileName.IsNullOrEmpty())
         {
-            var startIndex = url!.LastIndexOf('/') + 1;
+            var startIndex = url.LastIndexOf('/') + 1;
             var path = url.Substring(startIndex);
             if (path.Contains('.'))
             {
@@ -145,10 +148,10 @@ public static class ExtensionMethods
 
         if (fileName.IsNullOrEmpty())
             return fileName;
-        
+
         if (fileName!.Contains('/'))
             fileName = fileName.Substring(fileName.LastIndexOf('/') + 1);
-        
+
         if (fileName.Contains('?'))
             fileName = fileName.Substring(0, fileName.IndexOf('?'));
 
@@ -166,15 +169,15 @@ public static class ExtensionMethods
     public static string GetShortTime(this TimeSpan? time)
     {
         if (time == null)
-            return string.Empty;
+            return "00 : 00";
 
         var seconds = time.Value.TotalSeconds;
 
         var hours = seconds / 3600;
-        seconds = seconds % 3600;
+        seconds %= 3600;
 
         var minutes = seconds / 60;
-        seconds = seconds % 60;
+        seconds %= 60;
 
         return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }

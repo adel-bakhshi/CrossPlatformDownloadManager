@@ -69,8 +69,7 @@
                         Width="32">
                 <Button Classes="smallIconButton"
                         HorizontalAlignment="Right"
-                        Command="{Binding ExitProgramCommand}"
-                        ToolTip.Tip="Exit CDM">
+                        Command="{Binding ExitProgramCommand}">
                     <PathIcon Width="16"
                               Height="16"
                               Data="{DynamicResource CircleXMark}"

@@ -26,44 +26,10 @@
         <DataGrid Name="FilesDataGrid"
                   Grid.Row="0"
                   ItemsSource="{Binding DownloadFiles}"
-                  Classes="minimalDataGrid"
+                  Classes="minimalDataGrid darkRows"
                   Background="{DynamicResource SecondaryColor}"
                   SelectionMode="Extended"
-                  SelectionChanged="FilesDataGrid_OnSelectionChanged">
-            <DataGrid.Styles>
-                <Style Selector="DataGrid DataGridRow">
-                    <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
-                        <Setter Property="Fill"
-                                Value="{DynamicResource SecondaryColor}" />
-                        <Setter Property="IsVisible"
-                                Value="True" />
-                        <Setter Property="Opacity"
-                                Value="1" />
-                    </Style>
-
-                    <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
-                        <Setter Property="Fill"
-                                Value="{DynamicResource PrimaryColor}" />
-                        <Setter Property="IsVisible"
-                                Value="True" />
-                        <Setter Property="Opacity"
-                                Value="1" />
-                    </Style>
-
-                    <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
-                        <Setter Property="Fill"
-                                Value="{DynamicResource PrimaryColor}" />
-                        <Setter Property="Opacity"
-                                Value="0.5" />
-                    </Style>
-
-                    <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
-                        <Setter Property="Fill"
-                                Value="{DynamicResource MenuBackgroundColor}" />
-                    </Style>
-                </Style>
-            </DataGrid.Styles>
-
+                  SelectionChanged="FilesDataGridOnSelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="File Name"
                                     Binding="{Binding FileName, FallbackValue='', TargetNullValue=''}"

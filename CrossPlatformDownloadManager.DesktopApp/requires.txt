@@ -14,6 +14,8 @@ Add progress bar to windows toolbar for downloading files
 یک مکانیسم خوب برای پیاده سازی بخش RefreshDownloadAddress نیاز داری
 سرویس DownloadQueueService یه گزینه داره به نام AddDownloadFileToDownloadQueueAsync. هر جا که نیاز هست باید ازش استفاده کنی
 یه فایل لاگ باید بسازی که وقتی برنامه موقع بسته شدن خطایی میده، داخل این فایل ذخیره بشه و در اجرای بعدی اگر خطا وجود داشت به یه طریقی بهت ارسال بشه
-FilesDataGrid داخل FilesView و یه DataGrid دیگه شایدم بیشتر استایل های شبیه به هم دارن. این استایل ها رو یکی کن
 TopMost مربوط به TrayMenuIconWindow رو به تنظیمات اضافه کن
 اگه دانلود فایل خطایی داده باید ذخیره کنی و نمایشش بدی
+مکان TrayIconWindow رو ذخیره کن. ترجیحا در Settings ذخیره شود
+نگا کن برادر باید اول Settings رو درست و درمون بزنی بعد بیای برای بقیه شاخ و شونه بکشی
+چطور میشه Default Queue رو تغییر داد؟ تو صفحه اضافه کردن لینک یه گزینه داری به نام Remember my choice این مورد رو میگم

@@ -3,10 +3,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
+             xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadStatusView">
+    <!-- Resources -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:CheckEqualConverter x:Key="CheckEqualConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- Main content -->
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
           ColumnDefinitions="Auto, *"
           HorizontalAlignment="Stretch"
@@ -39,12 +48,12 @@
                    Text="Save Location"
                    Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="2"
+        <TextBlock Name="SaveLocationTextBlock"
+                   Grid.Row="2"
                    Grid.Column="1"
                    Text="{Binding $parent[local:DownloadStatusView].SaveLocation}"
                    Cursor="Hand"
-                   Name="TxbSaveLocation"
-                   Tapped="TxbSaveLocation_OnTapped"
+                   Tapped="SaveLocationTextBlockOnTapped"
                    Margin="0, 0, 0, 10">
             <TextBlock.Styles>
                 <Style Selector="TextBlock:pointerover">
@@ -121,6 +130,28 @@
 
         <TextBlock Grid.Row="8"
                    Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].ResumeCapability}" />
+                   Text="{Binding $parent[local:DownloadStatusView].ResumeCapability}"
+                   Classes.resumeCapabilityIsAvailable="{Binding $parent[local:DownloadStatusView].ResumeCapability, Converter={StaticResource CheckEqualConverter}, ConverterParameter='Yes'}"
+                   Classes.resumeCapabilityIsUnavailable="{Binding $parent[local:DownloadStatusView].ResumeCapability, Converter={StaticResource CheckEqualConverter}, ConverterParameter='No'}">
+            <!-- Styles -->
+            <TextBlock.Styles>
+                <Style Selector="TextBlock">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource InfoGradientBrush}" />
+
+                    <!-- Resume capability is available style -->
+                    <Style Selector="^.resumeCapabilityIsAvailable">
+                        <Setter Property="Foreground"
+                                Value="{DynamicResource SuccessGradientBrush}" />
+                    </Style>
+
+                    <!-- Resume capability is unavailable style -->
+                    <Style Selector="^.resumeCapabilityIsUnavailable">
+                        <Setter Property="Foreground"
+                                Value="{DynamicResource DangerGradientBrush}" />
+                    </Style>
+                </Style>
+            </TextBlock.Styles>
+        </TextBlock>
     </Grid>
 </UserControl>

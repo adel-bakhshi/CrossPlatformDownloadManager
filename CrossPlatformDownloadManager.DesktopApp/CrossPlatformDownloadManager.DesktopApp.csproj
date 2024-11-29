@@ -6,6 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <PlatformTarget>AnyCPU</PlatformTarget>
@@ -26,7 +27,7 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.2" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.2" />
         <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.2" />
-        <PackageReference Include="Downloader" Version="3.3.0" />
+        <PackageReference Include="Downloader" Version="3.3.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,7 +37,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="2.1.4" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.2" />
     </ItemGroup>
 
     <ItemGroup>

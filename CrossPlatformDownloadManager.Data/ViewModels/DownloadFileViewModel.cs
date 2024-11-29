@@ -173,8 +173,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string DownloadProgressAsString =>
-        DownloadProgress == null ? string.Empty : $"{DownloadProgress ?? 0:00.00}%";
+    public string DownloadProgressAsString => DownloadProgress == null ? "0.00%" : $"{DownloadProgress ?? 0:00.00}%";
 
     public string? DownloadedSizeAsString
     {
@@ -222,7 +221,14 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string TransferRateAsString => TransferRate.ToFileSize();
+    public string TransferRateAsString
+    {
+        get
+        {
+            var transferRate = TransferRate.ToFileSize();
+            return transferRate.IsNullOrEmpty() ? "0 KB" : transferRate;
+        }
+    }
 
     public string? SaveLocation
     {
@@ -280,7 +286,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 return;
         }
 
-        if (FileName.IsNullOrEmpty() || Url.IsNullOrEmpty())
+        if (FileName.IsNullOrEmpty() || Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
             return;
 
         if (!Directory.Exists(downloadPath!))
@@ -294,7 +300,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
         if (downloadPackage == null)
         {
-            await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName);
+            await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName).ConfigureAwait(false);
         }
         else
         {
@@ -311,7 +317,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 downloadPackage.Urls = urls.ToArray();
             }
 
-            await downloadService.DownloadFileTaskAsync(downloadPackage);
+            await downloadService.DownloadFileTaskAsync(downloadPackage).ConfigureAwait(false);
         }
     }
 
@@ -328,7 +334,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         _updateChunksDataTimer = null;
         _chunkProgresses = null;
 
-        await downloadService.CancelTaskAsync();
+        await downloadService.CancelTaskAsync().ConfigureAwait(false);
         SaveDownloadPackage(downloadService.Package);
     }
 
@@ -397,6 +403,21 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             IsSuccess = isSuccess,
             Error = error,
         };
+
+        if (_elapsedTimeTimer != null)
+        {
+            _elapsedTimeTimer.Stop();
+            _elapsedTimeTimer.Tick -= ElapsedTimeTimerOnTick;
+        }
+
+        if (_updateChunksDataTimer != null)
+        {
+            _updateChunksDataTimer.Stop();
+            _updateChunksDataTimer.Tick -= UpdateChunksDataTimerOnTick;
+        }
+
+        _elapsedTimeOfStartingDownload = null;
+        _chunkProgresses = null;
 
         DownloadFinished?.Invoke(this, eventArgs);
     }

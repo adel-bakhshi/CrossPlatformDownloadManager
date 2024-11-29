@@ -161,10 +161,21 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             {
                 switch (DownloadQueue)
                 {
-                    case { IsDaily: false, JustForDate: null }:
+                    case { IsDaily: false }:
                     {
-                        await ShowInfoDialogAsync("Attention", "When you choose 'Once', please select a date.", DialogButtons.Ok);
-                        return;
+                        if (DownloadQueue.JustForDate == null)
+                        {
+                            await ShowInfoDialogAsync("Start date", "When you choose 'Once', please select a date.", DialogButtons.Ok);
+                            return;
+                        }
+
+                        if (DownloadQueue.JustForDate.Value.Date < DateTime.Now.Date)
+                        {
+                            await ShowInfoDialogAsync("Start date", "You can't select a date in the past.", DialogButtons.Ok);
+                            return;
+                        }
+
+                        break;
                     }
 
                     case { IsDaily: true, DaysOfWeekViewModel: not { IsAnyDaySelected: true } }:

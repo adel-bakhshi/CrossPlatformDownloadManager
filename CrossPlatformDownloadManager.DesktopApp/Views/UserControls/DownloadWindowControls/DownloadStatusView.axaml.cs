@@ -128,9 +128,9 @@ public partial class DownloadStatusView : UserControl
         InitializeComponent();
     }
 
-    private void TxbSaveLocation_OnTapped(object? sender, TappedEventArgs e)
+    private void SaveLocationTextBlockOnTapped(object? sender, TappedEventArgs e)
     {
-        var command = this.GetValue(OpenSaveLocationCommandProperty);
+        var command = GetValue(OpenSaveLocationCommandProperty);
         command?.Execute(null);
     }
 }

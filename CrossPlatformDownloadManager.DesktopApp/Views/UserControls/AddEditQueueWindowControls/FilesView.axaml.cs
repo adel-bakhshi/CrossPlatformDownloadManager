@@ -14,7 +14,7 @@ public partial class FilesView : MyUserControlBase<FilesViewModel>
         InitializeComponent();
     }
 
-    private void FilesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void FilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selectedDownloadFiles = FilesDataGrid
             .SelectedItems
@@ -27,7 +27,7 @@ public partial class FilesView : MyUserControlBase<FilesViewModel>
         ViewModel.SelectedDownloadFiles = selectedDownloadFiles;
     }
 
-    private void FilesDataGrid_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    private void FilesDataGridOnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property != DataGrid.ItemsSourceProperty
             || ViewModel?.SelectedDownloadFiles == null

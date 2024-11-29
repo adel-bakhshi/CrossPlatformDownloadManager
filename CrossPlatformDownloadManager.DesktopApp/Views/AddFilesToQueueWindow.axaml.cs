@@ -20,7 +20,7 @@ public partial class AddFilesToQueueWindow : MyWindowBase<AddFilesToQueueWindowV
         this.Close(new List<DownloadFileViewModel>());
     }
 
-    private void FilesDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void FilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selectedItems = FilesDataGrid.SelectedItems;
         if (selectedItems == null || selectedItems.Count == 0 || ViewModel == null)

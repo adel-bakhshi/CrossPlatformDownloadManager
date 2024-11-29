@@ -1,14 +1,18 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -40,6 +44,8 @@ public class DownloadWindowViewModel : ViewModelBase
     private DownloadFileViewModel _downloadFile = new();
     private bool _isPaused;
     private string? _hideDetailsButtonContent;
+    private bool _canResumeFile;
+    private string _resumeCapabilityState = "Checking...";
 
     #endregion
 
@@ -80,11 +86,23 @@ public class DownloadWindowViewModel : ViewModelBase
         get => _isPaused;
         set => this.RaiseAndSetIfChanged(ref _isPaused, value);
     }
-    
+
     public string? HideDetailsButtonContent
     {
         get => _hideDetailsButtonContent;
         set => this.RaiseAndSetIfChanged(ref _hideDetailsButtonContent, value);
+    }
+
+    public bool CanResumeFile
+    {
+        get => _canResumeFile;
+        set => this.RaiseAndSetIfChanged(ref _canResumeFile, value);
+    }
+
+    public string ResumeCapabilityState
+    {
+        get => _resumeCapabilityState;
+        set => this.RaiseAndSetIfChanged(ref _resumeCapabilityState, value);
     }
 
     #endregion
@@ -96,6 +114,8 @@ public class DownloadWindowViewModel : ViewModelBase
     public ICommand CancelDownloadCommand { get; }
 
     public ICommand ShowHideDetailsCommand { get; }
+
+    public ICommand OpenSaveLocationCommand { get; }
 
     #endregion
 
@@ -115,80 +135,10 @@ public class DownloadWindowViewModel : ViewModelBase
         SelectedTabItem = TabItems.FirstOrDefault();
         HideDetailsButtonContent = "Hide Details";
 
-        ResumePauseDownloadCommand = ReactiveCommand.Create(ResumePauseDownload);
+        ResumePauseDownloadCommand = ReactiveCommand.CreateFromTask(ResumePauseDownloadAsync);
         CancelDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(CancelDownloadAsync);
-        ShowHideDetailsCommand = ReactiveCommand.Create<Window?>(ShowHideDetails);
-    }
-
-    private void ResumePauseDownload()
-    {
-        // TODO: Show message box
-        try
-        {
-            if (IsPaused)
-            {
-                AppService
-                    .DownloadFileService
-                    .ResumeDownloadFile(DownloadFile);
-
-                IsPaused = false;
-            }
-            else
-            {
-                AppService
-                    .DownloadFileService
-                    .PauseDownloadFile(DownloadFile);
-
-                IsPaused = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private async Task CancelDownloadAsync(Window? owner)
-    {
-        await StopDownloadAsync(owner);
-    }
-
-    private void ShowHideDetails(Window? owner)
-    {
-        // TODO: Show message box
-        try
-        {
-            var detailsGrid = owner?.FindControl<Grid>("ChunksDetailsGrid");
-            if (detailsGrid == null)
-                return;
-
-            if (_detailsIsVisible)
-            {
-                _detailsIsVisible = false;
-                _detailsHeight = detailsGrid.Bounds.Height + 15;
-
-                detailsGrid.IsVisible = false;
-                owner!.MinHeight -= _detailsHeight;
-                owner.Height -= _detailsHeight;
-                
-                HideDetailsButtonContent = "Show Details";
-            }
-            else
-            {
-                detailsGrid.IsVisible = true;
-                owner!.MinHeight += _detailsHeight;
-                owner.Height += _detailsHeight;
-                
-                HideDetailsButtonContent = "Hide Details";
-
-                _detailsIsVisible = true;
-                _detailsHeight = 0;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        ShowHideDetailsCommand = ReactiveCommand.CreateFromTask<Window?>(ShowHideDetailsAsync);
+        OpenSaveLocationCommand = ReactiveCommand.CreateFromTask(OpenSaveLocationAsync);
     }
 
     public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
@@ -212,7 +162,161 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
+    public async Task CheckResumeCapabilityAsync()
+    {
+        try
+        {
+            if (DownloadFile.Url.IsNullOrEmpty() || !DownloadFile.Url.CheckUrlValidation())
+            {
+                CanResumeFile = false;
+                ResumeCapabilityState = "No";
+                return;
+            }
+
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
+
+            // Send HEAD request
+            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, DownloadFile.Url));
+            response.EnsureSuccessStatusCode();
+
+            // Check for Accept-Ranges header
+            if (response.Headers.Contains("Accept-Ranges"))
+            {
+                var acceptRanges = response.Headers.GetValues("Accept-Ranges");
+                if (acceptRanges.Contains("bytes"))
+                {
+                    CanResumeFile = true;
+                    ResumeCapabilityState = "Yes";
+                    return;
+                }
+            }
+
+            // Some servers don't include Accept-Ranges but still support partial content.
+            // If Range request succeeds with Partial Content status:
+            if (response.StatusCode == System.Net.HttpStatusCode.PartialContent)
+            {
+                CanResumeFile = true;
+                ResumeCapabilityState = "Yes";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        CanResumeFile = false;
+        ResumeCapabilityState = "No";
+    }
+
     #region Helpers
+
+    private async Task ResumePauseDownloadAsync()
+    {
+        try
+        {
+            if (IsPaused)
+            {
+                AppService
+                    .DownloadFileService
+                    .ResumeDownloadFile(DownloadFile);
+
+                IsPaused = false;
+            }
+            else
+            {
+                AppService
+                    .DownloadFileService
+                    .PauseDownloadFile(DownloadFile);
+
+                IsPaused = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task CancelDownloadAsync(Window? owner)
+    {
+        await StopDownloadAsync(owner);
+    }
+
+    private async Task ShowHideDetailsAsync(Window? owner)
+    {
+        try
+        {
+            var detailsGrid = owner?.FindControl<Grid>("ChunksDetailsGrid");
+            if (detailsGrid == null)
+                return;
+
+            if (_detailsIsVisible)
+            {
+                _detailsIsVisible = false;
+                _detailsHeight = detailsGrid.Bounds.Height + 15;
+
+                detailsGrid.IsVisible = false;
+                owner!.MinHeight -= _detailsHeight;
+                owner.Height -= _detailsHeight;
+
+                HideDetailsButtonContent = "Show Details";
+            }
+            else
+            {
+                detailsGrid.IsVisible = true;
+                owner!.MinHeight += _detailsHeight;
+                owner.Height += _detailsHeight;
+
+                HideDetailsButtonContent = "Hide Details";
+
+                _detailsIsVisible = true;
+                _detailsHeight = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task OpenSaveLocationAsync()
+    {
+        try
+        {
+            if (DownloadFile.SaveLocation.IsNullOrEmpty())
+            {
+                await ShowInfoDialogAsync("Open folder",
+                    "The folder you are trying to access is not available. It may have been removed or relocated.",
+                    DialogButtons.Ok);
+
+                return;
+            }
+
+            if (!Directory.Exists(DownloadFile.SaveLocation))
+            {
+                await ShowInfoDialogAsync("Open folder",
+                    "The folder you are trying to access is not available. It may have been removed or relocated.",
+                    DialogButtons.Ok);
+
+                return;
+            }
+
+            var process = new Process();
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = DownloadFile.SaveLocation,
+                UseShellExecute = true
+            };
+
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
 
     public void ChangeSpeedLimiterState(DownloadSpeedLimiterViewEventArgs eventArgs)
     {

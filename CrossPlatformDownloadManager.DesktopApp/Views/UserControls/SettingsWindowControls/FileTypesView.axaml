@@ -100,44 +100,10 @@
             <DataGrid Grid.Row="2"
                       ItemsSource="{Binding FileExtensions}"
                       SelectedItem="{Binding SelectedFileExtension}"
-                      Classes="minimalDataGrid"
+                      Classes="minimalDataGrid darkRows"
                       Background="{DynamicResource PrimaryColor}"
                       SelectionMode="Single"
                       Height="{Binding $parent[local:FileTypesView].DataGridHeight}">
-                <DataGrid.Styles>
-                    <Style Selector="DataGrid DataGridRow">
-                        <Style Selector="^:nth-child(2n) /template/ Rectangle#BackgroundRectangle">
-                            <Setter Property="Fill"
-                                    Value="{DynamicResource PrimaryColor}" />
-                            <Setter Property="IsVisible"
-                                    Value="True" />
-                            <Setter Property="Opacity"
-                                    Value="1" />
-                        </Style>
-
-                        <Style Selector="^:nth-child(2n + 1) /template/ Rectangle#BackgroundRectangle">
-                            <Setter Property="Fill"
-                                    Value="{DynamicResource SecondaryColor}" />
-                            <Setter Property="IsVisible"
-                                    Value="True" />
-                            <Setter Property="Opacity"
-                                    Value="1" />
-                        </Style>
-
-                        <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
-                            <Setter Property="Fill"
-                                    Value="{DynamicResource SecondaryColor}" />
-                            <Setter Property="Opacity"
-                                    Value="0.5" />
-                        </Style>
-
-                        <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
-                            <Setter Property="Fill"
-                                    Value="{DynamicResource MenuBackgroundColor}" />
-                        </Style>
-                    </Style>
-                </DataGrid.Styles>
-
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Extension"
                                         Binding="{Binding Extension}"
@@ -153,7 +119,7 @@
                                         Binding="{Binding CategoryTitle}"
                                         MinWidth="200"
                                         IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
-                    
+
                     <DataGridTextColumn Header="Extension"
                                         Binding="{Binding Extension}"
                                         MinWidth="300"

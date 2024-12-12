@@ -191,22 +191,51 @@
         <StackPanel Orientation="Vertical"
                     Spacing="15">
             <!-- Must have 20px margin bottom. 15px spacing + 5px margin bottom -->
-            <cc:CustomTextBox Padding="12, 10"
-                              Background="{DynamicResource SecondaryColor}"
-                              CornerRadius="{DynamicResource DefaultCornerRadius}"
-                              IconData="{DynamicResource Queue}"
-                              IconSize="16"
-                              IconColor="{DynamicResource ProgressBarGradientBrush}"
-                              Watermark="Queue title"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
-                              Margin="0, 0, 0, 5"
-                              HorizontalAlignment="Stretch"
-                              OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
-                              OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
-                              OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
-                              BorderThickness="1"
-                              BorderBrush="{DynamicResource SecondaryColor}"
-                              Text="{Binding DownloadQueue.Title}" />
+            <Grid ColumnDefinitions="*, Auto"
+                  Margin="0, 0, 0, 5">
+                <!-- Queue title -->
+                <cc:CustomTextBox Grid.Column="0"
+                                  Padding="12, 10"
+                                  Background="{DynamicResource SecondaryColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource Queue}"
+                                  IconSize="16"
+                                  IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                  Watermark="Queue title"
+                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  HorizontalAlignment="Stretch"
+                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  Text="{Binding DownloadQueue.Title}" />
+
+                <!-- Is default button -->
+                <Button Grid.Column="1"
+                        Classes="button success"
+                        Classes.isNotDefault="{Binding !DownloadQueue.IsDefault}"
+                        Height="{Binding $parent[Grid].Bounds.Height}"
+                        Width="{Binding $parent[Grid].Bounds.Height}"
+                        Margin="10, 0, 0, 0"
+                        Command="{Binding ChangeDefaultDownloadQueueCommand}"
+                        ToolTip.Tip="Set/Unset queue as default">
+                    <!-- Styles -->
+                    <Button.Styles>
+                        <Style Selector="Button.isNotDefault">
+                            <Setter Property="Background"
+                                    Value="{DynamicResource SecondaryColor}" />
+                        </Style>
+                    </Button.Styles>
+
+                    <PathIcon Data="{DynamicResource Finished}"
+                              Foreground="{DynamicResource TextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+            </Grid>
 
             <!-- Start download on application startup section -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"

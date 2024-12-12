@@ -11,6 +11,8 @@ public class Settings : DbModelBase
 
     [Required] public bool DarkMode { get; set; }
 
+    [Required] public bool AlwaysKeepManagerOnTop { get; set; }
+
     [Required] public bool ShowStartDownloadDialog { get; set; }
 
     [Required] public bool ShowCompleteDownloadDialog { get; set; }
@@ -37,6 +39,8 @@ public class Settings : DbModelBase
 
     [Required] public bool UseSystemNotifications { get; set; }
 
+    [MaxLength(100)] public string? ManagerPoint { get; set; }
+
     public ICollection<ProxySettings> Proxies { get; } = [];
 
     public override void UpdateDbModel(DbModelBase? model)
@@ -47,6 +51,7 @@ public class Settings : DbModelBase
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
         DarkMode = settings.DarkMode;
+        AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
         ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
         ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;
         DuplicateDownloadLinkAction = settings.DuplicateDownloadLinkAction;
@@ -60,5 +65,6 @@ public class Settings : DbModelBase
         UseQueueStoppedSound = settings.UseQueueStoppedSound;
         UseQueueFinishedSound = settings.UseQueueFinishedSound;
         UseSystemNotifications = settings.UseSystemNotifications;
+        ManagerPoint = settings.ManagerPoint;
     }
 }

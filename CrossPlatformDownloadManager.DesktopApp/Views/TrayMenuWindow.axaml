@@ -18,7 +18,7 @@
         MinWidth="200"
         MinHeight="200"
         MaxWidth="200"
-        MaxHeight="400"
+        MaxHeight="410"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="False"
         ExtendClientAreaTitleBarHeightHint="-1"
@@ -122,7 +122,7 @@
                         </Transitions>
                     </Setter.Value>
                 </Setter>
-                
+
                 <Setter Property="RenderTransform"
                         Value="scale(1)" />
                 <Setter Property="Opacity"
@@ -141,6 +141,34 @@
                       VerticalScrollBarVisibility="Hidden">
             <StackPanel Orientation="Vertical"
                         Spacing="0">
+                <!-- Open CDM -->
+                <Button Classes="menuItemButton"
+                        Command="{Binding OpenMainWindowCommand}">
+                    <!-- Content -->
+                    <Grid ColumnDefinitions="Auto, *">
+                        <!-- Icon -->
+                        <Image Grid.Column="0"
+                               Width="16"
+                               Height="16"
+                               Stretch="Uniform"
+                               Margin="0, 0, 4, 0"
+                               VerticalAlignment="Center"
+                               Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/AppIcons/icon-64.png" />
+
+                        <!-- Title -->
+                        <TextBlock Grid.Column="1"
+                                   Text="Open"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Fill="{DynamicResource SecondaryColor}"
+                           Margin="8, 4" />
+
                 <!-- Download queues -->
                 <StackPanel Orientation="Vertical"
                             Spacing="0"

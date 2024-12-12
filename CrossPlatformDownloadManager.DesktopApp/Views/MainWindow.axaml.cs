@@ -11,6 +11,7 @@ using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -34,14 +35,13 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         _downloadFilesDataGridContextMenuFlyout = null;
     }
 
-    private void DownloadFilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private async void DownloadFilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        // TODO: Show message box
-        if (ViewModel == null)
-            return;
-
         try
         {
+            if (ViewModel == null)
+                return;
+
             var downloadFiles = DownloadFilesDataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
@@ -55,30 +55,55 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            ViewModel.SelectedFilesTotalSize = "0 KB";
+            if (ViewModel != null)
+            {
+                await ViewModel.ShowErrorDialogAsync(ex);
+                ViewModel.SelectedFilesTotalSize = "0 KB";
+            }
+
+            Log.Error(ex, "Error while updating selected files total size");
         }
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
-        base.OnLoaded(e);
+        try
+        {
+            base.OnLoaded(e);
 
-        var serviceProvider = this.GetServiceProvider();
-        var appService = serviceProvider.GetService<IAppService>();
-        var trayMenuWindow = serviceProvider.GetService<TrayMenuWindow>();
-        var vm = new TrayIconWindowViewModel(appService!, trayMenuWindow!);
-        var window = new TrayIconWindow { DataContext = vm };
-        window.Show();
+            var serviceProvider = this.GetServiceProvider();
+            var appService = serviceProvider.GetService<IAppService>();
+            var trayMenuWindow = serviceProvider.GetService<TrayMenuWindow>();
+            var vm = new ManagerWindowViewModel(appService!, trayMenuWindow!);
+            var window = new ManagerWindow { DataContext = vm };
+            window.Show();
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+
+            Log.Error(ex, "Error while trying to open manager window.");
+        }
     }
 
     private async void DownloadQueuesDataGridContextMenuOnOpening(object? sender, EventArgs e)
     {
-        if (sender is not Flyout flyout || ViewModel == null)
-            return;
+        try
+        {
+            if (sender is not Flyout flyout || ViewModel == null)
+                return;
 
-        await ViewModel.ChangeContextFlyoutEnableStateAsync(this);
-        _downloadFilesDataGridContextMenuFlyout = flyout;
+            await ViewModel.ChangeContextFlyoutEnableStateAsync(this);
+            _downloadFilesDataGridContextMenuFlyout = flyout;
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+
+            Log.Error(ex, "An error occured during opening context menu.");
+        }
     }
 
     public async Task<string?> ChangeSaveLocationAsync(string startDirectory)
@@ -96,5 +121,22 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 
         var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
         return !directories.Any() ? null : directories[0].Path.AbsolutePath;
+    }
+
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        try
+        {
+            base.OnClosing(e);
+            e.Cancel = true;
+            Hide();
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+
+            Log.Error(ex, "An error occured during closing window.");
+        }
     }
 }

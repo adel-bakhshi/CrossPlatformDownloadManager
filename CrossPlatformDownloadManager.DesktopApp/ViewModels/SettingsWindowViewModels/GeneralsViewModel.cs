@@ -5,30 +5,39 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewM
 
 public class GeneralsViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private bool _startOnSystemStartup;
+    private bool _useBrowserExtension;
+    private bool _darkMode;
+    private bool _alwaysKeepManagerOnTop;
+
+    #endregion
+
+    #region Properties
 
     public bool StartOnSystemStartup
     {
         get => _startOnSystemStartup;
         set => this.RaiseAndSetIfChanged(ref _startOnSystemStartup, value);
     }
-
-    private bool _useBrowserExtension;
-
+    
     public bool UseBrowserExtension
     {
         get => _useBrowserExtension;
         set => this.RaiseAndSetIfChanged(ref _useBrowserExtension, value);
     }
-
-    private bool _darkMode;
-
+    
     public bool DarkMode
     {
         get => _darkMode;
         set => this.RaiseAndSetIfChanged(ref _darkMode, value);
+    }
+
+    public bool AlwaysKeepManagerOnTop
+    {
+        get => _alwaysKeepManagerOnTop;
+        set => this.RaiseAndSetIfChanged(ref _alwaysKeepManagerOnTop, value);
     }
 
     #endregion

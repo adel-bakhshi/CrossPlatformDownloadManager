@@ -10,6 +10,7 @@ using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -68,19 +69,21 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     #region Commands
 
-    public ICommand? StartStopDownloadQueueCommand { get; }
+    public ICommand OpenMainWindowCommand { get; }
 
-    public ICommand? AddNewDownloadLinkCommand { get; }
+    public ICommand StartStopDownloadQueueCommand { get; }
 
-    public ICommand? AddNewDownloadQueueCommand { get; }
+    public ICommand AddNewDownloadLinkCommand { get; }
 
-    public ICommand? OpenSettingsWindowCommand { get; }
+    public ICommand AddNewDownloadQueueCommand { get; }
 
-    public ICommand? OpenHelpWindowCommand { get; }
+    public ICommand OpenSettingsWindowCommand { get; }
 
-    public ICommand? OpenAboutUsWindowCommand { get; }
+    public ICommand OpenHelpWindowCommand { get; }
 
-    public ICommand? ExitProgramCommand { get; }
+    public ICommand OpenAboutUsWindowCommand { get; }
+
+    public ICommand ExitProgramCommand { get; }
 
     #endregion
 
@@ -89,18 +92,35 @@ public class TrayMenuWindowViewModel : ViewModelBase
         LoadDownloadQueues();
         RefreshProxies();
 
+        OpenMainWindowCommand = ReactiveCommand.CreateFromTask(OpenMainWindowAsync);
         StartStopDownloadQueueCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         AddNewDownloadLinkCommand = ReactiveCommand.CreateFromTask(AddNewDownloadLinkAsync);
-        AddNewDownloadQueueCommand = ReactiveCommand.Create(AddNewDownloadQueue);
-        OpenSettingsWindowCommand = ReactiveCommand.Create(OpenSettingsWindow);
-        OpenHelpWindowCommand = ReactiveCommand.Create(OpenHelpWindow);
-        OpenAboutUsWindowCommand = ReactiveCommand.Create(OpenAboutUsWindow);
+        AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask(AddNewDownloadQueueAsync);
+        OpenSettingsWindowCommand = ReactiveCommand.CreateFromTask(OpenSettingsWindowAsync);
+        OpenHelpWindowCommand = ReactiveCommand.CreateFromTask(OpenHelpWindowAsync);
+        OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask(OpenAboutUsWindowAsync);
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
+    }
+
+    private async Task OpenMainWindowAsync()
+    {
+        try
+        {
+            var mainWindow = App.Desktop?.MainWindow;
+            if (mainWindow == null)
+                throw new InvalidOperationException("Could not find main window.");
+
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while opening the main window.");
+        }
     }
 
     private async Task StartStopDownloadQueueAsync(DownloadQueueViewModel? downloadQueue)
     {
-        // TODO: Show message box
         try
         {
             if (downloadQueue == null)
@@ -123,13 +143,13 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while starting/stopping the download queue.");
         }
     }
 
     private async Task AddNewDownloadLinkAsync()
     {
-        // TODO: Show message box
         try
         {
             HideTrayMenu();
@@ -150,11 +170,12 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while adding the download link.");
         }
     }
 
-    private void AddNewDownloadQueue()
+    private async Task AddNewDownloadQueueAsync()
     {
         try
         {
@@ -166,13 +187,13 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while adding the download queue.");
         }
     }
 
-    private void OpenSettingsWindow()
+    private async Task OpenSettingsWindowAsync()
     {
-        // TODO: Show message box
         try
         {
             HideTrayMenu();
@@ -183,18 +204,33 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while opening the settings window.");
         }
     }
 
-    private void OpenHelpWindow()
+    private async Task OpenHelpWindowAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while opening the help window.");
+        }
     }
 
-    private void OpenAboutUsWindow()
+    private async Task OpenAboutUsWindowAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while opening the about us window.");
+        }
     }
 
     private async Task ExitProgramAsync()
@@ -215,13 +251,14 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while exit the app.");
         }
     }
 
     protected override void OnDownloadQueueServiceDataChanged()
     {
-        LoadDownloadQueues();
         base.OnDownloadQueueServiceDataChanged();
+        LoadDownloadQueues();
     }
 
     protected override void OnSettingsServiceDataChanged()
@@ -297,7 +334,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
     private void HideTrayMenu()
     {
         var dataContext = TrayMenuWindow?.OwnerWindow?.DataContext;
-        if (dataContext is not TrayIconWindowViewModel trayIconWindowViewModel)
+        if (dataContext is not ManagerWindowViewModel trayIconWindowViewModel)
             throw new InvalidOperationException("View model not found.");
 
         trayIconWindowViewModel.HideMenu();
@@ -377,6 +414,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while changing proxy.");
         }
     }
 

@@ -1,8 +1,11 @@
 namespace CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
-public class DownloadFileEventArgs : EventArgs
+public class DownloadFileErrorEventArgs : EventArgs
 {
+    #region Properties
+
     public int Id { get; set; }
-    public bool IsSuccess { get; set; }
     public Exception? Error { get; set; }
+
+    #endregion
 }

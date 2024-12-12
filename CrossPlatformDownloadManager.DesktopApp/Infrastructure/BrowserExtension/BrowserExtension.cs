@@ -8,6 +8,7 @@ using CrossPlatformDownloadManager.Data.ViewModels.BrowserExtensions;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 
@@ -32,11 +33,10 @@ public class BrowserExtension : IBrowserExtension
 
     public async Task StartListeningAsync()
     {
-        // TODO: Show message box
         try
         {
             _httpListener.Start();
-            Console.WriteLine("Listening for URLs...");
+            Log.Information("Start listening for requests...");
 
             while (true)
             {
@@ -46,21 +46,20 @@ public class BrowserExtension : IBrowserExtension
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "Failed to start listening for requests.");
         }
     }
 
     public void StopListening()
     {
-        // TODO: Show message box
         try
         {
             _httpListener.Stop();
-            Console.WriteLine("Stopped listening for URLs...");
+            Log.Information("Stop listening for requests...");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "Failed to stop listening for requests.");
         }
     }
 
@@ -113,10 +112,9 @@ public class BrowserExtension : IBrowserExtension
                         ? $"CDM supports {fileExtension} file types."
                         : $"CDM doesn't support {fileExtension} file types.";
 
-                    var dateTimeAsString = DateTime.Now.ToShortTimeString();
                     var supportMessage = result ? "supporting" : "not supporting";
-                    var message = $"{dateTimeAsString} - CDM is {supportMessage} '{fileExtension}' file types.";
-                    Console.WriteLine(message);
+                    var message = $"CDM is {supportMessage} '{fileExtension}' file types.";
+                    Log.Information(message);
                 }
 
                 break;
@@ -144,7 +142,7 @@ public class BrowserExtension : IBrowserExtension
                 responseViewModel.IsSuccessful = true;
                 responseViewModel.Message = "Link added to CDM.";
 
-                Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - Captured URL: {requestViewModel.Url}");
+                Log.Information($"Captured URL: {requestViewModel.Url}");
                 break;
             }
 

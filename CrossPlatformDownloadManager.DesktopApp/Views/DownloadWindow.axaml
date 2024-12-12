@@ -100,7 +100,7 @@
                     <Button Classes="button warning"
                             Classes.paused="{Binding IsPaused}"
                             Command="{Binding ResumePauseDownloadCommand}"
-                            IsEnabled="{Binding CanResumeFile}">
+                            IsEnabled="{Binding DownloadFile.CanResumeDownload}">
                         <Button.Styles>
                             <Style Selector="Button">
                                 <Setter Property="Content"

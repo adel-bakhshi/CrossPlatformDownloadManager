@@ -326,9 +326,9 @@ public class DownloadQueueViewModel : PropertyChangedBase
         {
             var downloadFile = downloadFiles[taskIndex];
 
-            _downloadFileService.DownloadFinishedTasks.TryAdd(downloadFile.Id, []);
-            _downloadFileService.DownloadFinishedTasks[downloadFile.Id].Add(DownloadFileOnDownloadFinishedAsync);
-            
+            _downloadFileService.DownloadFinishedAsyncTasks.TryAdd(downloadFile.Id, []);
+            _downloadFileService.DownloadFinishedAsyncTasks[downloadFile.Id].Add(DownloadFileFinishedTaskAsync);
+
             downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
 
             _ = _downloadFileService.StartDownloadFileAsync(downloadFile);
@@ -353,19 +353,28 @@ public class DownloadQueueViewModel : PropertyChangedBase
             .DownloadFiles
             .Where(df => df.DownloadQueueId == Id && (df.IsDownloading || df.IsPaused))
             .ToList();
-
-        foreach (var downloadFile in downloadFiles)
-            await _downloadFileService.StopDownloadFileAsync(downloadFile);
-
-        downloadFiles = downloadFiles
-            .Select(df =>
+        
+        downloadFiles.ForEach(df =>
+        {
+            _downloadFileService.DownloadFinishedSyncTasks.TryAdd(df.Id, []);
+            _downloadFileService.DownloadFinishedSyncTasks[df.Id].Add(downloadFile =>
             {
-                df.CountOfError = 0;
-                return df;
-            })
-            .ToList();
+                try
+                {
+                    ArgumentNullException.ThrowIfNull(downloadFile);
 
-        await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
+                    downloadFile.CountOfError = 0;
+                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true };
+                }
+                catch (Exception ex)
+                {
+                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true, Exception = ex };
+                }
+            });
+        });
+
+        var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile));
+        await Task.WhenAll(tasks);
     }
 
     public void LoadViewData()
@@ -421,7 +430,7 @@ public class DownloadQueueViewModel : PropertyChangedBase
 
     #region Helpers
 
-    private async Task<DownloadFinishedTaskValue?> DownloadFileOnDownloadFinishedAsync(DownloadFileViewModel? viewModel)
+    private async Task<DownloadFinishedTaskValue?> DownloadFileFinishedTaskAsync(DownloadFileViewModel? viewModel)
     {
         try
         {

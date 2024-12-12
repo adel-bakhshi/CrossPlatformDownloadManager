@@ -5,12 +5,13 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
-public partial class TrayIconWindow : MyWindowBase<TrayIconWindowViewModel>
+public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
 {
-    public TrayIconWindow()
+    public ManagerWindow()
     {
         InitializeComponent();
 
@@ -47,7 +48,7 @@ public partial class TrayIconWindow : MyWindowBase<TrayIconWindowViewModel>
         Position = new PixelPoint(x, y);
     }
 
-    private void Window_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    private void WindowOnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (ViewModel == null)
             return;
@@ -65,6 +66,25 @@ public partial class TrayIconWindow : MyWindowBase<TrayIconWindowViewModel>
 
             if (ViewModel.IsMenuVisible)
                 ViewModel.HideMenu();
+        }
+    }
+
+    private async void CDMTextBlockOnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        try
+        {
+            var mainWindow = App.Desktop?.MainWindow;
+            if (mainWindow == null)
+                throw new InvalidOperationException("Could not find main window.");
+            
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+            
+            Log.Error(ex, "An error occured while trying to open main window.");
         }
     }
 }

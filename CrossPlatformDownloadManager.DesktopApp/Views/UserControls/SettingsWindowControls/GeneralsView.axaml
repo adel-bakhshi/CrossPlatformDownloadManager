@@ -19,7 +19,7 @@
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Center"
                            TextAlignment="Left"
-                           Text="Start CDM on system startup"
+                           Text="Start on system startup"
                            FontWeight="Bold" />
 
                 <ToggleSwitch Grid.Column="1"
@@ -35,7 +35,7 @@
                               IsChecked="{Binding StartOnSystemStartup}" />
             </Grid>
         </Border>
-        
+
         <!-- Use browser extension -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
@@ -61,7 +61,7 @@
                               IsChecked="{Binding UseBrowserExtension}" />
             </Grid>
         </Border>
-        
+
         <!-- Dark mode -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
@@ -85,6 +85,32 @@
                               VerticalContentAlignment="Center"
                               Width="40"
                               IsChecked="{Binding DarkMode}" />
+            </Grid>
+        </Border>
+
+        <!-- Always keep manager on top -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Always keep manager on top"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding AlwaysKeepManagerOnTop}" />
             </Grid>
         </Border>
     </StackPanel>

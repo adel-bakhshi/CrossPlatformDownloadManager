@@ -12,6 +12,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -245,9 +246,11 @@ public class MainWindowViewModel : ViewModelBase
 
     private void LoadDownloadQueues()
     {
-        DownloadQueues = AppService
+        var downloadQueues = AppService
             .DownloadQueueService
             .DownloadQueues;
+
+        DownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
     }
 
     private async Task SelectAllRowsAsync(DataGrid? dataGrid)
@@ -277,7 +280,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task AddNewLinkAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -359,7 +361,7 @@ public class MainWindowViewModel : ViewModelBase
 
             foreach (var downloadFile in downloadFiles)
             {
-                await AppService
+                _ = AppService
                     .DownloadFileService
                     .StopDownloadFileAsync(downloadFile);
             }
@@ -395,7 +397,7 @@ public class MainWindowViewModel : ViewModelBase
 
             foreach (var downloadFile in downloadFiles)
             {
-                await AppService
+                _ = AppService
                     .DownloadFileService
                     .StopDownloadFileAsync(downloadFile);
             }
@@ -408,51 +410,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task DeleteDownloadFilesAsync(DataGrid? dataGrid)
     {
-        try
-        {
-            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
-                return;
-
-            var downloadFiles = dataGrid
-                .SelectedItems
-                .OfType<DownloadFileViewModel>()
-                .ToList();
-
-            var isFileExists = downloadFiles
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
-                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
-                .Where(File.Exists)
-                .ToList();
-
-            var deleteFile = false;
-            if (isFileExists.Count > 0)
-            {
-                var result = await ShowWarningDialogAsync("Delete files",
-                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
-                    DialogButtons.YesNo);
-
-                if (result == DialogResult.Yes)
-                    deleteFile = true;
-            }
-
-            for (var i = downloadFiles.Count - 1; i >= 0; i--)
-            {
-                if (downloadFiles[i].IsDownloading)
-                {
-                    await AppService
-                        .DownloadFileService
-                        .StopDownloadFileAsync(downloadFiles[i]);
-                }
-
-                await AppService
-                    .DownloadFileService
-                    .DeleteDownloadFileAsync(downloadFiles[i], deleteFile);
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorDialogAsync(ex);
-        }
+        await RemoveDownloadFilesAsync(dataGrid, excludeFilesInRunningQueues: false);
     }
 
     private async Task DeleteCompletedDownloadFilesAsync()
@@ -617,7 +575,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
             dataGrid?.SelectAll();
         }
         catch (Exception ex)
@@ -630,7 +588,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsDownloading: true } downloadFile ||
                 downloadFile.SaveLocation.IsNullOrEmpty() ||
@@ -665,7 +623,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
@@ -706,7 +664,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
                 downloadFile.FileName.IsNullOrEmpty() ||
@@ -736,7 +694,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
                 downloadFile.FileName.IsNullOrEmpty() ||
@@ -785,7 +743,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
@@ -871,43 +829,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task RemoveContextMenuAsync(DataGrid? dataGrid)
     {
-        try
-        {
-            HideContextMenu();
-
-            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
-                return;
-
-            var downloadFiles = dataGrid
-                .SelectedItems
-                .OfType<DownloadFileViewModel>()
-                .ToList();
-
-            var isFileExists = downloadFiles
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
-                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
-                .Where(File.Exists)
-                .ToList();
-
-            var deleteFile = false;
-            if (isFileExists.Count > 0)
-            {
-                var result = await ShowWarningDialogAsync("Delete files",
-                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
-                    DialogButtons.YesNo);
-
-                if (result == DialogResult.Yes)
-                    deleteFile = true;
-            }
-
-            await AppService
-                .DownloadFileService
-                .DeleteDownloadFilesAsync(downloadFiles, alsoDeleteFile: deleteFile);
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorDialogAsync(ex);
-        }
+        await HideContextMenuAsync();
+        await RemoveDownloadFilesAsync(dataGrid, excludeFilesInRunningQueues: true);
     }
 
     private async Task AddToQueueContextMenuAsync(DataGrid? dataGrid)
@@ -918,7 +841,7 @@ public class MainWindowViewModel : ViewModelBase
             AddToQueueDownloadQueues = [];
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
             {
-                HideContextMenu();
+                await HideContextMenuAsync();
                 return;
             }
 
@@ -935,7 +858,7 @@ public class MainWindowViewModel : ViewModelBase
 
             if (downloadQueues.Count == 0)
             {
-                HideContextMenu();
+                await HideContextMenuAsync();
                 return;
             }
 
@@ -944,7 +867,7 @@ public class MainWindowViewModel : ViewModelBase
                 // If count of selected download files is equal to 0 then hide context menu
                 case 0:
                 {
-                    HideContextMenu();
+                    await HideContextMenuAsync();
                     return;
                 }
 
@@ -984,7 +907,7 @@ public class MainWindowViewModel : ViewModelBase
                                 .ToObservableCollection();
 
                             if (AddToQueueDownloadQueues.Count == 0)
-                                HideContextMenu();
+                                await HideContextMenuAsync();
 
                             break;
                         }
@@ -1013,7 +936,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
@@ -1060,7 +983,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            HideContextMenu();
+            await HideContextMenuAsync();
 
             var downloadQueue = AppService
                 .DownloadQueueService
@@ -1192,19 +1115,47 @@ public class MainWindowViewModel : ViewModelBase
                     .ToList();
             }
 
-            DownloadFiles = downloadFiles.ToObservableCollection();
+            DownloadFiles.UpdateCollection(downloadFiles.ToObservableCollection(), df => df.Id);
         }
         catch
         {
-            DownloadFiles = AppService
+            var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles;
+            
+            DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
         }
     }
 
     protected override void OnDownloadFileServiceDataChanged()
     {
         FilterDownloadList();
+    }
+
+    protected override async void OnDownloadFileServiceErrorOccured(DownloadFileErrorEventArgs e)
+    {
+        try
+        {
+            base.OnDownloadFileServiceErrorOccured(e);
+
+            var downloadFile = AppService
+                .DownloadFileService
+                .DownloadFiles
+                .FirstOrDefault(df => df.Id == e.Id);
+
+            if (downloadFile == null)
+                return;
+
+            var errorMessage = $"An error occurred while attempting to download the file '{downloadFile.FileName}'. " + Environment.NewLine +
+                               "Please try again. " + Environment.NewLine +
+                               "If the problem continues, please reach out to support for assistance.";
+
+            await ShowDangerDialogAsync("Error", errorMessage, DialogButtons.Ok, useMainWindowAsOwner: true);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 
     protected override void OnDownloadQueueServiceDataChanged()
@@ -1256,31 +1207,19 @@ public class MainWindowViewModel : ViewModelBase
             ContextFlyoutEnableState.CanOpenFolder = downloadFiles.Count > 0;
             ContextFlyoutEnableState.CanRename = downloadFiles is [{ IsCompleted: true }];
             ContextFlyoutEnableState.CanChangeFolder = downloadFiles is [{ IsCompleted: true }];
-            ContextFlyoutEnableState.CanRedownload =
-                downloadFiles.Exists(df => df is { IsDownloading: false, IsPaused: false, DownloadProgress: > 0 });
-
-            ContextFlyoutEnableState.CanResume =
-                downloadFiles.Exists(df => df is { IsDownloading: false, IsCompleted: false });
-
+            ContextFlyoutEnableState.CanRedownload = downloadFiles.Exists(df => df is { IsDownloading: false, IsPaused: false, DownloadProgress: > 0 });
+            ContextFlyoutEnableState.CanResume = downloadFiles.Exists(df => df is { IsDownloading: false, IsCompleted: false });
             ContextFlyoutEnableState.CanStop = downloadFiles.Exists(df => df.IsDownloading);
-            ContextFlyoutEnableState.CanRefreshDownloadAddress =
-                downloadFiles is [{ IsDownloading: false, IsCompleted: false }];
+            ContextFlyoutEnableState.CanRefreshDownloadAddress = downloadFiles is [{ IsDownloading: false, IsCompleted: false }];
+            ContextFlyoutEnableState.CanRemove =
+                downloadFiles.Count > 0 &&
+                downloadFiles.Exists(df => df.DownloadQueueId == null || downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId)?.IsRunning != true);
 
-            ContextFlyoutEnableState.CanRemove = downloadFiles.Count > 0;
-            ContextFlyoutEnableState.CanAddToQueue =
-                downloadFiles.Count > 0 && downloadFiles.Exists(df => !df.IsCompleted);
-
-            ContextFlyoutEnableState.CanRemoveFromQueue = downloadFiles.Count > 0 &&
-                                                          downloadFiles.Exists(df =>
-                                                              df is
-                                                              {
-                                                                  DownloadQueueId: not null,
-                                                                  IsDownloading: false,
-                                                                  IsPaused: false,
-                                                                  IsCompleted: false
-                                                              } &&
-                                                              downloadQueues.FirstOrDefault(dq =>
-                                                                  dq.Id == df.DownloadQueueId) != null);
+            ContextFlyoutEnableState.CanAddToQueue = downloadFiles.Count > 0 && downloadFiles.Exists(df => !df.IsCompleted);
+            ContextFlyoutEnableState.CanRemoveFromQueue =
+                downloadFiles.Count > 0 &&
+                downloadFiles.Exists(df => df is { DownloadQueueId: not null, IsDownloading: false, IsPaused: false, IsCompleted: false } &&
+                                           downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId) != null);
         }
         catch (Exception ex)
         {
@@ -1288,10 +1227,90 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async void HideContextMenu()
+    private async Task HideContextMenuAsync()
     {
-        await Task.Delay(100);
-        _mainWindow?.HideDownloadFilesDataGridContextMenu();
-        _mainWindow = null;
+        try
+        {
+            await Task.Delay(100);
+            _mainWindow?.HideDownloadFilesDataGridContextMenu();
+            _mainWindow = null;
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task RemoveDownloadFilesAsync(DataGrid? dataGrid, bool excludeFilesInRunningQueues)
+    {
+        try
+        {
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+                return;
+
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .ToList();
+
+            if (excludeFilesInRunningQueues)
+            {
+                var downloadQueues = AppService
+                    .DownloadQueueService
+                    .DownloadQueues;
+
+                downloadFiles = downloadFiles
+                    .Where(df => df.DownloadQueueId == null || downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId)?.IsRunning != true)
+                    .ToList();
+            }
+
+            if (downloadFiles.Count == 0)
+                return;
+
+            var isFileExists = downloadFiles
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
+                .ToList();
+
+            var deleteFile = false;
+            if (isFileExists.Count > 0)
+            {
+                var result = await ShowWarningDialogAsync("Delete files",
+                    $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    deleteFile = true;
+            }
+
+            var reloadData = downloadFiles.Count == 1;
+            for (var i = downloadFiles.Count - 1; i >= 0; i--)
+            {
+                if (downloadFiles[i].IsDownloading)
+                {
+                    await AppService
+                        .DownloadFileService
+                        .StopDownloadFileAsync(downloadFiles[i], ensureStopped: true);
+                }
+
+                await AppService
+                    .DownloadFileService
+                    .DeleteDownloadFileAsync(downloadFiles[i], deleteFile, reloadData);
+            }
+
+            if (!reloadData)
+            {
+                await AppService
+                    .DownloadFileService
+                    .LoadDownloadFilesAsync();
+            }
+
+            dataGrid.SelectedItems.Clear();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+        }
     }
 }

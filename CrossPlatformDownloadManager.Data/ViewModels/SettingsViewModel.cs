@@ -12,6 +12,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _startOnSystemStartup;
     private bool _useBrowserExtension;
     private bool _darkMode;
+    private bool _alwaysKeepManagerOnTop;
     private bool _showStartDownloadDialog;
     private bool _showCompleteDownloadDialog;
     private string _duplicateDownloadLinkAction = string.Empty;
@@ -26,6 +27,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _useQueueStoppedSound;
     private bool _useQueueFinishedSound;
     private bool _useSystemNotifications;
+    private PointViewModel? _managerPoint;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -54,6 +56,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _darkMode;
         set => SetField(ref _darkMode, value);
+    }
+
+    public bool AlwaysKeepManagerOnTop
+    {
+        get => _alwaysKeepManagerOnTop;
+        set => SetField(ref _alwaysKeepManagerOnTop, value);
     }
 
     public bool ShowStartDownloadDialog
@@ -138,6 +146,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _useSystemNotifications;
         set => SetField(ref _useSystemNotifications, value);
+    }
+
+    public PointViewModel? ManagerPoint
+    {
+        get => _managerPoint;
+        set => SetField(ref _managerPoint, value);
     }
     
     public ObservableCollection<ProxySettingsViewModel> Proxies

@@ -54,13 +54,12 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
                 return;
 
             ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+            ViewModel.DownloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
             _updateChunksDataTimer.Start();
 
             // Wait for 0.5s to focus the window
             await Task.Delay(1000);
             Focus();
-
-            await ViewModel.CheckResumeCapabilityAsync();
         }
         catch (Exception ex)
         {
@@ -73,16 +72,28 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
-        if (ViewModel == null)
-            return;
+        try
+        {
+            if (ViewModel == null)
+                return;
 
-        _isClosing = true;
-        ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+            _isClosing = true;
+            ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+            ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
 
-        if (ViewModel.DownloadFile.IsDownloading)
-            await ViewModel.StopDownloadAsync(this, closeWindow: false);
+            if (ViewModel.DownloadFile.IsDownloading)
+                await ViewModel.StopDownloadAsync(this, closeWindow: false);
+            
+            ViewModel.RemovePropertyChangedEventHandler();
+            base.OnClosing(e);
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
 
-        base.OnClosing(e);
+            Console.WriteLine(ex);
+        }
     }
 
     #region Helpers
@@ -139,9 +150,17 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
                 return;
 
             ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+            ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
+            ViewModel.RemovePropertyChangedEventHandler();
+            
             if (!_isClosing)
                 Close();
         });
+    }
+
+    private void DownloadFileOnDownloadStopped(object? sender, DownloadFileEventArgs e)
+    {
+        Hide();
     }
 
     #endregion

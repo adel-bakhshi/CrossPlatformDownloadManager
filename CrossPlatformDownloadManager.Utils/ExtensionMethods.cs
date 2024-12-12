@@ -29,8 +29,14 @@ public static class ExtensionMethods
 
     public static string ToFileSize(this double bytes)
     {
-        if (bytes <= 0)
-            return string.Empty;
+        switch (bytes)
+        {
+            case < 0:
+                return string.Empty;
+
+            case 0:
+                return "0 KB";
+        }
 
         var tb = bytes / Constants.TB;
         if (tb > 1)
@@ -169,6 +175,9 @@ public static class ExtensionMethods
     public static string GetShortTime(this TimeSpan? time)
     {
         if (time == null)
+            return string.Empty;
+
+        if (time == TimeSpan.Zero)
             return "00 : 00";
 
         var seconds = time.Value.TotalSeconds;
@@ -186,5 +195,65 @@ public static class ExtensionMethods
     {
         var json = obj.ConvertToJson();
         return json.ConvertFromJson<T>();
+    }
+
+    public static void UpdateList<T, TKey>(this List<T> oldList, List<T> newList, Func<T, TKey> keySelector) where TKey : notnull
+    {
+        // Create dictionaries for fast lookup
+        var oldItemsByKey = oldList.ToDictionary(keySelector);
+        var newItemsByKey = newList.ToDictionary(keySelector);
+
+        // Find items to remove
+        var itemsToRemove = oldItemsByKey.Keys.Except(newItemsByKey.Keys).Select(key => oldItemsByKey[key]).ToList();
+        foreach (var item in itemsToRemove)
+            oldList.Remove(item);
+
+        // Update existing items or add new ones
+        foreach (var newItem in newList)
+        {
+            // Get key from new item
+            var key = keySelector(newItem);
+            if (oldItemsByKey.TryGetValue(key, out var existingItem))
+            {
+                // Update existing item by replacing it
+                var index = oldList.IndexOf(existingItem);
+                oldList[index] = newItem;
+            }
+            else
+            {
+                // Add new item
+                oldList.Add(newItem);
+            }
+        }
+    }
+
+    public static void UpdateCollection<T, TKey>(this ObservableCollection<T> oldCollection, ObservableCollection<T> newCollection, Func<T, TKey> keySelector) where TKey : notnull
+    {
+        // Create dictionaries for fast lookup
+        var oldItemsByKey = oldCollection.ToDictionary(keySelector);
+        var newItemsByKey = newCollection.ToDictionary(keySelector);
+
+        // Find items to remove
+        var itemsToRemove = oldItemsByKey.Keys.Except(newItemsByKey.Keys).Select(key => oldItemsByKey[key]).ToList();
+        foreach (var item in itemsToRemove)
+            oldCollection.Remove(item);
+
+        // Update existing items or add new ones
+        foreach (var newItem in newCollection)
+        {
+            // Get key from new item
+            var key = keySelector(newItem);
+            if (oldItemsByKey.TryGetValue(key, out var existingItem))
+            {
+                // Update existing item by replacing it
+                var index = oldCollection.IndexOf(existingItem);
+                oldCollection[index] = newItem;
+            }
+            else
+            {
+                // Add new item
+                oldCollection.Add(newItem);
+            }
+        }
     }
 }

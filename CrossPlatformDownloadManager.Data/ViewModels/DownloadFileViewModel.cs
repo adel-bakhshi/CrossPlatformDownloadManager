@@ -1,13 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
 using Avalonia.Threading;
+using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
+using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -22,6 +26,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     // UpdateChunksData timer
     private DispatcherTimer? _updateChunksDataTimer;
     private List<ChunkProgressViewModel>? _chunkProgresses;
+
+    private DownloadService? _downloadService;
 
     private int _id;
     private string? _url;
@@ -44,6 +50,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private string? _downloadPackage;
     private ObservableCollection<ChunkDataViewModel> _chunksData = [];
     private int _countOfError;
+    private bool? _canResumeDownload;
 
     #endregion
 
@@ -221,14 +228,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string TransferRateAsString
-    {
-        get
-        {
-            var transferRate = TransferRate.ToFileSize();
-            return transferRate.IsNullOrEmpty() ? "0 KB" : transferRate;
-        }
-    }
+    public string TransferRateAsString => TransferRate.ToFileSize();
 
     public string? SaveLocation
     {
@@ -254,6 +254,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         set => SetField(ref _countOfError, value);
     }
 
+    public bool? CanResumeDownload
+    {
+        get => _canResumeDownload;
+        set => SetField(ref _canResumeDownload, value);
+    }
+
     #endregion
 
     #region Events
@@ -261,6 +267,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
     public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
     public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
+    public event EventHandler<DownloadFileEventArgs>? DownloadStopped;
 
     #endregion
 
@@ -269,6 +276,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         if (downloadService == null || unitOfWork == null)
             return;
+
+        _downloadService = downloadService;
 
         downloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
         downloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
@@ -295,12 +304,16 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CreateChunksData(downloadConfiguration.ChunkCount);
         CalculateElapsedTime();
         UpdateChunksData();
+        
+        // Check resume capability
+        CanResumeDownload = null;
+        _ = CheckResumeCapabilityAsync();
 
         var fileName = Path.Combine(downloadPath!, FileName!);
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
         if (downloadPackage == null)
         {
-            await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName).ConfigureAwait(false);
+            await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName);
         }
         else
         {
@@ -317,14 +330,16 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 downloadPackage.Urls = urls.ToArray();
             }
 
-            await downloadService.DownloadFileTaskAsync(downloadPackage).ConfigureAwait(false);
+            await downloadService.DownloadFileTaskAsync(downloadPackage);
         }
     }
 
-    public async Task StopDownloadFileAsync(DownloadService? downloadService)
+    public void StopDownloadFile(DownloadService? downloadService)
     {
         if (downloadService == null)
             return;
+
+        _downloadService = downloadService;
 
         _elapsedTimeTimer?.Stop();
         _updateChunksDataTimer?.Stop();
@@ -334,14 +349,16 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         _updateChunksDataTimer = null;
         _chunkProgresses = null;
 
-        await downloadService.CancelTaskAsync().ConfigureAwait(false);
-        SaveDownloadPackage(downloadService.Package);
+        _ = downloadService.CancelTaskAsync();
+        DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
     public void ResumeDownloadFile(DownloadService? downloadService)
     {
         if (downloadService == null)
             return;
+
+        _downloadService = downloadService;
 
         downloadService.Resume();
         _elapsedTimeTimer?.Start();
@@ -355,6 +372,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         if (downloadService == null)
             return;
+
+        _downloadService = downloadService;
 
         downloadService.Pause();
         _elapsedTimeTimer?.Stop();
@@ -377,19 +396,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private void DownloadServiceOnDownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
     {
         bool isSuccess;
-        string? error = null;
+        Exception? error = null;
 
-        // TODO: Show error
         if (e is { Error: not null, Cancelled: false })
         {
             Status = DownloadFileStatus.Error;
             isSuccess = false;
-            error = e.Error.Message;
+            error = e.Error;
         }
         else if (e.Cancelled)
         {
             Status = DownloadFileStatus.Stopped;
-            isSuccess = false;
+            isSuccess = true;
         }
         else
         {
@@ -419,6 +437,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         _elapsedTimeOfStartingDownload = null;
         _chunkProgresses = null;
 
+        if (_downloadService == null)
+            eventArgs.Error = new InvalidOperationException("Download service is null or undefined.");
+        else
+            SaveDownloadPackage(_downloadService.Package);
+
+        CanResumeDownload = null;
         DownloadFinished?.Invoke(this, eventArgs);
     }
 
@@ -528,6 +552,50 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private void SaveDownloadPackage(DownloadPackage? downloadPackage)
     {
         DownloadPackage = downloadPackage?.ConvertToJson();
+    }
+    
+    private async Task CheckResumeCapabilityAsync()
+    {
+        try
+        {
+            if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
+            {
+                CanResumeDownload = false;
+                return;
+            }
+
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
+
+            // Send HEAD request
+            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, Url));
+            response.EnsureSuccessStatusCode();
+
+            // Check for Accept-Ranges header
+            if (response.Headers.Contains("Accept-Ranges"))
+            {
+                var acceptRanges = response.Headers.GetValues("Accept-Ranges");
+                if (acceptRanges.Contains("bytes"))
+                {
+                    CanResumeDownload = true;
+                    return;
+                }
+            }
+
+            // Some servers don't include Accept-Ranges but still support partial content.
+            // If Range request succeeds with Partial Content status:
+            if (response.StatusCode == HttpStatusCode.PartialContent)
+            {
+                CanResumeDownload = true;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        CanResumeDownload = false;
     }
 
     #endregion

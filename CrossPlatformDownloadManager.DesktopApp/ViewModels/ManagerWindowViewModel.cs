@@ -10,7 +10,7 @@ using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
-public class TrayIconWindowViewModel : ViewModelBase
+public class ManagerWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
@@ -39,7 +39,7 @@ public class TrayIconWindowViewModel : ViewModelBase
 
     #endregion
 
-    public TrayIconWindowViewModel(IAppService appService, TrayMenuWindow trayMenuWindow) : base(appService)
+    public ManagerWindowViewModel(IAppService appService, TrayMenuWindow trayMenuWindow) : base(appService)
     {
         _trayMenuWindow = trayMenuWindow;
         

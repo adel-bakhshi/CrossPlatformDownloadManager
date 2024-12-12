@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 
@@ -15,10 +16,10 @@ public class OptionsViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private DownloadQueueViewModel _downloadQueue;
-    private ObservableCollection<string> _startDownloadDateOptions;
+    private DownloadQueueViewModel _downloadQueue = new();
+    private ObservableCollection<string> _startDownloadDateOptions = [];
     private string? _selectedStartDownloadDateOption;
-    private ObservableCollection<string> _daysOfWeekOptions;
+    private ObservableCollection<string> _daysOfWeekOptions = [];
     private string? _selectedDaysOfWeekOption;
     private DateTime? _selectedDate;
 
@@ -59,7 +60,7 @@ public class OptionsViewModel : ViewModelBase
         get => _selectedDaysOfWeekOption;
         set => this.RaiseAndSetIfChanged(ref _selectedDaysOfWeekOption, value);
     }
-    
+
     public DateTime? SelectedDate
     {
         get => _selectedDate;
@@ -76,6 +77,8 @@ public class OptionsViewModel : ViewModelBase
 
     public ICommand SelectStartDownloadDateCommand { get; }
 
+    public ICommand ChangeDefaultDownloadQueueCommand { get; }
+
     #endregion
 
     public OptionsViewModel(IAppService appService) : base(appService)
@@ -87,6 +90,7 @@ public class OptionsViewModel : ViewModelBase
         SelectedDate = DateTime.Now;
 
         SelectStartDownloadDateCommand = ReactiveCommand.CreateFromTask<CalendarDatePicker?>(SelectStartDownloadDateAsync);
+        ChangeDefaultDownloadQueueCommand = ReactiveCommand.CreateFromTask(ChangeDefaultDownloadQueueAsync);
     }
 
     public void ChangeDaysOfWeek(List<string> selectedItems)
@@ -117,6 +121,19 @@ public class OptionsViewModel : ViewModelBase
         catch (Exception ex)
         {
             await ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task ChangeDefaultDownloadQueueAsync()
+    {
+        try
+        {
+            DownloadQueue.IsDefault = !DownloadQueue.IsDefault;
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to change the default download queue.");
         }
     }
 

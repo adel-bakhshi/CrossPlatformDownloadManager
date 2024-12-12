@@ -1,10 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -14,6 +13,7 @@ using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -44,7 +44,6 @@ public class DownloadWindowViewModel : ViewModelBase
     private DownloadFileViewModel _downloadFile = new();
     private bool _isPaused;
     private string? _hideDetailsButtonContent;
-    private bool _canResumeFile;
     private string _resumeCapabilityState = "Checking...";
 
     #endregion
@@ -78,7 +77,13 @@ public class DownloadWindowViewModel : ViewModelBase
     public DownloadFileViewModel DownloadFile
     {
         get => _downloadFile;
-        set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
+        set
+        {
+            value.TransferRate ??= 0;
+            value.TimeLeft ??= TimeSpan.Zero;
+
+            this.RaiseAndSetIfChanged(ref _downloadFile, value);
+        }
     }
 
     public bool IsPaused
@@ -91,12 +96,6 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         get => _hideDetailsButtonContent;
         set => this.RaiseAndSetIfChanged(ref _hideDetailsButtonContent, value);
-    }
-
-    public bool CanResumeFile
-    {
-        get => _canResumeFile;
-        set => this.RaiseAndSetIfChanged(ref _canResumeFile, value);
     }
 
     public string ResumeCapabilityState
@@ -122,6 +121,8 @@ public class DownloadWindowViewModel : ViewModelBase
     public DownloadWindowViewModel(IAppService appService, DownloadFileViewModel downloadFile) : base(appService)
     {
         DownloadFile = downloadFile;
+        DownloadFile.PropertyChanged += DownloadFileOnPropertyChanged;
+        
         SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         OptionsTurnOffModes = Constants.TurnOffComputerModes.ToObservableCollection();
 
@@ -141,9 +142,16 @@ public class DownloadWindowViewModel : ViewModelBase
         OpenSaveLocationCommand = ReactiveCommand.CreateFromTask(OpenSaveLocationAsync);
     }
 
+    private void DownloadFileOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName?.Equals(nameof(DownloadFile.CanResumeDownload)) != true)
+            return;
+
+        ResumeCapabilityState = DownloadFile.CanResumeDownload == true ? "Yes" : "No";
+    }
+
     public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -152,62 +160,21 @@ public class DownloadWindowViewModel : ViewModelBase
             await AppService
                 .DownloadFileService
                 .StopDownloadFileAsync(DownloadFile);
+            
+            RemovePropertyChangedEventHandler();
 
             if (closeWindow)
                 owner.Close();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "Failed to stop downloading file");
         }
     }
 
-    public async Task CheckResumeCapabilityAsync()
+    public void RemovePropertyChangedEventHandler()
     {
-        try
-        {
-            if (DownloadFile.Url.IsNullOrEmpty() || !DownloadFile.Url.CheckUrlValidation())
-            {
-                CanResumeFile = false;
-                ResumeCapabilityState = "No";
-                return;
-            }
-
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
-
-            // Send HEAD request
-            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, DownloadFile.Url));
-            response.EnsureSuccessStatusCode();
-
-            // Check for Accept-Ranges header
-            if (response.Headers.Contains("Accept-Ranges"))
-            {
-                var acceptRanges = response.Headers.GetValues("Accept-Ranges");
-                if (acceptRanges.Contains("bytes"))
-                {
-                    CanResumeFile = true;
-                    ResumeCapabilityState = "Yes";
-                    return;
-                }
-            }
-
-            // Some servers don't include Accept-Ranges but still support partial content.
-            // If Range request succeeds with Partial Content status:
-            if (response.StatusCode == System.Net.HttpStatusCode.PartialContent)
-            {
-                CanResumeFile = true;
-                ResumeCapabilityState = "Yes";
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-        CanResumeFile = false;
-        ResumeCapabilityState = "No";
+        DownloadFile.PropertyChanged -= DownloadFileOnPropertyChanged;
     }
 
     #region Helpers

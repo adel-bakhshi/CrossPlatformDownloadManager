@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using System.IO;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Data.Services.DownloadQueueService;
@@ -14,6 +15,8 @@ using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
 
@@ -23,11 +26,34 @@ sealed class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while starting the application");
+        }
+        finally
+        {
+            Environment.Exit(0);
+        }
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
+        var startupPath = Environment.CurrentDirectory;
+        const string fileName = "logs.txt";
+        var logFilePath = Path.Combine(startupPath, fileName);
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(logFilePath)
+            .CreateLogger();
+
         var appBuilder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
@@ -37,36 +63,36 @@ sealed class Program
             {
                 // Add AutoMapper to services
                 services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-                
+
                 // Add UnitOfWork to services
                 services.AddTransient<IUnitOfWork, UnitOfWork>();
-                
+
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
-                
+
                 // Add DownloadFileService to services
                 services.AddSingleton<IDownloadFileService, DownloadFileService>();
-                
+
                 // Add DownloadQueueService to services
                 services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
-                
+
                 // Add AppService to services
                 services.AddSingleton<IAppService, AppService>();
-                
+
                 // Add ViewModels to services
                 services.AddSingleton<MainWindowViewModel>();
                 services.AddSingleton<TrayMenuWindowViewModel>();
-                
+
                 // Add Windows to services
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<TrayMenuWindow>();
-                
+
                 // Add BrowserExtension to services
                 services.AddSingleton<IBrowserExtension, BrowserExtension>();
-                
+
                 // Add AppInitializer to services
                 services.AddSingleton<IAppInitializer, AppInitializer>();
-                
+
                 // Add AppFinisher to services
                 services.AddSingleton<IAppFinisher, AppFinisher>();
             })

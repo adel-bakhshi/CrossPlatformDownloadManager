@@ -7,6 +7,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
 
@@ -41,10 +42,15 @@ public partial class App : Application
             }
 
             base.OnFrameworkInitializationCompleted();
+            Log.Information("Application started");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An unhandled exception occurred during initialization");
+            if (Desktop != null)
+                Desktop.Shutdown();
+            else
+                throw;
         }
     }
 

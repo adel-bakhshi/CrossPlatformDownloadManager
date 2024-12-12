@@ -257,8 +257,20 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             DownloadQueue.TurnOffComputerMode = turnOffComputerMode;
 
-            if (!IsEditMode)
-                DownloadQueue.IsDefault = false;
+            // Get all download queues that are default
+            var defaultDownloadQueues = await AppService
+                .UnitOfWork
+                .DownloadQueueRepository
+                .GetAllAsync(where: dq => dq.IsDefault);
+            
+            // Set all default download queues to not default
+            foreach (var defaultDownloadQueue in defaultDownloadQueues)
+                defaultDownloadQueue.IsDefault = false;
+            
+            // Update default download queues
+            await AppService
+                .DownloadQueueService
+                .UpdateDownloadQueuesAsync(defaultDownloadQueues);
 
             var downloadQueue = AppService
                 .Mapper

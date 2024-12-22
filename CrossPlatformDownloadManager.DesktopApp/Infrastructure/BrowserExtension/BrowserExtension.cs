@@ -133,7 +133,10 @@ public class BrowserExtension : IBrowserExtension
                 var vm = new AddDownloadLinkWindowViewModel(_appService)
                 {
                     IsLoadingUrl = true,
-                    Url = requestViewModel.Url
+                    DownloadFile =
+                    {
+                        Url = requestViewModel.Url
+                    }
                 };
 
                 var window = new AddDownloadLinkWindow { DataContext = vm };

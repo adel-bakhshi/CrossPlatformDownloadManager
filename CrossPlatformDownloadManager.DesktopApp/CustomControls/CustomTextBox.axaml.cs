@@ -7,9 +7,10 @@ namespace CrossPlatformDownloadManager.DesktopApp.CustomControls;
 
 public class CustomTextBox : TextBox
 {
+    #region Properties
+
     public static readonly StyledProperty<Geometry?> IconDataProperty =
-        AvaloniaProperty.Register<CustomTextBox, Geometry?>(
-            "IconData", defaultValue: null);
+        AvaloniaProperty.Register<CustomTextBox, Geometry?>("IconData", defaultValue: null);
 
     public Geometry? IconData
     {
@@ -18,8 +19,7 @@ public class CustomTextBox : TextBox
     }
 
     public static readonly StyledProperty<IBrush?> IconColorProperty =
-        AvaloniaProperty.Register<CustomTextBox, IBrush?>(
-            "IconColor", SolidColorBrush.Parse("#000000"));
+        AvaloniaProperty.Register<CustomTextBox, IBrush?>("IconColor", SolidColorBrush.Parse("#000000"));
 
     public IBrush? IconColor
     {
@@ -27,8 +27,7 @@ public class CustomTextBox : TextBox
         set => SetValue(IconColorProperty, value);
     }
 
-    public static readonly StyledProperty<double> IconSizeProperty = AvaloniaProperty.Register<CustomTextBox, double>(
-        "IconSize", defaultValue: 16);
+    public static readonly StyledProperty<double> IconSizeProperty = AvaloniaProperty.Register<CustomTextBox, double>("IconSize", defaultValue: 16);
 
     public double IconSize
     {
@@ -36,8 +35,8 @@ public class CustomTextBox : TextBox
         set => SetValue(IconSizeProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnFocusBorderColorProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>(
-        "OnFocusBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
+    public static readonly StyledProperty<IBrush?> OnFocusBorderColorProperty =
+        AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnFocusBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
 
     public IBrush? OnFocusBorderColor
     {
@@ -45,8 +44,8 @@ public class CustomTextBox : TextBox
         set => SetValue(OnFocusBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnHoverBorderColorProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>(
-        "OnHoverBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
+    public static readonly StyledProperty<IBrush?> OnHoverBorderColorProperty =
+        AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnHoverBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
 
     public IBrush? OnHoverBorderColor
     {
@@ -54,8 +53,7 @@ public class CustomTextBox : TextBox
         set => SetValue(OnHoverBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnErrorBorderColorProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>(
-        "OnErrorBorderColor");
+    public static readonly StyledProperty<IBrush?> OnErrorBorderColorProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnErrorBorderColor");
 
     public IBrush? OnErrorBorderColor
     {
@@ -63,8 +61,7 @@ public class CustomTextBox : TextBox
         set => SetValue(OnErrorBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>(
-        "WatermarkForeground");
+    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>("WatermarkForeground");
 
     public IBrush? WatermarkForeground
     {
@@ -72,21 +69,21 @@ public class CustomTextBox : TextBox
         set => SetValue(WatermarkForegroundProperty, value);
     }
 
-    public static readonly StyledProperty<bool> ShowPasswordRevealButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>(
-        "ShowPasswordRevealButton");
+    public static readonly StyledProperty<bool> ShowPasswordRevealButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>("ShowPasswordRevealButton");
 
     public bool ShowPasswordRevealButton
     {
         get => GetValue(ShowPasswordRevealButtonProperty);
         set => SetValue(ShowPasswordRevealButtonProperty, value);
     }
-    
-    public static readonly StyledProperty<bool> ShowClearButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>(
-        "ShowClearButton");
+
+    public static readonly StyledProperty<bool> ShowClearButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>("ShowClearButton");
 
     public bool ShowClearButton
     {
         get => GetValue(ShowClearButtonProperty);
         set => SetValue(ShowClearButtonProperty, value);
     }
+
+    #endregion
 }

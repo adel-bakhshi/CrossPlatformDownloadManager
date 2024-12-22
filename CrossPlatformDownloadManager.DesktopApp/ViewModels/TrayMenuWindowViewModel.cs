@@ -161,8 +161,11 @@ public class TrayMenuWindowViewModel : ViewModelBase
             var urlIsValid = url.CheckUrlValidation();
             var vm = new AddDownloadLinkWindowViewModel(AppService)
             {
-                Url = urlIsValid ? url : null,
-                IsLoadingUrl = urlIsValid
+                IsLoadingUrl = urlIsValid,
+                DownloadFile =
+                {
+                    Url = urlIsValid ? url : null
+                }
             };
 
             var window = new AddDownloadLinkWindow { DataContext = vm };

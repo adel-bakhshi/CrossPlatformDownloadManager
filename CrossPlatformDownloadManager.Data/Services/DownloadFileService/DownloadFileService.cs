@@ -7,6 +7,8 @@ using CrossPlatformDownloadManager.Data.Services.SettingsService;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.Data.ViewModels.Services;
+using CrossPlatformDownloadManager.Data.ViewModels.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
@@ -118,12 +120,210 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task AddDownloadFileAsync(DownloadFile downloadFile)
+    public async Task<ServiceResultViewModel<DownloadFileViewModel>> AddDownloadFileAsync(DownloadFileViewModel viewModel)
     {
+        var result = new ServiceResultViewModel<DownloadFileViewModel>();
+
+        var category = await _unitOfWork
+            .CategoryRepository
+            .GetAsync(where: c => c.Id == viewModel.CategoryId, includeProperties: ["CategorySaveDirectory"]);
+
+        var downloadFile = new DownloadFile
+        {
+            Url = viewModel.Url!,
+            FileName = viewModel.FileName!,
+            DownloadQueueId = null,
+            Size = viewModel.Size!.Value,
+            Description = viewModel.Description,
+            Status = DownloadFileStatus.None,
+            LastTryDate = null,
+            DateAdded = DateTime.Now,
+            DownloadQueuePriority = null,
+            CategoryId = category!.Id,
+            SaveLocation = category.CategorySaveDirectory!.SaveDirectory,
+        };
+
         await _unitOfWork.DownloadFileRepository.AddAsync(downloadFile);
         await _unitOfWork.SaveAsync();
 
         await LoadDownloadFilesAsync();
+
+        result.IsSuccess = true;
+        result.Result = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
+        return result;
+    }
+
+    public async Task<ServiceResultViewModel<UrlDetailsViewModel>> GetUrlDetailsAsync(string? url)
+    {
+        var result = new ServiceResultViewModel<UrlDetailsViewModel> { Result = new UrlDetailsViewModel() };
+
+        // Make sure url is valid
+        url = url?.Replace("\\", "/").Trim();
+        if (!url.CheckUrlValidation())
+        {
+            result.Result.IsUrlValid = false;
+            return result;
+        }
+
+        result.Result.Url = url!;
+
+        // Find a download file with the same url
+        var duplicateDownloadFile = DownloadFiles.FirstOrDefault(df => !df.Url.IsNullOrEmpty() && df.Url!.Equals(url));
+        result.Result.IsUrlDuplicate = duplicateDownloadFile != null;
+
+        // Create an instance of HttpClient
+        using var httpClient = new HttpClient();
+        // Send a HEAD request to get the headers only
+        using var request = new HttpRequestMessage(HttpMethod.Head, url);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        // Set file flag to true
+        var isFile = true;
+        // Check if the Content-Type indicates a file
+        var contentType = response.Content.Headers.ContentType?.MediaType?.ToLower() ?? string.Empty;
+        if (!contentType.StartsWith("application/") &&
+            !contentType.StartsWith("image/") &&
+            !contentType.StartsWith("video/") &&
+            !contentType.StartsWith("audio/") &&
+            !contentType.StartsWith("text/"))
+        {
+            isFile = false;
+
+            // Check Content-Disposition header
+            if (response.Content.Headers.ContentDisposition != null)
+            {
+                var dispositionType = response.Content.Headers.ContentDisposition.DispositionType;
+                if (dispositionType.Equals("attachment", StringComparison.OrdinalIgnoreCase))
+                    isFile = true;
+            }
+        }
+
+        // Save is file flag
+        result.Result.IsFile = isFile;
+        // Make sure the url point to a file
+        if (!isFile)
+            return result;
+
+        string? fileName = null;
+        // Get file name from header if possible
+        if (response.Content.Headers.ContentDisposition != null)
+            fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('\"') ?? string.Empty;
+
+        // Get file name from x-suggested-filename header if possible
+        if (fileName.IsNullOrEmpty())
+            fileName = response.Content.Headers.TryGetValues("x-suggested-filename", out var suggestedFileNames) ? suggestedFileNames.FirstOrDefault() : string.Empty;
+
+        // Fallback to using the URL to guess the file name if Content-Disposition is not present
+        if (fileName.IsNullOrEmpty())
+            fileName = url!.GetFileName();
+
+        // Set file name
+        result.Result.FileName = fileName?.Trim() ?? string.Empty;
+        // Set file size
+        result.Result.FileSize = response.Content.Headers.ContentLength ?? 0;
+
+        // find category item by file extension
+        var extension = Path.GetExtension(result.Result.FileName);
+        // Get all custom categories
+        var customCategories = await _unitOfWork
+            .CategoryRepository
+            .GetAllAsync(where: c => !c.IsDefault, includeProperties: "FileExtensions");
+
+        // Find file extension by extension
+        CategoryFileExtension? fileExtension;
+        var customCategory = customCategories.Find(c => c.FileExtensions.Any(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase)));
+        if (customCategory != null)
+        {
+            fileExtension = customCategory
+                .FileExtensions
+                .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase));
+        }
+        else
+        {
+            fileExtension = await _unitOfWork
+                .CategoryFileExtensionRepository
+                .GetAsync(where: fe => fe.Extension.ToLower() == extension.ToLower(), includeProperties: "Category");
+        }
+
+        // Find category by category file extension or choose general category
+        if (fileExtension != null)
+        {
+            var category = customCategory ?? fileExtension.Category;
+            result.Result.Category = category == null ? null : _mapper.Map<CategoryViewModel>(category);
+        }
+        else
+        {
+            var category = await _unitOfWork
+                .CategoryRepository
+                .GetAsync(where: c => c.Title.ToLower() == Constants.GeneralCategoryTitle.ToLower());
+
+            result.Result.Category = category == null ? null : _mapper.Map<CategoryViewModel>(category);
+        }
+
+        result.IsSuccess = true;
+        return result;
+    }
+
+    public async Task<ServiceResultViewModel> ValidateDownloadFileAsync(DownloadFileViewModel viewModel)
+    {
+        var result = new ServiceResultViewModel();
+
+        // Check url validation
+        if (viewModel.Url.IsNullOrEmpty() || !viewModel.Url.CheckUrlValidation())
+        {
+            result.Header = "Url";
+            result.Message = "Please enter a valid url.";
+            return result;
+        }
+
+        // Get category from database
+        var category = await _unitOfWork
+            .CategoryRepository
+            .GetAsync(where: c => c.Id == viewModel.CategoryId, includeProperties: "CategorySaveDirectory");
+
+        // Check category
+        if (category == null)
+        {
+            result.Header = "Category";
+            result.Message = "Please choose a category for your file.";
+            return result;
+        }
+
+        // Check category save directory
+        if (category.CategorySaveDirectory == null)
+        {
+            result.Header = "Save location";
+            result.Message = "Can't find save location for this category.";
+            return result;
+        }
+
+        // Check file name
+        if (viewModel.FileName.IsNullOrEmpty())
+        {
+            result.Header = "File name";
+            result.Message = "Please enter a file name.";
+            return result;
+        }
+
+        // Check file extension
+        if (!viewModel.FileName.HasFileExtension())
+        {
+            result.Header = "File name";
+            result.Message = "File type is null or invalid. Please choose correct file type like .exe or .zip.";
+            return result;
+        }
+
+        // Check Url point to a file and file size is greater than 0
+        if (viewModel.Size is null or <= 0)
+        {
+            result.Header = "No file detected";
+            result.Message = "It seems the URL does not point to a file. Make sure the URL points to a file and try again.";
+            return result;
+        }
+
+        result.IsSuccess = true;
+        return result;
     }
 
     public async Task UpdateDownloadFileAsync(DownloadFile downloadFile)
@@ -251,7 +451,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var service = downloadFileTask?.Service;
         if (service == null || service.Status == DownloadStatus.Stopped)
             return;
-        
+
         downloadFile.StopDownloadFile(service);
 
         // Wait for the download to stop
@@ -403,7 +603,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             // Add download file id to stop operations
             _stopOperations.Add(e.Id);
-            
+
             // Check if stop operation is running or not
             // If stop operation is not running, start it
             if (!_stopOperationIsRunning)
@@ -442,7 +642,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
             if (_stopOperationExceptions.Count <= 0)
                 return;
-            
+
             foreach (var eventArgs in _stopOperationExceptions)
                 ErrorOccurred?.Invoke(this, eventArgs);
 

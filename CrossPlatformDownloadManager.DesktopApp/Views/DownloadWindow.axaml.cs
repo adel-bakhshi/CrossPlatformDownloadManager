@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
@@ -10,6 +9,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -20,6 +20,9 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     // Update chunks data
     private readonly List<Rectangle> _chunksDataRectangles;
     private readonly DispatcherTimer _updateChunksDataTimer;
+
+    // Focus timer
+    private readonly DispatcherTimer _focusTimer;
 
     // Is window closing flag
     private bool _isClosing;
@@ -33,17 +36,9 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         _chunksDataRectangles = [];
         _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
-    }
 
-    private void DownloadSpeedLimiterView_OnSpeedLimiterStateChanged(object? sender,
-        DownloadSpeedLimiterViewEventArgs e)
-    {
-        ViewModel?.ChangeSpeedLimiterState(e);
-    }
-
-    private void DownloadOptionsView_OnOptionsStateChanged(object? sender, DownloadOptionsViewEventArgs e)
-    {
-        ViewModel?.ChangeOptions(e);
+        _focusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.5) };
+        _focusTimer.Tick += FocusTimerOnTick;
     }
 
     protected override async void OnLoaded(RoutedEventArgs e)
@@ -57,9 +52,8 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             ViewModel.DownloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
             _updateChunksDataTimer.Start();
 
-            // Wait for 0.5s to focus the window
-            await Task.Delay(1000);
-            Focus();
+            // Start focus window
+            _focusTimer.Start();
         }
         catch (Exception ex)
         {
@@ -83,8 +77,8 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
             if (ViewModel.DownloadFile.IsDownloading)
                 await ViewModel.StopDownloadAsync(this, closeWindow: false);
-            
-            ViewModel.RemovePropertyChangedEventHandler();
+
+            ViewModel.RemoveEventHandlers();
             base.OnClosing(e);
         }
         catch (Exception ex)
@@ -92,7 +86,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             if (ViewModel != null)
                 await ViewModel.ShowErrorDialogAsync(ex);
 
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured during closing download window.");
         }
     }
 
@@ -135,11 +129,18 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         }
 
         for (var i = 0; i < chunksCount; i++)
+            _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0 ? 0 : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
+    }
+
+    private void FocusTimerOnTick(object? sender, EventArgs e)
+    {
+        if (!IsFocused)
         {
-            _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0
-                ? 0
-                : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
+            Focus();
+            return;
         }
+
+        _focusTimer.Stop();
     }
 
     private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
@@ -151,8 +152,8 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
             ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
             ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
-            ViewModel.RemovePropertyChangedEventHandler();
-            
+            ViewModel.RemoveEventHandlers();
+
             if (!_isClosing)
                 Close();
         });

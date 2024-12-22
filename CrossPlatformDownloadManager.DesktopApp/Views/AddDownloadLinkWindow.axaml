@@ -6,7 +6,6 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
-        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
@@ -25,15 +24,12 @@
     <!-- Resources -->
     <Window.Resources>
         <ResourceDictionary>
-            <!-- Converters -->
-            <converters:ToFileSizeConverter x:Key="ToFileSizeConverter" />
-
             <!-- Download later content -->
             <Flyout x:Key="DownloadLaterContentFlyout"
                     Placement="TopEdgeAlignedLeft"
                     ShowMode="Transient"
                     VerticalOffset="-10"
-                    IsOpen="{Binding !DefaultQueueIsExist}">
+                    IsOpen="{Binding !DefaultDownloadQueueIsExist}">
                 <StackPanel Width="241"
                             Margin="10"
                             Spacing="10">
@@ -90,7 +86,7 @@
                                       HorizontalContentAlignment="Right"
                                       VerticalContentAlignment="Center"
                                       Width="40"
-                                      IsChecked="{Binding StartQueue}" />
+                                      IsChecked="{Binding StartDownloadQueue}" />
                     </Grid>
 
                     <Grid ColumnDefinitions="*, Auto">
@@ -144,7 +140,7 @@
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
                                       BorderThickness="0"
-                                      Text="{Binding Url}"
+                                      Text="{Binding DownloadFile.Url}"
                                       TextChanged="UrlTextBox_OnTextChanged" />
 
                     <!-- Category -->
@@ -195,7 +191,7 @@
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
                                       BorderThickness="0"
-                                      Text="{Binding FileName}" />
+                                      Text="{Binding DownloadFile.FileName}" />
 
                     <!-- Description -->
                     <cc:CustomTextBox IconData="{DynamicResource Description}"
@@ -208,7 +204,7 @@
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryColor}"
                                       BorderThickness="0"
-                                      Text="{Binding Description}" />
+                                      Text="{Binding DownloadFile.Description}" />
                 </StackPanel>
 
                 <!-- File Details -->
@@ -228,11 +224,11 @@
                                     IsVisible="{Binding !IsLoadingUrl}">
                             <PathIcon Width="{DynamicResource LargeIconSize}"
                                       Height="{DynamicResource LargeIconSize}"
-                                      Data="{Binding FileTypeIcon}"
+                                      Data="{Binding SelectedCategory.Icon, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
                                       Foreground="{DynamicResource ProgressBarGradientBrush}"
                                       HorizontalAlignment="Center" />
 
-                            <TextBlock Text="{Binding FileSize, Converter={StaticResource ToFileSizeConverter}}"
+                            <TextBlock Text="{Binding DownloadFile.SizeAsString}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
@@ -256,7 +252,7 @@
                 <!-- Download later button -->
                 <Button Classes="button info"
                         Flyout="{StaticResource DownloadLaterContentFlyout}"
-                        Command="{Binding AddToDefaultQueueCommand}"
+                        Command="{Binding AddDownloadFileToDefaultDownloadQueueCommand}"
                         CommandParameter="{Binding $parent[Window]}"
                         Content="Download Later"
                         IsEnabled="{Binding !IsLoadingUrl}" />

@@ -41,35 +41,23 @@
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Background="{DynamicResource SecondaryColor}"
                     Height="254"
-                    Margin="0, 0, 0, 10">
+                    Margin="0, 0, 0, 10"
+                    ClipToBounds="True">
                 <Grid>
                     <!-- Download Status View -->
                     <uc:DownloadStatusView
                         IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Status', FallbackValue=False, TargetNullValue=False}"
-                        Url="{Binding DownloadFile.Url}"
-                        FileName="{Binding DownloadFile.FileName}"
-                        SaveLocation="{Binding DownloadFile.SaveLocation}"
-                        FileSize="{Binding DownloadFile.SizeAsString}"
-                        DownloadProgress="{Binding DownloadFile.DownloadProgressAsString}"
-                        DownloadSize="{Binding DownloadFile.DownloadedSizeAsString}"
-                        Speed="{Binding DownloadFile.TransferRateAsString}"
-                        ElapsedTime="{Binding DownloadFile.ElapsedTimeAsString}"
-                        TimeLeft="{Binding DownloadFile.TimeLeftAsString}"
-                        OpenSaveLocationCommand="{Binding OpenSaveLocationCommand}"
-                        ResumeCapability="{Binding ResumeCapabilityState}" />
+                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadStatusViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                     <!-- Download Speed Limiter View  -->
                     <uc:DownloadSpeedLimiterView
                         IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Speed Limiter', FallbackValue=False, TargetNullValue=False}"
-                        UnitsDropDownItemsSource="{Binding SpeedLimiterUnits}"
-                        SpeedLimiterEnabled="False"
-                        SpeedLimiterStateChanged="DownloadSpeedLimiterView_OnSpeedLimiterStateChanged" />
+                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadSpeedLimiterViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
                     <!-- Download Options View -->
                     <uc:DownloadOptionsView
                         IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
-                        TurnOffModesDropDownItemsSource="{Binding OptionsTurnOffModes}"
-                        OptionsStateChanged="DownloadOptionsView_OnOptionsStateChanged" />
+                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadOptionsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
                 </Grid>
             </Border>
 

@@ -36,6 +36,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private int? _downloadQueueId;
     private string? _downloadQueueName;
     private double? _size;
+    private string? _description;
     private DownloadFileStatus? _status;
     private DateTime? _lastTryDate;
     private DateTime _dateAdded;
@@ -105,6 +106,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     }
 
     public string SizeAsString => Size.ToFileSize();
+
+    public string? Description
+    {
+        get => _description;
+        set => SetField(ref _description, value);
+    }
 
     public DownloadFileStatus? Status
     {

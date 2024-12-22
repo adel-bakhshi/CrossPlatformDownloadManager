@@ -292,8 +292,11 @@ public class MainWindowViewModel : ViewModelBase
             var urlIsValid = url.CheckUrlValidation();
             var vm = new AddDownloadLinkWindowViewModel(AppService)
             {
-                Url = urlIsValid ? url : null,
-                IsLoadingUrl = urlIsValid
+                IsLoadingUrl = urlIsValid,
+                DownloadFile =
+                {
+                    Url = urlIsValid ? url : null
+                }
             };
 
             var window = new AddDownloadLinkWindow { DataContext = vm };
@@ -796,6 +799,40 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
+            var downloadFiles = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .Where(df => df.IsDownloading)
+                .ToList();
+
+            if (downloadFiles.Count == 0)
+                return;
+
+            var cantResumeDownloadFiles = downloadFiles
+                .Where(df => df.CanResumeDownload == false)
+                .ToList();
+
+            var undefinedResumeDownloadFiles = downloadFiles
+                .Where(df => df.CanResumeDownload == null)
+                .ToList();
+
+            if (cantResumeDownloadFiles.Count > 0 || undefinedResumeDownloadFiles.Count > 0)
+            {
+                var result = await ShowInfoDialogAsync("Stop download",
+                    "Some files cannot continue downloading, or their status is uncertain. Do you still want to stop them?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.No)
+                {
+                    var removeDownloadFiles = cantResumeDownloadFiles
+                        .Union(undefinedResumeDownloadFiles)
+                        .ToList();
+
+                    foreach (var downloadFile in removeDownloadFiles)
+                        dataGrid.SelectedItems.Remove(downloadFile);
+                }
+            }
+
             await StopDownloadFileAsync(dataGrid);
         }
         catch (Exception ex)
@@ -1122,7 +1159,7 @@ public class MainWindowViewModel : ViewModelBase
             var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles;
-            
+
             DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
         }
     }
@@ -1209,7 +1246,7 @@ public class MainWindowViewModel : ViewModelBase
             ContextFlyoutEnableState.CanChangeFolder = downloadFiles is [{ IsCompleted: true }];
             ContextFlyoutEnableState.CanRedownload = downloadFiles.Exists(df => df is { IsDownloading: false, IsPaused: false, DownloadProgress: > 0 });
             ContextFlyoutEnableState.CanResume = downloadFiles.Exists(df => df is { IsDownloading: false, IsCompleted: false });
-            ContextFlyoutEnableState.CanStop = downloadFiles.Exists(df => df.IsDownloading);
+            ContextFlyoutEnableState.CanStop = downloadFiles.Exists(df => df.IsDownloading && df.CanResumeDownload != false);
             ContextFlyoutEnableState.CanRefreshDownloadAddress = downloadFiles is [{ IsDownloading: false, IsCompleted: false }];
             ContextFlyoutEnableState.CanRemove =
                 downloadFiles.Count > 0 &&

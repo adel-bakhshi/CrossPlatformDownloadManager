@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.Data.ViewModels.Services;
+using CrossPlatformDownloadManager.Data.ViewModels.Services.DownloadFileService;
 
 namespace CrossPlatformDownloadManager.Data.Services.DownloadFileService;
 
@@ -12,7 +14,7 @@ public interface IDownloadFileService
     ObservableCollection<DownloadFileViewModel> DownloadFiles { get; }
 
     Dictionary<int, List<Func<DownloadFileViewModel?, Task<DownloadFinishedTaskValue?>>>> DownloadFinishedAsyncTasks { get; }
-    
+
     Dictionary<int, List<Func<DownloadFileViewModel?, DownloadFinishedTaskValue?>>> DownloadFinishedSyncTasks { get; }
 
     #endregion
@@ -26,7 +28,11 @@ public interface IDownloadFileService
 
     Task LoadDownloadFilesAsync();
 
-    Task AddDownloadFileAsync(DownloadFile downloadFile);
+    Task<ServiceResultViewModel<DownloadFileViewModel>> AddDownloadFileAsync(DownloadFileViewModel viewModel);
+
+    Task<ServiceResultViewModel<UrlDetailsViewModel>> GetUrlDetailsAsync(string? url);
+
+    Task<ServiceResultViewModel> ValidateDownloadFileAsync(DownloadFileViewModel viewModel);
 
     Task UpdateDownloadFileAsync(DownloadFile downloadFile);
 

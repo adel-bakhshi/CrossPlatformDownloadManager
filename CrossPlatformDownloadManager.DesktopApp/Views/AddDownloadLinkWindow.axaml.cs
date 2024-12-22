@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -11,7 +12,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 {
     #region Private Fields
 
-    private readonly DispatcherTimer _urlTextChangedTimer;
+    private readonly DispatcherTimer _urlTextBoxChangedTimer;
 
     #endregion
 
@@ -19,30 +20,31 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
     {
         InitializeComponent();
 
-        _urlTextChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _urlTextChangedTimer.Tick += GetUrlInfo;
+        _urlTextBoxChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _urlTextBoxChangedTimer.Tick += UrlTextBoxChangedTimerOnTick;
     }
 
     private void UrlTextBox_OnTextChanged(object? sender, TextChangedEventArgs e)
     {
         // Reset timer when user still typing
-        _urlTextChangedTimer.Stop();
-        _urlTextChangedTimer.Start();
+        _urlTextBoxChangedTimer.Stop();
+        _urlTextBoxChangedTimer.Start();
     }
 
-    private async void GetUrlInfo(object? sender, EventArgs e)
+    private async void UrlTextBoxChangedTimerOnTick(object? sender, EventArgs e)
     {
         try
         {
             if (ViewModel == null)
                 return;
 
-            _urlTextChangedTimer.Stop();
-            await ViewModel.GetUrlInfoAsync();
+            _urlTextBoxChangedTimer.Stop();
+            await ViewModel.GetUrlDetailsAsync();
         }
         catch (Exception ex)
         {
             ViewModel?.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "Failed to get url details.");
         }
     }
 }

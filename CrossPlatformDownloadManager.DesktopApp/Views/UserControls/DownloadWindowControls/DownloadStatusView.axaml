@@ -2,12 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels"
              xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadStatusView">
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadStatusView"
+             x:DataType="vm:DownloadStatusViewModel">
+
     <!-- Resources -->
     <UserControl.Resources>
         <ResourceDictionary>
@@ -15,143 +17,193 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
+    <!-- Styles -->
+    <UserControl.Styles>
+        <Style Selector="Button.saveLocation">
+            <Setter Property="Cursor"
+                    Value="Hand" />
+            <Setter Property="Margin"
+                    Value="0, 0, 0, 10" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource TextColor}" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Left" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+
+            <!-- Transitions -->
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <BrushTransition Property="Foreground"
+                                         Duration="00:00:00.3" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Template -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Pointer over styles -->
+            <Style Selector="^:pointerover">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource CategoryItemHoverColor}" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
     <!-- Main content -->
-    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
-          ColumnDefinitions="Auto, *"
-          HorizontalAlignment="Stretch"
-          VerticalAlignment="Stretch">
-        <!-- Url -->
-        <TextBlock Grid.Row="0"
-                   Grid.Column="0"
-                   Text="Url"
-                   Margin="0, 0, 15, 10" />
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Hidden">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
+              ColumnDefinitions="Auto, *"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <!-- Url -->
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Url"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="0"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].Url}"
-                   Margin="0, 0, 0, 10" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.Url, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
 
-        <!-- Name -->
-        <TextBlock Grid.Row="1"
-                   Grid.Column="0"
-                   Text="Name"
-                   Margin="0, 0, 15, 10" />
+            <!-- Name -->
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Text="Name"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="1"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].FileName}"
-                   Margin="0, 0, 0, 10" />
+            <TextBlock Grid.Row="1"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.FileName, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
 
-        <!-- Save Location -->
-        <TextBlock Grid.Row="2"
-                   Grid.Column="0"
-                   Text="Save Location"
-                   Margin="0, 0, 15, 10" />
+            <!-- Save Location -->
+            <TextBlock Grid.Row="2"
+                       Grid.Column="0"
+                       Text="Save location"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Name="SaveLocationTextBlock"
-                   Grid.Row="2"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].SaveLocation}"
-                   Cursor="Hand"
-                   Tapped="SaveLocationTextBlockOnTapped"
-                   Margin="0, 0, 0, 10">
-            <TextBlock.Styles>
-                <Style Selector="TextBlock:pointerover">
-                    <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
-                </Style>
-            </TextBlock.Styles>
-        </TextBlock>
-
-        <!-- Size -->
-        <TextBlock Grid.Row="3"
-                   Grid.Column="0"
-                   Text="Size"
-                   Margin="0, 0, 15, 10" />
-
-        <TextBlock Grid.Row="3"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].FileSize}"
-                   Margin="0, 0, 0, 10" />
-
-        <!-- Downloaded -->
-        <TextBlock Grid.Row="4"
-                   Grid.Column="0"
-                   Text="Downloaded"
-                   Margin="0, 0, 15, 10" />
-
-        <StackPanel Grid.Row="4"
+            <Button Grid.Row="2"
                     Grid.Column="1"
-                    Orientation="Horizontal"
-                    Spacing="5"
-                    Margin="0, 0, 0, 10">
-            <TextBlock Text="{Binding $parent[local:DownloadStatusView].DownloadProgress}" />
-            <TextBlock Text="{Binding $parent[local:DownloadStatusView].DownloadSize}" />
-        </StackPanel>
+                    Content="{Binding DownloadFile.SaveLocation, FallbackValue='', TargetNullValue=''}"
+                    Classes="saveLocation"
+                    Command="{Binding OpenSaveLocationCommand}" />
 
-        <!-- Speed -->
-        <TextBlock Grid.Row="5"
-                   Grid.Column="0"
-                   Text="Speed"
-                   Margin="0, 0, 15, 10" />
+            <!-- Size -->
+            <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Text="Size"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="5"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].Speed}"
-                   Margin="0, 0, 0, 10" />
+            <TextBlock Grid.Row="3"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.SizeAsString, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
 
-        <!-- Elapsed Time -->
-        <TextBlock Grid.Row="6"
-                   Grid.Column="0"
-                   Text="Elapsed Time"
-                   Margin="0, 0, 15, 10" />
+            <!-- Downloaded -->
+            <TextBlock Grid.Row="4"
+                       Grid.Column="0"
+                       Text="Downloaded"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="6"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].ElapsedTime}"
-                   Margin="0, 0, 0, 10" />
+            <StackPanel Grid.Row="4"
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="5"
+                        Margin="0, 0, 0, 10">
+                <TextBlock Text="{Binding DownloadFile.DownloadProgressAsString, FallbackValue='', TargetNullValue=''}" />
+                <TextBlock Text="{Binding DownloadFile.DownloadedSizeAsString, FallbackValue='', TargetNullValue=''}" />
+            </StackPanel>
 
-        <!-- Time Left -->
-        <TextBlock Grid.Row="7"
-                   Grid.Column="0"
-                   Text="Time Left"
-                   Margin="0, 0, 15, 10" />
+            <!-- Speed -->
+            <TextBlock Grid.Row="5"
+                       Grid.Column="0"
+                       Text="Speed"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="7"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].TimeLeft}"
-                   Margin="0, 0, 0, 10" />
+            <TextBlock Grid.Row="5"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.TransferRateAsString, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
 
-        <!-- Resume Capability -->
-        <TextBlock Grid.Row="8"
-                   Grid.Column="0"
-                   Text="Resume Capability"
-                   Margin="0, 0, 15, 0" />
+            <!-- Elapsed Time -->
+            <TextBlock Grid.Row="6"
+                       Grid.Column="0"
+                       Text="Elapsed time"
+                       Margin="0, 0, 15, 10" />
 
-        <TextBlock Grid.Row="8"
-                   Grid.Column="1"
-                   Text="{Binding $parent[local:DownloadStatusView].ResumeCapability}"
-                   Classes.resumeCapabilityIsAvailable="{Binding $parent[local:DownloadStatusView].ResumeCapability, Converter={StaticResource CheckEqualConverter}, ConverterParameter='Yes'}"
-                   Classes.resumeCapabilityIsUnavailable="{Binding $parent[local:DownloadStatusView].ResumeCapability, Converter={StaticResource CheckEqualConverter}, ConverterParameter='No'}">
-            <!-- Styles -->
-            <TextBlock.Styles>
-                <Style Selector="TextBlock">
-                    <Setter Property="Foreground"
-                            Value="{DynamicResource InfoGradientBrush}" />
+            <TextBlock Grid.Row="6"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.ElapsedTimeAsString, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
 
-                    <!-- Resume capability is available style -->
-                    <Style Selector="^.resumeCapabilityIsAvailable">
+            <!-- Time Left -->
+            <TextBlock Grid.Row="7"
+                       Grid.Column="0"
+                       Text="Time left"
+                       Margin="0, 0, 15, 10" />
+
+            <TextBlock Grid.Row="7"
+                       Grid.Column="1"
+                       Text="{Binding DownloadFile.TimeLeftAsString, FallbackValue='', TargetNullValue=''}"
+                       Margin="0, 0, 0, 10" />
+
+            <!-- Resume Capability -->
+            <TextBlock Grid.Row="8"
+                       Grid.Column="0"
+                       Text="Resume capability"
+                       Margin="0, 0, 15, 0" />
+
+            <TextBlock Grid.Row="8"
+                       Grid.Column="1"
+                       Text="{Binding ResumeCapabilityState}"
+                       Classes.resumeCapabilityIsAvailable="{Binding ResumeCapabilityState, Converter={StaticResource CheckEqualConverter}, ConverterParameter='Yes'}"
+                       Classes.resumeCapabilityIsUnavailable="{Binding ResumeCapabilityState, Converter={StaticResource CheckEqualConverter}, ConverterParameter='No'}">
+                <!-- Styles -->
+                <TextBlock.Styles>
+                    <Style Selector="TextBlock">
                         <Setter Property="Foreground"
-                                Value="{DynamicResource SuccessGradientBrush}" />
-                    </Style>
+                                Value="{DynamicResource InfoGradientBrush}" />
 
-                    <!-- Resume capability is unavailable style -->
-                    <Style Selector="^.resumeCapabilityIsUnavailable">
-                        <Setter Property="Foreground"
-                                Value="{DynamicResource DangerGradientBrush}" />
+                        <!-- Resume capability is available style -->
+                        <Style Selector="^.resumeCapabilityIsAvailable">
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource SuccessGradientBrush}" />
+                        </Style>
+
+                        <!-- Resume capability is unavailable style -->
+                        <Style Selector="^.resumeCapabilityIsUnavailable">
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource DangerGradientBrush}" />
+                        </Style>
                     </Style>
-                </Style>
-            </TextBlock.Styles>
-        </TextBlock>
-    </Grid>
+                </TextBlock.Styles>
+            </TextBlock>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

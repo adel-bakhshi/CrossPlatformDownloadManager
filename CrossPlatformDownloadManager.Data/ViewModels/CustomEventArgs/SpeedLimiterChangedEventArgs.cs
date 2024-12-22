@@ -1,6 +1,6 @@
 namespace CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
-public class DownloadSpeedLimiterViewEventArgs : EventArgs
+public class SpeedLimiterChangedEventArgs : EventArgs
 {
     public bool Enabled { get; set; }
     public double? Speed { get; set; }

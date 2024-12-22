@@ -114,7 +114,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             await LoadDownloadQueuesAsync();
     }
 
-    public async Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue)
+    public async Task UpdateDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true)
     {
         if (downloadQueue == null)
             return;
@@ -122,19 +122,20 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await _unitOfWork.DownloadQueueRepository.UpdateAsync(downloadQueue);
         await _unitOfWork.SaveAsync();
 
-        await LoadDownloadQueuesAsync();
+        if (reloadData)
+            await LoadDownloadQueuesAsync();
     }
 
-    public async Task UpdateDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task UpdateDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true)
     {
         if (viewModel == null)
             return;
 
         var downloadQueue = _mapper.Map<DownloadQueue>(viewModel);
-        await UpdateDownloadQueueAsync(downloadQueue);
+        await UpdateDownloadQueueAsync(downloadQueue, reloadData);
     }
 
-    public async Task UpdateDownloadQueuesAsync(List<DownloadQueue>? downloadQueues)
+    public async Task UpdateDownloadQueuesAsync(List<DownloadQueue>? downloadQueues, bool reloadData = true)
     {
         if (downloadQueues == null || downloadQueues.Count == 0)
             return;
@@ -142,16 +143,17 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await _unitOfWork.DownloadQueueRepository.UpdateAllAsync(downloadQueues);
         await _unitOfWork.SaveAsync();
 
-        await LoadDownloadQueuesAsync();
+        if (reloadData)
+            await LoadDownloadQueuesAsync();
     }
 
-    public async Task UpdateDownloadQueuesAsync(List<DownloadQueueViewModel>? viewModels)
+    public async Task UpdateDownloadQueuesAsync(List<DownloadQueueViewModel>? viewModels, bool reloadData = true)
     {
         if (viewModels == null || viewModels.Count == 0)
             return;
 
         var downloadQueues = _mapper.Map<List<DownloadQueue>>(viewModels);
-        await UpdateDownloadQueuesAsync(downloadQueues);
+        await UpdateDownloadQueuesAsync(downloadQueues, reloadData);
     }
 
     public async Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel)
@@ -237,18 +239,18 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         downloadFile.DownloadQueueId = null;
         downloadFile.DownloadQueueName = null;
         downloadFile.DownloadQueuePriority = null;
-        
+
         await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
         await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }
 
-    public async Task RemoveDownloadFilesFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, 
+    public async Task RemoveDownloadFilesFromDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
         List<DownloadFileViewModel> downloadFileViewModels)
     {
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadQueueViewModel?.Id);
         if (downloadQueue == null || downloadFileViewModels.Count == 0)
             return;
-        
+
         var downloadFiles = _downloadFileService
             .DownloadFiles
             .Where(df => downloadFileViewModels.Exists(vm => vm.Id == df.Id))
@@ -263,12 +265,12 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             downloadFile.DownloadQueueName = null;
             downloadFile.DownloadQueuePriority = null;
         }
-        
+
         await _downloadFileService.UpdateDownloadFilesAsync(downloadFiles);
         await LoadDownloadQueuesAsync(addDefaultDownloadQueue: false);
     }
 
-    public async Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true)
     {
         // Make sure given download queue is not null
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
@@ -294,14 +296,14 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .ToList();
 
         // Update all download queues
-        await UpdateDownloadQueuesAsync(viewModels);
+        await UpdateDownloadQueuesAsync(viewModels, reloadData);
 
         // Set given download queue as default and update it
         downloadQueue.IsDefault = true;
-        await UpdateDownloadQueueAsync(downloadQueue);
+        await UpdateDownloadQueueAsync(downloadQueue, reloadData);
     }
 
-    public async Task ChangeLastSelectedDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task ChangeLastSelectedDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true)
     {
         // Make sure given download queue is not null
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
@@ -327,11 +329,11 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .ToList();
 
         // Update all download queues
-        await UpdateDownloadQueuesAsync(viewModels);
+        await UpdateDownloadQueuesAsync(viewModels, reloadData);
 
         // Set given download queue as last choice and update it
         downloadQueue.IsLastChoice = true;
-        await UpdateDownloadQueueAsync(downloadQueue);
+        await UpdateDownloadQueueAsync(downloadQueue, reloadData);
     }
 
     #region Helpers

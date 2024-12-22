@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,6 +9,7 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -21,17 +21,6 @@ public class DownloadWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    // Speed Limiter
-    private bool _isSpeedLimiterEnabled;
-    private double? _limitSpeed;
-    private string? _speedUnit;
-
-    // Options
-    private bool _openFolderAfterDownloadFinished;
-    private bool _exitProgramAfterDownloadFinished;
-    private bool _turnOffComputerAfterDownloadFinished;
-    private string? _turnOffComputerMode;
-
     // Show/Hide details
     private bool _detailsIsVisible = true;
     private double _detailsHeight;
@@ -39,12 +28,12 @@ public class DownloadWindowViewModel : ViewModelBase
     // Properties
     private ObservableCollection<string> _tabItems = [];
     private string? _selectedTabItem;
-    private ObservableCollection<string> _speedLimiterUnits = [];
-    private ObservableCollection<string> _optionsTurnOffModes = [];
+    private DownloadStatusViewModel? _downloadStatusViewModel;
+    private DownloadSpeedLimiterViewModel? _downloadSpeedLimiterViewModel;
+    private DownloadOptionsViewModel? _downloadOptionsViewModel;
     private DownloadFileViewModel _downloadFile = new();
     private bool _isPaused;
     private string? _hideDetailsButtonContent;
-    private string _resumeCapabilityState = "Checking...";
 
     #endregion
 
@@ -62,16 +51,22 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
     }
 
-    public ObservableCollection<string> SpeedLimiterUnits
+    public DownloadStatusViewModel? DownloadStatusViewModel
     {
-        get => _speedLimiterUnits;
-        set => this.RaiseAndSetIfChanged(ref _speedLimiterUnits, value);
+        get => _downloadStatusViewModel;
+        set => this.RaiseAndSetIfChanged(ref _downloadStatusViewModel, value);
     }
 
-    public ObservableCollection<string> OptionsTurnOffModes
+    public DownloadSpeedLimiterViewModel? DownloadSpeedLimiterViewModel
     {
-        get => _optionsTurnOffModes;
-        set => this.RaiseAndSetIfChanged(ref _optionsTurnOffModes, value);
+        get => _downloadSpeedLimiterViewModel;
+        set => this.RaiseAndSetIfChanged(ref _downloadSpeedLimiterViewModel, value);
+    }
+
+    public DownloadOptionsViewModel? DownloadOptionsViewModel
+    {
+        get => _downloadOptionsViewModel;
+        set => this.RaiseAndSetIfChanged(ref _downloadOptionsViewModel, value);
     }
 
     public DownloadFileViewModel DownloadFile
@@ -98,11 +93,10 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _hideDetailsButtonContent, value);
     }
 
-    public string ResumeCapabilityState
-    {
-        get => _resumeCapabilityState;
-        set => this.RaiseAndSetIfChanged(ref _resumeCapabilityState, value);
-    }
+    public bool OpenFolderAfterDownloadFinished { get; set; }
+    public bool ExitProgramAfterDownloadFinished { get; set; }
+    public bool TurnOffComputerAfterDownloadFinished { get; set; }
+    public string? TurnOffComputerMode { get; set; }
 
     #endregion
 
@@ -114,17 +108,18 @@ public class DownloadWindowViewModel : ViewModelBase
 
     public ICommand ShowHideDetailsCommand { get; }
 
-    public ICommand OpenSaveLocationCommand { get; }
-
     #endregion
 
     public DownloadWindowViewModel(IAppService appService, DownloadFileViewModel downloadFile) : base(appService)
     {
         DownloadFile = downloadFile;
-        DownloadFile.PropertyChanged += DownloadFileOnPropertyChanged;
-        
-        SpeedLimiterUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
-        OptionsTurnOffModes = Constants.TurnOffComputerModes.ToObservableCollection();
+        DownloadStatusViewModel = new DownloadStatusViewModel(appService, DownloadFile);
+
+        DownloadSpeedLimiterViewModel = new DownloadSpeedLimiterViewModel(appService);
+        DownloadSpeedLimiterViewModel.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
+
+        DownloadOptionsViewModel = new DownloadOptionsViewModel(appService);
+        DownloadOptionsViewModel.OptionsChanged += DownloadOptionsViewModelOnOptionsChanged;
 
         TabItems =
         [
@@ -139,15 +134,6 @@ public class DownloadWindowViewModel : ViewModelBase
         ResumePauseDownloadCommand = ReactiveCommand.CreateFromTask(ResumePauseDownloadAsync);
         CancelDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(CancelDownloadAsync);
         ShowHideDetailsCommand = ReactiveCommand.CreateFromTask<Window?>(ShowHideDetailsAsync);
-        OpenSaveLocationCommand = ReactiveCommand.CreateFromTask(OpenSaveLocationAsync);
-    }
-
-    private void DownloadFileOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName?.Equals(nameof(DownloadFile.CanResumeDownload)) != true)
-            return;
-
-        ResumeCapabilityState = DownloadFile.CanResumeDownload == true ? "Yes" : "No";
     }
 
     public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
@@ -160,8 +146,8 @@ public class DownloadWindowViewModel : ViewModelBase
             await AppService
                 .DownloadFileService
                 .StopDownloadFileAsync(DownloadFile);
-            
-            RemovePropertyChangedEventHandler();
+
+            RemoveEventHandlers();
 
             if (closeWindow)
                 owner.Close();
@@ -172,9 +158,15 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    public void RemovePropertyChangedEventHandler()
+    public void RemoveEventHandlers()
     {
-        DownloadFile.PropertyChanged -= DownloadFileOnPropertyChanged;
+        DownloadStatusViewModel?.RemoveEventHandlers();
+
+        if (DownloadSpeedLimiterViewModel != null)
+            DownloadSpeedLimiterViewModel.SpeedLimiterChanged -= DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
+
+        if (DownloadOptionsViewModel != null)
+            DownloadOptionsViewModel.OptionsChanged -= DownloadOptionsViewModelOnOptionsChanged;
     }
 
     #region Helpers
@@ -248,36 +240,25 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task OpenSaveLocationAsync()
+    private async void DownloadSpeedLimiterViewModelOnSpeedLimiterChanged(object? sender, SpeedLimiterChangedEventArgs e)
     {
         try
         {
-            if (DownloadFile.SaveLocation.IsNullOrEmpty())
+            if (!e.Enabled)
             {
-                await ShowInfoDialogAsync("Open folder",
-                    "The folder you are trying to access is not available. It may have been removed or relocated.",
-                    DialogButtons.Ok);
+                AppService
+                    .DownloadFileService
+                    .LimitDownloadFileSpeed(DownloadFile, 0);
 
                 return;
             }
 
-            if (!Directory.Exists(DownloadFile.SaveLocation))
-            {
-                await ShowInfoDialogAsync("Open folder",
-                    "The folder you are trying to access is not available. It may have been removed or relocated.",
-                    DialogButtons.Ok);
+            var unit = e.Unit.IsNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
+            var speed = (long)(e.Speed == null ? 0 : e.Speed.Value * unit);
 
-                return;
-            }
-
-            var process = new Process();
-            process.StartInfo = new ProcessStartInfo
-            {
-                FileName = DownloadFile.SaveLocation,
-                UseShellExecute = true
-            };
-
-            process.Start();
+            AppService
+                .DownloadFileService
+                .LimitDownloadFileSpeed(DownloadFile, speed);
         }
         catch (Exception ex)
         {
@@ -285,36 +266,19 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    public void ChangeSpeedLimiterState(DownloadSpeedLimiterViewEventArgs eventArgs)
+    private async void DownloadOptionsViewModelOnOptionsChanged(object? sender, DownloadOptionsChangedEventArgs e)
     {
-        _isSpeedLimiterEnabled = eventArgs.Enabled;
-        _limitSpeed = _isSpeedLimiterEnabled ? eventArgs.Speed : null;
-        _speedUnit = _isSpeedLimiterEnabled ? eventArgs.Unit : null;
-
-        if (_isSpeedLimiterEnabled)
+        try
         {
-            var unit = _speedUnit.IsNullOrEmpty() ? 0 :
-                _speedUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
-            var speed = (long)(_limitSpeed == null ? 0 : _limitSpeed.Value * unit);
-
-            AppService
-                .DownloadFileService
-                .LimitDownloadFileSpeed(DownloadFile, speed);
+            OpenFolderAfterDownloadFinished = e.OpenFolderAfterDownloadFinished;
+            ExitProgramAfterDownloadFinished = e.ExitProgramAfterDownloadFinished;
+            TurnOffComputerAfterDownloadFinished = e.TurnOffComputerAfterDownloadFinished;
+            TurnOffComputerMode = e.TurnOffComputerMode;
         }
-        else
+        catch (Exception ex)
         {
-            AppService
-                .DownloadFileService
-                .LimitDownloadFileSpeed(DownloadFile, 0);
+            await ShowErrorDialogAsync(ex);
         }
-    }
-
-    public void ChangeOptions(DownloadOptionsViewEventArgs eventArgs)
-    {
-        _openFolderAfterDownloadFinished = eventArgs.OpenFolderAfterDownloadFinished;
-        _exitProgramAfterDownloadFinished = eventArgs.ExitProgramAfterDownloadFinished;
-        _turnOffComputerAfterDownloadFinished = eventArgs.TurnOffComputerAfterDownloadFinished;
-        _turnOffComputerMode = eventArgs.TurnOffComputerMode;
     }
 
     #endregion

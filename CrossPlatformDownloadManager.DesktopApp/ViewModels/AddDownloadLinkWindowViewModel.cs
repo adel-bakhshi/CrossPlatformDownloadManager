@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -21,31 +18,24 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private int? _addedDownloadFileId;
-    private bool _isFile;
-
-    // Properties
-    private string? _url;
+    private DownloadFileViewModel _downloadFile = new();
     private ObservableCollection<CategoryViewModel> _categories = [];
     private CategoryViewModel? _selectedCategory;
-    private string? _fileName;
-    private string? _description;
-    private double _fileSize;
-    private bool _isLoadingUrl;
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
     private DownloadQueueViewModel? _selectedDownloadQueue;
+    private bool _isLoadingUrl;
     private bool _rememberMyChoice;
-    private bool _startQueue;
-    private bool _defaultQueueIsExist;
+    private bool _startDownloadQueue;
+    private bool _defaultDownloadQueueIsExist;
 
     #endregion
 
     #region Properties
 
-    public string? Url
+    public DownloadFileViewModel DownloadFile
     {
-        get => _url;
-        set => this.RaiseAndSetIfChanged(ref _url, value?.Trim());
+        get => _downloadFile;
+        set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
     }
 
     public ObservableCollection<CategoryViewModel> Categories
@@ -60,34 +50,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedCategory, value);
-            this.RaisePropertyChanged(nameof(FileTypeIcon));
+
+            DownloadFile.CategoryId = value?.Id;
+            this.RaisePropertyChanged(nameof(DownloadFile));
         }
-    }
-
-    public string? FileName
-    {
-        get => _fileName;
-        set => this.RaiseAndSetIfChanged(ref _fileName, value);
-    }
-
-    public string? Description
-    {
-        get => _description;
-        set => this.RaiseAndSetIfChanged(ref _description, value);
-    }
-
-    public string? FileTypeIcon => SelectedCategory?.Icon;
-
-    public double FileSize
-    {
-        get => _fileSize;
-        set => this.RaiseAndSetIfChanged(ref _fileSize, value);
-    }
-
-    public bool IsLoadingUrl
-    {
-        get => _isLoadingUrl;
-        set => this.RaiseAndSetIfChanged(ref _isLoadingUrl, value);
     }
 
     public ObservableCollection<DownloadQueueViewModel> DownloadQueues
@@ -102,22 +68,28 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedDownloadQueue, value);
     }
 
+    public bool IsLoadingUrl
+    {
+        get => _isLoadingUrl;
+        set => this.RaiseAndSetIfChanged(ref _isLoadingUrl, value);
+    }
+
     public bool RememberMyChoice
     {
         get => _rememberMyChoice;
         set => this.RaiseAndSetIfChanged(ref _rememberMyChoice, value);
     }
 
-    public bool StartQueue
+    public bool StartDownloadQueue
     {
-        get => _startQueue;
-        set => this.RaiseAndSetIfChanged(ref _startQueue, value);
+        get => _startDownloadQueue;
+        set => this.RaiseAndSetIfChanged(ref _startDownloadQueue, value);
     }
 
-    public bool DefaultQueueIsExist
+    public bool DefaultDownloadQueueIsExist
     {
-        get => _defaultQueueIsExist;
-        set => this.RaiseAndSetIfChanged(ref _defaultQueueIsExist, value);
+        get => _defaultDownloadQueueIsExist;
+        set => this.RaiseAndSetIfChanged(ref _defaultDownloadQueueIsExist, value);
     }
 
     #endregion
@@ -130,7 +102,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public ICommand AddDownloadFileToDownloadQueueCommand { get; }
 
-    public ICommand AddToDefaultQueueCommand { get; }
+    public ICommand AddDownloadFileToDefaultDownloadQueueCommand { get; }
 
     public ICommand StartDownloadCommand { get; }
 
@@ -146,7 +118,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
         AddNewQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewQueueAsync);
         AddDownloadFileToDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddDownloadFileToDownloadQueueAsync);
-        AddToDefaultQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddToDefaultQueueAsync);
+        AddDownloadFileToDefaultDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddDownloadFileToDefaultDownloadQueueAsync);
         StartDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(StartDownloadAsync);
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
@@ -173,19 +145,21 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occured while trying to start download.");
 
-            var isValid = await ValidateDownloadFileAsync();
-            if (!isValid)
+            var isValidResult = await AppService.DownloadFileService.ValidateDownloadFileAsync(DownloadFile);
+            if (!isValidResult.IsSuccess)
+            {
+                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
                 return;
+            }
 
-            var result = await AddDownloadFileAsync(null);
-            if (!result)
+            var result = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile);
+            if (!result.IsSuccess)
+            {
+                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
                 return;
+            }
 
-            var downloadFile = AppService
-                .DownloadFileService
-                .DownloadFiles
-                .FirstOrDefault(df => df.Id == _addedDownloadFileId);
-
+            var downloadFile = result.Result;
             if (downloadFile == null)
             {
                 await ShowInfoDialogAsync("File not found",
@@ -196,9 +170,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             }
 
             // Start download before DownloadWindow opened
-            _ = AppService
-                .DownloadFileService
-                .StartDownloadFileAsync(downloadFile);
+            _ = AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
 
             var vm = new DownloadWindowViewModel(AppService, downloadFile);
             var window = new DownloadWindow { DataContext = vm };
@@ -261,9 +233,15 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occured while trying to add file to queue.");
 
-            var isValid = await ValidateDownloadFileAsync();
-            if (!isValid)
+            var isValidResult = await AppService
+                .DownloadFileService
+                .ValidateDownloadFileAsync(DownloadFile);
+
+            if (!isValidResult.IsSuccess)
+            {
+                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
                 return;
+            }
 
             if (SelectedDownloadQueue == null)
             {
@@ -285,22 +263,33 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 return;
             }
 
-            var result = await AddDownloadFileAsync(downloadQueue);
-            if (!result)
+            var result = await AppService
+                .DownloadFileService
+                .AddDownloadFileAsync(DownloadFile);
+
+            if (!result.IsSuccess)
+            {
+                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
                 return;
+            }
+
+            // Add download file to selected download queue
+            await AppService
+                .DownloadQueueService
+                .AddDownloadFileToDownloadQueueAsync(downloadQueue, result.Result);
 
             if (RememberMyChoice)
             {
                 await AppService
                     .DownloadQueueService
-                    .ChangeDefaultDownloadQueueAsync(downloadQueue);
+                    .ChangeDefaultDownloadQueueAsync(downloadQueue, reloadData: false);
             }
 
             await AppService
                 .DownloadQueueService
                 .ChangeLastSelectedDownloadQueueAsync(downloadQueue);
 
-            if (StartQueue)
+            if (StartDownloadQueue)
             {
                 _ = AppService
                     .DownloadQueueService
@@ -315,29 +304,45 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task AddToDefaultQueueAsync(Window? owner)
+    private async Task AddDownloadFileToDefaultDownloadQueueAsync(Window? owner)
     {
         try
         {
             if (owner == null)
                 return;
 
-            var isValid = await ValidateDownloadFileAsync();
-            if (!isValid)
+            var isValidResult = await AppService
+                .DownloadFileService
+                .ValidateDownloadFileAsync(DownloadFile);
+
+            if (!isValidResult.IsSuccess)
+            {
+                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
                 return;
+            }
 
             var defaultDownloadQueue = AppService
                 .DownloadQueueService
                 .DownloadQueues
                 .FirstOrDefault(dq => dq.IsDefault);
 
-            DefaultQueueIsExist = defaultDownloadQueue != null;
-            if (!DefaultQueueIsExist)
+            DefaultDownloadQueueIsExist = defaultDownloadQueue != null;
+            if (!DefaultDownloadQueueIsExist)
                 return;
 
-            var result = await AddDownloadFileAsync(defaultDownloadQueue);
-            if (!result)
+            var result = await AppService
+                .DownloadFileService
+                .AddDownloadFileAsync(DownloadFile);
+
+            if (!result.IsSuccess)
+            {
+                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
                 return;
+            }
+
+            await AppService
+                .DownloadQueueService
+                .AddDownloadFileToDownloadQueueAsync(defaultDownloadQueue, DownloadFile);
 
             owner.Close(true);
         }
@@ -347,107 +352,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task<bool> AddDownloadFileAsync(DownloadQueueViewModel? downloadQueue)
-    {
-        var ext = Path.GetExtension(FileName!);
-        var fileExtensions = await AppService
-            .UnitOfWork
-            .CategoryFileExtensionRepository
-            .GetAllAsync(where: fe => fe.Extension.ToLower() == ext.ToLower(),
-                includeProperties: "Category.CategorySaveDirectory");
-
-        var category = fileExtensions
-            .Find(fe => fe.Category?.IsDefault != true)?
-            .Category ?? fileExtensions.FirstOrDefault()?.Category;
-
-        if (category?.CategorySaveDirectory == null)
-        {
-            await ShowInfoDialogAsync("Category", "Can't find save location for this category.", DialogButtons.Ok);
-            return false;
-        }
-
-        int? maxDownloadQueuePriority = null;
-        if (downloadQueue != null)
-        {
-            maxDownloadQueuePriority = await AppService
-                .UnitOfWork
-                .DownloadFileRepository
-                .GetMaxAsync(selector: df => df.DownloadQueuePriority,
-                    where: df => df.DownloadQueueId == downloadQueue.Id) ?? 0;
-
-            maxDownloadQueuePriority++;
-        }
-
-        var downloadFile = new DownloadFile
-        {
-            Url = Url!,
-            FileName = FileName!,
-            DownloadQueueId = downloadQueue?.Id,
-            Size = FileSize,
-            Description = Description,
-            Status = DownloadFileStatus.None,
-            LastTryDate = null,
-            DateAdded = DateTime.Now,
-            DownloadQueuePriority = maxDownloadQueuePriority,
-            CategoryId = category.Id,
-            SaveLocation = category.CategorySaveDirectory.SaveDirectory,
-        };
-
-        await AppService
-            .DownloadFileService
-            .AddDownloadFileAsync(downloadFile);
-
-        _addedDownloadFileId = downloadFile.Id;
-        return true;
-    }
-
-    private async Task<bool> ValidateDownloadFileAsync()
-    {
-        // Check url validation
-        if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
-        {
-            await ShowInfoDialogAsync("Url", "Please enter a valid url.", DialogButtons.Ok);
-            return false;
-        }
-
-        // Check category
-        if (SelectedCategory == null)
-        {
-            await ShowInfoDialogAsync("Category", "Please choose a category for your file.", DialogButtons.Ok);
-            return false;
-        }
-
-        // Check file name
-        if (FileName.IsNullOrEmpty())
-        {
-            await ShowInfoDialogAsync("File name", "Please enter a file name.", DialogButtons.Ok);
-            return false;
-        }
-
-        // Check file extension
-        if (!FileName.HasFileExtension())
-        {
-            await ShowInfoDialogAsync("File name", "File type is null or invalid. Please choose correct file type like .exe or .zip.", DialogButtons.Ok);
-            return false;
-        }
-
-        // Check Url point to a file and file size is greater than 0
-        if (_isFile && FileSize > 0)
-            return true;
-
-        await ShowInfoDialogAsync("No file detected",
-            "It seems the URL does not point to a file. Make sure the URL points to a file and try again.",
-            DialogButtons.Ok);
-
-        return false;
-    }
-
     private void LoadDownloadQueues()
     {
-        DownloadQueues = AppService
+        var downloadQueues = AppService
             .DownloadQueueService
             .DownloadQueues;
 
+        DownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
         SelectedDownloadQueue = GetSelectedDownloadQueue();
     }
 
@@ -476,110 +387,40 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
-    public async Task GetUrlInfoAsync()
+    public async Task GetUrlDetailsAsync()
     {
         try
         {
-            // Set loading flag to true
             IsLoadingUrl = true;
-
-            // Make sure url is valid
-            if (!Url.CheckUrlValidation())
-                return;
-
-            Url = Url!.Replace("\\", "/").Trim();
-
-            // Find a download file with the same url
-            var downloadFileWithSameUrl = AppService
-                .DownloadFileService
-                .DownloadFiles
-                .FirstOrDefault(df => !df.Url.IsNullOrEmpty() && df.Url!.Equals(Url));
-
-            // If download file exist, don't add this url
-            if (downloadFileWithSameUrl != null)
+            var result = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url);
+            if (!result.IsSuccess)
             {
-                // TODO: Show message box
-                return;
-            }
-
-            // Create an instance of HttpClient
-            using var httpClient = new HttpClient();
-            // Send a HEAD request to get the headers only
-            using var request = new HttpRequestMessage(HttpMethod.Head, Url);
-            using var response = await httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            // Set file flag to true
-            _isFile = true;
-            // Check if the Content-Type indicates a file
-            var contentType = response.Content.Headers.ContentType?.MediaType?.ToLower() ?? string.Empty;
-            if (!contentType.StartsWith("application/") &&
-                !contentType.StartsWith("image/") &&
-                !contentType.StartsWith("video/") &&
-                !contentType.StartsWith("audio/") &&
-                !contentType.StartsWith("text/"))
-            {
-                _isFile = false;
-
-                // Check Content-Disposition header
-                if (response.Content.Headers.ContentDisposition != null)
+                switch (result.Result)
                 {
-                    var dispositionType = response.Content.Headers.ContentDisposition.DispositionType;
-                    if (dispositionType.Equals("attachment", StringComparison.OrdinalIgnoreCase))
-                        _isFile = true;
+                    case { IsFile: false }:
+                    {
+                        await ShowInfoDialogAsync("File not found", 
+                            "The link you entered does not return a downloadable file. This could be due to an incorrect link, restricted access, or unsupported content.",
+                            DialogButtons.Ok);
+                        
+                        break;
+                    }
                 }
+
+                return;
             }
 
-            string? fileName = null;
-            // Get file name from header if possible
-            if (response.Content.Headers.ContentDisposition != null)
-                fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('\"') ?? string.Empty;
-
-            // Fallback to using the URL to guess the file name if Content-Disposition is not present
-            if (fileName.IsNullOrEmpty())
-                fileName = Url!.GetFileName();
-
-            // Set file name
-            FileName = fileName ?? string.Empty;
-            // Set file size
-            FileSize = response.Content.Headers.ContentLength ?? 0;
-
-            // find category item by file extension
-            var extension = Path.GetExtension(FileName!);
-            // Get all custom categories
-            var customCategories = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAllAsync(where: c => !c.IsDefault, includeProperties: "FileExtensions");
-
-            // Find file extension by extension
-            CategoryFileExtension? fileExtension;
-            var customCategory = customCategories
-                .Find(c => c.FileExtensions.Any(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase)));
-
-            if (customCategory != null)
+            if (result.Result!.IsUrlDuplicate)
             {
-                fileExtension = customCategory.FileExtensions
-                    .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase));
-            }
-            else
-            {
-                fileExtension = await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .GetAsync(where: fe => fe.Extension.ToLower() == extension.ToLower(), includeProperties: "Category");
+                // TODO: Based on user settings handle duplicate urls
             }
 
-            // Find category by category file extension or choose general category
-            if (fileExtension != null)
-            {
-                var category = customCategory ?? fileExtension.Category;
-                SelectedCategory = category != null ? Categories.FirstOrDefault(c => c.Id == category.Id) : Categories.FirstOrDefault();
-            }
-            else
-            {
-                SelectedCategory = Categories.FirstOrDefault();
-            }
+            DownloadFile.Url = result.Result.Url;
+            DownloadFile.FileName = result.Result.FileName;
+            DownloadFile.Size = result.Result.FileSize;
+            DownloadFile.CategoryId = result.Result.Category?.Id;
+
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == result.Result.Category?.Id);
         }
         catch (Exception ex)
         {

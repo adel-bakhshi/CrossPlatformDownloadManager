@@ -1,6 +1,6 @@
 namespace CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 
-public class DownloadOptionsViewEventArgs : EventArgs
+public class DownloadOptionsChangedEventArgs : EventArgs
 {
     public bool OpenFolderAfterDownloadFinished { get; set; }
     public bool ExitProgramAfterDownloadFinished { get; set; }

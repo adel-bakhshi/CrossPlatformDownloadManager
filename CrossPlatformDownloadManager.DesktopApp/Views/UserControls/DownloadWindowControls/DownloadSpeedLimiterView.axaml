@@ -3,93 +3,89 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadSpeedLimiterView">
-    <StackPanel Orientation="Vertical"
-                Spacing="15"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls.DownloadSpeedLimiterView"
+             x:DataType="vm:DownloadSpeedLimiterViewModel">
+
+    <!-- Main content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Hidden">
+        <Border Padding="15"
+                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Background="{DynamicResource PrimaryColor}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
-        <StackPanel Orientation="Vertical"
-                    Spacing="10"
-                    HorizontalAlignment="Left">
-            <!-- Speed limiter status -->
-            <StackPanel Orientation="Horizontal"
-                        Spacing="5">
-                <TextBlock Text="Speed Limiter is" />
-                <TextBlock FontWeight="Bold"
-                           Classes.speedLimiterEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}">
-                    <TextBlock.Styles>
-                        <Style Selector="TextBlock">
-                            <Setter Property="Text"
-                                    Value="Disabled" />
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource DangerGradientBrush}" />
+                VerticalAlignment="Top">
+            <StackPanel Orientation="Vertical"
+                        Spacing="10">
+                <!-- Title and switch -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="Limit speed"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Left"
+                               FontWeight="Bold" />
 
-                            <Style Selector="^.speedLimiterEnabled">
-                                <Setter Property="Text"
-                                        Value="Enabled" />
-                                <Setter Property="Foreground"
-                                        Value="{DynamicResource SuccessGradientBrush}" />
-                            </Style>
-                        </Style>
-                    </TextBlock.Styles>
-                </TextBlock>
+                    <ToggleSwitch Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding IsSpeedLimiterEnabled}" />
+                </Grid>
+
+                <!-- Speed and unit -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <!-- Speed  -->
+                    <cc:CustomNumericUpDown Grid.Column="0"
+                                            Watermark="Speed"
+                                            WatermarkForeground="{DynamicResource TertiaryColor}"
+                                            Padding="12, 10"
+                                            CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                            Background="{DynamicResource SecondaryColor}"
+                                            IconData="{DynamicResource Ban}"
+                                            IconColor="{DynamicResource IconColor}"
+                                            IconSize="{DynamicResource SmallIconSize}"
+                                            BorderThickness="0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            IsEnabled="{Binding IsSpeedLimiterEnabled}"
+                                            Value="{Binding SpeedLimit}"
+                                            ShowButtonSpinner="False"
+                                            Increment="1"
+                                            Minimum="0"
+                                            ClipValueToMinMax="True"
+                                            Margin="0, 0, 10, 0" />
+
+                    <!-- Unit -->
+                    <cc:CustomComboBox Grid.Column="1"
+                                       PlaceholderText="Unit"
+                                       MinWidth="80"
+                                       Background="{DynamicResource SecondaryColor}"
+                                       ToggleIconColor="{DynamicResource TertiaryColor}"
+                                       OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                       ItemsSource="{Binding SpeedUnits}"
+                                       SelectedItem="{Binding SelectedSpeedUnit}"
+                                       IsEnabled="{Binding IsSpeedLimiterEnabled}"
+                                       MaxDropDownHeight="300"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Stretch">
+                        <cc:CustomComboBox.ItemTemplate>
+                            <DataTemplate DataType="x:String">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomComboBox.ItemTemplate>
+                    </cc:CustomComboBox>
+                </Grid>
             </StackPanel>
-
-            <!-- Enable/Disable Speed limiter -->
-            <Button Name="BtnEnableOrDisableSpeedLimiter"
-                    Classes="button"
-                    Classes.danger="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
-                    Classes.success="{Binding !$parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
-                    Click="BtnEnableOrDisableSpeedLimiter_OnClick">
-                <TextBlock Classes.speedLimiterEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}">
-                    <TextBlock.Styles>
-                        <Style Selector="TextBlock">
-                            <Setter Property="Text"
-                                    Value="Enable Speed Limiter" />
-
-                            <Style Selector="^.speedLimiterEnabled">
-                                <Setter Property="Text"
-                                        Value="Disable Speed Limiter" />
-                            </Style>
-                        </Style>
-                    </TextBlock.Styles>
-                </TextBlock>
-            </Button>
-        </StackPanel>
-
-        <!-- Speed limiter TextBox and ComboBox -->
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <cc:CustomTextBox Name="TxtSpeedLimiterValue"
-                              Watermark="Speed"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
-                              Padding="12, 10"
-                              CornerRadius="{DynamicResource DefaultCornerRadius}"
-                              Background="{DynamicResource PrimaryColor}"
-                              Width="80"
-                              BorderThickness="0"
-                              IsEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
-                              TextChanged="TxtSpeedLimiterValue_OnTextChanged" />
-
-            <cc:CustomComboBox Name="CboSpeedLimiterUnit"
-                               PlaceholderText="Unit"
-                               MinWidth="70"
-                               Background="{DynamicResource PrimaryColor}"
-                               ToggleIconColor="{DynamicResource TertiaryColor}"
-                               OnHoverToggleIconColor="{DynamicResource TextColor}"
-                               ItemsSource="{Binding $parent[local:DownloadSpeedLimiterView].UnitsDropDownItemsSource}"
-                               IsEnabled="{Binding $parent[local:DownloadSpeedLimiterView].SpeedLimiterEnabled}"
-                               SelectionChanged="CboSpeedLimiterUnit_OnSelectionChanged">
-                <cc:CustomComboBox.ItemTemplate>
-                    <DataTemplate DataType="x:String">
-                        <TextBlock Text="{Binding}" />
-                    </DataTemplate>
-                </cc:CustomComboBox.ItemTemplate>
-            </cc:CustomComboBox>
-        </StackPanel>
-    </StackPanel>
+        </Border>
+    </ScrollViewer>
 </UserControl>

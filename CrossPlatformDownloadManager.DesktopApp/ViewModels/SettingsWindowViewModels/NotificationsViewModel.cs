@@ -5,9 +5,19 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewM
 
 public class NotificationsViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private bool _downloadComplete;
+    private bool _downloadStopped;
+    private bool _downloadFailed;
+    private bool _queueStarted;
+    private bool _queueStopped;
+    private bool _queueFinished;
+    private bool _useSystemNotifications;
+
+    #endregion
+
+    #region Properties
 
     public bool DownloadComplete
     {
@@ -15,15 +25,11 @@ public class NotificationsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _downloadComplete, value);
     }
 
-    private bool _downloadStopped;
-
     public bool DownloadStopped
     {
         get => _downloadStopped;
         set => this.RaiseAndSetIfChanged(ref _downloadStopped, value);
     }
-
-    private bool _downloadFailed;
 
     public bool DownloadFailed
     {
@@ -31,15 +37,11 @@ public class NotificationsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _downloadFailed, value);
     }
 
-    private bool _queueStarted;
-
     public bool QueueStarted
     {
         get => _queueStarted;
         set => this.RaiseAndSetIfChanged(ref _queueStarted, value);
     }
-
-    private bool _queueStopped;
 
     public bool QueueStopped
     {
@@ -47,15 +49,11 @@ public class NotificationsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _queueStopped, value);
     }
 
-    private bool _queueFinished;
-
     public bool QueueFinished
     {
         get => _queueFinished;
         set => this.RaiseAndSetIfChanged(ref _queueFinished, value);
     }
-
-    private bool _useSystemNotifications;
 
     public bool UseSystemNotifications
     {
@@ -67,5 +65,22 @@ public class NotificationsViewModel : ViewModelBase
 
     public NotificationsViewModel(IAppService appService) : base(appService)
     {
+        LoadViewData();
     }
+
+    #region Helpers
+
+    private void LoadViewData()
+    {
+        var settings = AppService.SettingsService.Settings;
+        DownloadComplete = settings.UseDownloadCompleteSound;
+        DownloadStopped = settings.UseDownloadStoppedSound;
+        DownloadFailed = settings.UseDownloadFailedSound;
+        QueueStarted = settings.UseQueueStartedSound;
+        QueueStopped = settings.UseQueueStoppedSound;
+        QueueFinished = settings.UseQueueFinishedSound;
+        UseSystemNotifications = settings.UseSystemNotifications;
+    }
+
+    #endregion
 }

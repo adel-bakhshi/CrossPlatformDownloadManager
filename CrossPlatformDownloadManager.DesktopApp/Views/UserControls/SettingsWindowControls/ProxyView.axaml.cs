@@ -1,13 +1,8 @@
 using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 
@@ -31,13 +26,10 @@ public partial class ProxyView : MyUserControlBase<ProxyViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel == null)
-            {
-                Console.WriteLine(ex);
-                return;
-            }
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
 
-            await ViewModel.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to load available proxies.");
         }
     }
 }

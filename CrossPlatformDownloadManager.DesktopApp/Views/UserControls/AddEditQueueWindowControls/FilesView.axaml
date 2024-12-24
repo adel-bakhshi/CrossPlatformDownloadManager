@@ -138,7 +138,6 @@
                   Grid.Row="2"
                   ItemsSource="{Binding DownloadFiles}"
                   Classes="minimalDataGrid darkRows"
-                  Background="{DynamicResource SecondaryColor}"
                   SelectionMode="Extended"
                   SelectionChanged="FilesDataGridOnSelectionChanged"
                   PropertyChanged="FilesDataGridOnPropertyChanged">

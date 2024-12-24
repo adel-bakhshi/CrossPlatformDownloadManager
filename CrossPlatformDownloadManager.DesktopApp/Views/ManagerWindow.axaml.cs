@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using Serilog;
@@ -11,14 +12,23 @@ namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
 public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
 {
+    #region Private Fields
+
+    private readonly DispatcherTimer _saveManagerPointTimer;
+
+    #endregion
+
     public ManagerWindow()
     {
+        _saveManagerPointTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _saveManagerPointTimer.Tick += SaveManagerPointTimerOnTick;
+
         InitializeComponent();
 
-        PositionChanged += WindowOnPositionChanged;
+        PositionChanged += ManagerWindowOnPositionChanged;
     }
 
-    private void WindowOnPositionChanged(object? sender, PixelPointEventArgs e)
+    private void ManagerWindowOnPositionChanged(object? sender, PixelPointEventArgs e)
     {
         if (Screens.Primary == null)
             return;
@@ -30,25 +40,39 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         var y = (int)Math.Clamp(Position.Y, 0, screenHeight - Bounds.Height);
 
         Position = new PixelPoint(x, y);
+        
+        // Restart timer
+        _saveManagerPointTimer.Stop();
+        _saveManagerPointTimer.Start();
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
-        if (Screens.Primary == null)
+        if (Screens.Primary == null || ViewModel == null)
             return;
 
-        var screenWidth = Screens.Primary.WorkingArea.Width;
-        var screenHeight = Screens.Primary.WorkingArea.Height;
+        int x, y;
+        var point = ViewModel.ManagerPoint;
+        if (point == null)
+        {
+            var screenWidth = Screens.Primary.WorkingArea.Width;
+            var screenHeight = Screens.Primary.WorkingArea.Height;
 
-        var x = (int)(screenWidth - Bounds.Width) - 20;
-        var y = (int)(screenHeight - Bounds.Height) - 20;
+            x = (int)(screenWidth - Bounds.Width) - 20;
+            y = (int)(screenHeight - Bounds.Height) - 20;
+        }
+        else
+        {
+            x = (int)point.X;
+            y = (int)point.Y;
+        }
 
         Position = new PixelPoint(x, y);
     }
 
-    private void WindowOnPointerPressed(object? sender, PointerPressedEventArgs e)
+    private void ManagerWindowOnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (ViewModel == null)
             return;
@@ -76,15 +100,38 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
             var mainWindow = App.Desktop?.MainWindow;
             if (mainWindow == null)
                 throw new InvalidOperationException("Could not find main window.");
-            
+
             mainWindow.Show();
         }
         catch (Exception ex)
         {
             if (ViewModel != null)
                 await ViewModel.ShowErrorDialogAsync(ex);
-            
+
             Log.Error(ex, "An error occured while trying to open main window.");
         }
     }
+
+    #region Helpers
+
+    private async void SaveManagerPointTimerOnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _saveManagerPointTimer.Stop();
+            if (ViewModel == null)
+                return;
+            
+            await ViewModel.SaveManagerPointAsync(Position.X, Position.Y);
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+            
+            Log.Error(ex, "An error occured while trying to save manager point.");
+        }
+    }
+
+    #endregion
 }

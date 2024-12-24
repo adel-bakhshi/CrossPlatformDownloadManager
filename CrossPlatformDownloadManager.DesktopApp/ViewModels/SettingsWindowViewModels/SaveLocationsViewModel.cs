@@ -9,23 +9,28 @@ using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
 public class SaveLocationsViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private ObservableCollection<CategoryViewModel> _categories = [];
+    private CategoryViewModel? _selectedCategory;
+    private FileTypesViewModel? _fileTypesViewModel;
+
+    #endregion
+
+    #region Properties
 
     public ObservableCollection<CategoryViewModel> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
-
-    private CategoryViewModel? _selectedCategory;
 
     public CategoryViewModel? SelectedCategory
     {
@@ -37,8 +42,6 @@ public class SaveLocationsViewModel : ViewModelBase
         }
     }
 
-    private FileTypesViewModel? _fileTypesViewModel;
-
     public FileTypesViewModel? FileTypesViewModel
     {
         get => _fileTypesViewModel;
@@ -49,31 +52,27 @@ public class SaveLocationsViewModel : ViewModelBase
 
     #region Commands
 
-    public ICommand? AddNewCategoryCommand { get; set; }
+    public ICommand AddNewCategoryCommand { get; set; }
 
-    public ICommand? EditCategoryCommand { get; set; }
+    public ICommand EditCategoryCommand { get; set; }
 
-    public ICommand? DeleteCategoryCommand { get; set; }
+    public ICommand DeleteCategoryCommand { get; set; }
 
     #endregion
 
     public SaveLocationsViewModel(IAppService appService) : base(appService)
     {
-        FileTypesViewModel = new FileTypesViewModel(appService)
-        {
-            DependsOnCategory = true
-        };
+        FileTypesViewModel = new FileTypesViewModel(appService) { DependsOnCategory = true };
 
         LoadCategoriesAsync().GetAwaiter();
 
-        AddNewCategoryCommand = ReactiveCommand.Create<Window?>(AddNewCategory);
-        EditCategoryCommand = ReactiveCommand.Create<Window?>(EditCategory);
-        DeleteCategoryCommand = ReactiveCommand.Create(DeleteCategory);
+        AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
+        EditCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(EditCategoryAsync);
+        DeleteCategoryCommand = ReactiveCommand.CreateFromTask(DeleteCategoryAsync);
     }
 
-    private async void AddNewCategory(Window? owner)
+    private async Task AddNewCategoryAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -94,13 +93,12 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void EditCategory(Window? owner)
+    private async Task EditCategoryAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null || SelectedCategory == null)
@@ -123,13 +121,12 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void DeleteCategory()
+    private async Task DeleteCategoryAsync()
     {
-        // TODO: Show message box
         try
         {
             if (SelectedCategory == null)
@@ -138,13 +135,22 @@ public class SaveLocationsViewModel : ViewModelBase
             var category = await AppService
                 .UnitOfWork
                 .CategoryRepository
-                .GetAsync(where: c => c.Id == SelectedCategory.Id,
-                    includeProperties: ["CategorySaveDirectory", "FileExtensions", "DownloadFiles"]);
+                .GetAsync(where: c => c.Id == SelectedCategory.Id, includeProperties: ["CategorySaveDirectory", "FileExtensions", "DownloadFiles"]);
 
             if (category == null)
                 return;
 
             if (category.IsDefault)
+            {
+                await ShowInfoDialogAsync("Delete category", "This default category cannot be deleted.", DialogButtons.Ok);
+                return;
+            }
+
+            var result = await ShowDangerDialogAsync("Delete category",
+                "All data within this category will be permanently deleted. Are you sure you want to proceed?",
+                DialogButtons.YesNo);
+            
+            if (result != DialogResult.Yes)
                 return;
 
             await AppService
@@ -179,13 +185,12 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 
     private async Task LoadCategoriesAsync()
     {
-        // TODO: Show message box
         try
         {
             var categories = await AppService
@@ -193,18 +198,17 @@ public class SaveLocationsViewModel : ViewModelBase
                 .CategoryRepository
                 .GetAllAsync(includeProperties: ["CategorySaveDirectory"]);
 
-            var categoryViewModels = AppService
-                .Mapper
-                .Map<List<CategoryViewModel>>(categories);
-
-            Categories = categoryViewModels.ToObservableCollection();
+            var categoryViewModels = AppService.Mapper.Map<List<CategoryViewModel>>(categories);
+            Categories = categoryViewModels
+                .Where(c => c.Title?.Equals(Constants.GeneralCategoryTitle) != true)
+                .ToObservableCollection();
+            
             SelectedCategory = Categories.FirstOrDefault();
-
             LoadFileExtensions();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
         }
     }
 

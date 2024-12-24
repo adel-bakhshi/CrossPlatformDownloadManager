@@ -38,19 +38,19 @@ public static class ExtensionMethods
                 return "0 KB";
         }
 
-        var tb = bytes / Constants.TB;
+        var tb = bytes / Constants.TeraByte;
         if (tb > 1)
             return $"{tb:N2} TB";
 
-        var gb = bytes / Constants.GB;
+        var gb = bytes / Constants.GigaByte;
         if (gb > 1)
             return $"{gb:N2} GB";
 
-        var mb = bytes / Constants.MB;
+        var mb = bytes / Constants.MegaByte;
         if (mb > 1)
             return $"{mb:N2} MB";
 
-        var kb = bytes / Constants.KB;
+        var kb = bytes / Constants.KiloByte;
         if (kb > 1)
             return $"{kb:N2} KB";
 

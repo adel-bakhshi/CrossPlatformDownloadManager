@@ -44,6 +44,13 @@ public class BrowserExtension : IBrowserExtension
                 _ = ProcessRequestAsync(context);
             }
         }
+        catch (HttpListenerException ex)
+        {
+            // The I/O operation has been aborted because of either a thread exit or an application request.
+            // This error occurs when the HttpListener is stopped and as a result the GetContextAsync method fails because it cannot find any Listener. This error does not need to be written to the application logs.
+            if (ex.ErrorCode != 995)
+                Log.Error(ex, "An error occurred while listening for requests.");
+        }
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to start listening for requests.");

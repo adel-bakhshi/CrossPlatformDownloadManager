@@ -15,8 +15,11 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _alwaysKeepManagerOnTop;
     private bool _showStartDownloadDialog;
     private bool _showCompleteDownloadDialog;
-    private string _duplicateDownloadLinkAction = string.Empty;
+    private DuplicateDownloadLinkAction _duplicateDownloadLinkAction;
     private int _maximumConnectionsCount;
+    private bool _isSpeedLimiterEnabled;
+    private double? _limitSpeed;
+    private string? _limitUnit;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
     private string _customProxySettings = string.Empty;
@@ -76,7 +79,7 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _showCompleteDownloadDialog, value);
     }
 
-    public string DuplicateDownloadLinkAction
+    public DuplicateDownloadLinkAction DuplicateDownloadLinkAction
     {
         get => _duplicateDownloadLinkAction;
         set => SetField(ref _duplicateDownloadLinkAction, value);
@@ -86,6 +89,24 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _maximumConnectionsCount;
         set => SetField(ref _maximumConnectionsCount, value);
+    }
+
+    public bool IsSpeedLimiterEnabled
+    {
+        get => _isSpeedLimiterEnabled;
+        set => SetField(ref _isSpeedLimiterEnabled, value);
+    }
+
+    public double? LimitSpeed
+    {
+        get => _limitSpeed;
+        set => SetField(ref _limitSpeed, value);
+    }
+
+    public string? LimitUnit
+    {
+        get => _limitUnit;
+        set => SetField(ref _limitUnit, value);
     }
 
     public ProxyMode ProxyMode
@@ -153,7 +174,7 @@ public class SettingsViewModel : PropertyChangedBase
         get => _managerPoint;
         set => SetField(ref _managerPoint, value);
     }
-    
+
     public ObservableCollection<ProxySettingsViewModel> Proxies
     {
         get => _proxies;

@@ -101,7 +101,6 @@
                       ItemsSource="{Binding FileExtensions}"
                       SelectedItem="{Binding SelectedFileExtension}"
                       Classes="minimalDataGrid darkRows"
-                      Background="{DynamicResource PrimaryColor}"
                       SelectionMode="Single"
                       Height="{Binding $parent[local:FileTypesView].DataGridHeight}">
                 <DataGrid.Columns>

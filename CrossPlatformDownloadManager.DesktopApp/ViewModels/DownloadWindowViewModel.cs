@@ -253,7 +253,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 return;
             }
 
-            var unit = e.Unit.IsNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KB : Constants.MB;
+            var unit = e.Unit.IsNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte;
             var speed = (long)(e.Speed == null ? 0 : e.Speed.Value * unit);
 
             AppService

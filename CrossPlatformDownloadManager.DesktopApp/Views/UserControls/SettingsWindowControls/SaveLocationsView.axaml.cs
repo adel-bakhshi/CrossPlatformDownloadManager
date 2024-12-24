@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 
@@ -20,18 +21,14 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
     {
         base.OnPropertyChanged(change);
 
-        if (!change.Property.Name.Equals("IsVisible"))
-            return;
-
-        if (!IsVisible || ViewModel == null)
+        if (change.Property != IsVisibleProperty || !IsVisible || ViewModel == null)
             return;
 
         ViewModel.LoadFileExtensions();
     }
 
-    private async void BrowseButton_OnClick(object? sender, RoutedEventArgs e)
+    private async void BrowseButtonOnClick(object? sender, RoutedEventArgs e)
     {
-        // TODO: Show message box
         try
         {
             if (ViewModel?.SelectedCategory == null)
@@ -56,7 +53,10 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+            
+            Log.Error(ex, "An error occured while trying to select directory for a category.");
         }
     }
 }

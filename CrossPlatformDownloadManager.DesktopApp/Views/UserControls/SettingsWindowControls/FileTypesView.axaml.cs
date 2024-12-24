@@ -1,7 +1,8 @@
+using System;
 using Avalonia;
-using Avalonia.Controls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 
@@ -10,8 +11,7 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
     #region Properties
 
     public static readonly StyledProperty<double> DataGridHeightProperty =
-        AvaloniaProperty.Register<FileTypesView, double>(
-            name: nameof(DataGridHeight), defaultValue: double.NaN);
+        AvaloniaProperty.Register<FileTypesView, double>(name: nameof(DataGridHeight), defaultValue: double.NaN);
 
     public double DataGridHeight
     {
@@ -28,14 +28,21 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
 
     protected override async void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
-        base.OnPropertyChanged(change);
+        try
+        {
+            base.OnPropertyChanged(change);
 
-        if (change.Property != IsVisibleProperty)
-            return;
+            if (change.Property != IsVisibleProperty || !IsVisible || ViewModel == null)
+                return;
 
-        if (!IsVisible || ViewModel == null)
-            return;
-        
-        await ViewModel.LoadFileExtensionsAsync();
+            await ViewModel.LoadFileExtensionsAsync();
+        }
+        catch (Exception ex)
+        {
+            if (ViewModel != null)
+                await ViewModel.ShowErrorDialogAsync(ex);
+
+            Log.Error(ex, "An error occured while trying to load file extensions.");
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using CrossPlatformDownloadManager.Data.Services.AppService;
 using ReactiveUI;
 
@@ -44,5 +45,19 @@ public class GeneralsViewModel : ViewModelBase
 
     public GeneralsViewModel(IAppService appService) : base(appService)
     {
+        LoadViewData();
     }
+
+    #region Helpers
+
+    private void LoadViewData()
+    {
+        var settings = AppService.SettingsService.Settings;
+        StartOnSystemStartup = settings.StartOnSystemStartup;
+        UseBrowserExtension = settings.UseBrowserExtension;
+        DarkMode = settings.DarkMode;
+        AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+    }
+
+    #endregion
 }

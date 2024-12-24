@@ -17,9 +17,15 @@ public class Settings : DbModelBase
 
     [Required] public bool ShowCompleteDownloadDialog { get; set; }
 
-    [Required] [MaxLength(500)] public string DuplicateDownloadLinkAction { get; set; } = string.Empty;
+    [Required] public DuplicateDownloadLinkAction DuplicateDownloadLinkAction { get; set; }
 
     [Required] public int MaximumConnectionsCount { get; set; }
+
+    [Required] public bool IsSpeedLimiterEnabled { get; set; }
+
+    public double? LimitSpeed { get; set; }
+
+    [MaxLength(50)] public string? LimitUnit { get; set; }
 
     [Required] public ProxyMode ProxyMode { get; set; }
 
@@ -56,6 +62,9 @@ public class Settings : DbModelBase
         ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;
         DuplicateDownloadLinkAction = settings.DuplicateDownloadLinkAction;
         MaximumConnectionsCount = settings.MaximumConnectionsCount;
+        IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled;
+        LimitSpeed = settings.LimitSpeed;
+        LimitUnit = settings.LimitUnit;
         ProxyMode = settings.ProxyMode;
         ProxyType = settings.ProxyType;
         UseDownloadCompleteSound = settings.UseDownloadCompleteSound;

@@ -151,7 +151,7 @@
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 Classes="button success"
-                                Click="BrowseButton_OnClick">
+                                Click="BrowseButtonOnClick">
                             Browse
                         </Button>
                     </Grid>

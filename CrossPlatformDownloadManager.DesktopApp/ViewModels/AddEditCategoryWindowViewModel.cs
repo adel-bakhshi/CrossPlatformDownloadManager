@@ -10,14 +10,26 @@ using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class AddEditCategoryWindowViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private string? _categoryTitle;
+    private ObservableCollection<CategoryFileExtensionViewModel> _fileExtensions = [];
+    private CategoryFileExtensionViewModel _newFileExtension = new();
+    private ObservableCollection<string> _siteAddresses = [];
+    private string? _siteAddress;
+    private string? _saveDirectory;
+    private bool _isEditMode;
+    private int? _categoryId;
+
+    #endregion
+
+    #region Properties
 
     public string? CategoryTitle
     {
@@ -25,15 +37,11 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _categoryTitle, value);
     }
 
-    private ObservableCollection<CategoryFileExtensionViewModel> _fileExtensions = [];
-
     public ObservableCollection<CategoryFileExtensionViewModel> FileExtensions
     {
         get => _fileExtensions;
         set => this.RaiseAndSetIfChanged(ref _fileExtensions, value);
     }
-
-    private CategoryFileExtensionViewModel _newFileExtension = new();
 
     public CategoryFileExtensionViewModel NewFileExtension
     {
@@ -41,23 +49,17 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _newFileExtension, value);
     }
 
-    private ObservableCollection<string> _siteAddresses = [];
-
     public ObservableCollection<string> SiteAddresses
     {
         get => _siteAddresses;
         set => this.RaiseAndSetIfChanged(ref _siteAddresses, value);
     }
 
-    private string? _siteAddress;
-
     public string? SiteAddress
     {
         get => _siteAddress;
         set => this.RaiseAndSetIfChanged(ref _siteAddress, value);
     }
-
-    private string? _saveDirectory;
 
     public string? SaveDirectory
     {
@@ -66,8 +68,6 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     }
 
     public string Title => IsEditMode ? "CDM - Edit Category" : "CDM - Add New Category";
-
-    private bool _isEditMode;
 
     public bool IsEditMode
     {
@@ -78,8 +78,6 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(Title));
         }
     }
-
-    private int? _categoryId;
 
     public int? CategoryId
     {
@@ -115,12 +113,11 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtensionViewModel?>(DeleteFileExtension);
         AddNewSiteAddressCommand = ReactiveCommand.Create(AddNewSiteAddress);
         DeleteSiteAddressCommand = ReactiveCommand.Create<string?>(DeleteSiteAddress);
-        SaveCommand = ReactiveCommand.Create<Window?>(Save);
+        SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
     }
 
-    private async void Save(Window? owner)
+    private async Task SaveAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null || CategoryTitle.IsNullOrEmpty() || SaveDirectory.IsNullOrEmpty())
@@ -129,7 +126,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             CategoryTitle = CategoryTitle!.Trim();
             SaveDirectory = SaveDirectory!.Trim();
 
-            Category? category = null;
+            Category? category;
             if (IsEditMode)
             {
                 category = await AppService
@@ -160,9 +157,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     .AddAsync(category);
             }
 
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
+            await AppService.UnitOfWork.SaveAsync();
 
             if (IsEditMode && category.FileExtensions.Count > 0)
             {
@@ -171,9 +166,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     .CategoryFileExtensionRepository
                     .DeleteAllAsync(category.FileExtensions);
 
-                await AppService
-                    .UnitOfWork
-                    .SaveAsync();
+                await AppService.UnitOfWork.SaveAsync();
             }
 
             var fileExtensions = FileExtensions
@@ -190,9 +183,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                 .CategoryFileExtensionRepository
                 .AddRangeAsync(fileExtensions);
 
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
+            await AppService.UnitOfWork.SaveAsync();
 
             CategorySaveDirectory? saveDirectory;
             if (IsEditMode)
@@ -221,26 +212,22 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                     .AddAsync(saveDirectory);
             }
 
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
+            await AppService.UnitOfWork.SaveAsync();
 
             category.CategorySaveDirectoryId = saveDirectory.Id;
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
+            await AppService.UnitOfWork.SaveAsync();
 
             owner.Close(true);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "And error occured while trying to save the category.");
         }
     }
 
     private async Task LoadCategoryAsync()
     {
-        // TODO: Show message box
         try
         {
             if (CategoryId != null)
@@ -248,8 +235,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                 var category = await AppService
                     .UnitOfWork
                     .CategoryRepository
-                    .GetAsync(where: c => c.Id == CategoryId,
-                        includeProperties: ["CategorySaveDirectory"]);
+                    .GetAsync(where: c => c.Id == CategoryId, includeProperties: ["CategorySaveDirectory"]);
 
                 if (category == null)
                     return;
@@ -258,13 +244,15 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                 FileExtensions = AppService
                     .Mapper
                     .Map<List<CategoryFileExtensionViewModel>>(category.FileExtensions)
+                    .Select(fe =>
+                    {
+                        fe.Extension = fe.Extension!.TrimStart('.');
+                        return fe;
+                    })
                     .ToObservableCollection();
 
                 var json = category.AutoAddLinkFromSites;
-                SiteAddresses = json.IsNullOrEmpty()
-                    ? []
-                    : json!.ConvertFromJson<List<string>>().ToObservableCollection();
-
+                SiteAddresses = json.IsNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();
                 if (category.CategorySaveDirectory != null)
                     SaveDirectory = category.CategorySaveDirectory.SaveDirectory;
             }
@@ -273,8 +261,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                 var generalCategory = await AppService
                     .UnitOfWork
                     .CategoryRepository
-                    .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle,
-                        includeProperties: ["CategorySaveDirectory"]);
+                    .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle, includeProperties: ["CategorySaveDirectory"]);
 
                 if (generalCategory?.CategorySaveDirectory == null)
                     return;
@@ -284,7 +271,8 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "And error occured while trying to load the category.");
         }
     }
 

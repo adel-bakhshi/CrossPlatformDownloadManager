@@ -4,11 +4,23 @@ namespace CrossPlatformDownloadManager.Utils;
 
 public static class Constants
 {
+    #region Private Fields
+
+    // Duplicate download link actions
+    private const string LetUserChooseAction = "Show the dialog and let me choose";
+    private const string DuplicateWithNumberAction = "Add the duplicate with a number after its file name";
+    private const string OverwriteExistingAction = "Add the duplicate and overwrite existing file";
+    private const string ShowCompleteDialogOrResumeAction = "if download file complete, show download complete dialog. Otherwise, resume it";
+
+    #endregion
+
+    #region Public Fields
+
     // File Size
-    public const long KB = 1024;
-    public const long MB = KB * 1024;
-    public const long GB = MB * 1024;
-    public const long TB = GB * 1024;
+    public const long KiloByte = 1024;
+    public const long MegaByte = KiloByte * 1024;
+    public const long GigaByte = MegaByte * 1024;
+    public const long TeraByte = GigaByte * 1024;
 
     // Turn off computer modes
     public static readonly List<string> TurnOffComputerModes = Enum
@@ -40,14 +52,6 @@ public static class Constants
     public const string UnfinishedCategoryHeaderTitle = "Unfinished";
     public const string FinishedCategoryHeaderTitle = "Finished";
 
-    public static readonly List<string> DuplicateDownloadLinkActions =
-    [
-        "Show the dialog and let me choose",
-        "Add the duplicate with a number after its file name",
-        "Add the duplicate and overwrite existing file",
-        "if download file complete, show download complete dialog. Otherwise resume it"
-    ];
-
     public static readonly List<int> MaximumConnectionsCounts =
     [
         1,
@@ -64,14 +68,62 @@ public static class Constants
         {
             if (pt.Equals(Enum.GetName(ProxyType.Socks5)))
                 pt = "Socks 5";
-            
+
             return pt;
         })
         .ToList();
 
     public const string DefaultDownloadQueueTitle = "Main Queue";
-    
+
     // Listening urls
     public const string CheckFileTypeSupportUrl = "http://localhost:5000/cdm/download/check/";
     public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
+
+    #endregion
+
+    public static List<string> GetDuplicateActionsMessages()
+    {
+        var names = Enum
+            .GetValues<DuplicateDownloadLinkAction>()
+            .Select(name =>
+            {
+                return name switch
+                {
+                    DuplicateDownloadLinkAction.LetUserChoose => LetUserChooseAction,
+                    DuplicateDownloadLinkAction.DuplicateWithNumber => DuplicateWithNumberAction,
+                    DuplicateDownloadLinkAction.OverwriteExisting => OverwriteExistingAction,
+                    DuplicateDownloadLinkAction.ShowCompleteDialogOrResume => ShowCompleteDialogOrResumeAction,
+                    _ => string.Empty
+                };
+            })
+            .ToList();
+
+        return names;
+    }
+
+    public static string? GetDuplicateActionMessage(DuplicateDownloadLinkAction action)
+    {
+        return action switch
+        {
+            DuplicateDownloadLinkAction.LetUserChoose => LetUserChooseAction,
+            DuplicateDownloadLinkAction.DuplicateWithNumber => DuplicateWithNumberAction,
+            DuplicateDownloadLinkAction.OverwriteExisting => OverwriteExistingAction,
+            DuplicateDownloadLinkAction.ShowCompleteDialogOrResume => ShowCompleteDialogOrResumeAction,
+            _ => null
+        };
+    }
+
+    public static DuplicateDownloadLinkAction GetDuplicateActionFromMessage(string message)
+    {
+        var action = message switch
+        {
+            LetUserChooseAction => DuplicateDownloadLinkAction.LetUserChoose,
+            DuplicateWithNumberAction => DuplicateDownloadLinkAction.DuplicateWithNumber,
+            OverwriteExistingAction => DuplicateDownloadLinkAction.OverwriteExisting,
+            ShowCompleteDialogOrResumeAction => DuplicateDownloadLinkAction.ShowCompleteDialogOrResume,
+            _ => throw new ArgumentException("Can't get action from message.")
+        };
+
+        return action;
+    }
 }

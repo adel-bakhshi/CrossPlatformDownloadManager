@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -22,7 +23,7 @@ public class ManagerWindowViewModel : ViewModelBase
     #endregion
 
     #region Properties
-    
+
     public string DownloadSpeed
     {
         get => _downloadSpeed;
@@ -30,6 +31,7 @@ public class ManagerWindowViewModel : ViewModelBase
     }
 
     public bool IsMenuVisible { get; set; }
+    public PointViewModel? ManagerPoint => AppService.SettingsService.Settings.ManagerPoint;
 
     #endregion
 
@@ -42,7 +44,7 @@ public class ManagerWindowViewModel : ViewModelBase
     public ManagerWindowViewModel(IAppService appService, TrayMenuWindow trayMenuWindow) : base(appService)
     {
         _trayMenuWindow = trayMenuWindow;
-        
+
         _updateDownloadSpeedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _updateDownloadSpeedTimer.Tick += UpdateDownloadSpeedTimerOnTick;
         _updateDownloadSpeedTimer.Start();
@@ -66,8 +68,22 @@ public class ManagerWindowViewModel : ViewModelBase
         IsMenuVisible = false;
     }
 
+    public async Task SaveManagerPointAsync(int x, int y)
+    {
+        // Check current point and compare with new
+        var currentPoint = AppService.SettingsService.Settings.ManagerPoint;
+        if (currentPoint != null && (int)currentPoint.X == x && (int)currentPoint.Y == y)
+            return;
+        
+        AppService.SettingsService.Settings.ManagerPoint = new PointViewModel { X = x, Y = y };
+        
+        await AppService
+            .SettingsService
+            .SaveSettingsAsync(AppService.SettingsService.Settings);
+    }
+
     #region Helpers
-    
+
     private async Task ExitProgramAsync()
     {
         try

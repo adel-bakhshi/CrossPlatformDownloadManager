@@ -54,8 +54,6 @@
                                                  TextWrapping="NoWrap"
                                                  Watermark="{TemplateBinding Watermark}"
                                                  WatermarkForeground="{TemplateBinding WatermarkForeground}"
-                                                 InnerLeftContent="{Binding InnerLeftContent, RelativeSource={RelativeSource TemplatedParent}}"
-                                                 InnerRightContent="{Binding InnerRightContent, RelativeSource={RelativeSource TemplatedParent}}"
                                                  IconData="{TemplateBinding IconData}"
                                                  IconColor="{TemplateBinding IconColor}"
                                                  IconSize="{TemplateBinding IconSize}" />

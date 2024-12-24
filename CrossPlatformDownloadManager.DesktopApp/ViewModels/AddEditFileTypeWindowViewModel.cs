@@ -10,16 +10,27 @@ using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class AddEditFileTypeWindowViewModel : ViewModelBase
 {
+    #region Private Fields
+
+    private bool _isEditMode;
+    private bool _categoryComboBoxIsEnabled;
+    private int? _categoryFileExtensionId;
+    private string? _extension;
+    private string? _alias;
+    private ObservableCollection<CategoryViewModel> _categories = [];
+    private CategoryViewModel? _selectedCategory;
+
+    #endregion
+
     #region Properties
 
     public string Title => IsEditMode ? "CDM - Edit File Type" : "CDM - Add New File Type";
-
-    private bool _isEditMode;
 
     public bool IsEditMode
     {
@@ -32,15 +43,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         }
     }
 
-    private bool _categoryComboBoxIsEnabled;
-
     public bool CategoryComboBoxIsEnabled
     {
         get => _categoryComboBoxIsEnabled;
         set => this.RaiseAndSetIfChanged(ref _categoryComboBoxIsEnabled, value);
     }
-
-    private int? _categoryFileExtensionId;
 
     public int? CategoryFileExtensionId
     {
@@ -52,15 +59,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         }
     }
 
-    private string? _extension;
-
     public string? Extension
     {
         get => _extension;
         set => this.RaiseAndSetIfChanged(ref _extension, value);
     }
-
-    private string? _alias;
 
     public string? Alias
     {
@@ -68,15 +71,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _alias, value);
     }
 
-    private ObservableCollection<CategoryViewModel> _categories = [];
-
     public ObservableCollection<CategoryViewModel> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
-
-    private CategoryViewModel? _selectedCategory;
 
     public CategoryViewModel? SelectedCategory
     {
@@ -88,9 +87,9 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
     #region Commands
 
-    public ICommand? SaveCommand { get; set; }
+    public ICommand SaveCommand { get; set; }
 
-    public ICommand? CloseCommand { get; set; }
+    public ICommand CloseCommand { get; set; }
 
     #endregion
 
@@ -98,13 +97,12 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
     {
         LoadCategoriesAsync().GetAwaiter();
 
-        SaveCommand = ReactiveCommand.Create<Window?>(Save);
-        CloseCommand = ReactiveCommand.Create<Window?>(Close);
+        SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
+        CloseCommand = ReactiveCommand.CreateFromTask<Window?>(CloseAsync);
     }
 
-    private async void Save(Window? owner)
+    private async Task SaveAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -162,53 +160,50 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to save the file type.");
         }
     }
 
-    private void Close(Window? owner)
+    private async Task CloseAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
-            if (owner == null)
-                return;
-
-            owner.Close();
+            owner?.Close();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "And error occured while trying to close the window.");
         }
     }
 
     private async Task LoadCategoriesAsync()
     {
-        // TODO: Show message box
         try
         {
             var categories = await AppService
                 .UnitOfWork
                 .CategoryRepository
                 .GetAllAsync();
-            
-            var categoryViewModels = AppService
-                .Mapper
-                .Map<List<CategoryViewModel>>(categories);
-            
-            Categories = categoryViewModels.ToObservableCollection();
+
+            var categoryViewModels = AppService.Mapper.Map<List<CategoryViewModel>>(categories);
+            Categories = categoryViewModels
+                .Where(c => c.Title?.Equals(Constants.GeneralCategoryTitle) != true)
+                .ToObservableCollection();
+
             if (!IsEditMode)
                 SelectedCategory = Categories.FirstOrDefault();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to load categories.");
         }
     }
 
     private async Task LoadCategoryFileExtensionDataAsync()
     {
-        // TODO: Show message box
         try
         {
             var fileExtension = await AppService
@@ -225,7 +220,8 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            await ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to load category file extension data.");
         }
     }
 

@@ -25,7 +25,7 @@
         ClipToBounds="True"
         CanResize="False"
         WindowStartupLocation="Manual"
-        PointerPressed="WindowOnPointerPressed">
+        PointerPressed="ManagerWindowOnPointerPressed">
 
     <!-- Resources -->
     <Window.Resources>

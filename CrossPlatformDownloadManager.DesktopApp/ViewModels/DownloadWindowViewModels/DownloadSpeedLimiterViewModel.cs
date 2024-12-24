@@ -16,7 +16,7 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
     private readonly DispatcherTimer _speedLimitValueChangedTimer;
 
     private bool _isSpeedLimiterEnabled;
-    private double? _speedLimit = 0;
+    private double? _speedLimit;
     private ObservableCollection<string> _speedUnits = [];
     private string? _selectedSpeedUnit;
 
@@ -30,6 +30,9 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _isSpeedLimiterEnabled, value);
+            if (!value)
+                SpeedLimit = null;
+            
             RaiseSpeedLimiterChanged();
         }
     }

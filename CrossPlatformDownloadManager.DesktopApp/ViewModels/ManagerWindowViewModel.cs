@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -32,6 +33,7 @@ public class ManagerWindowViewModel : ViewModelBase
 
     public bool IsMenuVisible { get; set; }
     public PointViewModel? ManagerPoint => AppService.SettingsService.Settings.ManagerPoint;
+    public bool AlwaysKeepManagerOnTop => AppService.SettingsService.Settings.AlwaysKeepManagerOnTop;
 
     #endregion
 
@@ -50,6 +52,8 @@ public class ManagerWindowViewModel : ViewModelBase
         _updateDownloadSpeedTimer.Start();
 
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
+
+        AppService.SettingsService.Settings.PropertyChanged += SettingsOnPropertyChanged;
     }
 
     public void ShowMenu(Window? owner)
@@ -74,9 +78,9 @@ public class ManagerWindowViewModel : ViewModelBase
         var currentPoint = AppService.SettingsService.Settings.ManagerPoint;
         if (currentPoint != null && (int)currentPoint.X == x && (int)currentPoint.Y == y)
             return;
-        
+
         AppService.SettingsService.Settings.ManagerPoint = new PointViewModel { X = x, Y = y };
-        
+
         await AppService
             .SettingsService
             .SaveSettingsAsync(AppService.SettingsService.Settings);
@@ -108,6 +112,12 @@ public class ManagerWindowViewModel : ViewModelBase
         DownloadSpeed = AppService
             .DownloadFileService
             .GetDownloadSpeed();
+    }
+
+    private void SettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName?.Equals(nameof(AppService.SettingsService.Settings.AlwaysKeepManagerOnTop)) == true)
+            this.RaisePropertyChanged(nameof(AlwaysKeepManagerOnTop));
     }
 
     #endregion

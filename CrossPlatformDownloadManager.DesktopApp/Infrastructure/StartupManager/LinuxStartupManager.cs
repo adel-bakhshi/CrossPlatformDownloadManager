@@ -7,8 +7,12 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.StartupManager;
 [SupportedOSPlatform("linux")]
 public class LinuxStartupManager : IStartupManager
 {
+    #region Private Fields
+
     private readonly string _appName;
     private readonly string _appExec;
+
+    #endregion
 
     public LinuxStartupManager(string appName, string appExec)
     {

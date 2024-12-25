@@ -1,0 +1,127 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CrossPlatformDownloadManager.DesktopApp.CustomControls">
+    <Design.PreviewWith>
+        <controls:CustomRadioContentButton />
+    </Design.PreviewWith>
+
+    <!-- Other ellipse styles -->
+    <Style Selector="Ellipse.outerEllipse">
+        <Setter Property="HorizontalAlignment"
+                Value="Center" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+        <Setter Property="Width"
+                Value="16" />
+        <Setter Property="Height"
+                Value="16" />
+        <Setter Property="Stroke"
+                Value="{DynamicResource TertiaryColor}" />
+        <Setter Property="StrokeThickness"
+                Value="1" />
+
+        <!-- Transitions -->
+        <Setter Property="Transitions">
+            <Setter.Value>
+                <Transitions>
+                    <BrushTransition Property="Stroke"
+                                     Duration="00:00:00.1" />
+                </Transitions>
+            </Setter.Value>
+        </Setter>
+
+        <Style Selector="^.isChecked">
+            <Setter Property="Stroke"
+                    Value="{DynamicResource ProgressBarGradientBrush}" />
+        </Style>
+    </Style>
+
+    <!-- Inner ellipse styles -->
+    <Style Selector="Ellipse.innerEllipse">
+        <Setter Property="HorizontalAlignment"
+                Value="Center" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+        <Setter Property="Width"
+                Value="8" />
+        <Setter Property="Height"
+                Value="8" />
+        <Setter Property="Fill"
+                Value="{DynamicResource ProgressBarGradientBrush}" />
+        <Setter Property="Opacity"
+                Value="0" />
+
+        <!-- Transitions -->
+        <Setter Property="Transitions">
+            <Setter.Value>
+                <Transitions>
+                    <DoubleTransition Property="Opacity"
+                                      Duration="00:00:00.1" />
+                </Transitions>
+            </Setter.Value>
+        </Setter>
+
+        <Style Selector="^.isChecked">
+            <Setter Property="Opacity"
+                    Value="1" />
+        </Style>
+    </Style>
+
+    <!-- Radio button styles -->
+    <Style Selector="controls|CustomRadioContentButton">
+        <Setter Property="Padding"
+                Value="15" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="ClipToBounds"
+                Value="True" />
+        <Setter Property="Background"
+                Value="{DynamicResource SecondaryColor}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TextColor}" />
+
+        <!-- Template -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        ClipToBounds="{TemplateBinding ClipToBounds}">
+                    <Grid ColumnDefinitions="Auto, *"
+                          Margin="{TemplateBinding Padding}">
+                        <!-- Ellipses -->
+                        <Panel Grid.Column="0"
+                               VerticalAlignment="Top"
+                               Margin="0, 0, 10, 0">
+                            <!-- Outer ellipse -->
+                            <Ellipse Classes="outerEllipse"
+                                     Classes.isChecked="{TemplateBinding IsChecked}" />
+
+                            <!-- Inner ellipse -->
+                            <Ellipse Classes="innerEllipse"
+                                     Classes.isChecked="{TemplateBinding IsChecked}" />
+                        </Panel>
+
+                        <!-- Content -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Vertical"
+                                    Spacing="15">
+                            <!-- Title -->
+                            <TextBlock Text="{TemplateBinding Title}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       FontFamily="{TemplateBinding FontFamily}" />
+
+                            <!-- Info content -->
+                            <ContentPresenter Content="{TemplateBinding InfoContent}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

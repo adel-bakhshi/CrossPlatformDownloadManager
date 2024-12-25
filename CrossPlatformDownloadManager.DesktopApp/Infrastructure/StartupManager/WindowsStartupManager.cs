@@ -1,4 +1,3 @@
-using IWshRuntimeLibrary;
 using Microsoft.Win32;
 using System;
 using System.IO;
@@ -9,8 +8,12 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.StartupManager;
 [SupportedOSPlatform("windows")]
 public class WindowsStartupManager : IStartupManager
 {
+    #region Private Fields
+
     private readonly string _appName;
     private readonly bool _forAllUsers;
+
+    #endregion
 
     public WindowsStartupManager(string appName, bool forAllUsers)
     {
@@ -40,26 +43,10 @@ public class WindowsStartupManager : IStartupManager
         }
 
         var executablePath = Path.Combine(Environment.CurrentDirectory, $"{_appName}.exe");
-        if (!System.IO.File.Exists(executablePath))
+        if (!File.Exists(executablePath))
             throw new FileNotFoundException("The executable file was not found.");
 
         key.SetValue(_appName, executablePath);
-
-        if (_forAllUsers)
-            return;
-
-        // Create a shortcut only for the current user
-        var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        var shortcutPath = Path.Combine(startupFolderPath, $"{_appName}.lnk");
-        if (System.IO.File.Exists(shortcutPath))
-            return;
-
-        WshShell shell = new();
-        var shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
-        shortcut.TargetPath = executablePath;
-        shortcut.WorkingDirectory = Environment.CurrentDirectory;
-        shortcut.Description = $"{_appName}";
-        shortcut.Save();
     }
 
     public void Delete()
@@ -69,14 +56,5 @@ public class WindowsStartupManager : IStartupManager
             : Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
 
         key?.DeleteValue(_appName, false);
-
-        if (_forAllUsers)
-            return;
-
-        // Remove the shortcut only from the current user's startup folder
-        var startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        var shortcutPath = Path.Combine(startupFolderPath, $"{_appName}.lnk");
-        if (System.IO.File.Exists(shortcutPath))
-            System.IO.File.Delete(shortcutPath);
     }
 }

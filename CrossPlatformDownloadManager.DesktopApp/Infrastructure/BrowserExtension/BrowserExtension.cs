@@ -74,28 +74,49 @@ public class BrowserExtension : IBrowserExtension
 
     private async Task ProcessRequestAsync(HttpListenerContext context)
     {
+        // Initialize variables
         var request = context.Request;
+        var response = context.Response;
+        string? json;
+        byte[] buffer;
+        var result = new ResponseViewModel();
+
+        // Check if browser extension is enabled
+        var useBrowserExtension = _appService.SettingsService.Settings.UseBrowserExtension;
+        if (!useBrowserExtension)
+        {
+            result.IsSuccessful = false;
+            result.Message = "Browser extension is disabled. Please enable it and try again.";
+
+            json = result.ConvertToJson();
+            buffer = Encoding.UTF8.GetBytes(json!);
+            response.ContentLength64 = buffer.Length;
+
+            await response.OutputStream.WriteAsync(buffer);
+            response.OutputStream.Close();
+
+            return;
+        }
 
         // Make sure this is a POST request
         if (!request.HttpMethod.Equals("POST"))
             return;
 
         using var reader = new StreamReader(request.InputStream);
-        var json = await reader.ReadToEndAsync();
+        json = await reader.ReadToEndAsync();
 
         var requestViewModel = json.ConvertFromJson<RequestViewModel>();
         if (requestViewModel == null)
             return;
 
-        var responseViewModel = new ResponseViewModel();
         switch (request.Url?.OriginalString.ToLower())
         {
             case Constants.CheckFileTypeSupportUrl:
             {
                 if (requestViewModel.Url.IsNullOrEmpty())
                 {
-                    responseViewModel.IsSuccessful = false;
-                    responseViewModel.Message = "Url is empty.";
+                    result.IsSuccessful = false;
+                    result.Message = "Url is empty.";
                 }
                 else
                 {
@@ -103,8 +124,8 @@ public class BrowserExtension : IBrowserExtension
                     var fileExtension = Path.GetExtension(fileName);
                     if (fileExtension.IsNullOrEmpty())
                     {
-                        responseViewModel.IsSuccessful = false;
-                        responseViewModel.Message = "Can't get file extension.";
+                        result.IsSuccessful = false;
+                        result.Message = "Can't get file extension.";
                         break;
                     }
 
@@ -113,13 +134,11 @@ public class BrowserExtension : IBrowserExtension
                         .CategoryFileExtensionRepository
                         .GetAllAsync(select: fe => fe.Extension, distinct: true);
 
-                    var result = !fileExtension.IsNullOrEmpty() && fileExtensions.Contains(fileExtension!);
-                    responseViewModel.IsSuccessful = result;
-                    responseViewModel.Message = result
-                        ? $"CDM supports {fileExtension} file types."
-                        : $"CDM doesn't support {fileExtension} file types.";
+                    var isExtensionExists = !fileExtension.IsNullOrEmpty() && fileExtensions.Contains(fileExtension!);
+                    result.IsSuccessful = isExtensionExists;
+                    result.Message = isExtensionExists ? $"CDM supports {fileExtension} file types." : $"CDM doesn't support {fileExtension} file types.";
 
-                    var supportMessage = result ? "supporting" : "not supporting";
+                    var supportMessage = isExtensionExists ? "supporting" : "not supporting";
                     var message = $"CDM is {supportMessage} '{fileExtension}' file types.";
                     Log.Information(message);
                 }
@@ -132,25 +151,58 @@ public class BrowserExtension : IBrowserExtension
                 var urlIsValid = requestViewModel.Url.CheckUrlValidation();
                 if (!urlIsValid)
                 {
-                    responseViewModel.IsSuccessful = false;
-                    responseViewModel.Message = "CDM can't accept this URL.";
+                    result.IsSuccessful = false;
+                    result.Message = "CDM can't accept this URL.";
                     break;
                 }
 
-                var vm = new AddDownloadLinkWindowViewModel(_appService)
+                // Check for user option for showing start download dialog
+                var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
+                if (showStartDownloadDialog)
                 {
-                    IsLoadingUrl = true,
-                    DownloadFile =
+                    var vm = new AddDownloadLinkWindowViewModel(_appService)
                     {
-                        Url = requestViewModel.Url
+                        IsLoadingUrl = true,
+                        DownloadFile =
+                        {
+                            Url = requestViewModel.Url
+                        }
+                    };
+
+                    var window = new AddDownloadLinkWindow { DataContext = vm };
+                    window.Show();
+                }
+                else
+                {
+                    var details = await _appService.DownloadFileService.GetUrlDetailsAsync(requestViewModel.Url!);
+                    if (!details.IsSuccess)
+                    {
+                        switch (details.Result)
+                        {
+                            case { IsFile: false }:
+                            {
+                                const string message = "The link you selected does not return a downloadable file. This could be due to an incorrect link, restricted access, " +
+                                                       "or unsupported content.";
+
+                                result.IsSuccessful = false;
+                                result.Message = message;
+                                
+                                Log.Information(message);
+                                break;
+                            }
+                        }
+                        
+                        break;
                     }
-                };
 
-                var window = new AddDownloadLinkWindow { DataContext = vm };
-                window.Show();
+                    if (details.Result!.IsUrlDuplicate)
+                    {
+                        
+                    }
+                }
 
-                responseViewModel.IsSuccessful = true;
-                responseViewModel.Message = "Link added to CDM.";
+                result.IsSuccessful = true;
+                result.Message = "Link added to CDM.";
 
                 Log.Information($"Captured URL: {requestViewModel.Url}");
                 break;
@@ -158,17 +210,16 @@ public class BrowserExtension : IBrowserExtension
 
             default:
             {
-                responseViewModel.IsSuccessful = false;
-                responseViewModel.Message = "Your request url is not supported.";
+                result.IsSuccessful = false;
+                result.Message = "Your request url is not supported.";
                 break;
             }
         }
 
-        json = responseViewModel.ConvertToJson();
+        json = result.ConvertToJson();
 
         // Send a response back to the browser extension if needed
-        var response = context.Response;
-        var buffer = Encoding.UTF8.GetBytes(json!);
+        buffer = Encoding.UTF8.GetBytes(json!);
         response.ContentLength64 = buffer.Length;
 
         await response.OutputStream.WriteAsync(buffer);

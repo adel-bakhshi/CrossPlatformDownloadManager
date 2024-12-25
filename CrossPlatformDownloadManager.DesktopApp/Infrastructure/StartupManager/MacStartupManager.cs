@@ -7,8 +7,12 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.StartupManager;
 [SupportedOSPlatform("macos")]
 public class MacStartupManager : IStartupManager
 {
+    #region Private Fields
+
     private readonly string _appName;
     private readonly string _appPath;
+
+    #endregion
 
     public MacStartupManager(string appName, string appPath)
     {

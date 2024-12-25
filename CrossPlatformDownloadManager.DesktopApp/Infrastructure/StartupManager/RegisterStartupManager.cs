@@ -6,7 +6,11 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.StartupManager;
 
 public static class RegisterStartupManager
 {
+    #region Private Fields
+
     private const string AppName = "CrossPlatformDownloadManager.DesktopApp";
+
+    #endregion
 
     public static bool IsRegistered(bool forAllUsers = false)
     {

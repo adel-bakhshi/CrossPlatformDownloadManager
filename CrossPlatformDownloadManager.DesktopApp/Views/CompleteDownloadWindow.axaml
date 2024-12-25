@@ -1,0 +1,155 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.CompleteDownloadWindow"
+        x:DataType="vm:CompleteDownloadWindowViewModel"
+        Icon="/Assets/Images/cdm-logo.ico"
+        Title="CDM - Download Completed"
+        Width="640"
+        Height="320"
+        MinWidth="640"
+        MinHeight="320"
+        MaxWidth="640"
+        MaxHeight="320"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        CanResize="False">
+
+    <!-- Main content -->
+    <Grid Margin="20"
+          RowDefinitions="Auto, *, Auto">
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Download completed"
+                   FontWeight="Bold"
+                   Foreground="{DynamicResource SuccessGradientBrush}"
+                   Margin="0, 0, 0, 15" />
+
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden">
+            <StackPanel Orientation="Vertical"
+                        Spacing="10">
+                <!-- Details -->
+                <Border Padding="15"
+                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Background="{DynamicResource SecondaryColor}">
+                    <Grid RowDefinitions="Auto, Auto, Auto, Auto"
+                          ColumnDefinitions="Auto, *">
+                        <!-- File name -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="File name:"
+                                   Margin="0, 0, 0, 10" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="Cross platform Download Manager 1.0.2.exe"
+                                   Margin="15, 0, 0, 10"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <!-- File size -->
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="File size:"
+                                   Margin="0, 0, 0, 10" />
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="56.4 MB"
+                                   Margin="15, 0, 0, 10"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <!-- Save location -->
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Save location:"
+                                   Margin="0, 0, 0, 10" />
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Text="C:\Users\adelb\Downloads\CDM\Programs"
+                                   Margin="15, 0, 0, 10"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <!-- Address -->
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="0"
+                                   Text="Address:" />
+
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   Text="https://www.github.com/adel-bakhshi/releases/1.0.2/Cross platform Download Manager 1.0.2.exe"
+                                   ToolTip.Tip="https://www.github.com/adel-bakhshi/releases/1.0.2/Cross platform Download Manager 1.0.2.exe"
+                                   Margin="15, 0, 0, 0"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <!-- Don't show again -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryColor}">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   Text="Don’t show this dialog again"
+                                   FontWeight="Bold" />
+
+                        <ToggleSwitch Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40"
+                                      IsChecked="{Binding DontShowThisDialogAgain}" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*, Auto"
+              Margin="0, 20, 0, 0">
+            <!-- Open file and folder buttons -->
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+                <Button Classes="button success"
+                        Command="{Binding OpenFolderCommand}"
+                        Content="Open file" />
+
+                <Button Classes="button info"
+                        Command="{Binding OpenFileCommand}"
+                        Content="Open folder" />
+            </StackPanel>
+
+            <!-- Close button -->
+            <Button Grid.Column="1"
+                    Classes="button danger"
+                    Command="{Binding CloseCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Close"
+                    VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

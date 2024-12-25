@@ -12,7 +12,7 @@
         Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Tray Icon"
         ShowInTaskbar="False"
-        Topmost="True"
+        Topmost="{Binding AlwaysKeepManagerOnTop}"
         Width="200"
         Height="40"
         ExtendClientAreaChromeHints="NoChrome"

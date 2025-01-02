@@ -4,9 +4,10 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,11 +57,9 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             if (ViewModel != null)
-            {
-                await ViewModel.ShowErrorDialogAsync(ex);
                 ViewModel.SelectedFilesTotalSize = "0 KB";
-            }
 
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "Error while updating selected files total size");
         }
     }
@@ -80,9 +79,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "Error while trying to open manager window.");
         }
     }
@@ -99,9 +96,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured during opening context menu.");
         }
     }
@@ -133,9 +128,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured during closing window.");
         }
     }

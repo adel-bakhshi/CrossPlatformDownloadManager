@@ -1,4 +1,3 @@
-Download files with same name must handle
 Fix titles and text blocks. I mean change this "Start Download On Application Startup" to this "Start download on application startup"
 WindowNotificationManager
 NetCoreAudio
@@ -21,3 +20,4 @@ Add progress bar to windows toolbar for downloading files
 هر جا از Console.Write استفاده کردی باید به جاش از Log. حالا هر چی استفاده کنی
 Start on system startup حتما باید در لینوکس تست بشه
 هرجایی که از ShowErrorDialogAsync استفاده کردی باید بعدش یه Log.Error() هم بگذاری. نمیتونی داخل متد ShowErrorDialogAsync اینکار رو انجام بدی باید دستی انجامش بدی
+Import settings و export settings رو هم به منوی فایل اضافه کن

@@ -117,7 +117,7 @@
                                        FontFamily="{TemplateBinding FontFamily}" />
 
                             <!-- Info content -->
-                            <ContentPresenter Content="{TemplateBinding InfoContent}" />
+                            <ContentPresenter Content="{TemplateBinding Content}" />
                         </StackPanel>
                     </Grid>
                 </Border>

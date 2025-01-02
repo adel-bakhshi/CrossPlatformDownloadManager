@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
@@ -221,7 +223,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "And error occured while trying to save the category.");
         }
     }
@@ -271,7 +273,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "And error occured while trying to load the category.");
         }
     }

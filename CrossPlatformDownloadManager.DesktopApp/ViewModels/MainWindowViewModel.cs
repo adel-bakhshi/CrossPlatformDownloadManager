@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,9 +9,12 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -274,7 +276,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -289,24 +291,38 @@ public class MainWindowViewModel : ViewModelBase
             if (owner.Clipboard != null)
                 url = await owner.Clipboard.GetTextAsync();
 
+            url = url?.Replace('\\', '/').Trim();
             var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(AppService)
+            var showStartDownloadDialog = AppService.SettingsService.Settings.ShowStartDownloadDialog;
+            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
+            if (showStartDownloadDialog)
             {
-                IsLoadingUrl = urlIsValid,
-                DownloadFile =
+                var vm = new AddDownloadLinkWindowViewModel(AppService)
                 {
-                    Url = urlIsValid ? url : null
-                }
-            };
+                    IsLoadingUrl = urlIsValid,
+                    DownloadFile =
+                    {
+                        Url = urlIsValid ? url : null
+                    }
+                };
 
-            var window = new AddDownloadLinkWindow { DataContext = vm };
-            await window.ShowDialog(owner);
+                var window = new AddDownloadLinkWindow { DataContext = vm };
+                await window.ShowDialog(owner);
 
-            await LoadCategoriesAsync();
+                await LoadCategoriesAsync();
+            }
+            // Otherwise, add link to database and start it
+            else
+            {
+                if (!urlIsValid)
+                    return;
+
+                await AddNewDownloadFileAndStartItAsync(url!);
+            }
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -345,7 +361,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -371,7 +387,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -407,7 +423,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -435,7 +451,7 @@ public class MainWindowViewModel : ViewModelBase
             var deleteFile = false;
             if (isFileExists.Count > 0)
             {
-                var result = await ShowWarningDialogAsync("Delete files",
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
                     $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
                     DialogButtons.YesNo);
 
@@ -452,7 +468,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -469,7 +485,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -495,7 +511,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -510,7 +526,7 @@ public class MainWindowViewModel : ViewModelBase
             var tag = button?.Tag?.ToString();
             if (tag.IsNullOrEmpty() || !int.TryParse(tag, out var downloadQueueId))
             {
-                await ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
                 return;
             }
 
@@ -521,7 +537,7 @@ public class MainWindowViewModel : ViewModelBase
 
             if (downloadQueue == null)
             {
-                await ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
                 return;
             }
 
@@ -531,7 +547,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -548,18 +564,18 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async Task ExitProgramAsync()
+    private static async Task ExitProgramAsync()
     {
         try
         {
             if (App.Desktop == null)
                 return;
 
-            var result = await ShowWarningDialogAsync("Exit",
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Exit",
                 "Are you sure you want to exit the app?",
                 DialogButtons.YesNo);
 
@@ -570,7 +586,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -583,7 +599,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -603,22 +619,15 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
                 return;
             }
 
-            var process = new Process();
-            process.StartInfo = new ProcessStartInfo
-            {
-                FileName = filePath,
-                UseShellExecute = true,
-            };
-
-            process.Start();
+            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -631,35 +640,26 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            var folderPaths = dataGrid
+            var filePathList = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && Directory.Exists(df.SaveLocation!))
-                .Select(df => df.SaveLocation!)
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
                 .Distinct()
                 .ToList();
 
-            if (folderPaths.Count == 0)
+            if (filePathList.Count == 0)
             {
-                await ShowInfoDialogAsync("Open folder", "Folder not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder", "No folders found", DialogButtons.Ok);
                 return;
             }
 
-            foreach (var folderPath in folderPaths)
-            {
-                var process = new Process();
-                process.StartInfo = new ProcessStartInfo
-                {
-                    FileName = folderPath,
-                    UseShellExecute = true
-                };
-
-                process.Start();
-            }
+            filePathList.ForEach(PlatformSpecificManager.OpenContainingFolderAndSelectFile);
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -679,7 +679,7 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await ShowInfoDialogAsync("Rename", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Rename", "File not found", DialogButtons.Ok);
                 return;
             }
 
@@ -689,7 +689,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -710,21 +710,21 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await ShowInfoDialogAsync("Change folder", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File not found", DialogButtons.Ok);
                 return;
             }
 
             var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
             if (newSaveLocation.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Change folder", "Folder not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found", DialogButtons.Ok);
                 return;
             }
 
             var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
             if (File.Exists(newFilePath))
             {
-                await ShowInfoDialogAsync("Change folder", "File already exists", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File already exists", DialogButtons.Ok);
                 return;
             }
 
@@ -738,7 +738,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -773,7 +773,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -788,7 +788,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -818,7 +818,7 @@ public class MainWindowViewModel : ViewModelBase
 
             if (cantResumeDownloadFiles.Count > 0 || undefinedResumeDownloadFiles.Count > 0)
             {
-                var result = await ShowInfoDialogAsync("Stop download",
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Stop download",
                     "Some files cannot continue downloading, or their status is uncertain. Do you still want to stop them?",
                     DialogButtons.YesNo);
 
@@ -837,7 +837,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -860,7 +860,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -965,7 +965,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1012,7 +1012,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1039,7 +1039,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1166,38 +1166,12 @@ public class MainWindowViewModel : ViewModelBase
 
     protected override void OnDownloadFileServiceDataChanged()
     {
-        FilterDownloadList();
-    }
-
-    protected override async void OnDownloadFileServiceErrorOccured(DownloadFileErrorEventArgs e)
-    {
-        try
-        {
-            base.OnDownloadFileServiceErrorOccured(e);
-
-            var downloadFile = AppService
-                .DownloadFileService
-                .DownloadFiles
-                .FirstOrDefault(df => df.Id == e.Id);
-
-            if (downloadFile == null)
-                return;
-
-            var errorMessage = $"An error occurred while attempting to download the file '{downloadFile.FileName}'. " + Environment.NewLine +
-                               "Please try again. " + Environment.NewLine +
-                               "If the problem continues, please reach out to support for assistance.";
-
-            await ShowDangerDialogAsync("Error", errorMessage, DialogButtons.Ok, useMainWindowAsOwner: true);
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorDialogAsync(ex);
-        }
+        Dispatcher.UIThread.InvokeAsync(FilterDownloadList);
     }
 
     protected override void OnDownloadQueueServiceDataChanged()
     {
-        LoadDownloadQueues();
+        Dispatcher.UIThread.InvokeAsync(LoadDownloadQueues);
     }
 
     private string GetToolTipText()
@@ -1260,7 +1234,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1274,7 +1248,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1313,7 +1287,7 @@ public class MainWindowViewModel : ViewModelBase
             var deleteFile = false;
             if (isFileExists.Count > 0)
             {
-                var result = await ShowWarningDialogAsync("Delete files",
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
                     $"Do you want to delete file{(isFileExists.Count == 1 ? "" : "s")}?",
                     DialogButtons.YesNo);
 
@@ -1347,7 +1321,56 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private async Task AddNewDownloadFileAndStartItAsync(string url)
+    {
+        // Get url details
+        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(url);
+        // Validate url details
+        var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
+        if (!validateResult.IsValid)
+        {
+            if (validateResult.Title.IsNullOrEmpty() || validateResult.Message.IsNullOrEmpty())
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Error downloading file",
+                    "An error occurred while downloading the file.",
+                    DialogButtons.Ok);
+            }
+            else
+            {
+                await DialogBoxManager.ShowDangerDialogAsync(validateResult.Title!, validateResult.Message!, DialogButtons.Ok);
+            }
+
+            return;
+        }
+
+        DuplicateDownloadLinkAction? duplicateAction = null;
+        if (urlDetails.IsDuplicate)
+        {
+            var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
+            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
+            {
+                duplicateAction = await AppService
+                    .DownloadFileService
+                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
+            }
+            else
+            {
+                duplicateAction = savedDuplicateAction;
+            }
+        }
+
+        var downloadFile = new DownloadFileViewModel
+        {
+            Url = urlDetails.Url,
+            FileName = urlDetails.FileName,
+            CategoryId = urlDetails.Category?.Id,
+            Size = urlDetails.FileSize
+        };
+
+        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile, urlDetails.IsDuplicate, duplicateAction, startDownloading: true);
     }
 }

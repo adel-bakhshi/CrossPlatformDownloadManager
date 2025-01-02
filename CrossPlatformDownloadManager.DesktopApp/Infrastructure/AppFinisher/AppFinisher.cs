@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 

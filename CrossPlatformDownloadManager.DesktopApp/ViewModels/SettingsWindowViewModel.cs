@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.StartupManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
-using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -140,7 +142,7 @@ public class SettingsWindowViewModel : ViewModelBase
             // Validate settings before save
             if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
+                await DialogBoxManager.ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
                     "No action has been specified for handling duplicate links. Please define how duplicate links should be managed when added.",
                     DialogButtons.Ok);
 
@@ -149,7 +151,7 @@ public class SettingsWindowViewModel : ViewModelBase
 
             if (DownloadsViewModel.SelectedMaximumConnectionsCount == 0)
             {
-                await ShowInfoDialogAsync("Invalid or Unspecified File Divisions",
+                await DialogBoxManager.ShowInfoDialogAsync("Invalid or Unspecified File Divisions",
                     "The number of file divisions for the download is either unspecified or invalid. Please choose a valid option and try saving again.",
                     DialogButtons.Ok);
 
@@ -158,7 +160,7 @@ public class SettingsWindowViewModel : ViewModelBase
 
             if (DownloadsViewModel.SelectedSpeedUnit.IsNullOrEmpty())
             {
-                var result = await ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
                     "You haven’t specified the unit for the speed limiter. Would you like to use KB as the default unit?",
                     DialogButtons.YesNo);
 
@@ -177,13 +179,13 @@ public class SettingsWindowViewModel : ViewModelBase
             // Register app for startup
             if (GeneralsViewModel.StartOnSystemStartup)
             {
-                var isRegistered = RegisterStartupManager.IsRegistered();
+                var isRegistered = PlatformSpecificManager.IsStartupRegistered();
                 if (!isRegistered)
-                    RegisterStartupManager.Register();
+                    PlatformSpecificManager.RegisterStartup();
             }
             else
             {
-                RegisterStartupManager.Delete();
+                PlatformSpecificManager.DeleteStartup();
             }
 
             // Save categories settings
@@ -282,11 +284,11 @@ public class SettingsWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async Task CancelAsync(Window? owner)
+    private static async Task CancelAsync(Window? owner)
     {
         try
         {
@@ -294,7 +296,7 @@ public class SettingsWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

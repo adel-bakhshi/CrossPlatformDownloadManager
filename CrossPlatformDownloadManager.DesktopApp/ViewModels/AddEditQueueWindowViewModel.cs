@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -121,7 +124,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             if (DownloadQueue.IsRunning)
             {
-                var result = await ShowWarningDialogAsync("Warning", "Queue is running. Do you want to stop it?", DialogButtons.YesNo);
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Warning", "Queue is running. Do you want to stop it?", DialogButtons.YesNo);
                 if (result != DialogResult.Yes)
                     return;
 
@@ -132,13 +135,13 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             if (DownloadQueue.Title.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Attention", "Please enter a title.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter a title.", DialogButtons.Ok);
                 return;
             }
 
             if (DownloadQueue is { RetryOnDownloadingFailed: true, RetryCount: < 1 })
             {
-                var result = await ShowInfoDialogAsync("Attention", "Retry count must be greater than 0. Do you want to set it to 1?", DialogButtons.YesNo);
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Attention", "Retry count must be greater than 0. Do you want to set it to 1?", DialogButtons.YesNo);
                 if (result != DialogResult.Yes)
                     return;
 
@@ -147,7 +150,8 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             if (DownloadQueue.DownloadCountAtSameTime == 0)
             {
-                var result = await ShowInfoDialogAsync("Attention", "Download count at same time must be greater than 0. Do you want to set it to 1?", DialogButtons.YesNo);
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Attention", "Download count at same time must be greater than 0. Do you want to set it to 1?",
+                    DialogButtons.YesNo);
                 if (result != DialogResult.Yes)
                     return;
 
@@ -165,13 +169,13 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     {
                         if (DownloadQueue.JustForDate == null)
                         {
-                            await ShowInfoDialogAsync("Start date", "When you choose 'Once', please select a date.", DialogButtons.Ok);
+                            await DialogBoxManager.ShowInfoDialogAsync("Start date", "When you choose 'Once', please select a date.", DialogButtons.Ok);
                             return;
                         }
 
                         if (DownloadQueue.JustForDate.Value.Date < DateTime.Now.Date)
                         {
-                            await ShowInfoDialogAsync("Start date", "You can't select a date in the past.", DialogButtons.Ok);
+                            await DialogBoxManager.ShowInfoDialogAsync("Start date", "You can't select a date in the past.", DialogButtons.Ok);
                             return;
                         }
 
@@ -180,20 +184,20 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
                     case { IsDaily: true, DaysOfWeekViewModel: not { IsAnyDaySelected: true } }:
                     {
-                        await ShowInfoDialogAsync("Attention", "When you choose 'Daily', please select at least one day.", DialogButtons.Ok);
+                        await DialogBoxManager.ShowInfoDialogAsync("Attention", "When you choose 'Daily', please select at least one day.", DialogButtons.Ok);
                         return;
                     }
                 }
-                
+
                 if (DownloadQueue.StartDownloadHour == null || DownloadQueue.StartDownloadMinute == null)
                 {
-                    await ShowInfoDialogAsync("Attention", "Please select a start time for your queue.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a start time for your queue.", DialogButtons.Ok);
                     return;
                 }
 
                 if (DownloadQueue.SelectedStartTimeOfDay.IsNullOrEmpty())
                 {
-                    await ShowInfoDialogAsync("Attention", "Please select a start time of day for your queue.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a start time of day for your queue.", DialogButtons.Ok);
                     return;
                 }
 
@@ -207,13 +211,13 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             {
                 if (DownloadQueue.StopDownloadHour == null || DownloadQueue.StopDownloadMinute == null)
                 {
-                    await ShowInfoDialogAsync("Attention", "Please select a stop time for your queue.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a stop time for your queue.", DialogButtons.Ok);
                     return;
                 }
 
                 if (DownloadQueue.SelectedStopTimeOfDay.IsNullOrEmpty())
                 {
-                    await ShowInfoDialogAsync("Attention", "Please select a stop time of day for your queue.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a stop time of day for your queue.", DialogButtons.Ok);
                     return;
                 }
 
@@ -228,7 +232,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             {
                 if (DownloadQueue.SelectedTurnOffComputerMode.IsNullOrEmpty())
                 {
-                    await ShowInfoDialogAsync("Attention", "Please select a turn off computer mode for your queue.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a turn off computer mode for your queue.", DialogButtons.Ok);
                     return;
                 }
 
@@ -262,11 +266,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 .UnitOfWork
                 .DownloadQueueRepository
                 .GetAllAsync(where: dq => dq.IsDefault);
-            
+
             // Set all default download queues to not default
             foreach (var defaultDownloadQueue in defaultDownloadQueues)
                 defaultDownloadQueue.IsDefault = false;
-            
+
             // Update default download queues
             await AppService
                 .DownloadQueueService
@@ -334,7 +338,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -356,7 +360,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             if (downloadQueue == null)
                 return;
 
-            var result = await ShowWarningDialogAsync("Delete queue",
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete queue",
                 $"You are about to remove '{downloadQueue.Title}'. Do you want to confirm this action?",
                 DialogButtons.YesNo);
 
@@ -369,7 +373,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     .DownloadQueueService
                     .StopDownloadQueueAsync(downloadQueue);
             }
-            
+
             await AppService
                 .DownloadQueueService
                 .DeleteDownloadQueueAsync(downloadQueue);
@@ -378,11 +382,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async Task CancelAsync(Window? owner)
+    private static async Task CancelAsync(Window? owner)
     {
         try
         {
@@ -393,7 +397,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

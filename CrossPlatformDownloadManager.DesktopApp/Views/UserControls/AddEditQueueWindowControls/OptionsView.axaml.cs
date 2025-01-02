@@ -4,7 +4,9 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls;
 
@@ -12,7 +14,7 @@ public partial class OptionsView : MyUserControlBase<OptionsViewModel>
 {
     #region Private Fields
 
-    private bool _changingDaysOfWeek = false;
+    private bool _changingDaysOfWeek;
 
     #endregion
 
@@ -63,13 +65,8 @@ public partial class OptionsView : MyUserControlBase<OptionsViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel == null)
-            {
-                Console.WriteLine(ex);
-                return;
-            }
-
-            await ViewModel.ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured while trying to change days of week.");
         }
     }
 
@@ -117,13 +114,13 @@ public partial class OptionsView : MyUserControlBase<OptionsViewModel>
 
         if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Friday)
             daysOfWeek.Add("Friday");
-        
+
         // Set selected days of week
         _changingDaysOfWeek = true;
         DaysOfWeekSelectBox.SelectedItems?.Clear();
         foreach (var day in daysOfWeek)
             DaysOfWeekSelectBox.SelectedItems?.Add(day);
-        
+
         _changingDaysOfWeek = false;
     }
 }

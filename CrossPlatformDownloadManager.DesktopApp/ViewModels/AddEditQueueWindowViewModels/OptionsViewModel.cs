@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using ReactiveUI;
 using Serilog;
 
@@ -120,7 +122,7 @@ public class OptionsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -132,7 +134,7 @@ public class OptionsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to change the default download queue.");
         }
     }

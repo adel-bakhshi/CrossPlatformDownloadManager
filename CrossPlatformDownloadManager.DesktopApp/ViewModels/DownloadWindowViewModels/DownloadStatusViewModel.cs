@@ -1,13 +1,15 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
-using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
@@ -71,7 +73,7 @@ public class DownloadStatusViewModel : ViewModelBase
         {
             if (DownloadFile?.SaveLocation.IsNullOrEmpty() != false)
             {
-                await ShowInfoDialogAsync("Open folder",
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder",
                     "The folder you are trying to access is not available. It may have been removed or relocated.",
                     DialogButtons.Ok);
 
@@ -80,27 +82,18 @@ public class DownloadStatusViewModel : ViewModelBase
 
             if (!Directory.Exists(DownloadFile.SaveLocation))
             {
-                await ShowInfoDialogAsync("Open folder",
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder",
                     "The folder you are trying to access is not available. It may have been removed or relocated.",
                     DialogButtons.Ok);
 
                 return;
             }
 
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = DownloadFile.SaveLocation,
-                    UseShellExecute = true
-                }
-            };
-
-            process.Start();
+            PlatformSpecificManager.OpenFolder(DownloadFile.SaveLocation);
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

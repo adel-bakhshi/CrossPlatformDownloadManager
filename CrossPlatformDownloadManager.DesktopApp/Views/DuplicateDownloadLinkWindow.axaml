@@ -39,68 +39,65 @@
                         Spacing="10">
                 <!-- Add duplicate with number -->
                 <cc:CustomRadioContentButton Title="Add the duplicate with a number after its file name"
-                                             GroupName="DuplicateDownloadLink">
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding DuplicateWithNumberedFile}">
                     <!-- Info content -->
-                    <cc:CustomRadioContentButton.InfoContent>
-                        <Grid RowDefinitions="Auto, Auto"
-                              ColumnDefinitions="Auto, *">
-                            <!-- Current file name -->
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="0"
-                                       Text="Current file name:"
-                                       Margin="0, 0, 0, 5"
-                                       VerticalAlignment="Top" />
+                    <Grid RowDefinitions="Auto, Auto"
+                          ColumnDefinitions="Auto, *">
+                        <!-- Current file name -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Current file name:"
+                                   Margin="0, 0, 0, 5"
+                                   VerticalAlignment="Top" />
 
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="1"
-                                       Margin="10, 0, 0, 5"
-                                       VerticalAlignment="Top"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource InfoGradientBrush}"
-                                       Text="Cross platform Download Manager 1.0.2.exe" />
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="10, 0, 0, 5"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource InfoGradientBrush}"
+                                   Text="{Binding FileName}" />
 
-                            <!-- New file name -->
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="0"
-                                       Text="New file name:"
-                                       VerticalAlignment="Top" />
+                        <!-- New file name -->
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="New file name:"
+                                   VerticalAlignment="Top" />
 
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1"
-                                       Margin="10, 0, 0, 0"
-                                       VerticalAlignment="Top"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource SuccessGradientBrush}"
-                                       Text="Cross platform Download Manager 1.0.2_2.exe" />
-                        </Grid>
-                    </cc:CustomRadioContentButton.InfoContent>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Margin="10, 0, 0, 0"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SuccessGradientBrush}"
+                                   Text="{Binding NewFileName}" />
+                    </Grid>
                 </cc:CustomRadioContentButton>
 
                 <!-- Add duplicate and overwrite -->
                 <cc:CustomRadioContentButton Title="Add the duplicate and overwrite existing file"
-                                             GroupName="DuplicateDownloadLink">
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding OverwriteExistingFile}">
                     <!-- Info content -->
-                    <cc:CustomRadioContentButton.InfoContent>
-                        <TextBlock TextWrapping="Wrap">
-                            <Run Text="Selecting this option will remove the existing" />
+                    <TextBlock TextWrapping="Wrap">
+                        <Run Text="Selecting this option will remove the existing" />
 
-                            <!-- File name -->
-                            <Run Text="Cross platform Download Manager 1.0.2.exe"
-                                 Foreground="{DynamicResource InfoGradientBrush}" />
+                        <!-- File name -->
+                        <Run Text="{Binding FileName}"
+                             Foreground="{DynamicResource InfoGradientBrush}" />
 
-                            <Run Text="file information from your system and replace it with updated details." />
-                        </TextBlock>
-                    </cc:CustomRadioContentButton.InfoContent>
+                        <Run Text="file information from your system and replace it with updated details." />
+                    </TextBlock>
                 </cc:CustomRadioContentButton>
 
                 <!-- Show download complete dialog when complete otherwise resume -->
                 <cc:CustomRadioContentButton Title="if download file complete, show download complete dialog. Otherwise, resume it"
-                                             GroupName="DuplicateDownloadLink">
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding ShowCompleteDialogOrResumeFile}">
                     <!-- Info content -->
-                    <cc:CustomRadioContentButton.InfoContent>
-                        <TextBlock TextWrapping="Wrap"
-                                   Text="By selecting this option, a download completion window will appear if your file has finished downloading. Otherwise, the download will resume." />
-                    </cc:CustomRadioContentButton.InfoContent>
+                    <TextBlock TextWrapping="Wrap"
+                               Text="By selecting this option, a download completion window will appear if your file has finished downloading. Otherwise, the download will resume." />
                 </cc:CustomRadioContentButton>
             </StackPanel>
         </ScrollViewer>

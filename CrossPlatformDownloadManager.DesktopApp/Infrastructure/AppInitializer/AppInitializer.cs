@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 

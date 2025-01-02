@@ -1,5 +1,6 @@
 using System;
-using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;

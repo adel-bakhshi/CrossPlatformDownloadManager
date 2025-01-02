@@ -5,8 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -17,6 +20,8 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class AddDownloadLinkWindowViewModel : ViewModelBase
 {
     #region Private Fields
+
+    private UrlDetailsResultViewModel? _urlDetails;
 
     private DownloadFileViewModel _downloadFile = new();
     private ObservableCollection<CategoryViewModel> _categories = [];
@@ -123,7 +128,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
-    private async Task CancelAsync(Window? owner)
+    private static async Task CancelAsync(Window? owner)
     {
         try
         {
@@ -134,7 +139,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -145,29 +150,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occured while trying to start download.");
 
-            var isValidResult = await AppService.DownloadFileService.ValidateDownloadFileAsync(DownloadFile);
-            if (!isValidResult.IsSuccess)
-            {
-                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
-                return;
-            }
-
-            var result = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile);
-            if (!result.IsSuccess)
-            {
-                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
-                return;
-            }
-
-            var downloadFile = result.Result;
+            var downloadFile = await AddDownloadFileAsync();
             if (downloadFile == null)
-            {
-                await ShowInfoDialogAsync("File not found",
-                    "Inserted file not found. Maybe it was deleted or not inserted correctly. Please try again or contact support team.",
-                    DialogButtons.Ok);
-
                 return;
-            }
 
             // Start download before DownloadWindow opened
             _ = AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
@@ -180,7 +165,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -201,7 +186,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -222,7 +207,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -233,19 +218,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occured while trying to add file to queue.");
 
-            var isValidResult = await AppService
-                .DownloadFileService
-                .ValidateDownloadFileAsync(DownloadFile);
-
-            if (!isValidResult.IsSuccess)
-            {
-                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
-                return;
-            }
-
             if (SelectedDownloadQueue == null)
             {
-                await ShowInfoDialogAsync("Queue not selected", "Please select a queue for your file.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Queue not selected", "Please select a queue for your file.", DialogButtons.Ok);
                 return;
             }
 
@@ -256,27 +231,21 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             if (downloadQueue == null)
             {
-                await ShowInfoDialogAsync("Queue not found",
+                await DialogBoxManager.ShowInfoDialogAsync("Queue not found",
                     "Queue not found. Maybe it was deleted or changed. Please try again or contact support team.",
                     DialogButtons.Ok);
 
                 return;
             }
 
-            var result = await AppService
-                .DownloadFileService
-                .AddDownloadFileAsync(DownloadFile);
-
-            if (!result.IsSuccess)
-            {
-                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
+            var downloadFile = await AddDownloadFileAsync();
+            if (downloadFile == null)
                 return;
-            }
 
             // Add download file to selected download queue
             await AppService
                 .DownloadQueueService
-                .AddDownloadFileToDownloadQueueAsync(downloadQueue, result.Result);
+                .AddDownloadFileToDownloadQueueAsync(downloadQueue, downloadFile);
 
             if (RememberMyChoice)
             {
@@ -300,7 +269,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -309,17 +278,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                return;
-
-            var isValidResult = await AppService
-                .DownloadFileService
-                .ValidateDownloadFileAsync(DownloadFile);
-
-            if (!isValidResult.IsSuccess)
-            {
-                await ShowInfoDialogAsync(isValidResult.Header!, isValidResult.Message!, DialogButtons.Ok);
-                return;
-            }
+                throw new InvalidOperationException("An error occured while trying to add file to default queue.");
 
             var defaultDownloadQueue = AppService
                 .DownloadQueueService
@@ -330,26 +289,60 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (!DefaultDownloadQueueIsExist)
                 return;
 
-            var result = await AppService
-                .DownloadFileService
-                .AddDownloadFileAsync(DownloadFile);
-
-            if (!result.IsSuccess)
-            {
-                await ShowDangerDialogAsync("Add file", "An error occured while trying to add file.", DialogButtons.Ok);
+            var downloadFile = await AddDownloadFileAsync();
+            if (downloadFile == null)
                 return;
-            }
 
             await AppService
                 .DownloadQueueService
-                .AddDownloadFileToDownloadQueueAsync(defaultDownloadQueue, DownloadFile);
+                .AddDownloadFileToDownloadQueueAsync(defaultDownloadQueue, downloadFile);
 
             owner.Close(true);
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private async Task<DownloadFileViewModel?> AddDownloadFileAsync()
+    {
+        if (_urlDetails == null || !_urlDetails.Url.Equals(DownloadFile.Url))
+            return null;
+
+        var validateUrlDetailsResult = AppService.DownloadFileService.ValidateUrlDetails(_urlDetails);
+        if (!validateUrlDetailsResult.IsValid)
+            return null;
+
+        var validateDownloadFile = await AppService.DownloadFileService.ValidateDownloadFileAsync(DownloadFile);
+        if (!validateDownloadFile)
+            return null;
+
+        DuplicateDownloadLinkAction? duplicateAction = null;
+        if (_urlDetails.IsDuplicate)
+        {
+            var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
+            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
+            {
+                duplicateAction = await AppService
+                    .DownloadFileService
+                    .GetUserDuplicateActionAsync(_urlDetails.Url, _urlDetails.FileName, _urlDetails.Category!.CategorySaveDirectory!);
+            }
+            else
+            {
+                duplicateAction = savedDuplicateAction;
+            }
+        }
+
+        var downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile, _urlDetails.IsDuplicate, duplicateAction);
+        if (downloadFile != null)
+            return downloadFile;
+
+        await DialogBoxManager.ShowInfoDialogAsync("File not found",
+            "An error occured while trying to add file. Please try again or contact support.",
+            DialogButtons.Ok);
+
+        return null;
     }
 
     private void LoadDownloadQueues()
@@ -383,7 +376,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -392,39 +385,20 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             IsLoadingUrl = true;
-            var result = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url);
-            if (!result.IsSuccess)
-            {
-                switch (result.Result)
-                {
-                    case { IsFile: false }:
-                    {
-                        await ShowInfoDialogAsync("File not found", 
-                            "The link you entered does not return a downloadable file. This could be due to an incorrect link, restricted access, or unsupported content.",
-                            DialogButtons.Ok);
-                        
-                        break;
-                    }
-                }
 
-                return;
-            }
+            // Get url details
+            _urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url);
 
-            if (result.Result!.IsUrlDuplicate)
-            {
-                // TODO: Based on user settings handle duplicate urls
-            }
+            DownloadFile.Url = _urlDetails.Url;
+            DownloadFile.FileName = _urlDetails.FileName;
+            DownloadFile.Size = _urlDetails.FileSize;
+            DownloadFile.CategoryId = _urlDetails.Category?.Id;
 
-            DownloadFile.Url = result.Result.Url;
-            DownloadFile.FileName = result.Result.FileName;
-            DownloadFile.Size = result.Result.FileSize;
-            DownloadFile.CategoryId = result.Result.Category?.Id;
-
-            SelectedCategory = Categories.FirstOrDefault(c => c.Id == result.Result.Category?.Id);
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == _urlDetails.Category?.Id);
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
         finally
         {

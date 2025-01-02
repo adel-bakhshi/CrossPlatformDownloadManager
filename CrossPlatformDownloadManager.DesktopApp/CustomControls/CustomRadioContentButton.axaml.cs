@@ -16,14 +16,5 @@ public class CustomRadioContentButton : RadioButton
         set => SetValue(TitleProperty, value);
     }
 
-    public static readonly StyledProperty<object?> InfoContentProperty = AvaloniaProperty
-        .Register<CustomRadioContentButton, object?>(nameof(InfoContent), defaultValue: null);
-
-    public object? InfoContent
-    {
-        get => GetValue(InfoContentProperty);
-        set => SetValue(InfoContentProperty, value);
-    }
-
     #endregion
 }

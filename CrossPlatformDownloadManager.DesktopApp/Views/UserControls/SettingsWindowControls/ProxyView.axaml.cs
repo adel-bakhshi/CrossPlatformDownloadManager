@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using Serilog;
 
@@ -26,9 +27,7 @@ public partial class ProxyView : MyUserControlBase<ProxyViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to load available proxies.");
         }
     }

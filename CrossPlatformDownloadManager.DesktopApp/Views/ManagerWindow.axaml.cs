@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using Serilog;
 
@@ -40,7 +41,7 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         var y = (int)Math.Clamp(Position.Y, 0, screenHeight - Bounds.Height);
 
         Position = new PixelPoint(x, y);
-        
+
         // Restart timer
         _saveManagerPointTimer.Stop();
         _saveManagerPointTimer.Start();
@@ -105,9 +106,7 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to open main window.");
         }
     }
@@ -121,14 +120,12 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
             _saveManagerPointTimer.Stop();
             if (ViewModel == null)
                 return;
-            
+
             await ViewModel.SaveManagerPointAsync(Position.X, Position.Y);
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-            
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to save manager point.");
         }
     }

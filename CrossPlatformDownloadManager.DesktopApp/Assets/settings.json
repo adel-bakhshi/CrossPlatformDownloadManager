@@ -1,2 +1,22 @@
 {
+  "startOnSystemStartup": true,
+  "UseBrowserExtension": true,
+  "darkMode": true,
+  "alwaysKeepManagerOnTop": true,
+  "showStartDownloadDialog": true,
+  "showCompleteDownloadDialog": true,
+  "duplicateDownloadLinkAction": 0,
+  "maximumConnectionsCount": 8,
+  "isSpeedLimiterEnabled": false,
+  "limitSpeed": null,
+  "limitUnit": null,
+  "proxyMode": 0,
+  "proxyType": 0,
+  "useDownloadCompleteSound": false,
+  "useDownloadStoppedSound": false,
+  "useDownloadFailedSound": false,
+  "useQueueStartedSound": false,
+  "useQueueStoppedSound": false,
+  "useQueueFinishedSound": false,
+  "useSystemNotifications": false
 }

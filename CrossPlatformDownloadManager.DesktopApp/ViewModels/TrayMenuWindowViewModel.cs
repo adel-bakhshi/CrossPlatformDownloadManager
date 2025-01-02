@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Threading;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -21,6 +24,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
     private const string SystemProxySettingsName = "System proxy settings";
 
     private bool _firstTimeRefreshProxies = true;
+    private bool _canChangeProxy = true;
 
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
@@ -102,7 +106,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
     }
 
-    private async Task OpenMainWindowAsync()
+    private static async Task OpenMainWindowAsync()
     {
         try
         {
@@ -114,7 +118,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while opening the main window.");
         }
     }
@@ -143,7 +147,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while starting/stopping the download queue.");
         }
     }
@@ -158,22 +162,36 @@ public class TrayMenuWindowViewModel : ViewModelBase
             if (TrayMenuWindow!.Clipboard != null)
                 url = await TrayMenuWindow.Clipboard.GetTextAsync();
 
+            url = url?.Replace('\\', '/').Trim();
             var urlIsValid = url.CheckUrlValidation();
-            var vm = new AddDownloadLinkWindowViewModel(AppService)
+            var showStartDownloadDialog = AppService.SettingsService.Settings.ShowStartDownloadDialog;
+            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
+            if (showStartDownloadDialog)
             {
-                IsLoadingUrl = urlIsValid,
-                DownloadFile =
+                var vm = new AddDownloadLinkWindowViewModel(AppService)
                 {
-                    Url = urlIsValid ? url : null
-                }
-            };
+                    IsLoadingUrl = urlIsValid,
+                    DownloadFile =
+                    {
+                        Url = urlIsValid ? url : null
+                    }
+                };
 
-            var window = new AddDownloadLinkWindow { DataContext = vm };
-            window.Show();
+                var window = new AddDownloadLinkWindow { DataContext = vm };
+                window.Show();
+            }
+            // Otherwise, add link to database and start it
+            else
+            {
+                if (!urlIsValid)
+                    return;
+                
+                await AddNewDownloadFileAndStartItAsync(url!);
+            }
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while adding the download link.");
         }
     }
@@ -190,7 +208,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while adding the download queue.");
         }
     }
@@ -207,31 +225,31 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while opening the settings window.");
         }
     }
 
-    private async Task OpenHelpWindowAsync()
+    private static async Task OpenHelpWindowAsync()
     {
         try
         {
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while opening the help window.");
         }
     }
 
-    private async Task OpenAboutUsWindowAsync()
+    private static async Task OpenAboutUsWindowAsync()
     {
         try
         {
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while opening the about us window.");
         }
     }
@@ -245,7 +263,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             if (App.Desktop == null)
                 return;
 
-            var result = await ShowInfoDialogAsync("Exit", "Are you sure you want to exit the app?", DialogButtons.YesNo);
+            var result = await DialogBoxManager.ShowInfoDialogAsync("Exit", "Are you sure you want to exit the app?", DialogButtons.YesNo);
             if (result != DialogResult.Yes)
                 return;
 
@@ -253,7 +271,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while exit the app.");
         }
     }
@@ -278,8 +296,6 @@ public class TrayMenuWindowViewModel : ViewModelBase
             .DownloadQueueService
             .DownloadQueues;
     }
-
-    private bool _canChangeProxy = true;
 
     private void RefreshProxies()
     {
@@ -329,7 +345,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                await ShowErrorDialogAsync(ex);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
             }
         });
     }
@@ -416,9 +432,58 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while changing proxy.");
         }
+    }
+
+    private async Task AddNewDownloadFileAndStartItAsync(string url)
+    {
+        // Get url details
+        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(url);
+        // Validate url details
+        var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
+        if (!validateResult.IsValid)
+        {
+            if (validateResult.Title.IsNullOrEmpty() || validateResult.Message.IsNullOrEmpty())
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Error downloading file",
+                    "An error occurred while downloading the file.",
+                    DialogButtons.Ok);
+            }
+            else
+            {
+                await DialogBoxManager.ShowDangerDialogAsync(validateResult.Title!, validateResult.Message!, DialogButtons.Ok);
+            }
+            
+            return;
+        }
+
+        DuplicateDownloadLinkAction? duplicateAction = null;
+        if (urlDetails.IsDuplicate)
+        {
+            var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
+            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
+            {
+                duplicateAction = await AppService
+                    .DownloadFileService
+                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
+            }
+            else
+            {
+                duplicateAction = savedDuplicateAction;
+            }
+        }
+
+        var downloadFile = new DownloadFileViewModel
+        {
+            Url = urlDetails.Url,
+            FileName = urlDetails.FileName,
+            CategoryId = urlDetails.Category?.Id,
+            Size = urlDetails.FileSize
+        };
+
+        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile, urlDetails.IsDuplicate, duplicateAction, startDownloading: true);
     }
 
     #endregion

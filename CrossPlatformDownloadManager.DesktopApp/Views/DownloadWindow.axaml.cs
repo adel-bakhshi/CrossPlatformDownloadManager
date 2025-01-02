@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using Serilog;
 
@@ -57,10 +58,8 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occured during loading download window.");
         }
     }
 
@@ -76,16 +75,15 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
 
             if (ViewModel.DownloadFile.IsDownloading)
-                await ViewModel.StopDownloadAsync(this, closeWindow: false);
+                await ViewModel.StopDownloadAsync(this);
 
             ViewModel.RemoveEventHandlers();
+            _updateChunksDataTimer.Stop();
             base.OnClosing(e);
         }
         catch (Exception ex)
         {
-            if (ViewModel != null)
-                await ViewModel.ShowErrorDialogAsync(ex);
-
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured during closing download window.");
         }
     }
@@ -145,17 +143,25 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {
-        Dispatcher.UIThread.Post(() =>
+        _ = Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            if (ViewModel == null)
-                return;
+            try
+            {
+                if (ViewModel == null)
+                    return;
 
-            ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-            ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
-            ViewModel.RemoveEventHandlers();
+                ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+                ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
+                ViewModel.RemoveEventHandlers();
 
-            if (!_isClosing)
-                Close();
+                if (!_isClosing)
+                    Close();
+            }
+            catch (Exception ex)
+            {
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+                Log.Error(ex, "An error occured while completing the file download.");
+            }
         });
     }
 

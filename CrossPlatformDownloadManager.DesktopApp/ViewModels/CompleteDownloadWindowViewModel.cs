@@ -1,8 +1,15 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
 
@@ -13,6 +20,7 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     #region Private Fields
 
     private bool _dontShowThisDialogAgain;
+    private DownloadFileViewModel _downloadFile;
 
     #endregion
 
@@ -22,6 +30,12 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     {
         get => _dontShowThisDialogAgain;
         set => this.RaiseAndSetIfChanged(ref _dontShowThisDialogAgain, value);
+    }
+
+    public DownloadFileViewModel DownloadFile
+    {
+        get => _downloadFile;
+        set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
     }
 
     #endregion
@@ -36,38 +50,72 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
 
     #endregion
 
-    public CompleteDownloadWindowViewModel(IAppService appService) : base(appService)
+    public CompleteDownloadWindowViewModel(IAppService appService, DownloadFileViewModel downloadFile) : base(appService)
     {
-        OpenFileCommand = ReactiveCommand.CreateFromTask(OpenFileAsync);
-        OpenFolderCommand = ReactiveCommand.CreateFromTask(OpenFolderAsync);
+        _downloadFile = downloadFile;
+
+        OpenFileCommand = ReactiveCommand.CreateFromTask<Window?>(OpenFileAsync);
+        OpenFolderCommand = ReactiveCommand.CreateFromTask<Window?>(OpenFolderAsync);
         CloseCommand = ReactiveCommand.CreateFromTask<Window?>(CloseAsync);
     }
 
-    private async Task OpenFileAsync()
+    private async Task OpenFileAsync(Window? owner)
     {
         try
         {
+            if (DownloadFile.SaveLocation.IsNullOrEmpty() || DownloadFile.FileName.IsNullOrEmpty())
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                return;
+            }
+
+            var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
+            if (!File.Exists(filePath))
+            {
+                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                return;
+            }
+
+            PlatformSpecificManager.OpenFile(filePath);
+            owner?.Close();
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to open the file.");
         }
     }
 
-    private async Task OpenFolderAsync()
+    private async Task OpenFolderAsync(Window? owner)
     {
         try
         {
+            if (DownloadFile.SaveLocation.IsNullOrEmpty() 
+                || !Directory.Exists(DownloadFile.SaveLocation!)
+                || DownloadFile.FileName.IsNullOrEmpty())
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Open folder", "Folder not found", DialogButtons.Ok);
+                return;
+            }
+
+            var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
+            if (!File.Exists(filePath))
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Open folder", "File not found.", DialogButtons.Ok);
+                return;
+            }
+
+            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+            owner?.Close();
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to open the folder.");
         }
     }
 
-    private async Task CloseAsync(Window? owner)
+    private static async Task CloseAsync(Window? owner)
     {
         try
         {
@@ -75,7 +123,7 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while trying to close the window.");
         }
     }

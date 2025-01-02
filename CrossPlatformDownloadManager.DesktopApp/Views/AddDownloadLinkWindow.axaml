@@ -118,6 +118,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
+    <!-- Main content -->
     <Grid Margin="20">
         <Grid RowDefinitions="*, Auto">
             <Grid Grid.Row="0"

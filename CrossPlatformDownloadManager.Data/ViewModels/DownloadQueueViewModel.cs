@@ -1,7 +1,4 @@
 using System.Collections.ObjectModel;
-using CrossPlatformDownloadManager.Data.Services.DownloadFileService;
-using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
@@ -11,9 +8,6 @@ namespace CrossPlatformDownloadManager.Data.ViewModels;
 public class DownloadQueueViewModel : PropertyChangedBase
 {
     #region Private Fields
-
-    private IUnitOfWork? _unitOfWork;
-    private IDownloadFileService? _downloadFileService;
 
     private int _id;
     private string? _title;
@@ -265,118 +259,6 @@ public class DownloadQueueViewModel : PropertyChangedBase
         DaysOfWeekViewModel = new DaysOfWeekViewModel();
     }
 
-    public async Task StartDownloadQueueAsync(IUnitOfWork? unitOfWork, IDownloadFileService? downloadFileService)
-    {
-        if (unitOfWork == null || downloadFileService == null)
-            return;
-
-        _unitOfWork = unitOfWork;
-        _downloadFileService = downloadFileService;
-
-        await ContinueDownloadQueueAsync();
-    }
-
-    public async Task ContinueDownloadQueueAsync()
-    {
-        if (_unitOfWork == null || _downloadFileService == null)
-            return;
-
-        var primaryKeys = await _unitOfWork
-            .DownloadFileRepository
-            .GetAllAsync(where: df => df.DownloadQueueId == Id, select: df => df.Id, distinct: true);
-
-        var downloadFiles = _downloadFileService
-            .DownloadFiles
-            .Where(df => df.DownloadQueueId == Id
-                         && primaryKeys.Contains(df.Id)
-                         && df is { IsDownloading: false, IsPaused: false, IsCompleted: false }
-                         && (!RetryOnDownloadingFailed || df.CountOfError < RetryCount))
-            .ToList();
-
-        if (IncludePausedFiles)
-        {
-            var pausedDownloadFiles = _downloadFileService
-                .DownloadFiles
-                .Where(df => df.DownloadQueueId == Id
-                             && primaryKeys.Contains(df.Id)
-                             && df.IsPaused
-                             && (!RetryOnDownloadingFailed || df.CountOfError < RetryCount))
-                .ToList();
-
-            downloadFiles = downloadFiles
-                .Union(pausedDownloadFiles)
-                .ToList();
-        }
-
-        downloadFiles = downloadFiles
-            .OrderBy(df => df.DownloadQueuePriority)
-            .ToList();
-
-        if (downloadFiles.Count == 0 && DownloadingFiles.Count == 0)
-        {
-            await StopDownloadQueueAsync();
-            return;
-        }
-
-        if (!IsRunning)
-            IsRunning = true;
-
-        var taskIndex = 0;
-        while (DownloadingFiles.Count < DownloadCountAtSameTime && taskIndex < downloadFiles.Count)
-        {
-            var downloadFile = downloadFiles[taskIndex];
-
-            _downloadFileService.DownloadFinishedAsyncTasks.TryAdd(downloadFile.Id, []);
-            _downloadFileService.DownloadFinishedAsyncTasks[downloadFile.Id].Add(DownloadFileFinishedTaskAsync);
-
-            downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
-
-            _ = _downloadFileService.StartDownloadFileAsync(downloadFile);
-
-            DownloadingFiles.Add(downloadFile);
-
-            taskIndex++;
-        }
-
-        if (DownloadingFiles.Count == 0)
-            await StopDownloadQueueAsync();
-    }
-
-    public async Task StopDownloadQueueAsync()
-    {
-        if (_downloadFileService == null)
-            return;
-
-        IsRunning = false;
-
-        var downloadFiles = _downloadFileService
-            .DownloadFiles
-            .Where(df => df.DownloadQueueId == Id && (df.IsDownloading || df.IsPaused))
-            .ToList();
-        
-        downloadFiles.ForEach(df =>
-        {
-            _downloadFileService.DownloadFinishedSyncTasks.TryAdd(df.Id, []);
-            _downloadFileService.DownloadFinishedSyncTasks[df.Id].Add(downloadFile =>
-            {
-                try
-                {
-                    ArgumentNullException.ThrowIfNull(downloadFile);
-
-                    downloadFile.CountOfError = 0;
-                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true };
-                }
-                catch (Exception ex)
-                {
-                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true, Exception = ex };
-                }
-            });
-        });
-
-        var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile));
-        await Task.WhenAll(tasks);
-    }
-
     public void LoadViewData()
     {
         StartDownloadScheduleEnabled = StartDownloadSchedule != null;
@@ -427,57 +309,4 @@ public class DownloadQueueViewModel : PropertyChangedBase
 
         DaysOfWeekViewModel = daysOfWeek;
     }
-
-    #region Helpers
-
-    private async Task<DownloadFinishedTaskValue?> DownloadFileFinishedTaskAsync(DownloadFileViewModel? viewModel)
-    {
-        try
-        {
-            if (_unitOfWork == null || _downloadFileService == null)
-                return null;
-
-            var downloadFile = DownloadingFiles.Find(df => df.Id == viewModel?.Id);
-            if (downloadFile == null)
-                return null;
-
-            downloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
-
-            if ((downloadFile.IsError || downloadFile.IsStopped) && IsRunning)
-            {
-                var maxPriority = await _unitOfWork
-                    .DownloadFileRepository
-                    .GetMaxAsync(selector: df => df.DownloadQueuePriority, where: df => df.DownloadQueueId == Id);
-
-                downloadFile.DownloadQueuePriority = maxPriority + 1;
-
-                if (downloadFile.IsError)
-                    downloadFile.CountOfError++;
-            }
-
-            if (downloadFile.IsCompleted || downloadFile.IsError || downloadFile.IsStopped)
-                DownloadingFiles.Remove(downloadFile);
-
-            await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
-
-            if (IsRunning)
-                _ = ContinueDownloadQueueAsync();
-
-            return new DownloadFinishedTaskValue { UpdateDownloadFile = false };
-        }
-        catch (Exception ex)
-        {
-            return new DownloadFinishedTaskValue { Exception = ex };
-        }
-    }
-
-    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
-    {
-        if (IncludePausedFiles || !IsRunning)
-            return;
-
-        _ = ContinueDownloadQueueAsync();
-    }
-
-    #endregion
 }

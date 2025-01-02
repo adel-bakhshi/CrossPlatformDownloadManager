@@ -17,7 +17,7 @@ public static class ExtensionMethods
         return json.IsNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!);
     }
 
-    public static string? ConvertToJson(this object? value)
+    public static string ConvertToJson(this object? value)
     {
         return JsonConvert.SerializeObject(value);
     }

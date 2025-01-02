@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -19,15 +19,15 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="13.0.1" />
-        <PackageReference Include="Avalonia" Version="11.2.2" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.2" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.2.2" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.2" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.2" />
+        <PackageReference Include="Avalonia" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.2" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.2" />
-        <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.2" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.3" />
         <PackageReference Include="Downloader" Version="3.3.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
           <PrivateAssets>all</PrivateAssets>
@@ -38,8 +38,8 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.2" />
-        <PackageReference Include="Serilog" Version="4.2.0" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.3" />
+        <PackageReference Include="Serilog" Version="4.2.1-dev-02337" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     </ItemGroup>
@@ -60,6 +60,10 @@
         <DependentUpon>DownloadStatusView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Infrastructure\DialogBox\Views\DialogWindow.axaml.cs">
+        <DependentUpon>DialogWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -68,5 +72,9 @@
 
     <ItemGroup>
       <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\Services\" />
     </ItemGroup>
 </Project>

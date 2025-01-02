@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
-using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
@@ -93,7 +95,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -121,7 +123,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -142,14 +144,14 @@ public class SaveLocationsViewModel : ViewModelBase
 
             if (category.IsDefault)
             {
-                await ShowInfoDialogAsync("Delete category", "This default category cannot be deleted.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Delete category", "This default category cannot be deleted.", DialogButtons.Ok);
                 return;
             }
 
-            var result = await ShowDangerDialogAsync("Delete category",
+            var result = await DialogBoxManager.ShowDangerDialogAsync("Delete category",
                 "All data within this category will be permanently deleted. Are you sure you want to proceed?",
                 DialogButtons.YesNo);
-            
+
             if (result != DialogResult.Yes)
                 return;
 
@@ -185,7 +187,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -202,13 +204,13 @@ public class SaveLocationsViewModel : ViewModelBase
             Categories = categoryViewModels
                 .Where(c => c.Title?.Equals(Constants.GeneralCategoryTitle) != true)
                 .ToObservableCollection();
-            
+
             SelectedCategory = Categories.FirstOrDefault();
             LoadFileExtensions();
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

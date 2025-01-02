@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using Avalonia.Threading;
-using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
@@ -267,6 +266,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         set => SetField(ref _canResumeDownload, value);
     }
 
+    public bool IsStopping { get; set; }
+
     #endregion
 
     #region Events
@@ -356,6 +357,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         _updateChunksDataTimer = null;
         _chunkProgresses = null;
 
+        IsStopping = true;
         _ = downloadService.CancelTaskAsync();
         DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
@@ -450,6 +452,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             SaveDownloadPackage(_downloadService.Package);
 
         CanResumeDownload = null;
+        IsStopping = false;
         DownloadFinished?.Invoke(this, eventArgs);
     }
 

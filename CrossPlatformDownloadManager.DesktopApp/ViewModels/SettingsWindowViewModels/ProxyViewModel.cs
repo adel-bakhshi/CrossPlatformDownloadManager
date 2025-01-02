@@ -5,8 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -81,7 +84,7 @@ public class ProxyViewModel : ViewModelBase
     }
 
     public bool IsAvailableProxiesExists => AvailableProxies.Any();
-    
+
     public bool EditingProxy
     {
         get => _editingProxy;
@@ -132,7 +135,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -170,7 +173,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -244,7 +247,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -254,13 +257,13 @@ public class ProxyViewModel : ViewModelBase
         {
             if (ProxySettings.Type.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
                 return;
             }
 
             if (ProxySettings.Host.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Attention", "Please enter proxy host.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter proxy host.", DialogButtons.Ok);
                 return;
             }
 
@@ -268,7 +271,7 @@ public class ProxyViewModel : ViewModelBase
 
             if (ProxySettings.Port.IsNullOrEmpty())
             {
-                await ShowInfoDialogAsync("Attention", "Please enter proxy port.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter proxy port.", DialogButtons.Ok);
                 return;
             }
 
@@ -276,7 +279,7 @@ public class ProxyViewModel : ViewModelBase
 
             if (!int.TryParse(ProxySettings.Port, out _))
             {
-                await ShowInfoDialogAsync("Attention", "Please enter a valid port number.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter a valid port number.", DialogButtons.Ok);
                 return;
             }
 
@@ -322,7 +325,7 @@ public class ProxyViewModel : ViewModelBase
 
                 if (proxySettingsInDb != null)
                 {
-                    await ShowInfoDialogAsync("Attention",
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention",
                         "Unable to save proxy. There is already another proxy with the same type, host and port. Please change the type, host or port or edit the previous proxy.",
                         DialogButtons.Ok);
 
@@ -336,7 +339,7 @@ public class ProxyViewModel : ViewModelBase
 
                 if (proxySettingsInDb != null)
                 {
-                    await ShowInfoDialogAsync("Attention",
+                    await DialogBoxManager.ShowInfoDialogAsync("Attention",
                         "Unable to save proxy. Another proxy with the same name already exists. Please choose a different proxy name or edit the existing proxy.",
                         DialogButtons.Ok);
 
@@ -347,12 +350,12 @@ public class ProxyViewModel : ViewModelBase
                     .SettingsService
                     .AddProxySettingsAsync(ProxySettings);
             }
-            
+
             ClearProxy();
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -383,7 +386,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -396,7 +399,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

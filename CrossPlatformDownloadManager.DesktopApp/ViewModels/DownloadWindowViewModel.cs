@@ -1,17 +1,16 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Services.AppService;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
-using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 using Serilog;
 
@@ -136,7 +135,7 @@ public class DownloadWindowViewModel : ViewModelBase
         ShowHideDetailsCommand = ReactiveCommand.CreateFromTask<Window?>(ShowHideDetailsAsync);
     }
 
-    public async Task StopDownloadAsync(Window? owner, bool closeWindow = true)
+    public async Task StopDownloadAsync(Window? owner)
     {
         try
         {
@@ -148,12 +147,10 @@ public class DownloadWindowViewModel : ViewModelBase
                 .StopDownloadFileAsync(DownloadFile);
 
             RemoveEventHandlers();
-
-            if (closeWindow)
-                owner.Close();
         }
         catch (Exception ex)
         {
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "Failed to stop downloading file");
         }
     }
@@ -194,7 +191,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -236,7 +233,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -262,7 +259,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -277,7 +274,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowErrorDialogAsync(ex);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

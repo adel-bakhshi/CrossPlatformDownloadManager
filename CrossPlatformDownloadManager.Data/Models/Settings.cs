@@ -1,49 +1,50 @@
 using System.ComponentModel.DataAnnotations;
 using CrossPlatformDownloadManager.Utils.Enums;
+using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Data.Models;
 
 public class Settings : DbModelBase
 {
-    [Required] public bool StartOnSystemStartup { get; set; }
+    [Required] [JsonProperty("startOnSystemStartup")] public bool StartOnSystemStartup { get; set; }
 
-    [Required] public bool UseBrowserExtension { get; set; }
+    [Required] [JsonProperty("useBrowserExtension")] public bool UseBrowserExtension { get; set; }
 
-    [Required] public bool DarkMode { get; set; }
+    [Required] [JsonProperty("darkMode")] public bool DarkMode { get; set; }
 
-    [Required] public bool AlwaysKeepManagerOnTop { get; set; }
+    [Required] [JsonProperty("alwaysKeepManagerOnTop")] public bool AlwaysKeepManagerOnTop { get; set; }
 
-    [Required] public bool ShowStartDownloadDialog { get; set; }
+    [Required] [JsonProperty("showStartDownloadDialog")] public bool ShowStartDownloadDialog { get; set; }
 
-    [Required] public bool ShowCompleteDownloadDialog { get; set; }
+    [Required] [JsonProperty("showCompleteDownloadDialog")] public bool ShowCompleteDownloadDialog { get; set; }
 
-    [Required] public DuplicateDownloadLinkAction DuplicateDownloadLinkAction { get; set; }
+    [Required] [JsonProperty("duplicateDownloadLinkAction")] public DuplicateDownloadLinkAction DuplicateDownloadLinkAction { get; set; }
 
-    [Required] public int MaximumConnectionsCount { get; set; }
+    [Required] [JsonProperty("maximumConnectionsCount")] public int MaximumConnectionsCount { get; set; }
 
-    [Required] public bool IsSpeedLimiterEnabled { get; set; }
+    [Required] [JsonProperty("isSpeedLimiterEnabled")] public bool IsSpeedLimiterEnabled { get; set; }
 
-    public double? LimitSpeed { get; set; }
+    [JsonProperty("limitSpeed")] public double? LimitSpeed { get; set; }
 
-    [MaxLength(50)] public string? LimitUnit { get; set; }
+    [MaxLength(50)] [JsonProperty("limitUnit")] public string? LimitUnit { get; set; }
 
-    [Required] public ProxyMode ProxyMode { get; set; }
+    [Required] [JsonProperty("proxyMode")] public ProxyMode ProxyMode { get; set; }
 
-    [Required] public ProxyType ProxyType { get; set; }
+    [Required] [JsonProperty("proxyType")] public ProxyType ProxyType { get; set; }
 
-    [Required] public bool UseDownloadCompleteSound { get; set; }
+    [Required] [JsonProperty("useDownloadCompleteSound")] public bool UseDownloadCompleteSound { get; set; }
 
-    [Required] public bool UseDownloadStoppedSound { get; set; }
+    [Required] [JsonProperty("useDownloadStoppedSound")] public bool UseDownloadStoppedSound { get; set; }
 
-    [Required] public bool UseDownloadFailedSound { get; set; }
+    [Required] [JsonProperty("useDownloadFailedSound")] public bool UseDownloadFailedSound { get; set; }
 
-    [Required] public bool UseQueueStartedSound { get; set; }
+    [Required] [JsonProperty("useQueueStartedSound")] public bool UseQueueStartedSound { get; set; }
 
-    [Required] public bool UseQueueStoppedSound { get; set; }
+    [Required] [JsonProperty("useQueueStoppedSound")] public bool UseQueueStoppedSound { get; set; }
 
-    [Required] public bool UseQueueFinishedSound { get; set; }
+    [Required] [JsonProperty("useQueueFinishedSound")] public bool UseQueueFinishedSound { get; set; }
 
-    [Required] public bool UseSystemNotifications { get; set; }
+    [Required] [JsonProperty("useSystemNotifications")] public bool UseSystemNotifications { get; set; }
 
     [MaxLength(100)] public string? ManagerPoint { get; set; }
 

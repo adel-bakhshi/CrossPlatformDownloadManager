@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
-using CrossPlatformDownloadManager.Data.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 

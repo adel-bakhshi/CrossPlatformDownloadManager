@@ -50,7 +50,7 @@
 
                         <TextBlock Grid.Row="0"
                                    Grid.Column="1"
-                                   Text="Cross platform Download Manager 1.0.2.exe"
+                                   Text="{Binding DownloadFile.FileName}"
                                    Margin="15, 0, 0, 10"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis" />
@@ -63,7 +63,7 @@
 
                         <TextBlock Grid.Row="1"
                                    Grid.Column="1"
-                                   Text="56.4 MB"
+                                   Text="{Binding DownloadFile.SizeAsString}"
                                    Margin="15, 0, 0, 10"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis" />
@@ -76,20 +76,20 @@
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
-                                   Text="C:\Users\adelb\Downloads\CDM\Programs"
+                                   Text="{Binding DownloadFile.SaveLocation}"
                                    Margin="15, 0, 0, 10"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis" />
 
-                        <!-- Address -->
+                        <!-- Url -->
                         <TextBlock Grid.Row="3"
                                    Grid.Column="0"
-                                   Text="Address:" />
+                                   Text="Url:" />
 
                         <TextBlock Grid.Row="3"
                                    Grid.Column="1"
-                                   Text="https://www.github.com/adel-bakhshi/releases/1.0.2/Cross platform Download Manager 1.0.2.exe"
-                                   ToolTip.Tip="https://www.github.com/adel-bakhshi/releases/1.0.2/Cross platform Download Manager 1.0.2.exe"
+                                   Text="{Binding DownloadFile.Url}"
+                                   ToolTip.Tip="{Binding DownloadFile.Url}"
                                    Margin="15, 0, 0, 0"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis" />
@@ -135,11 +135,13 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center">
                 <Button Classes="button success"
-                        Command="{Binding OpenFolderCommand}"
+                        Command="{Binding OpenFileCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
                         Content="Open file" />
 
                 <Button Classes="button info"
-                        Command="{Binding OpenFileCommand}"
+                        Command="{Binding OpenFolderCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
                         Content="Open folder" />
             </StackPanel>
 

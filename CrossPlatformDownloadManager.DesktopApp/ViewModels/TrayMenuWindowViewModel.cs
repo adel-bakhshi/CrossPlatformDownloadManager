@@ -185,7 +185,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             {
                 if (!urlIsValid)
                     return;
-                
+
                 await AddNewDownloadFileAndStartItAsync(url!);
             }
         }
@@ -455,12 +455,12 @@ public class TrayMenuWindowViewModel : ViewModelBase
             {
                 await DialogBoxManager.ShowDangerDialogAsync(validateResult.Title!, validateResult.Message!, DialogButtons.Ok);
             }
-            
+
             return;
         }
 
         DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsDuplicate)
+        if (urlDetails.IsUrlDuplicate)
         {
             var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
             if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
@@ -483,7 +483,13 @@ public class TrayMenuWindowViewModel : ViewModelBase
             Size = urlDetails.FileSize
         };
 
-        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile, urlDetails.IsDuplicate, duplicateAction, startDownloading: true);
+        await AppService
+            .DownloadFileService
+            .AddDownloadFileAsync(downloadFile,
+                isUrlDuplicate: urlDetails.IsUrlDuplicate,
+                duplicateAction: duplicateAction,
+                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
+                startDownloading: true);
     }
 
     #endregion

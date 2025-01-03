@@ -319,7 +319,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             return null;
 
         DuplicateDownloadLinkAction? duplicateAction = null;
-        if (_urlDetails.IsDuplicate)
+        if (_urlDetails.IsUrlDuplicate)
         {
             var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
             if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
@@ -334,7 +334,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             }
         }
 
-        var downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile, _urlDetails.IsDuplicate, duplicateAction);
+        var downloadFile = await AppService
+            .DownloadFileService
+            .AddDownloadFileAsync(DownloadFile,
+                isUrlDuplicate: _urlDetails.IsUrlDuplicate,
+                duplicateAction: duplicateAction,
+                isFileNameDuplicate: _urlDetails.IsFileNameDuplicate);
+
         if (downloadFile != null)
             return downloadFile;
 

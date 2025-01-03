@@ -8,5 +8,6 @@ public class UrlDetailsResultViewModel
     public string FileName { get; set; } = string.Empty;
     public double FileSize { get; set; }
     public CategoryViewModel? Category { get; set; }
-    public bool IsDuplicate { get; set; }
+    public bool IsUrlDuplicate { get; set; }
+    public bool IsFileNameDuplicate { get; set; }
 }

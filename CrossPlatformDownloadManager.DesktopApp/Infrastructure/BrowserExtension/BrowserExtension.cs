@@ -264,7 +264,7 @@ public class BrowserExtension : IBrowserExtension
         }
 
         DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsDuplicate)
+        if (urlDetails.IsUrlDuplicate)
         {
             var savedDuplicateAction = _appService.SettingsService.Settings.DuplicateDownloadLinkAction;
             if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
@@ -287,7 +287,14 @@ public class BrowserExtension : IBrowserExtension
             Size = urlDetails.FileSize
         };
 
-        await _appService.DownloadFileService.AddDownloadFileAsync(downloadFile, urlDetails.IsDuplicate, duplicateAction, startDownloading: true);
+        await _appService
+            .DownloadFileService
+            .AddDownloadFileAsync(downloadFile,
+                isUrlDuplicate: urlDetails.IsUrlDuplicate,
+                duplicateAction: duplicateAction,
+                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
+                startDownloading: true);
+
         result.IsSuccessful = true;
         return result;
     }

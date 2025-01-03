@@ -1,14 +1,4 @@
 Fix titles and text blocks. I mean change this "Start Download On Application Startup" to this "Start download on application startup"
-WindowNotificationManager
-NetCoreAudio
-LibVLCSharp.Avalonia
-CSCore: Windows only, Linux and Mac experimental
-SharpAudio
-https://khalidabuhakmeh.com/play-audio-files-with-net: Audio for mac only
-https://code.google.com/archive/p/portaudiosharp/
-https://github.com/CryShana/CryMedia
-https://gitlab.com/define-private-public/Bassoon
-Beautiful icons: https://www.svgrepo.com/collection/scarlab-solid-oval-interface-icons/1
 Add progress bar to windows toolbar for downloading files
 یک مکانیسم خوب برای پیاده سازی بخش RefreshDownloadAddress نیاز داری
 سرویس DownloadQueueService یه گزینه داره به نام AddDownloadFileToDownloadQueueAsync. هر جا که نیاز هست باید ازش استفاده کنی
@@ -21,3 +11,5 @@ Add progress bar to windows toolbar for downloading files
 Start on system startup حتما باید در لینوکس تست بشه
 هرجایی که از ShowErrorDialogAsync استفاده کردی باید بعدش یه Log.Error() هم بگذاری. نمیتونی داخل متد ShowErrorDialogAsync اینکار رو انجام بدی باید دستی انجامش بدی
 Import settings و export settings رو هم به منوی فایل اضافه کن
+وقتی که بخوای دانلود رو ادامه بدی (Resume) بعضی از Chunk ها اگه کامل شده باشن مقدارشون 0 در نظر گرفته میشه
+مشکل همیشگی با Chunk ها، اگه در حال اتصال باشن مینویسه Completed

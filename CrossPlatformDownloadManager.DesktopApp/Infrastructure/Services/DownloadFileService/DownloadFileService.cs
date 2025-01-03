@@ -131,8 +131,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     }
 
     public async Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel,
-        bool isDuplicate = false,
+        bool isUrlDuplicate = false,
         DuplicateDownloadLinkAction? duplicateAction = null,
+        bool isFileNameDuplicate = false,
         bool startDownloading = false)
     {
         var isValid = await ValidateDownloadFileAsync(viewModel);
@@ -159,7 +160,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         };
 
         DownloadFileViewModel? result = null;
-        if (isDuplicate)
+        if (isUrlDuplicate)
         {
             if (duplicateAction is null or DuplicateDownloadLinkAction.LetUserChoose)
                 throw new InvalidOperationException("When you want to add a duplicate URL, you must specify how to handle this URL.");
@@ -196,6 +197,25 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         if (result != null)
             return result;
+
+        // Make sure each file has a unique name
+        if (isFileNameDuplicate)
+        {
+            var duplicateDownloadFile = DownloadFiles
+                .FirstOrDefault(df => !df.FileName.IsNullOrEmpty()
+                                      && df.FileName!.Equals(downloadFile.FileName)
+                                      && !df.SaveLocation.IsNullOrEmpty()
+                                      && df.SaveLocation!.Equals(downloadFile.SaveLocation));
+
+            if (duplicateDownloadFile != null)
+            {
+                var newFileName = GetNewFileName(downloadFile.FileName, downloadFile.SaveLocation);
+                if (newFileName.IsNullOrEmpty())
+                    throw new InvalidOperationException("New file name for duplicate file is null or empty.");
+
+                downloadFile.FileName = newFileName;
+            }
+        }
 
         await _unitOfWork.DownloadFileRepository.AddAsync(downloadFile);
         await _unitOfWork.SaveAsync();
@@ -269,7 +289,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var configuration = new DownloadConfiguration
         {
             ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
-            MaximumBytesPerSecond = 64 * 1024, // TODO: Enable speed limiter
+            MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
             ParallelDownload = true
         };
 
@@ -584,7 +604,13 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // Find a download file with the same url and handle it
-        result.IsDuplicate = DownloadFiles.FirstOrDefault(df => !df.Url.IsNullOrEmpty() && df.Url!.Equals(url)) != null;
+        result.IsUrlDuplicate = DownloadFiles.FirstOrDefault(df => !df.Url.IsNullOrEmpty() && df.Url!.Equals(url)) != null;
+        result.IsFileNameDuplicate = DownloadFiles
+            .FirstOrDefault(df => !df.FileName.IsNullOrEmpty()
+                                  && df.FileName!.Equals(fileName)
+                                  && !df.SaveLocation.IsNullOrEmpty()
+                                  && df.SaveLocation!.Equals(result.Category!.CategorySaveDirectory)) != null;
+
         return result;
     }
 
@@ -718,6 +744,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         var isFilePathDuplicate = filePathList.Exists(fp => fp.Equals(filePath));
         var index = 2;
+        var originalFileName = Path.GetFileNameWithoutExtension(filePath);
         var newFileName = Path.GetFileName(filePath);
         var fileExtension = Path.GetExtension(filePath);
 
@@ -725,11 +752,39 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         while (isFilePathDuplicate || File.Exists(filePath))
         {
             var oldFileName = Path.GetFileName(filePath);
-            newFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{index}{fileExtension}";
+            newFileName = $"{originalFileName}_{index}{fileExtension}";
 
             filePath = filePath.Replace(oldFileName, newFileName);
             index++;
             isFilePathDuplicate = filePathList.Exists(fp => fp.Equals(filePath));
+        }
+
+        return newFileName;
+    }
+
+    public string GetNewFileName(string fileName, string saveLocation)
+    {
+        var downloadFiles = DownloadFiles
+            .Where(df => !df.FileName.IsNullOrEmpty()
+                         && !df.SaveLocation.IsNullOrEmpty()
+                         && df.FileName!.Equals(fileName)
+                         && df.SaveLocation!.Equals(saveLocation))
+            .ToList();
+
+        if (downloadFiles.Count == 0)
+            return string.Empty;
+
+        var fileNames = downloadFiles.ConvertAll(df => df.FileName);
+        var index = 2;
+        var originalFileName = Path.GetFileNameWithoutExtension(fileName);
+        var newFileName = Path.GetFileName(fileName);
+        var fileExtension = Path.GetExtension(fileName);
+
+        // Choose new name until it doesn't exist
+        while (fileNames.Contains(newFileName))
+        {
+            newFileName = $"{originalFileName}_{index}{fileExtension}";
+            index++;
         }
 
         return newFileName;
@@ -962,6 +1017,16 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var vm = new DownloadWindowViewModel(appService, downloadFile);
         var window = new DownloadWindow { DataContext = vm };
         window.Show();
+    }
+
+    private long GetMaximumBytesPerSecond()
+    {
+        if (!_settingsService.Settings.IsSpeedLimiterEnabled)
+            return 0;
+
+        var limitSpeed = (long)(_settingsService.Settings.LimitSpeed ?? 0);
+        var limitUnit = _settingsService.Settings.LimitUnit?.Equals("KB", StringComparison.OrdinalIgnoreCase) == true ? Constants.KiloByte : Constants.MegaByte;
+        return limitSpeed * limitUnit;
     }
 
     #endregion

@@ -1348,7 +1348,7 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsDuplicate)
+        if (urlDetails.IsUrlDuplicate)
         {
             var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
             if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
@@ -1371,6 +1371,12 @@ public class MainWindowViewModel : ViewModelBase
             Size = urlDetails.FileSize
         };
 
-        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile, urlDetails.IsDuplicate, duplicateAction, startDownloading: true);
+        await AppService
+            .DownloadFileService
+            .AddDownloadFileAsync(downloadFile,
+                isUrlDuplicate: urlDetails.IsUrlDuplicate,
+                duplicateAction: duplicateAction,
+                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
+                startDownloading: true);
     }
 }

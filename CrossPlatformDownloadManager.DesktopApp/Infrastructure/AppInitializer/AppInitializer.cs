@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 
@@ -22,7 +24,6 @@ public class AppInitializer : IAppInitializer
 
     public async Task InitializeAsync()
     {
-        // TODO: Show message box
         try
         {
             // Initialize UnitOfWork
@@ -39,11 +40,16 @@ public class AppInitializer : IAppInitializer
             await _appService.DownloadQueueService.LoadDownloadQueuesAsync(addDefaultDownloadQueue: true);
             
             // Start listening for URLs
-            await _browserExtension.StartListeningAsync();
+            _ = _browserExtension.StartListeningAsync();
+            
+            // Initialize AudioManager
+            AudioManager.Initialize();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            // Log error and exit application
+            Log.Error(ex, "An error occurred while initializing the application.");
+            Environment.Exit(0);
         }
     }
 }

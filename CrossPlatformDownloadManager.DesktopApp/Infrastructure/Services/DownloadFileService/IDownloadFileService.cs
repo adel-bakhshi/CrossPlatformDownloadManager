@@ -31,8 +31,9 @@ public interface IDownloadFileService
     Task LoadDownloadFilesAsync();
 
     Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel,
-        bool isDuplicate = false,
+        bool isUrlDuplicate = false,
         DuplicateDownloadLinkAction? duplicateAction = null,
+        bool isFileNameDuplicate = false,
         bool startDownloading = false);
 
     Task UpdateDownloadFileAsync(DownloadFile downloadFile);
@@ -70,4 +71,6 @@ public interface IDownloadFileService
     Task<DuplicateDownloadLinkAction> GetUserDuplicateActionAsync(string url, string fileName, string saveLocation);
 
     string GetNewFileName(string url, string fileName, string saveLocation);
+    
+    string GetNewFileName(string fileName, string saveLocation);
 }

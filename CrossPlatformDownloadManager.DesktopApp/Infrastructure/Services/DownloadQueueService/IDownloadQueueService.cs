@@ -37,7 +37,7 @@ public interface IDownloadQueueService
 
     Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
-    Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel);
+    Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool playSound = true);
 
     Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, DownloadFileViewModel? downloadFileViewModel);
     

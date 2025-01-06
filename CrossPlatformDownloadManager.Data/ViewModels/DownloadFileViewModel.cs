@@ -268,6 +268,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     }
 
     public bool IsStopping { get; set; }
+    public bool PlayStopSound { get; set; } = true;
+    public int? TempDownloadQueueId { get; set; }
 
     #endregion
 
@@ -281,7 +283,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     #endregion
 
     public async Task StartDownloadFileAsync(DownloadService? downloadService,
-        DownloadConfiguration downloadConfiguration, IUnitOfWork? unitOfWork)
+        DownloadConfiguration downloadConfiguration,
+        IUnitOfWork? unitOfWork)
     {
         if (downloadService == null || unitOfWork == null)
             return;
@@ -313,7 +316,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CreateChunksData(downloadConfiguration.ChunkCount);
         CalculateElapsedTime();
         UpdateChunksData();
-        
+
         // Check resume capability
         CanResumeDownload = null;
         _ = CheckResumeCapabilityAsync();
@@ -328,7 +331,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         {
             // Load previous chunks data
             LoadChunksData(downloadPackage.Chunks);
-            
+
             var urls = downloadPackage
                 .Urls
                 .ToList();
@@ -554,10 +557,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             {
                 chunkProgress.CheckCount++;
             }
-            
+
             chunkData.DownloadedSize = chunkProgress.ReceivedBytesSize;
             chunkData.TotalSize = chunkProgress.TotalBytesToReceive;
-            
+
             if (!_updateChunksDataTimer!.IsEnabled)
                 chunkData.Info = "Paused";
 
@@ -573,7 +576,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         DownloadPackage = downloadPackage?.ConvertToJson();
     }
-    
+
     private async Task CheckResumeCapabilityAsync()
     {
         try

@@ -46,7 +46,7 @@ public interface IDownloadFileService
 
     Task StartDownloadFileAsync(DownloadFileViewModel? viewModel);
 
-    Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false);
+    Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false, bool playSound = true);
 
     void ResumeDownloadFile(DownloadFileViewModel? viewModel);
 

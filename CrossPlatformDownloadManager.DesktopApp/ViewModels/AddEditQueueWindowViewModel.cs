@@ -373,7 +373,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             {
                 await AppService
                     .DownloadQueueService
-                    .StopDownloadQueueAsync(downloadQueue);
+                    .StopDownloadQueueAsync(downloadQueue, playSound: false);
             }
 
             await AppService

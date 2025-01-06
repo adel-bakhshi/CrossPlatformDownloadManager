@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -28,6 +29,10 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     {
         InitializeComponent();
         DataContext = mainWindowViewModel;
+
+        // Find AddToQueueFlyout and manage show/hide of it
+        if (this.FindResource("AddToQueueFlyout") is Flyout addToQueueFlyout)
+            ViewModel!.AddToQueueFlyout = addToQueueFlyout;
     }
 
     public void HideDownloadFilesDataGridContextMenu()

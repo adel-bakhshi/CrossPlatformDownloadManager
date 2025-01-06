@@ -38,7 +38,7 @@ public class AppFinisher : IAppFinisher
             {
                 await _appService
                     .DownloadQueueService
-                    .StopDownloadQueueAsync(downloadQueue);
+                    .StopDownloadQueueAsync(downloadQueue, playSound: false);
             }
 
             // Find all download files that are still downloading

@@ -8,6 +8,8 @@ using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
@@ -170,13 +172,14 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         await ContinueDownloadQueueAsync(downloadQueue);
     }
 
-    public async Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel)
+    public async Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool playSound = true)
     {
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
         if (downloadQueue == null)
             return;
 
         downloadQueue.IsRunning = false;
+        downloadQueue.IsStartSoundPlayed = false;
 
         var downloadFiles = _downloadFileService
             .DownloadFiles
@@ -202,8 +205,11 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             });
         });
 
-        var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile));
+        var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile, playSound: false));
         await Task.WhenAll(tasks);
+
+        if (playSound)
+            _ = AudioManager.PlayAsync(AppNotificationType.QueueStopped);
     }
 
     public async Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel,
@@ -466,9 +472,14 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             .OrderBy(df => df.DownloadQueuePriority)
             .ToList();
 
+        // All download files are finished
         if (downloadFiles.Count == 0 && viewModel.DownloadingFiles.Count == 0)
         {
-            await StopDownloadQueueAsync(viewModel);
+            // Play queue finished sound when start queue sound is already played
+            if (viewModel.IsStartSoundPlayed)
+                _ = AudioManager.PlayAsync(AppNotificationType.QueueFinished);
+
+            await StopDownloadQueueAsync(viewModel, playSound: false);
             return;
         }
 
@@ -492,14 +503,23 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         }
 
         if (viewModel.DownloadingFiles.Count == 0)
+        {
             await StopDownloadQueueAsync(viewModel);
+            return;
+        }
+
+        if (!viewModel.IsStartSoundPlayed)
+        {
+            _ = AudioManager.PlayAsync(AppNotificationType.QueueStarted);
+            viewModel.IsStartSoundPlayed = true;
+        }
     }
 
     private async Task<DownloadFinishedTaskValue?> DownloadFileFinishedTaskAsync(DownloadFileViewModel? viewModel)
     {
         try
         {
-            var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.DownloadQueueId);
+            var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.TempDownloadQueueId);
             var downloadFile = downloadQueue?.DownloadingFiles.Find(df => df.Id == viewModel?.Id);
             if (downloadFile == null)
                 return null;

@@ -13,6 +13,8 @@ using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
@@ -345,7 +347,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork);
     }
 
-    public async Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false)
+    public async Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false, bool playSound = true)
     {
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
@@ -356,6 +358,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (service == null || service.Status == DownloadStatus.Stopped || downloadFile.IsStopping)
             return;
 
+        downloadFile.PlayStopSound = playSound;
         downloadFile.StopDownloadFile(service);
 
         // Wait for the download to stop
@@ -855,6 +858,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
             downloadFile.TimeLeft = null;
             downloadFile.TransferRate = null;
+            downloadFile.TempDownloadQueueId = downloadFile.DownloadQueueId;
 
             if (downloadFile.IsCompleted)
             {
@@ -862,6 +866,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 downloadFile.DownloadQueueId = null;
                 downloadFile.DownloadQueueName = null;
                 downloadFile.DownloadQueuePriority = null;
+
+                // Play download completed sound
+                if (_settingsService.Settings.UseDownloadCompleteSound)
+                    _ = AudioManager.PlayAsync(AppNotificationType.DownloadCompleted);
 
                 // Show complete download dialog when user want's this
                 if (_settingsService.Settings.ShowCompleteDownloadDialog)
@@ -875,6 +883,20 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     var window = new CompleteDownloadWindow { DataContext = viewModel };
                     window.Show();
                 }
+            }
+            else if (downloadFile.IsError)
+            {
+                // Play download failed sound
+                if (_settingsService.Settings.UseDownloadFailedSound)
+                    _ = AudioManager.PlayAsync(AppNotificationType.DownloadFailed);
+            }
+            else if (downloadFile.IsStopped)
+            {
+                // Play download stopped sound
+                if (_settingsService.Settings.UseDownloadStoppedSound && downloadFile.PlayStopSound)
+                    _ = AudioManager.PlayAsync(AppNotificationType.DownloadStopped);
+
+                downloadFile.PlayStopSound = true;
             }
 
             List<DownloadFinishedTaskValue?> taskValues = [];
@@ -893,6 +915,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 taskValues.AddRange(syncTasks.Select(task => task(downloadFile)));
 
             DownloadFinishedSyncTasks.Remove(downloadFile.Id);
+            
+            // Set temp download queue id to null
+            downloadFile.TempDownloadQueueId = null;
 
             var exception = taskValues.Find(v => v?.Exception != null)?.Exception;
             if (exception != null)

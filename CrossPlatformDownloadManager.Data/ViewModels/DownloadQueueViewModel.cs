@@ -246,6 +246,8 @@ public class DownloadQueueViewModel : PropertyChangedBase
         set => SetField(ref _downloadingFiles, value);
     }
 
+    public bool IsStartSoundPlayed { get; set; }
+
     #endregion
 
     public DownloadQueueViewModel()

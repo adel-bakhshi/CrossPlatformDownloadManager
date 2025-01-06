@@ -147,6 +147,8 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _contextFlyoutEnableState, value);
     }
 
+    public Flyout? AddToQueueFlyout { get; set; }
+
     #endregion
 
     #region Commands
@@ -934,6 +936,9 @@ public class MainWindowViewModel : ViewModelBase
                         AddToQueueDownloadQueues = downloadQueues
                             .Where(dq => dq.Id != downloadQueue.Id)
                             .ToObservableCollection();
+                        
+                        if (AddToQueueDownloadQueues.Count == 0)
+                            AddToQueueFlyout?.Hide();
                     }
 
                     break;
@@ -957,7 +962,7 @@ public class MainWindowViewModel : ViewModelBase
                                 .ToObservableCollection();
 
                             if (AddToQueueDownloadQueues.Count == 0)
-                                await HideContextMenuAsync();
+                                AddToQueueFlyout?.Hide();
 
                             break;
                         }

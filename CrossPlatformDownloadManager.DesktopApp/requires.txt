@@ -1,15 +1,9 @@
 Fix titles and text blocks. I mean change this "Start Download On Application Startup" to this "Start download on application startup"
 Add progress bar to windows toolbar for downloading files
 یک مکانیسم خوب برای پیاده سازی بخش RefreshDownloadAddress نیاز داری
-سرویس DownloadQueueService یه گزینه داره به نام AddDownloadFileToDownloadQueueAsync. هر جا که نیاز هست باید ازش استفاده کنی
 جاهایی که نیازه باید از UpdateList و UpdateCollection استفاده کنی
-برای Browser Extension باید یه قابلیتی بگذاری که بعد دریافت لینک دانلود، لینک دانلودی که داخل مرورگر هست رو پاک کنه
 استایل Scroll ها رو باید تغییر بدی
-به جای کنسول باید از Log استفاده کنی
 مورد بعدی اینکه اگر موقع باز شدن برنامه داخل لاگ ها هیچ خطایی ثبت نشده باشه که هیچ ولی اگر ثبت شده باید به خودم ارسال بشه با اجازه کاربر
-هر جا از Console.Write استفاده کردی باید به جاش از Log. حالا هر چی استفاده کنی
 Start on system startup حتما باید در لینوکس تست بشه
-هرجایی که از ShowErrorDialogAsync استفاده کردی باید بعدش یه Log.Error() هم بگذاری. نمیتونی داخل متد ShowErrorDialogAsync اینکار رو انجام بدی باید دستی انجامش بدی
 Import settings و export settings رو هم به منوی فایل اضافه کن
-وقتی که بخوای دانلود رو ادامه بدی (Resume) بعضی از Chunk ها اگه کامل شده باشن مقدارشون 0 در نظر گرفته میشه
-مشکل همیشگی با Chunk ها، اگه در حال اتصال باشن مینویسه Completed
+صوت رو درست کن

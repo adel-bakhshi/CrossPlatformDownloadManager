@@ -345,6 +345,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "An error occured while refreshing proxies.");
                 await DialogBoxManager.ShowErrorDialogAsync(ex);
             }
         });

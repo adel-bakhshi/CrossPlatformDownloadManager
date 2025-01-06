@@ -50,7 +50,7 @@ public partial class App : Application
             if (Desktop != null)
                 Desktop.Shutdown();
             else
-                throw;
+                Environment.Exit(0);
         }
     }
 
@@ -69,7 +69,8 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while finishing the application.");
+            Environment.Exit(0);
         }
     }
 

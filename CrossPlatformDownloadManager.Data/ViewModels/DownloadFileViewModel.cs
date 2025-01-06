@@ -10,6 +10,7 @@ using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
+using Serilog;
 using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
@@ -325,6 +326,9 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
         else
         {
+            // Load previous chunks data
+            LoadChunksData(downloadPackage.Chunks);
+            
             var urls = downloadPackage
                 .Urls
                 .ToList();
@@ -482,6 +486,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
         chunkProgress.ReceivedBytesSize = e.ReceivedBytesSize;
         chunkProgress.TotalBytesToReceive = e.TotalBytesToReceive;
+        chunkProgress.IsCompleted = e.ReceivedBytesSize >= e.TotalBytesToReceive;
     }
 
     private void CreateChunksData(int count)
@@ -524,7 +529,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         if (_chunkProgresses == null || _chunkProgresses.Count == 0)
             return;
 
-        foreach (var chunkProgress in _chunkProgresses)
+        var chunkProgresses = _chunkProgresses.Where(c => !c.IsCompletionChecked).ToList();
+        foreach (var chunkProgress in chunkProgresses)
         {
             if (!int.TryParse(chunkProgress.ProgressId, out var progressId))
                 return;
@@ -533,7 +539,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             if (chunkData == null)
                 return;
 
-            if (chunkProgress.CheckCount % 5 == 0)
+            if (chunkProgress.CheckCount % 10 == 0)
             {
                 if (_updateChunksDataTimer!.IsEnabled && chunkData.DownloadedSize != chunkData.TotalSize)
                 {
@@ -548,14 +554,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             {
                 chunkProgress.CheckCount++;
             }
-
-            if (chunkData.DownloadedSize == chunkData.TotalSize)
-                chunkData.Info = "Completed";
-            else if (!_updateChunksDataTimer!.IsEnabled)
-                chunkData.Info = "Paused";
-
+            
             chunkData.DownloadedSize = chunkProgress.ReceivedBytesSize;
             chunkData.TotalSize = chunkProgress.TotalBytesToReceive;
+            
+            if (!_updateChunksDataTimer!.IsEnabled)
+                chunkData.Info = "Paused";
+
+            if (chunkProgress.IsCompleted)
+            {
+                chunkData.Info = "Completed";
+                chunkProgress.IsCompletionChecked = true;
+            }
         }
     }
 
@@ -602,10 +612,26 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while checking resume capability.");
         }
 
         CanResumeDownload = false;
+    }
+
+    private void LoadChunksData(Chunk[] chunks)
+    {
+        if (chunks.Length == 0)
+            return;
+
+        foreach (var chunk in chunks)
+        {
+            var chunkProgress = _chunkProgresses?.Find(c => c.ProgressId.Equals(chunk.Id));
+            if (chunkProgress == null)
+                continue;
+
+            chunkProgress.ReceivedBytesSize = chunk.IsDownloadCompleted() ? chunk.Length : chunk.Position;
+            chunkProgress.TotalBytesToReceive = chunk.Length;
+        }
     }
 
     #endregion

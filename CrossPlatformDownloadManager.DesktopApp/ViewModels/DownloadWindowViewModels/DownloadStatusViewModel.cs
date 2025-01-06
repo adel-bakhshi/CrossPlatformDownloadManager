@@ -11,6 +11,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
 
@@ -93,6 +94,7 @@ public class DownloadStatusViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to open the folder.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

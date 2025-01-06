@@ -44,7 +44,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "Failed to get url details.");
+            Log.Error(ex, "An error occured while trying to get url details.");
         }
     }
 }

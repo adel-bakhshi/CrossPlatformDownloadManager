@@ -13,6 +13,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
@@ -95,6 +96,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to add new category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -123,6 +125,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to edit category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -187,6 +190,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to delete category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -210,6 +214,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to load categories.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

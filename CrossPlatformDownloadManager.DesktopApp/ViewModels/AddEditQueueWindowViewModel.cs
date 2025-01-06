@@ -14,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewM
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -338,6 +339,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to save queue.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -382,6 +384,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to delete queue.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -397,6 +400,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to cancel.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

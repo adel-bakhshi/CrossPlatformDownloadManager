@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
 
@@ -38,7 +39,7 @@ public class WindowsStartupManager : IStartupManager
 
         if (key == null)
         {
-            Console.WriteLine("Could not open registry key. Admin rights may be required.");
+            Log.Information("Could not open registry key. Admin rights may be required.");
             return; // Or throw an exception
         }
 

@@ -2,15 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using ReactiveUI;
-using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 
@@ -91,8 +88,8 @@ public class OptionsViewModel : ViewModelBase
         DaysOfWeekOptions = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         SelectedDate = DateTime.Now;
 
-        SelectStartDownloadDateCommand = ReactiveCommand.CreateFromTask<CalendarDatePicker?>(SelectStartDownloadDateAsync);
-        ChangeDefaultDownloadQueueCommand = ReactiveCommand.CreateFromTask(ChangeDefaultDownloadQueueAsync);
+        SelectStartDownloadDateCommand = ReactiveCommand.Create<CalendarDatePicker?>(SelectStartDownloadDate);
+        ChangeDefaultDownloadQueueCommand = ReactiveCommand.Create(ChangeDefaultDownloadQueue);
     }
 
     public void ChangeDaysOfWeek(List<string> selectedItems)
@@ -111,32 +108,17 @@ public class OptionsViewModel : ViewModelBase
 
     #region Helpers
 
-    private async Task SelectStartDownloadDateAsync(CalendarDatePicker? datePicker)
+    private static void SelectStartDownloadDate(CalendarDatePicker? datePicker)
     {
-        try
-        {
-            if (datePicker == null)
-                return;
+        if (datePicker == null)
+            return;
 
-            datePicker.IsDropDownOpen = !datePicker.IsDropDownOpen;
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        datePicker.IsDropDownOpen = !datePicker.IsDropDownOpen;
     }
 
-    private async Task ChangeDefaultDownloadQueueAsync()
+    private void ChangeDefaultDownloadQueue()
     {
-        try
-        {
-            DownloadQueue.IsDefault = !DownloadQueue.IsDefault;
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to change the default download queue.");
-        }
+        DownloadQueue.IsDefault = !DownloadQueue.IsDefault;
     }
 
     private void ChangeStartDownloadDateOption()

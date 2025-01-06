@@ -9,6 +9,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 
@@ -112,7 +113,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while loading settings.");
         }
     }
 

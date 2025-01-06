@@ -4,7 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -22,7 +24,6 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
 
     private async void BrowseButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        // TODO: Show message box
         try
         {
             var topLevel = GetTopLevel(this);
@@ -44,7 +45,8 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to select directory.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

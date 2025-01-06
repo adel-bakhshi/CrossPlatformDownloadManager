@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 
@@ -23,7 +24,6 @@ public class AppFinisher : IAppFinisher
 
     public async Task FinishAppAsync()
     {
-        // TODO: Show message box
         try
         {
             // Find all running download queues
@@ -57,23 +57,16 @@ public class AppFinisher : IAppFinisher
             }
 
             // Get settings and save them
-            var settings = _appService
+            await _appService
                 .SettingsService
-                .Settings;
-
-            if (settings != null)
-            {
-                await _appService
-                    .SettingsService
-                    .SaveSettingsAsync(settings, reloadData: false);
-            }
+                .SaveSettingsAsync(_appService.SettingsService.Settings, reloadData: false);
 
             // Stop listening for URLs
             _browserExtension.StopListening();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while finishing the application.");
         }
     }
 }

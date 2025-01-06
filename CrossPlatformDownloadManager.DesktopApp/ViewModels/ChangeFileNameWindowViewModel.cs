@@ -6,9 +6,12 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -52,12 +55,11 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         _downloadFile = downloadFile;
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
-        CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
+        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
     private async Task SaveAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -71,13 +73,13 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to close the window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private void Cancel(Window? owner)
+    private async Task CancelAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -85,14 +87,32 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
 
             if (!CurrentFileName.Equals(NewFileName))
             {
-                // TODO: Ask user if he wants to save changes
+                var result = await DialogBoxManager.ShowWarningDialogAsync(
+                    "Change file name",
+                    "Are you sure you want to discard the changes?",
+                    DialogButtons.YesNoCancel);
+
+                switch (result)
+                {
+                    case DialogResult.No:
+                    {
+                        await SaveAsync(owner);
+                        return;
+                    }
+
+                    case DialogResult.Cancel:
+                    {
+                        return;
+                    }
+                }
             }
 
             owner.Close();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to close the window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -139,14 +159,23 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         {
             fileExtension = Path.GetExtension(filePath);
             if (fileExtension.IsNullOrEmpty())
-                throw new InvalidOperationException("An unknown error occured.");
+                throw new InvalidOperationException("An error occured while trying to get file extension.");
 
             newFilePath += fileExtension;
         }
 
-        if (!fileExtension.Equals(Path.GetExtension(filePath)))
+        var originalFileExtension = Path.GetExtension(filePath);
+        if (!fileExtension.Equals(originalFileExtension))
         {
-            // TODO: Ask user for continue with new fileExtension
+            var result = await DialogBoxManager.ShowWarningDialogAsync(
+                "Change file extension", 
+                "Are you sure you want to change the file extension?", 
+                DialogButtons.YesNo);
+
+            if (result == DialogResult.No)
+            {
+                newFilePath = newFilePath.Substring(0, newFilePath.Length - fileExtension.Length) + originalFileExtension;
+            }
         }
 
         File.Move(filePath, newFilePath);

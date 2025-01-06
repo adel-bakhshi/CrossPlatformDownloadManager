@@ -11,6 +11,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -105,6 +106,7 @@ public class ManagerWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while exit the app.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

@@ -116,6 +116,7 @@ public class FileTypesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while adding a new file type.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -142,6 +143,7 @@ public class FileTypesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while editing a file type.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -174,6 +176,7 @@ public class FileTypesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while deleting a file type.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

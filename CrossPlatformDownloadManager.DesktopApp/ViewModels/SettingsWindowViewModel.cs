@@ -13,6 +13,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -104,7 +105,7 @@ public class SettingsWindowViewModel : ViewModelBase
         GenerateTabs();
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
-        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
+        CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
     }
 
     private void GenerateTabs()
@@ -284,19 +285,13 @@ public class SettingsWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to save settings.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private static async Task CancelAsync(Window? owner)
+    private static void Cancel(Window? owner)
     {
-        try
-        {
-            owner?.Close();
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        owner?.Close();
     }
 }

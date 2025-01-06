@@ -6,10 +6,12 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
 
@@ -77,7 +79,6 @@ public class FilesViewModel : ViewModelBase
 
     private async void AddItemToDataGrid(Window? owner)
     {
-        // TODO: Show message box if error occurred
         try
         {
             if (owner == null)
@@ -108,7 +109,8 @@ public class FilesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while opening the add files to queue window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

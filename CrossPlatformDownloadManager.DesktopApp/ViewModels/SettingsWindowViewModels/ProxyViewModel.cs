@@ -13,6 +13,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
@@ -123,18 +124,17 @@ public class ProxyViewModel : ViewModelBase
     {
         try
         {
-            var proxies = AppService
+            AvailableProxies = AppService
                 .SettingsService
                 .Settings
                 .Proxies;
 
-            foreach (var proxy in proxies)
-                _ = proxy.CheckIsResponsiveAsync();
-
-            AvailableProxies = proxies;
+            var tasks = AvailableProxies.Select(p => p.CheckIsResponsiveAsync()).ToList();
+            await Task.WhenAll(tasks);
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while loading available proxies.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -173,6 +173,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while changing proxy type.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -247,6 +248,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while deleting proxy.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -355,6 +357,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while saving proxy.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -386,20 +389,14 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while setting selected proxy.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    protected override async void OnSettingsServiceDataChanged()
+    protected override void OnSettingsServiceDataChanged()
     {
-        try
-        {
-            base.OnSettingsServiceDataChanged();
-            await LoadAvailableProxiesAsync();
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        base.OnSettingsServiceDataChanged();
+        _ = LoadAvailableProxiesAsync();
     }
 }

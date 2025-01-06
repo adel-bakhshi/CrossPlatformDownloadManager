@@ -3,7 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.DesktopApp.CustomControls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
 
@@ -14,9 +16,8 @@ public partial class ChangeFileNameWindow : MyWindowBase<ChangeFileNameWindowVie
         InitializeComponent();
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
-        // TODO: Show message box
         try
         {
             base.OnLoaded(e);
@@ -29,6 +30,9 @@ public partial class ChangeFileNameWindow : MyWindowBase<ChangeFileNameWindowVie
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to open change file name window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            
             Close();
         }
     }

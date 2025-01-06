@@ -14,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -132,13 +133,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         try
         {
-            if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to cancel.");
-
-            owner.Close();
+            owner?.Close();
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to close the window.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -165,6 +164,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to start download.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -186,6 +186,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to add new category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -207,6 +208,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to add new queue.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -269,6 +271,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to add file to queue.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -301,6 +304,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to add file to default queue.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -382,6 +386,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to load categories.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -404,6 +409,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to get url details.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
         finally

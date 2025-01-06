@@ -10,6 +10,8 @@ public class ChunkProgressViewModel : PropertyChangedBase
     private long _receivedBytesSize;
     private long _totalBytesToReceive;
     private int _checkCount;
+    private bool _isCompleted;
+    private bool _isCompletionChecked;
 
     #endregion
 
@@ -37,6 +39,18 @@ public class ChunkProgressViewModel : PropertyChangedBase
     {
         get => _checkCount;
         set => SetField(ref _checkCount, value);
+    }
+    
+    public bool IsCompleted
+    {
+        get => _isCompleted;
+        set => SetField(ref _isCompleted, value);
+    }
+    
+    public bool IsCompletionChecked
+    {
+        get => _isCompletionChecked;
+        set => SetField(ref _isCompletionChecked, value);
     }
 
     #endregion

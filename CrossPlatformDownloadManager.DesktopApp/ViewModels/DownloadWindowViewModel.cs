@@ -191,6 +191,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to resume/pause the download.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -233,6 +234,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to show/hide the details.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -259,23 +261,17 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occured while trying to limit the download speed.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async void DownloadOptionsViewModelOnOptionsChanged(object? sender, DownloadOptionsChangedEventArgs e)
+    private void DownloadOptionsViewModelOnOptionsChanged(object? sender, DownloadOptionsChangedEventArgs e)
     {
-        try
-        {
-            OpenFolderAfterDownloadFinished = e.OpenFolderAfterDownloadFinished;
-            ExitProgramAfterDownloadFinished = e.ExitProgramAfterDownloadFinished;
-            TurnOffComputerAfterDownloadFinished = e.TurnOffComputerAfterDownloadFinished;
-            TurnOffComputerMode = e.TurnOffComputerMode;
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        OpenFolderAfterDownloadFinished = e.OpenFolderAfterDownloadFinished;
+        ExitProgramAfterDownloadFinished = e.ExitProgramAfterDownloadFinished;
+        TurnOffComputerAfterDownloadFinished = e.TurnOffComputerAfterDownloadFinished;
+        TurnOffComputerMode = e.TurnOffComputerMode;
     }
 
     #endregion

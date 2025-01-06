@@ -4,6 +4,7 @@ using CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 using CrossPlatformDownloadManager.Data.Services.Repository.Services;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 
@@ -112,7 +113,7 @@ public class UnitOfWork : IUnitOfWork
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while creating the database.");
         }
     }
 

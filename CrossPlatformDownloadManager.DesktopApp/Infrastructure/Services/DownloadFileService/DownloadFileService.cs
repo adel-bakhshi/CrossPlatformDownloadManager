@@ -290,7 +290,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
             MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
-            ParallelDownload = true
+            ParallelDownload = true,
+            CheckDiskSizeBeforeDownload = true
         };
 
         switch (_settingsService.Settings.ProxyMode)
@@ -835,7 +836,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occurred while stopping operations.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

@@ -6,9 +6,12 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -47,12 +50,11 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
         NewAddress = _downloadFile?.Url ?? string.Empty;
         
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
-        CancelCommand = ReactiveCommand.Create<Window?>(Cancel);
+        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
     private async Task SaveAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             NewAddress = NewAddress.Replace("\\", "/").Trim();
@@ -89,13 +91,13 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to refresh the download address.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private void Cancel(Window? owner)
+    private async Task CancelAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -112,7 +114,24 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
 
                 if (downloadFile != null && !downloadFile.Url.IsNullOrEmpty() && !downloadFile.Url!.Equals(NewAddress))
                 {
-                    // TODO: Ask user if he wants to save changes
+                    var result = await DialogBoxManager.ShowWarningDialogAsync(
+                        "Refresh Download Address",
+                        "Are you sure you want to cancel the refresh of the download address without saving the changes?",
+                        DialogButtons.YesNoCancel);
+
+                    switch (result)
+                    {
+                        case DialogResult.No:
+                        {
+                            await SaveAsync(owner);
+                            return;
+                        }
+
+                        case DialogResult.Cancel:
+                        {
+                            return;
+                        }
+                    }
                 }
             }
             
@@ -120,7 +139,8 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to close the window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

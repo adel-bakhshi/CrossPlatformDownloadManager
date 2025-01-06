@@ -60,7 +60,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 ViewModel.SelectedFilesTotalSize = "0 KB";
 
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "Error while updating selected files total size");
+            Log.Error(ex, "An error occured while trying to update total size of download files.");
         }
     }
 
@@ -80,7 +80,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "Error while trying to open manager window.");
+            Log.Error(ex, "An error occured while trying to open manager window.");
         }
     }
 

@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
@@ -48,12 +51,11 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
 
     public AddFilesToQueueWindowViewModel(IAppService appService) : base(appService)
     {
-        SaveCommand = ReactiveCommand.Create<Window?>(Save);
+        SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
     }
 
-    private void Save(Window? owner)
+    private async Task SaveAsync(Window? owner)
     {
-        // TODO: Show message box
         try
         {
             if (owner == null)
@@ -66,7 +68,8 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error(ex, "An error occured while trying to close the window.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

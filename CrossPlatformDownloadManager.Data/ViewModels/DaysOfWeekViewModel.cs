@@ -68,6 +68,7 @@ public class DaysOfWeekViewModel : PropertyChangedBase
         set => SetField(ref _friday, value);
     }
     
+    [JsonIgnore]
     public bool IsAnyDaySelected => Saturday || Sunday || Monday || Tuesday || Wednesday || Thursday || Friday;
 
     #endregion

@@ -23,7 +23,7 @@ public interface IDownloadQueueService
 
     Task LoadDownloadQueuesAsync(bool addDefaultDownloadQueue = false);
 
-    Task AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true);
+    Task<int> AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true);
 
     Task DeleteDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true);
 
@@ -50,4 +50,6 @@ public interface IDownloadQueueService
     Task ChangeDefaultDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true);
 
     Task ChangeLastSelectedDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true);
+    
+    void StartScheduleManagerTimer();
 }

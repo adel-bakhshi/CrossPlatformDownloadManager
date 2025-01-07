@@ -9,6 +9,7 @@ using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,6 +82,9 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             var vm = new ManagerWindowViewModel(appService!, trayMenuWindow!);
             var window = new ManagerWindow { DataContext = vm };
             window.Show();
+
+            var downloadQueueService = serviceProvider.GetService<IDownloadQueueService>();
+            downloadQueueService!.StartScheduleManagerTimer();
         }
         catch (Exception ex)
         {

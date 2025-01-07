@@ -17,26 +17,34 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowV
 
 public class FilesViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
-    private DownloadQueueViewModel _downloadQueue;
-
-    public DownloadQueueViewModel DownloadQueue
-    {
-        get => _downloadQueue;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _downloadQueue, value);
-            LoadDownloadFiles();
-        }
-    }
+    private readonly int _downloadQueueId;
 
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
+    private int _downloadCountAtSameTime;
+    private bool _includePausedFiles;
+
+    #endregion
+
+    #region Properties
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
         get => _downloadFiles;
         set => this.RaiseAndSetIfChanged(ref _downloadFiles, value);
+    }
+
+    public int DownloadCountAtSameTime
+    {
+        get => _downloadCountAtSameTime;
+        set => this.RaiseAndSetIfChanged(ref _downloadCountAtSameTime, value);
+    }
+
+    public bool IncludePausedFiles
+    {
+        get => _includePausedFiles;
+        set => this.RaiseAndSetIfChanged(ref _includePausedFiles, value);
     }
 
     public List<DownloadFileViewModel>? SelectedDownloadFiles { get; set; }
@@ -55,10 +63,12 @@ public class FilesViewModel : ViewModelBase
 
     #endregion
 
-    public FilesViewModel(IAppService appService) : base(appService)
+    public FilesViewModel(IAppService appService, DownloadQueueViewModel downloadQueue) : base(appService)
     {
-        DownloadQueue = new DownloadQueueViewModel();
-        
+        _downloadQueueId = downloadQueue.Id;
+        DownloadCountAtSameTime = downloadQueue.DownloadCountAtSameTime;
+        IncludePausedFiles = downloadQueue.IncludePausedFiles;
+
         LoadDownloadFiles();
 
         AddItemToDataGridCommand = ReactiveCommand.Create<Window?>(AddItemToDataGrid);
@@ -69,12 +79,14 @@ public class FilesViewModel : ViewModelBase
 
     private void LoadDownloadFiles()
     {
-        DownloadFiles = AppService
+        var downloadFiles = AppService
             .DownloadFileService
             .DownloadFiles
-            .Where(df => df.DownloadQueueId != null && df.DownloadQueueId == DownloadQueue?.Id)
+            .Where(df => df.DownloadQueueId != null && df.DownloadQueueId == _downloadQueueId)
             .OrderBy(df => df.DownloadQueuePriority)
             .ToObservableCollection();
+
+        DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
     }
 
     private async void AddItemToDataGrid(Window? owner)
@@ -84,7 +96,7 @@ public class FilesViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddFilesToQueueWindowViewModel(AppService) { DownloadQueueId = DownloadQueue?.Id };
+            var vm = new AddFilesToQueueWindowViewModel(AppService) { DownloadQueueId = _downloadQueueId };
             var window = new AddFilesToQueueWindow { DataContext = vm };
 
             var result = await window.ShowDialog<List<DownloadFileViewModel>?>(owner);
@@ -142,6 +154,12 @@ public class FilesViewModel : ViewModelBase
     private void ChangePriorityToHigherLevel(DataGrid? dataGrid)
     {
         ChangeItemsPriority(dataGrid, true);
+    }
+
+    protected override void OnDownloadQueueServiceDataChanged()
+    {
+        base.OnDownloadQueueServiceDataChanged();
+        LoadDownloadFiles();
     }
 
     #region Helpers

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -13,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 
@@ -25,6 +27,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     private readonly IDownloadFileService _downloadFileService;
 
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues;
+    private readonly DispatcherTimer _scheduleManagerTimer;
 
     #endregion
 
@@ -52,6 +55,183 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         _downloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
 
         _downloadQueues = [];
+
+        _scheduleManagerTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _scheduleManagerTimer.Tick += ScheduleManagerTimerOnTick;
+    }
+
+    private void ScheduleManagerTimerOnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Stop timer until operation is finished
+            _scheduleManagerTimer.Stop();
+
+            // Start scheduled queues
+            var startScheduledQueues = DownloadQueues
+                .Where(dq => dq is { StartDownloadSchedule: not null, IsScheduleEnabled: false })
+                .ToList();
+
+            foreach (var downloadQueue in startScheduledQueues)
+            {
+                _ = downloadQueue.IsDaily ? StartDailyScheduleAsync(downloadQueue) : StartJustForDateScheduleAsync(downloadQueue);
+            }
+
+            // Stop scheduled queues
+            var stopScheduledQueues = DownloadQueues
+                .Where(dq => dq.StopDownloadSchedule != null && (dq.IsScheduleEnabled || dq.IsRunning))
+                .ToList();
+
+            foreach (var downloadQueue in stopScheduledQueues)
+            {
+                _ = downloadQueue.IsDaily ? StopDailyScheduleAsync(downloadQueue) : StopJustForDateScheduleAsync(downloadQueue);
+            }
+
+            _scheduleManagerTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while scheduling manager.");
+
+            if (!_scheduleManagerTimer.IsEnabled)
+                _scheduleManagerTimer.Start();
+        }
+    }
+
+    private async Task StartDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        var daysOfWeek = downloadQueue.DaysOfWeek;
+        if (daysOfWeek.IsNullOrEmpty())
+            return;
+
+        var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();
+        if (daysOfWeekViewModel == null)
+            return;
+
+        var currentDayOfWeek = DateTime.Now.DayOfWeek;
+
+        bool dayOfWeekAcceptable;
+        switch (currentDayOfWeek)
+        {
+            case DayOfWeek.Saturday when daysOfWeekViewModel.Saturday:
+            case DayOfWeek.Sunday when daysOfWeekViewModel.Sunday:
+            case DayOfWeek.Monday when daysOfWeekViewModel.Monday:
+            case DayOfWeek.Tuesday when daysOfWeekViewModel.Tuesday:
+            case DayOfWeek.Wednesday when daysOfWeekViewModel.Wednesday:
+            case DayOfWeek.Thursday when daysOfWeekViewModel.Thursday:
+            case DayOfWeek.Friday when daysOfWeekViewModel.Friday:
+            {
+                dayOfWeekAcceptable = true;
+                break;
+            }
+
+            default:
+            {
+                dayOfWeekAcceptable = false;
+                break;
+            }
+        }
+
+        if (!dayOfWeekAcceptable)
+            return;
+
+        await StartScheduleAsync(downloadQueue);
+    }
+
+    private async Task StartJustForDateScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Compare current date with just for date
+        if (downloadQueue.JustForDate?.Date.Equals(DateTime.Now.Date) != true)
+            return;
+
+        await StartScheduleAsync(downloadQueue);
+    }
+
+    private async Task StartScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Make sure start time is equal to current time
+        var startDownloadHour = downloadQueue.StartDownloadSchedule!.Value.Hours;
+        var startDownloadMinute = downloadQueue.StartDownloadSchedule!.Value.Minutes;
+
+        // Compare current time with start time
+        if (startDownloadHour != DateTime.Now.Hour || startDownloadMinute != DateTime.Now.Minute)
+            return;
+
+        var downloadFiles = _downloadFileService
+            .DownloadFiles
+            .Where(df => df.DownloadQueueId == downloadQueue.Id)
+            .ToList();
+
+        if (downloadFiles.Count == 0)
+            return;
+
+        downloadQueue.IsScheduleEnabled = true;
+        // Start download queue
+        await StartDownloadQueueAsync(downloadQueue);
+    }
+
+    private async Task StopDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        var daysOfWeek = downloadQueue.DaysOfWeek;
+        if (daysOfWeek.IsNullOrEmpty())
+            return;
+
+        var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();
+        if (daysOfWeekViewModel == null)
+            return;
+
+        var currentDayOfWeek = DateTime.Now.DayOfWeek;
+
+        bool dayOfWeekAcceptable;
+        switch (currentDayOfWeek)
+        {
+            case DayOfWeek.Saturday when daysOfWeekViewModel.Saturday:
+            case DayOfWeek.Sunday when daysOfWeekViewModel.Sunday:
+            case DayOfWeek.Monday when daysOfWeekViewModel.Monday:
+            case DayOfWeek.Tuesday when daysOfWeekViewModel.Tuesday:
+            case DayOfWeek.Wednesday when daysOfWeekViewModel.Wednesday:
+            case DayOfWeek.Thursday when daysOfWeekViewModel.Thursday:
+            case DayOfWeek.Friday when daysOfWeekViewModel.Friday:
+            {
+                dayOfWeekAcceptable = true;
+                break;
+            }
+
+            default:
+            {
+                dayOfWeekAcceptable = false;
+                break;
+            }
+        }
+
+        if (!dayOfWeekAcceptable)
+            return;
+
+        await StopScheduleAsync(downloadQueue);
+    }
+
+    private async Task StopJustForDateScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Compare current date with just for date
+        if (downloadQueue.JustForDate?.Date.Equals(DateTime.Now.Date) != true)
+            return;
+
+        await StopScheduleAsync(downloadQueue);
+    }
+
+    private async Task StopScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Make sure stop time is equal to current time
+        var stopDownloadHour = downloadQueue.StopDownloadSchedule!.Value.Hours;
+        var stopDownloadMinute = downloadQueue.StopDownloadSchedule!.Value.Minutes;
+
+        // Compare current time with stop time
+        if (DateTime.Now.Hour != stopDownloadHour || DateTime.Now.Minute != stopDownloadMinute)
+            return;
+
+        downloadQueue.IsScheduleEnabled = false;
+        // Stop download queue
+        await StopDownloadQueueAsync(downloadQueue);
     }
 
     public async Task LoadDownloadQueuesAsync(bool addDefaultDownloadQueue = false)
@@ -70,28 +250,30 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         foreach (var downloadQueue in deletedDownloadQueues)
             DownloadQueues.Remove(downloadQueue);
 
-        var addDownloadQueues = downloadQueues
+        var addedDownloadQueues = downloadQueues
             .Where(dq => DownloadQueues.All(vm => vm.Id != dq.Id))
             .Select(dq => _mapper.Map<DownloadQueueViewModel>(dq))
             .ToList();
 
-        foreach (var downloadQueue in addDownloadQueues)
+        foreach (var downloadQueue in addedDownloadQueues)
             DownloadQueues.Add(downloadQueue);
 
         OnPropertyChanged(nameof(DownloadQueues));
         DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true)
+    public async Task<int> AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true)
     {
         if (downloadQueue is not { Id: 0 })
-            return;
+            return 0;
 
         await _unitOfWork.DownloadQueueRepository.AddAsync(downloadQueue);
         await _unitOfWork.SaveAsync();
 
         if (reloadData)
             await LoadDownloadQueuesAsync();
+
+        return downloadQueue.Id;
     }
 
     public async Task DeleteDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool reloadData = true)
@@ -249,9 +431,9 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         if (downloadQueue == null)
             return;
 
-        var downloadFiles = _downloadFileService
-            .DownloadFiles
-            .Where(df => primaryKeys.Contains(df.Id) && !df.IsCompleted && df.DownloadQueueId != downloadQueue.Id)
+        var downloadFiles = primaryKeys
+            .Select(pk => _downloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == pk && !df.IsCompleted && df.DownloadQueueId != downloadQueue.Id))
+            .OfType<DownloadFileViewModel>()
             .ToList();
 
         if (downloadFiles.Count == 0)
@@ -385,6 +567,11 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         // Set given download queue as last choice and update it
         downloadQueue.IsLastChoice = true;
         await UpdateDownloadQueueAsync(downloadQueue, reloadData);
+    }
+
+    public void StartScheduleManagerTimer()
+    {
+        _scheduleManagerTimer.Start();
     }
 
     #region Helpers

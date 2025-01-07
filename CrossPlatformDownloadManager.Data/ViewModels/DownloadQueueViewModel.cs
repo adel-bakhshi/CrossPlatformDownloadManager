@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
@@ -28,18 +27,6 @@ public class DownloadQueueViewModel : PropertyChangedBase
     private int _downloadCountAtSameTime = 1;
     private bool _includePausedFiles;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
-    private bool _startDownloadScheduleEnabled;
-    private double? _startDownloadHour;
-    private double? _startDownloadMinute;
-    private bool _stopDownloadScheduleEnabled;
-    private double? _stopDownloadHour;
-    private double? _stopDownloadMinute;
-    private readonly ObservableCollection<string> _timesOfDay = [];
-    private string? _selectedStartTimeOfDay;
-    private string? _selectedStopTimeOfDay;
-    private readonly ObservableCollection<string> _turnOffComputerModes = [];
-    private string? _selectedTurnOffComputerMode;
-    private DaysOfWeekViewModel? _daysOfWeekViewModel;
     private bool _isRunning;
 
     private List<DownloadFileViewModel> _downloadingFiles = [];
@@ -162,78 +149,6 @@ public class DownloadQueueViewModel : PropertyChangedBase
         set => SetField(ref _downloadFiles, value);
     }
 
-    public bool StartDownloadScheduleEnabled
-    {
-        get => _startDownloadScheduleEnabled;
-        set => SetField(ref _startDownloadScheduleEnabled, value);
-    }
-
-    public double? StartDownloadHour
-    {
-        get => _startDownloadHour;
-        set => SetField(ref _startDownloadHour, value);
-    }
-
-    public double? StartDownloadMinute
-    {
-        get => _startDownloadMinute;
-        set => SetField(ref _startDownloadMinute, value);
-    }
-
-    public bool StopDownloadScheduleEnabled
-    {
-        get => _stopDownloadScheduleEnabled;
-        set => SetField(ref _stopDownloadScheduleEnabled, value);
-    }
-
-    public double? StopDownloadHour
-    {
-        get => _stopDownloadHour;
-        set => SetField(ref _stopDownloadHour, value);
-    }
-
-    public double? StopDownloadMinute
-    {
-        get => _stopDownloadMinute;
-        set => SetField(ref _stopDownloadMinute, value);
-    }
-
-    public ObservableCollection<string> TimesOfDay
-    {
-        get => _timesOfDay;
-        private init => SetField(ref _timesOfDay, value);
-    }
-
-    public string? SelectedStartTimeOfDay
-    {
-        get => _selectedStartTimeOfDay;
-        set => SetField(ref _selectedStartTimeOfDay, value);
-    }
-
-    public string? SelectedStopTimeOfDay
-    {
-        get => _selectedStopTimeOfDay;
-        set => SetField(ref _selectedStopTimeOfDay, value);
-    }
-
-    public ObservableCollection<string> TurnOffComputerModes
-    {
-        get => _turnOffComputerModes;
-        private init => SetField(ref _turnOffComputerModes, value);
-    }
-
-    public string? SelectedTurnOffComputerMode
-    {
-        get => _selectedTurnOffComputerMode;
-        set => SetField(ref _selectedTurnOffComputerMode, value);
-    }
-
-    public DaysOfWeekViewModel? DaysOfWeekViewModel
-    {
-        get => _daysOfWeekViewModel;
-        set => SetField(ref _daysOfWeekViewModel, value);
-    }
-
     public bool IsRunning
     {
         get => _isRunning;
@@ -247,68 +162,7 @@ public class DownloadQueueViewModel : PropertyChangedBase
     }
 
     public bool IsStartSoundPlayed { get; set; }
+    public bool IsScheduleEnabled { get; set; }
 
     #endregion
-
-    public DownloadQueueViewModel()
-    {
-        TimesOfDay = Constants.TimesOfDay.ToObservableCollection();
-        SelectedStartTimeOfDay = SelectedStopTimeOfDay = TimesOfDay.FirstOrDefault();
-
-        TurnOffComputerModes = Constants.TurnOffComputerModes.ToObservableCollection();
-        SelectedTurnOffComputerMode = TurnOffComputerModes.FirstOrDefault();
-
-        DaysOfWeekViewModel = new DaysOfWeekViewModel();
-    }
-
-    public void LoadViewData()
-    {
-        StartDownloadScheduleEnabled = StartDownloadSchedule != null;
-        StopDownloadScheduleEnabled = StopDownloadSchedule != null;
-
-        if (StartDownloadScheduleEnabled)
-        {
-            var isAfternoon = StartDownloadSchedule!.Value.Hours > 12;
-
-            StartDownloadHour = StartDownloadSchedule!.Value.Hours - (isAfternoon ? 12 : 0);
-            StartDownloadMinute = StartDownloadSchedule!.Value.Minutes;
-
-            var timeOfDay = isAfternoon ? "PM" : "AM";
-            SelectedStartTimeOfDay =
-                TimesOfDay.FirstOrDefault(t => t.Equals(timeOfDay, StringComparison.OrdinalIgnoreCase)) ??
-                TimesOfDay.FirstOrDefault();
-        }
-
-        if (StopDownloadScheduleEnabled)
-        {
-            var isAfternoon = StopDownloadSchedule!.Value.Hours > 12;
-
-            StopDownloadHour = StopDownloadSchedule!.Value.Hours - (isAfternoon ? 12 : 0);
-            StopDownloadMinute = StopDownloadSchedule!.Value.Minutes;
-
-            var timeOfDay = isAfternoon ? "PM" : "AM";
-            SelectedStopTimeOfDay =
-                TimesOfDay.FirstOrDefault(t => t.Equals(timeOfDay, StringComparison.OrdinalIgnoreCase)) ??
-                TimesOfDay.FirstOrDefault();
-        }
-
-        if (TurnOffComputerWhenDone)
-        {
-            var turnOffComputerMode = Enum.GetName(typeof(TurnOffComputerMode), TurnOffComputerMode!);
-            if (turnOffComputerMode.IsNullOrEmpty())
-                return;
-
-            if (turnOffComputerMode!.Equals("Shutdown", StringComparison.OrdinalIgnoreCase))
-                turnOffComputerMode = "Shut down";
-
-            SelectedTurnOffComputerMode = TurnOffComputerModes.FirstOrDefault(m => m.Equals(turnOffComputerMode, StringComparison.OrdinalIgnoreCase)) ??
-                                          TurnOffComputerModes.FirstOrDefault();
-        }
-
-        var daysOfWeek = DaysOfWeek.ConvertFromJson<DaysOfWeekViewModel>();
-        if (daysOfWeek == null)
-            return;
-
-        DaysOfWeekViewModel = daysOfWeek;
-    }
 }

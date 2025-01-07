@@ -28,7 +28,7 @@
                                         Watermark="Count"
                                         WatermarkForeground="{DynamicResource TertiaryColor}"
                                         BorderThickness="0"
-                                        Value="{Binding DownloadQueue.DownloadCountAtSameTime}"
+                                        Value="{Binding DownloadCountAtSameTime}"
                                         VerticalAlignment="Center"
                                         MinWidth="80"
                                         ShowButtonSpinner="False"
@@ -129,7 +129,7 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding DownloadQueue.IncludePausedFiles}" />
+                              IsChecked="{Binding IncludePausedFiles}" />
             </Grid>
         </Border>
 
@@ -137,7 +137,7 @@
         <DataGrid Name="FilesDataGrid"
                   Grid.Row="2"
                   ItemsSource="{Binding DownloadFiles}"
-                  Classes="minimalDataGrid darkRows"
+                  Classes="minimalDataGrid darkRows invertColors"
                   SelectionMode="Extended"
                   SelectionChanged="FilesDataGridOnSelectionChanged"
                   PropertyChanged="FilesDataGridOnPropertyChanged">

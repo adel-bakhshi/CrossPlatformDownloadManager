@@ -269,6 +269,45 @@
                             Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
                 </Style>
             </Style>
+
+            <Style Selector="^.invertColors">
+                <Style Selector="^ DataGridColumnHeader">
+                    <Setter Property="Background"
+                            Value="{DynamicResource SecondaryColor}" />
+                </Style>
+
+                <Style Selector="^ DataGridRow">
+                    <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource SecondaryColor}" />
+                    </Style>
+
+                    <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource PrimaryColor}" />
+                    </Style>
+
+                    <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                    </Style>
+
+                    <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                    </Style>
+
+                    <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                    </Style>
+
+                    <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                    </Style>
+                </Style>
+            </Style>
         </Style>
     </Style>
 </Styles>

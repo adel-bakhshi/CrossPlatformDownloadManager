@@ -5,3 +5,9 @@ Add progress bar to windows toolbar for downloading files
 مورد بعدی اینکه اگر موقع باز شدن برنامه داخل لاگ ها هیچ خطایی ثبت نشده باشه که هیچ ولی اگر ثبت شده باید به خودم ارسال بشه با اجازه کاربر
 Start on system startup حتما باید در لینوکس تست بشه
 Import settings و export settings رو هم به منوی فایل اضافه کن
+Schedule رو به صورت روزانه (Daily) هم تست کن
+هر جا از DialogBoxManager استفاده کردی، متن پیام و عنوانش رو باید یه چیز معقولی بگذاری
+هر جایی که از ShowDialog< استفاده کردی حتما نوع خروجی رو nullable تعریف کن
+هرجا که از StartDownloadFileAsync استفاده کردی باید Window هم نمایش بدی. اگر بشه اینکار رو در خود متد انجام داد خیلی عالی میشه
+برای پنجره ها آیکون بگذار
+TODO ها رو انجام بده

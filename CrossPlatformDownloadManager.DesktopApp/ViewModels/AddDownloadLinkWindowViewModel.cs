@@ -198,7 +198,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occured while trying to add new queue.");
 
-            var vm = new AddEditQueueWindowViewModel(AppService);
+            var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
             var result = await window.ShowDialog<bool?>(owner);
             if (result != true)

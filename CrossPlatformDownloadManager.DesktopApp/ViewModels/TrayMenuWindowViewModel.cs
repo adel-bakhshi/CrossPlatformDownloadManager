@@ -202,7 +202,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         {
             HideTrayMenu();
 
-            var vm = new AddEditQueueWindowViewModel(AppService);
+            var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
             window.Show();
         }

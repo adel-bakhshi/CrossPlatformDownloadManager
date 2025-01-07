@@ -544,7 +544,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            var vm = new AddEditQueueWindowViewModel(AppService) { IsEditMode = true, DownloadQueue = downloadQueue };
+            var vm = new AddEditQueueWindowViewModel(AppService, downloadQueue);
             var window = new AddEditQueueWindow { DataContext = vm };
             await window.ShowDialog(owner);
         }
@@ -562,7 +562,7 @@ public class MainWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var vm = new AddEditQueueWindowViewModel(AppService) { IsEditMode = false };
+            var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
             await window.ShowDialog(owner);
         }

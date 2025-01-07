@@ -79,46 +79,14 @@ public partial class OptionsView : MyUserControlBase<OptionsViewModel>
     private void LoadData()
     {
         // If ViewModel is null or is not edit mode, don't need to load data and return
-        if (ViewModel == null || ViewModel.DownloadQueue.Id == 0)
+        if (ViewModel == null || ViewModel.DaysOfWeek.Count == 0)
             return;
-
-        // Set selected start download date option
-        ViewModel.SelectedStartDownloadDateOption = ViewModel.DownloadQueue.IsDaily ? "Daily" : "Once";
-        if (!ViewModel.DownloadQueue.IsDaily)
-            ViewModel.SelectedDate = ViewModel.DownloadQueue.JustForDate;
-
-        // Make sure DaysOfWeekViewModel is not null
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel == null)
-            return;
-
-        // Create days of week list
-        var daysOfWeek = new List<string>();
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Saturday)
-            daysOfWeek.Add("Saturday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Sunday)
-            daysOfWeek.Add("Sunday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Monday)
-            daysOfWeek.Add("Monday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Tuesday)
-            daysOfWeek.Add("Tuesday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Wednesday)
-            daysOfWeek.Add("Wednesday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Thursday)
-            daysOfWeek.Add("Thursday");
-
-        if (ViewModel.DownloadQueue.DaysOfWeekViewModel.Friday)
-            daysOfWeek.Add("Friday");
 
         // Set selected days of week
         _changingDaysOfWeek = true;
+        DaysOfWeekSelectBox.SelectedItems ??= new List<string>();
         DaysOfWeekSelectBox.SelectedItems?.Clear();
-        foreach (var day in daysOfWeek)
+        foreach (var day in ViewModel.DaysOfWeek)
             DaysOfWeekSelectBox.SelectedItems?.Add(day);
 
         _changingDaysOfWeek = false;

@@ -22,7 +22,7 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         Close(false);
     }
 
-    private async void BrowseButton_OnClick(object? sender, RoutedEventArgs e)
+    private async void BrowseButtonOnClick(object? sender, RoutedEventArgs e)
     {
         try
         {

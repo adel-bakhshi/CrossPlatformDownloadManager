@@ -1,10 +1,10 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;

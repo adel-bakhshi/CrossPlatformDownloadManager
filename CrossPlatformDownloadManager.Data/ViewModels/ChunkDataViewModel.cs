@@ -19,7 +19,7 @@ public class ChunkDataViewModel : PropertyChangedBase
     public int ChunkIndex
     {
         get => _chunkIndex;
-        init
+        set
         {
             if (!SetField(ref _chunkIndex, value))
                 return;
@@ -46,7 +46,7 @@ public class ChunkDataViewModel : PropertyChangedBase
         }
     }
 
-    public string? DownloadedSizeAsString => DownloadedSize.ToFileSize();
+    public string DownloadedSizeAsString => DownloadedSize.ToFileSize();
 
     public string? Info
     {

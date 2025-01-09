@@ -10,6 +10,8 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.FileTypesView"
              x:DataType="vm:FileTypesViewModel">
+    
+    <!-- Content -->
     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
             Padding="15"
             Background="{DynamicResource SecondaryColor}">

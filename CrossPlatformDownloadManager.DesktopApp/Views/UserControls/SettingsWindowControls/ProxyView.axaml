@@ -19,7 +19,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <!-- Main content -->
+    <!-- Content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical"

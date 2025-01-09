@@ -9,7 +9,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.RefreshDownloadAddressWindow"
         x:DataType="vm:RefreshDownloadAddressWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Refresh download address"
         Width="450"
         Height="200"
@@ -21,26 +20,48 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
+
     <!-- Main content -->
     <Grid Margin="20"
           RowDefinitions="*, Auto">
-        <!-- New address -->
-        <cc:CustomTextBox Grid.Row="0"
-                          Background="{DynamicResource SecondaryColor}"
-                          Watermark="New address"
-                          WatermarkForeground="{DynamicResource TertiaryColor}"
-                          CornerRadius="{DynamicResource DefaultCornerRadius}"
-                          IconData="{DynamicResource AddUrl}"
-                          IconColor="{DynamicResource IconColor}"
-                          IconSize="{DynamicResource SmallIconSize}"
-                          Padding="12, 10"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Top"
-                          OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                          OnHoverBorderColor="{DynamicResource SecondaryColor}"
-                          BorderThickness="1"
-                          BorderBrush="{DynamicResource SecondaryColor}"
-                          Text="{Binding NewAddress}" />
+        <StackPanel Grid.Row="0"
+                    Orientation="Vertical"
+                    Spacing="10">
+            <!-- Current address -->
+            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+                              Watermark="Current address"
+                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource LinkSlash}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryColor}"
+                              Text="{Binding CurrentAddress}"
+                              IsReadOnly="True" />
+
+            <!-- New address -->
+            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+                              Watermark="New address"
+                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource AddUrl}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryColor}"
+                              Text="{Binding NewAddress}" />
+        </StackPanel>
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="1"

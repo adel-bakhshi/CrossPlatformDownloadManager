@@ -329,7 +329,6 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             foreach (var downloadFile in stoppedDownloadFiles)
             {
-                // TODO: Show download window
                 _ = AppService
                     .DownloadFileService
                     .StartDownloadFileAsync(downloadFile);

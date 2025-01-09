@@ -9,6 +9,8 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.DownloadsView"
              x:DataType="vm:DownloadsViewModel">
+    
+    <!-- Content -->
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Show start download dialog -->

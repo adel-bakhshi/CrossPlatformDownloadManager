@@ -8,6 +8,8 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.GeneralsView"
              x:DataType="vm:GeneralsViewModel">
+    
+    <!-- Content -->
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Start on system startup -->

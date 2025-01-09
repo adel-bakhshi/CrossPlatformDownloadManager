@@ -8,6 +8,8 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.NotificationsView"
              x:DataType="vm:NotificationsViewModel">
+    
+    <!-- Content -->
     <StackPanel Orientation="Vertical"
                 Spacing="15">
         <!-- Duplicate download link action -->

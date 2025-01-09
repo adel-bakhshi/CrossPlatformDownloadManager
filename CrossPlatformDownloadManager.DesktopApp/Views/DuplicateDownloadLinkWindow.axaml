@@ -9,7 +9,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DuplicateDownloadLinkWindow"
         x:DataType="vm:DuplicateDownloadLinkWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Duplicate download link"
         Width="640"
         Height="460"

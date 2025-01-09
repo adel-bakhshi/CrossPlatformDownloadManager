@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using ReactiveUI;
 using Serilog;
 
@@ -20,11 +20,9 @@ public class DownloadWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    // Show/Hide details
     private bool _detailsIsVisible = true;
     private double _detailsHeight;
 
-    // Properties
     private ObservableCollection<string> _tabItems = [];
     private string? _selectedTabItem;
     private DownloadStatusViewModel? _downloadStatusViewModel;
@@ -131,17 +129,14 @@ public class DownloadWindowViewModel : ViewModelBase
         HideDetailsButtonContent = "Hide Details";
 
         ResumePauseDownloadCommand = ReactiveCommand.CreateFromTask(ResumePauseDownloadAsync);
-        CancelDownloadCommand = ReactiveCommand.CreateFromTask<Window?>(CancelDownloadAsync);
+        CancelDownloadCommand = ReactiveCommand.CreateFromTask(CancelDownloadAsync);
         ShowHideDetailsCommand = ReactiveCommand.CreateFromTask<Window?>(ShowHideDetailsAsync);
     }
 
-    public async Task StopDownloadAsync(Window? owner)
+    public async Task StopDownloadAsync()
     {
         try
         {
-            if (owner == null)
-                return;
-
             await AppService
                 .DownloadFileService
                 .StopDownloadFileAsync(DownloadFile);
@@ -196,9 +191,9 @@ public class DownloadWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task CancelDownloadAsync(Window? owner)
+    private async Task CancelDownloadAsync()
     {
-        await StopDownloadAsync(owner);
+        await StopDownloadAsync();
     }
 
     private async Task ShowHideDetailsAsync(Window? owner)

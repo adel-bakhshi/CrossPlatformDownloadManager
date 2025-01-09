@@ -11,7 +11,6 @@
         d:DesignHeight="720"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM"
         Width="1280"
         Height="720"
@@ -132,7 +131,7 @@
                         Width="230"
                         Margin="0, 8">
                 <!-- Title -->
-                <TextBlock Text="Your Queues"
+                <TextBlock Text="Your queues"
                            FontWeight="Bold"
                            Margin="8, 0" />
 
@@ -261,9 +260,8 @@
                 <Button Classes="button success"
                         Margin="8, 0"
                         Command="{Binding AddNewDownloadQueueCommand}"
-                        CommandParameter="{Binding $parent[Window]}">
-                    Add new queue
-                </Button>
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Add new queue" />
             </StackPanel>
         </Flyout>
 
@@ -557,7 +555,7 @@
                         <!-- Task -->
                         <MenuItem Header="Task"
                                   Classes="header">
-                            <MenuItem Header="Add Url"
+                            <MenuItem Header="Add new file"
                                       Classes="listItem"
                                       Width="250" />
 
@@ -808,9 +806,8 @@
                                                         HorizontalAlignment="Stretch"
                                                         IsVisible="{Binding IsDownloading}"
                                                         Spacing="3">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Downloading - {0}}"
-                                                    Foreground="{DynamicResource InfoGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Downloading - {0}}"
+                                                           Foreground="{DynamicResource InfoGradientBrush}" />
 
                                                 <ProgressBar Foreground="{DynamicResource InfoGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
@@ -822,9 +819,8 @@
                                                         HorizontalAlignment="Stretch"
                                                         IsVisible="{Binding IsStopped}"
                                                         Spacing="3">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Stopped - {0}}"
-                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Stopped - {0}}"
+                                                           Foreground="{DynamicResource WarningGradientBrush}" />
 
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
@@ -836,9 +832,8 @@
                                                         HorizontalAlignment="Stretch"
                                                         IsVisible="{Binding IsPaused}"
                                                         Spacing="3">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Paused - {0}}"
-                                                    Foreground="{DynamicResource WarningGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Paused - {0}}"
+                                                           Foreground="{DynamicResource WarningGradientBrush}" />
 
                                                 <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
                                                              Background="{DynamicResource TextColor}"
@@ -850,9 +845,8 @@
                                                         HorizontalAlignment="Stretch"
                                                         IsVisible="{Binding IsError}"
                                                         Spacing="3">
-                                                <TextBlock
-                                                    Text="{Binding DownloadProgressAsString, StringFormat={}Error - {0}}"
-                                                    Foreground="{DynamicResource DangerGradientBrush}" />
+                                                <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Error - {0}}"
+                                                           Foreground="{DynamicResource DangerGradientBrush}" />
 
                                                 <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
                                                              Background="{DynamicResource TextColor}"

@@ -9,7 +9,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.ChangeFileNameWindow"
         x:DataType="vm:ChangeFileNameWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Change file name"
         Width="450"
         Height="200"

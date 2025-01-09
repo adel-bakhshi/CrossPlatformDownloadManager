@@ -1,4 +1,6 @@
-namespace CrossPlatformDownloadManager.Data.ViewModels;
+using System;
+
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 
 public class DownloadFinishedTaskValue
 {

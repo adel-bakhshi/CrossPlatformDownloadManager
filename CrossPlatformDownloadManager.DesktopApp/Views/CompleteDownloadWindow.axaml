@@ -8,7 +8,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.CompleteDownloadWindow"
         x:DataType="vm:CompleteDownloadWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Download Completed"
         Width="640"
         Height="320"

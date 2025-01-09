@@ -11,7 +11,6 @@
         d:DesignHeight="270"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLinkWindow"
         x:DataType="vm:AddDownloadLinkWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add Download Link"
         Width="570"
         Height="270"
@@ -72,7 +71,7 @@
 
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Grid.Column="0"
-                                   Text="Start Queue"
+                                   Text="Start queue"
                                    HorizontalAlignment="Left"
                                    VerticalAlignment="Center" />
 
@@ -91,7 +90,7 @@
 
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Grid.Column="0"
-                                   Text="Remember My Choice"
+                                   Text="Remember my choice"
                                    HorizontalAlignment="Left"
                                    VerticalAlignment="Center" />
 
@@ -110,9 +109,8 @@
 
                     <Button Classes="button success"
                             Command="{Binding AddDownloadFileToDownloadQueueCommand}"
-                            CommandParameter="{Binding $parent[Window]}">
-                        Add To Queue
-                    </Button>
+                            CommandParameter="{Binding $parent[Window]}"
+                            Content="Add to Queue" />
                 </StackPanel>
             </Flyout>
         </ResourceDictionary>

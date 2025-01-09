@@ -338,22 +338,9 @@ public class MainWindowViewModel : ViewModelBase
 
             foreach (var downloadFile in downloadFiles)
             {
-                if (downloadFile.IsPaused)
-                {
-                    AppService
-                        .DownloadFileService
-                        .ResumeDownloadFile(downloadFile);
-                }
-                else
-                {
-                    _ = AppService
-                        .DownloadFileService
-                        .StartDownloadFileAsync(downloadFile);
-                }
-
-                var vm = new DownloadWindowViewModel(AppService, downloadFile);
-                var window = new DownloadWindow { DataContext = vm };
-                window.Show();
+                _ = AppService
+                    .DownloadFileService
+                    .StartDownloadFileAsync(downloadFile);
             }
         }
         catch (Exception ex)
@@ -776,10 +763,6 @@ public class MainWindowViewModel : ViewModelBase
                 await AppService
                     .DownloadFileService
                     .RedownloadDownloadFileAsync(downloadFile);
-
-                var vm = new DownloadWindowViewModel(AppService, downloadFile);
-                var window = new DownloadWindow { DataContext = vm };
-                window.Show();
             }
         }
         catch (Exception ex)

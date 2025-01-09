@@ -10,7 +10,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueueWindow"
         x:DataType="vm:AddEditQueueWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="{Binding Title}"
         Width="800"
         Height="600"

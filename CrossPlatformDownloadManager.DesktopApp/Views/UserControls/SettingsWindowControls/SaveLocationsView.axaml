@@ -11,6 +11,8 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.SaveLocationsView"
              x:DataType="vm:SaveLocationsViewModel">
+
+    <!-- Content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical"
@@ -151,9 +153,8 @@
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 Classes="button success"
-                                Click="BrowseButtonOnClick">
-                            Browse
-                        </Button>
+                                Content="Browse"
+                                Click="BrowseButtonOnClick" />
                     </Grid>
                 </Grid>
             </Border>

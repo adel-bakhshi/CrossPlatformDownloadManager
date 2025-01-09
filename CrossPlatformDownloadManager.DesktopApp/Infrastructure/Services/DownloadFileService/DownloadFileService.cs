@@ -12,16 +12,17 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
@@ -209,7 +210,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                                       && !df.SaveLocation.IsNullOrEmpty()
                                       && df.SaveLocation!.Equals(downloadFile.SaveLocation));
 
-            if (duplicateDownloadFile != null)
+            var duplicateFilePath = Path.Combine(downloadFile.SaveLocation, downloadFile.FileName);
+            if (duplicateDownloadFile != null || File.Exists(duplicateFilePath))
             {
                 var newFileName = GetNewFileName(downloadFile.FileName, downloadFile.SaveLocation);
                 if (newFileName.IsNullOrEmpty())
@@ -226,7 +228,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         result = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
         if (startDownloading)
-            StartDownloadAndShowWindow(result);
+            _ = StartDownloadFileAsync(result);
 
         return result;
     }
@@ -277,7 +279,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         await UpdateDownloadFilesAsync(downloadFiles);
     }
 
-    public async Task StartDownloadFileAsync(DownloadFileViewModel? viewModel)
+    public async Task StartDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true)
     {
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null || downloadFile.IsCompleted || downloadFile.IsDownloading || downloadFile.IsPaused || downloadFile.IsStopping)
@@ -288,12 +290,16 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             return;
         }
 
+        // Check disk size before starting download
+        var hasEnoughSpace = await CheckDiskSpaceAsync(downloadFile);
+        if (!hasEnoughSpace)
+            return;
+
         var configuration = new DownloadConfiguration
         {
             ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
             MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
-            ParallelDownload = true,
-            CheckDiskSizeBeforeDownload = true
+            ParallelDownload = true
         };
 
         switch (_settingsService.Settings.ProxyMode)
@@ -335,15 +341,18 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         var service = new DownloadService(configuration);
-
-        _downloadFileTasks.Add(new DownloadFileTaskViewModel
+        var downloadFileTask = new DownloadFileTaskViewModel
         {
             Key = downloadFile.Id,
             Configuration = configuration,
-            Service = service,
-        });
+            Service = service
+        };
+
+        downloadFileTask.CreateDownloadWindow(downloadFile, showWindow);
+        _downloadFileTasks.Add(downloadFileTask);
 
         downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+        downloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
         await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork);
     }
 
@@ -468,7 +477,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             await LoadDownloadFilesAsync();
     }
 
-    public async Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel)
+    public async Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true)
     {
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
@@ -490,7 +499,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         await UpdateDownloadFileAsync(downloadFile);
-        _ = StartDownloadFileAsync(downloadFile);
+        _ = StartDownloadFileAsync(downloadFile, showWindow);
     }
 
     public string GetDownloadSpeed()
@@ -775,7 +784,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                          && df.SaveLocation!.Equals(saveLocation))
             .ToList();
 
-        if (downloadFiles.Count == 0)
+        if (downloadFiles.Count == 0 && !File.Exists(Path.Combine(saveLocation, fileName)))
             return string.Empty;
 
         var fileNames = downloadFiles.ConvertAll(df => df.FileName);
@@ -783,9 +792,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var originalFileName = Path.GetFileNameWithoutExtension(fileName);
         var newFileName = Path.GetFileName(fileName);
         var fileExtension = Path.GetExtension(fileName);
-
-        // Choose new name until it doesn't exist
-        while (fileNames.Contains(newFileName))
+        
+        // Choose new name until it does not exist
+        while (fileNames.Contains(newFileName) || File.Exists(Path.Combine(saveLocation, newFileName)))
         {
             newFileName = $"{originalFileName}_{index}{fileExtension}";
             index++;
@@ -812,6 +821,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 _downloadFinishedTimer.Start();
             }
 
+            // Hide download window
+            var downloadFileTask = _downloadFileTasks.Find(task => task.Key == e.Id);
+            Dispatcher.UIThread.Post(() => downloadFileTask?.DownloadWindow?.Hide());
+
             if (e.Error != null)
                 throw e.Error;
         }
@@ -822,6 +835,35 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 DialogButtons.Ok);
 
             Log.Error(ex, "An error occurred while downloading the file.");
+        }
+    }
+
+    private async void DownloadFileOnDownloadStopped(object? sender, DownloadFileEventArgs e)
+    {
+        try
+        {
+            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
+            if (downloadFile == null)
+                return;
+
+            // Remove DownloadStopped event from download file
+            downloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
+
+            // Get download file task
+            var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+            if (downloadFileTask == null)
+                return;
+
+            // Hide download window
+            Dispatcher.UIThread.Post(() => downloadFileTask.DownloadWindow?.Hide());
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while stopping the download.");
+
+            await DialogBoxManager.ShowDangerDialogAsync("Error stopping download",
+                $"An error occurred while stopping the download.\nError message: {ex.Message}",
+                DialogButtons.Ok);
         }
     }
 
@@ -854,7 +896,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             if (downloadFile == null)
                 return;
 
+            // Remove DownloadFinished event from download file
             downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+            // Remove DownloadStopped event from download file
+            downloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
 
             downloadFile.TimeLeft = null;
             downloadFile.TransferRate = null;
@@ -915,7 +960,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 taskValues.AddRange(syncTasks.Select(task => task(downloadFile)));
 
             DownloadFinishedSyncTasks.Remove(downloadFile.Id);
-            
+
             // Set temp download queue id to null
             downloadFile.TempDownloadQueueId = null;
 
@@ -936,21 +981,24 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
             // Find task from the list
             var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
-            if (downloadFileTask == null)
-                return;
+            if (downloadFileTask != null)
+            {
+                // Close download window
+                downloadFileTask.DownloadWindow?.Close();
 
-            // Check if the task is stopping
-            if (downloadFileTask.Stopping)
-            {
-                // Set the stopping flag to false
-                downloadFileTask.Stopping = false;
-                // Set the stop operation finished flag to true
-                downloadFileTask.StopOperationFinished = true;
-            }
-            else
-            {
-                // Remove the task from the list
-                _downloadFileTasks.Remove(downloadFileTask);
+                // Check if the task is stopping
+                if (downloadFileTask.Stopping)
+                {
+                    // Set the stopping flag to false
+                    downloadFileTask.Stopping = false;
+                    // Set the stop operation finished flag to true
+                    downloadFileTask.StopOperationFinished = true;
+                }
+                else
+                {
+                    // Remove the task from the list
+                    _downloadFileTasks.Remove(downloadFileTask);
+                }
             }
 
             _stopOperations.Remove(id);
@@ -1012,38 +1060,24 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         else
         {
             if (downloadFile.IsPaused)
-                ResumeDownloadFile(downloadFile);
-            else
-                _ = StartDownloadFileAsync(downloadFile);
+            {
+                var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+                if (downloadFileTask?.DownloadWindow == null)
+                    throw new InvalidOperationException("Download window not found.");
 
-            var viewModel = new DownloadWindowViewModel(appService, downloadFile);
-            var window = new DownloadWindow { DataContext = viewModel };
-            window.Show();
+                ResumeDownloadFile(downloadFile);
+
+                // Show download window if it is not visible
+                if (!downloadFileTask.DownloadWindow.IsVisible)
+                    Dispatcher.UIThread.Post(() => downloadFileTask.DownloadWindow.Show());
+            }
+            else
+            {
+                _ = StartDownloadFileAsync(downloadFile);
+            }
         }
 
         return downloadFile;
-    }
-
-    private void StartDownloadAndShowWindow(DownloadFileViewModel? viewModel)
-    {
-        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
-        if (downloadFile == null)
-            return;
-
-        var ownerWindow = App.Desktop?.Windows.FirstOrDefault(w => w.IsFocused) ?? App.Desktop?.MainWindow;
-        if (ownerWindow == null)
-            throw new InvalidOperationException("Owner window not found.");
-
-        var serviceProvider = Application.Current?.GetServiceProvider();
-        var appService = serviceProvider?.GetService<IAppService>();
-        if (appService == null)
-            throw new InvalidOperationException("Can't find app service.");
-
-        _ = StartDownloadFileAsync(downloadFile);
-
-        var vm = new DownloadWindowViewModel(appService, downloadFile);
-        var window = new DownloadWindow { DataContext = vm };
-        window.Show();
     }
 
     private long GetMaximumBytesPerSecond()
@@ -1054,6 +1088,32 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var limitSpeed = (long)(_settingsService.Settings.LimitSpeed ?? 0);
         var limitUnit = _settingsService.Settings.LimitUnit?.Equals("KB", StringComparison.OrdinalIgnoreCase) == true ? Constants.KiloByte : Constants.MegaByte;
         return limitSpeed * limitUnit;
+    }
+
+    private static async Task<bool> CheckDiskSpaceAsync(DownloadFileViewModel downloadFile)
+    {
+        if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+        {
+            await DialogBoxManager.ShowDangerDialogAsync("Storage not found",
+                "An error occurred while trying to determine the storage location for this file. This may be due to a system error or missing file information.",
+                DialogButtons.Ok);
+
+            return false;
+        }
+
+        if (downloadFile.Size is null or <= 0)
+            return false;
+
+        var driveInfo = new DriveInfo(downloadFile.SaveLocation!);
+        var hasEnoughSpace = driveInfo.AvailableFreeSpace >= downloadFile.Size!.Value;
+        if (hasEnoughSpace)
+            return true;
+
+        await DialogBoxManager.ShowDangerDialogAsync("Insufficient disk space",
+            $"There is not enough free space available on the disk '{driveInfo.Name}'.",
+            DialogButtons.Ok);
+
+        return false;
     }
 
     #endregion

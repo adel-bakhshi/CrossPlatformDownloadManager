@@ -68,6 +68,7 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/SettingsWindowControls/NotificationsView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/SettingsWindowControls/ProxyView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/SettingsWindowControls/SaveLocationsView.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/Views/UserControls/UserControl1.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.Test/App.axaml" value="CrossPlatformDownloadManager.Test/CrossPlatformDownloadManager.Test.csproj" />
         <entry key="CrossPlatformDownloadManager.Test/Assets/Styles/TimePickerStyle.axaml" value="CrossPlatformDownloadManager.Test/CrossPlatformDownloadManager.Test.csproj" />
         <entry key="CrossPlatformDownloadManager.Test/CustomControls/CustomComboBox.axaml" value="CrossPlatformDownloadManager.Test/CrossPlatformDownloadManager.Test.csproj" />

@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
@@ -44,7 +43,7 @@ public interface IDownloadFileService
 
     Task UpdateDownloadFilesAsync(List<DownloadFileViewModel> viewModels);
 
-    Task StartDownloadFileAsync(DownloadFileViewModel? viewModel);
+    Task StartDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true);
 
     Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false, bool playSound = true);
 
@@ -58,7 +57,7 @@ public interface IDownloadFileService
 
     Task DeleteDownloadFilesAsync(List<DownloadFileViewModel>? viewModels, bool alsoDeleteFile, bool reloadData = true);
 
-    Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel);
+    Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true);
 
     string GetDownloadSpeed();
 

@@ -10,6 +10,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -153,12 +154,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (downloadFile == null)
                 return;
 
-            // Start download before DownloadWindow opened
+            // Start download and open download window
             _ = AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
-
-            var vm = new DownloadWindowViewModel(AppService, downloadFile);
-            var window = new DownloadWindow { DataContext = vm };
-            window.Show();
 
             owner.Close(true);
         }

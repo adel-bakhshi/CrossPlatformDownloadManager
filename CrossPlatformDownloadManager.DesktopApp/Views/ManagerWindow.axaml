@@ -9,7 +9,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.ManagerWindow"
         x:DataType="vm:ManagerWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Manager"
         ShowInTaskbar="False"
         Topmost="{Binding AlwaysKeepManagerOnTop}"

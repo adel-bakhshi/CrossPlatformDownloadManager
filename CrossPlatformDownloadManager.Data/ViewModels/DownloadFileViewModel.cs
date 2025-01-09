@@ -5,8 +5,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
@@ -187,7 +187,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string DownloadProgressAsString => DownloadProgress == null ? "0.00%" : $"{DownloadProgress ?? 0:00.00}%";
+    public string DownloadProgressAsString => DownloadProgress == null ? "00.00%" : $"{DownloadProgress ?? 0:00.00}%";
 
     public string? DownloadedSizeAsString
     {

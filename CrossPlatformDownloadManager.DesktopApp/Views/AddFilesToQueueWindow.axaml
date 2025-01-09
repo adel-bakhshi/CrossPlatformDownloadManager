@@ -8,7 +8,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddFilesToQueueWindow"
         x:DataType="vm:AddFilesToQueueWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add Files to Queue"
         Width="800"
         Height="600"
@@ -20,13 +19,20 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
-    <Grid RowDefinitions="*, Auto"
+    <Grid RowDefinitions="Auto, *, Auto"
           Margin="20">
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Select files"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Stretch"
+                   Margin="0, 0, 0, 15" />
+
         <!-- Files DataGrid -->
         <DataGrid Name="FilesDataGrid"
-                  Grid.Row="0"
+                  Grid.Row="1"
                   ItemsSource="{Binding DownloadFiles}"
-                  Classes="minimalDataGrid darkRows"
+                  Classes="minimalDataGrid darkRows invertColors"
                   SelectionMode="Extended"
                   SelectionChanged="FilesDataGridOnSelectionChanged">
             <DataGrid.Columns>
@@ -53,22 +59,20 @@
         </DataGrid>
 
         <!-- Action buttons -->
-        <StackPanel Grid.Row="1"
+        <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     Spacing="10"
                     HorizontalAlignment="Right"
                     Margin="0, 15, 0, 0">
             <Button Classes="button success"
                     Command="{Binding SaveCommand}"
-                    CommandParameter="{Binding $parent[Window]}">
-                Save
-            </Button>
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
 
             <Button Name="CancelButton"
                     Classes="button danger"
-                    Click="CancelButton_OnClick">
-                Cancel
-            </Button>
+                    Content="Cancel"
+                    Click="CancelButtonOnClick" />
         </StackPanel>
     </Grid>
 </Window>

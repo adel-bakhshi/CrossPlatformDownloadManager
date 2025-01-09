@@ -15,7 +15,7 @@ public partial class AddFilesToQueueWindow : MyWindowBase<AddFilesToQueueWindowV
         InitializeComponent();
     }
 
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
+    private void CancelButtonOnClick(object? sender, RoutedEventArgs e)
     {
         this.Close(new List<DownloadFileViewModel>());
     }

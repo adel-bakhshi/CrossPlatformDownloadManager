@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.BrowserExtensions;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;

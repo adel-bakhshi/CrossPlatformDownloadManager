@@ -22,6 +22,8 @@
                 Value="CenterScreen" />
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="Icon"
+                Value="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/cdm-logo.ico" />
 
         <Style Selector="^ TextBlock">
             <Setter Property="LineHeight"

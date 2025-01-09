@@ -10,7 +10,6 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Icon="/Assets/Images/cdm-logo.ico"
         Title="CDM - Add New Category"
         Width="800"
         Height="600"
@@ -22,6 +21,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
+    
     <!-- Resources -->
     <Window.Resources>
         <!-- Converters -->

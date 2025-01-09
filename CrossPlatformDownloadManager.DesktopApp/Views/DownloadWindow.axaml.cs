@@ -6,10 +6,10 @@ using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using ReactiveUI;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
@@ -23,10 +23,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
     private readonly DispatcherTimer _updateChunksDataTimer;
 
     // Focus timer
-    private readonly DispatcherTimer _focusTimer;
-
-    // Is window closing flag
-    private bool _isClosing;
+    private readonly DispatcherTimer _focusWindowTimer;
 
     #endregion
 
@@ -35,11 +32,11 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         InitializeComponent();
 
         _chunksDataRectangles = [];
-        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.25) };
         _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
 
-        _focusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.5) };
-        _focusTimer.Tick += FocusTimerOnTick;
+        _focusWindowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _focusWindowTimer.Tick += FocusWindowTimerOnTick;
     }
 
     protected override async void OnLoaded(RoutedEventArgs e)
@@ -48,13 +45,11 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         {
             if (ViewModel == null)
                 return;
-
-            ViewModel.DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
-            ViewModel.DownloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
+            
+            // Start update chunks data timer
             _updateChunksDataTimer.Start();
-
-            // Start focus window
-            _focusTimer.Start();
+            // Start focus window timer
+            _focusWindowTimer.Start();
         }
         catch (Exception ex)
         {
@@ -62,43 +57,24 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             Log.Error(ex, "An error occured during loading download window.");
         }
     }
-
-    protected override async void OnClosing(WindowClosingEventArgs e)
-    {
-        try
-        {
-            if (ViewModel == null)
-                return;
-
-            _isClosing = true;
-            ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-            ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
-
-            if (ViewModel.DownloadFile.IsDownloading)
-                await ViewModel.StopDownloadAsync(this);
-
-            ViewModel.RemoveEventHandlers();
-            _updateChunksDataTimer.Stop();
-            base.OnClosing(e);
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during closing download window.");
-        }
-    }
+    
+    public void StopUpdateChunksDataTimer() => _updateChunksDataTimer.Stop();
 
     #region Helpers
 
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
-        if (ViewModel == null)
+        if (ViewModel == null || !IsVisible)
+            return;
+
+        Title = $"CDM - {(ViewModel.IsPaused ? "Paused" : "Downloading")} {Math.Floor(ViewModel.DownloadFile.DownloadProgress ?? 0):00}%";
+
+        if (ViewModel.IsPaused)
             return;
 
         var chunksData = ViewModel.DownloadFile.ChunksData;
         var bounds = ChunksProgressBarsCanvas.Bounds;
-        var chunksCount = chunksData.Count;
-        var divisionsWidth = bounds.Width / chunksCount;
+        var divisionsWidth = bounds.Width / chunksData.Count;
 
         if (_chunksDataRectangles.Count == 0)
         {
@@ -112,7 +88,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
                 },
             };
 
-            for (var i = 0; i < chunksCount; i++)
+            for (var i = 0; i < chunksData.Count; i++)
             {
                 var rect = new Rectangle();
                 rect.Bind(Rectangle.HeightProperty, heightBinding);
@@ -126,11 +102,11 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             }
         }
 
-        for (var i = 0; i < chunksCount; i++)
+        for (var i = 0; i < chunksData.Count; i++)
             _chunksDataRectangles[i].Width = chunksData[i].TotalSize == 0 ? 0 : chunksData[i].DownloadedSize * divisionsWidth / chunksData[i].TotalSize;
     }
 
-    private void FocusTimerOnTick(object? sender, EventArgs e)
+    private void FocusWindowTimerOnTick(object? sender, EventArgs e)
     {
         if (!IsFocused)
         {
@@ -138,36 +114,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             return;
         }
 
-        _focusTimer.Stop();
-    }
-
-    private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
-    {
-        _ = Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            try
-            {
-                if (ViewModel == null)
-                    return;
-
-                ViewModel.DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-                ViewModel.DownloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
-                ViewModel.RemoveEventHandlers();
-
-                if (!_isClosing)
-                    Close();
-            }
-            catch (Exception ex)
-            {
-                await DialogBoxManager.ShowErrorDialogAsync(ex);
-                Log.Error(ex, "An error occured while completing the file download.");
-            }
-        });
-    }
-
-    private void DownloadFileOnDownloadStopped(object? sender, DownloadFileEventArgs e)
-    {
-        Hide();
+        _focusWindowTimer.Stop();
     }
 
     #endregion

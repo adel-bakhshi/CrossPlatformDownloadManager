@@ -8,11 +8,12 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.Data.ViewModels.CustomEventArgs;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Serilog;
 
@@ -683,7 +684,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
             downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
 
-            _ = _downloadFileService.StartDownloadFileAsync(downloadFile);
+            _ = _downloadFileService.StartDownloadFileAsync(downloadFile, showWindow: false);
 
             viewModel.DownloadingFiles.Add(downloadFile);
             taskIndex++;

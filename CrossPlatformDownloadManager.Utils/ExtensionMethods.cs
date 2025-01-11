@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Platform;
+using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Utils;
@@ -27,7 +28,7 @@ public static class ExtensionMethods
         return items == null ? [] : new ObservableCollection<T>(items);
     }
 
-    public static string ToFileSize(this double bytes)
+    public static string ToFileSize(this double bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         switch (bytes)
         {
@@ -39,50 +40,90 @@ public static class ExtensionMethods
         }
 
         var tb = bytes / Constants.TeraByte;
+        if (roundSize)
+        {
+            if (roundToUpper)
+                tb = Math.Ceiling(tb);
+            else if (roundToLower)
+                tb = Math.Floor(tb);
+            else
+                tb = Math.Round(tb);
+        }
+
         if (tb > 1)
             return $"{tb:N2} TB";
 
         var gb = bytes / Constants.GigaByte;
+        if (roundSize)
+        {
+            if (roundToUpper)
+                gb = Math.Ceiling(gb);
+            else if (roundToLower)
+                gb = Math.Floor(gb);
+            else
+                gb = Math.Round(gb);
+        }
+
         if (gb > 1)
             return $"{gb:N2} GB";
 
         var mb = bytes / Constants.MegaByte;
+        if (roundSize)
+        {
+            if (roundToUpper)
+                mb = Math.Ceiling(mb);
+            else if (roundToLower)
+                mb = Math.Floor(mb);
+            else
+                mb = Math.Round(mb);
+        }
+
         if (mb > 1)
             return $"{mb:N2} MB";
 
         var kb = bytes / Constants.KiloByte;
+        if (roundSize)
+        {
+            if (roundToUpper)
+                kb = Math.Ceiling(kb);
+            else if (roundToLower)
+                kb = Math.Floor(kb);
+            else
+                kb = Math.Round(kb);
+        }
+
         if (kb > 1)
             return $"{kb:N2} KB";
 
         return $"{bytes:N2} Byte" + (bytes > 1 ? "s" : "");
     }
 
-    public static string ToFileSize(this double? bytes)
+    public static string ToFileSize(this double? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         bytes ??= 0;
-        return bytes.Value.ToFileSize();
+        return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
-    public static string ToFileSize(this long bytes)
+    public static string ToFileSize(this long bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
-        return ((double)bytes).ToFileSize();
+        return ((double)bytes).ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
-    public static string ToFileSize(this long? bytes)
-    {
-        bytes ??= 0;
-        return bytes.Value.ToFileSize();
-    }
-
-    public static string ToFileSize(this float bytes)
-    {
-        return ((double)bytes).ToFileSize();
-    }
-
-    public static string ToFileSize(this float? bytes)
+    public static string ToFileSize(this long? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         bytes ??= 0;
-        return bytes.Value.ToFileSize();
+        return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
+    }
+
+    public static string ToFileSize(this float bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
+    {
+        return ((double)bytes).ToFileSize(roundSize, roundToUpper, roundToLower);
+    }
+
+    public static string ToFileSize(this float? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
+    {
+        bytes ??= 0;
+        return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
     public static bool CheckUrlValidation(this string? url)
@@ -256,4 +297,113 @@ public static class ExtensionMethods
             }
         }
     }
+
+    public static async Task CopyFileAsync(this string sourcePath, string destinationPath)
+    {
+        // Use a buffer size that's a multiple of 4KB for optimal performance.
+        const int bufferSize = 4096;
+
+        await using var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true);
+        await using var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true);
+        var buffer = new byte[bufferSize];
+        int bytesRead;
+
+        while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            await destinationStream.WriteAsync(buffer, 0, bytesRead);
+    }
+
+    public static async Task ZipDirectoryAsync(this string sourceDir, string zipFilePath)
+    {
+        await using var outputStream = File.Create(zipFilePath);
+        await using var zipStream = new ZipOutputStream(outputStream);
+        zipStream.SetLevel(9); // 0-9, 9 being the highest compression
+
+        var folderOffset = sourceDir.Length + (sourceDir.EndsWith('\\') ? 0 : 1); // Adjust offset for directory separator
+        await CompressFolderAsync(sourceDir, zipStream, folderOffset);
+        zipStream.Finish();
+    }
+
+    public static async Task UnZipFileAsync(this string zipFilePath, string destinationDir)
+    {
+        if (!Directory.Exists(destinationDir))
+            Directory.CreateDirectory(destinationDir);
+
+        await using var fileStream = File.OpenRead(zipFilePath);
+        var zipFile = new ZipFile(fileStream);
+
+        foreach (ZipEntry entry in zipFile)
+        {
+            if (entry.Size <= 0) 
+                continue;
+            
+            var targetFile = Path.Combine(destinationDir, entry.Name).Replace('/', '\\');
+            var directoryPath = Path.GetDirectoryName(targetFile);
+            if (directoryPath.IsNullOrEmpty())
+                continue;
+            
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath!);
+            
+            await using var outputFile = File.Create(targetFile);
+
+            await using var zippedStream = zipFile.GetInputStream(entry);
+            var buffer = new byte[4096];
+
+            int readBytes;
+            while ((readBytes = await zippedStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                outputFile.Write(buffer, 0, readBytes);
+                outputFile.Flush();
+            }
+        }
+    }
+
+    public static string GetDriveName(this DriveInfo driveInfo)
+    {
+        var driveName = driveInfo.Name.EndsWith('\\') ? driveInfo.Name.Substring(0, driveInfo.Name.Length - 1) : driveInfo.Name;
+        if (!driveName.EndsWith(':'))
+            driveName += ":";
+
+        return driveName;
+    }
+
+    #region Helpers
+
+    private static async Task CompressFolderAsync(string sourceFolder, ZipOutputStream zipStream, int folderOffset)
+    {
+        var files = Directory.GetFiles(sourceFolder);
+        foreach (var file in files)
+        {
+            var fileInfo = new FileInfo(file);
+            var entryName = file.Substring(folderOffset); // Remove the folder path
+            var entry = new ZipEntry(entryName)
+            {
+                DateTime = fileInfo.LastWriteTime,
+                Size = fileInfo.Length
+            };
+
+            await zipStream.PutNextEntryAsync(entry);
+
+            var buffer = new byte[4096];
+            await using var fileStream = File.OpenRead(file);
+            
+            int sourceBytes;
+            while ((sourceBytes = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                zipStream.Write(buffer, 0, sourceBytes);
+                zipStream.Flush();
+            }
+
+            zipStream.CloseEntry();
+        }
+
+        // Process subdirectories
+        var folders = Directory.GetDirectories(sourceFolder);
+        foreach (var folder in folders)
+        {
+            await CompressFolderAsync(folder, zipStream, folderOffset);
+        }
+    }
+
+    #endregion
 }

@@ -747,7 +747,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             .ToList();
 
         if (downloadFiles.Count == 0)
-            return string.Empty;
+            return fileName;
 
         var filePathList = downloadFiles
             .Where(df => !df.FileName.IsNullOrEmpty() && !df.SaveLocation.IsNullOrEmpty())
@@ -785,7 +785,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             .ToList();
 
         if (downloadFiles.Count == 0 && !File.Exists(Path.Combine(saveLocation, fileName)))
-            return string.Empty;
+            return fileName;
 
         var fileNames = downloadFiles.ConvertAll(df => df.FileName);
         var index = 2;
@@ -1101,11 +1101,16 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             return false;
         }
 
+        var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+        long downloadedSize = 0;
+        if (File.Exists(filePath))
+            downloadedSize = new FileInfo(filePath).Length;
+
         if (downloadFile.Size is null or <= 0)
             return false;
 
         var driveInfo = new DriveInfo(downloadFile.SaveLocation!);
-        var hasEnoughSpace = driveInfo.AvailableFreeSpace >= downloadFile.Size!.Value;
+        var hasEnoughSpace = driveInfo.AvailableFreeSpace >= downloadFile.Size!.Value - downloadedSize;
         if (hasEnoughSpace)
             return true;
 

@@ -67,7 +67,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 settings = assetsUri.OpenJsonAsset<Settings>();
                 if (settings == null)
                     throw new InvalidOperationException("An error occurred while loading settings.");
-                
+
                 // The first time the settings are saved, the program must be added to Startup.
                 if (settings.StartOnSystemStartup)
                     RegisterStartup();
@@ -134,6 +134,17 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         if (reloadData)
             await LoadSettingsAsync();
+
+        if (Settings.StartOnSystemStartup)
+        {
+            if (!PlatformSpecificManager.IsStartupRegistered())
+                PlatformSpecificManager.RegisterStartup();
+        }
+        else
+        {
+            if (PlatformSpecificManager.IsStartupRegistered())
+                PlatformSpecificManager.DeleteStartup();
+        }
     }
 
     public async Task<int> AddProxySettingsAsync(ProxySettings? proxySettings)
@@ -291,7 +302,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         var isRegistered = PlatformSpecificManager.IsStartupRegistered();
         if (isRegistered)
             return;
-        
+
         PlatformSpecificManager.RegisterStartup();
     }
 

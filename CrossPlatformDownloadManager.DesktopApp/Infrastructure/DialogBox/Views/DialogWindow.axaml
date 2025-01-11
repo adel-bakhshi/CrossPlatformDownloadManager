@@ -81,8 +81,22 @@
 
     <!-- Styles -->
     <Window.Styles>
-        <!-- Window styles -->
+        <!-- Dialog border style -->
         <Style Selector="Border.dialogBorder">
+            <!-- Animation -->
+            <Style.Animations>
+                <Animation Duration="00:00:00.3">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity"
+                                Value="0.0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity"
+                                Value="1.0" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+
             <!-- Information styles -->
             <Style Selector="^.information">
                 <Setter Property="Background"

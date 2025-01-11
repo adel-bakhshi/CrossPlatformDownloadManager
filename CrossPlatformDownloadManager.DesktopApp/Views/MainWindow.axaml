@@ -555,27 +555,44 @@
                         <!-- Task -->
                         <MenuItem Header="Task"
                                   Classes="header">
-                            <MenuItem Header="Add new file"
+                            <MenuItem Header="Add new link"
                                       Classes="listItem"
-                                      Width="250" />
+                                      Width="250"
+                                      Command="{Binding AddNewLinkMenuItemCommand}"
+                                      CommandParameter="{Binding $parent[Window]}" />
 
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
 
-                            <MenuItem Header="Export"
+                            <MenuItem Header="Export data"
                                       Classes="listItem"
-                                      Width="250" />
+                                      Width="250"
+                                      Command="{Binding ExportDataMenuItemCommand}" />
 
-                            <MenuItem Header="Import"
+                            <MenuItem Header="Import data"
                                       Classes="listItem"
-                                      Width="250" />
+                                      Width="250"
+                                      Command="{Binding ImportDataMenuItemCommand}" />
+
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+
+                            <MenuItem Header="Export settings"
+                                      Classes="listItem"
+                                      Width="250"
+                                      Command="{Binding ExportSettingsMenuItemCommand}" />
+
+                            <MenuItem Header="Import settings"
+                                      Classes="listItem"
+                                      Width="250"
+                                      Command="{Binding ImportSettingsMenuItemCommand}" />
 
                             <Separator Background="{DynamicResource SecondaryColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Exit"
                                       Classes="listItem"
-                                      Command="{Binding ExitProgramCommand}"
+                                      Command="{Binding ExitProgramMenuItemCommand}"
                                       Width="250" />
                         </MenuItem>
 

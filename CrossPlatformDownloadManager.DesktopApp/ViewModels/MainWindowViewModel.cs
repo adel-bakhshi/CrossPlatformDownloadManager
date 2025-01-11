@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.Data.ViewModels.Exports;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
@@ -175,8 +178,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand AddNewDownloadQueueCommand { get; }
 
-    public ICommand ExitProgramCommand { get; }
-
     public ICommand SelectAllRowsContextMenuCommand { get; }
 
     public ICommand OpenFileContextMenuCommand { get; }
@@ -202,6 +203,18 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand RemoveFromQueueContextMenuCommand { get; }
 
     public ICommand AddDownloadFileToDownloadQueueContextMenuCommand { get; }
+
+    public ICommand AddNewLinkMenuItemCommand { get; }
+
+    public ICommand ExportDataMenuItemCommand { get; }
+
+    public ICommand ImportDataMenuItemCommand { get; }
+
+    public ICommand ExportSettingsMenuItemCommand { get; }
+
+    public ICommand ImportSettingsMenuItemCommand { get; }
+
+    public ICommand ExitProgramMenuItemCommand { get; }
 
     #endregion
 
@@ -233,7 +246,6 @@ public class MainWindowViewModel : ViewModelBase
         StartStopDownloadQueueCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         ShowDownloadQueueDetailsCommand = ReactiveCommand.CreateFromTask<Button?>(ShowDownloadQueueDetailsAsync);
         AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewDownloadQueueAsync);
-        ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
         SelectAllRowsContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(SelectAllRowsContextMenuAsync);
         OpenFileContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(OpenFileContextMenuAsync);
         OpenFolderContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(OpenFolderContextMenuAsync);
@@ -247,6 +259,12 @@ public class MainWindowViewModel : ViewModelBase
         AddToQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(AddToQueueContextMenuAsync);
         RemoveFromQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveFromQueueContextMenuAsync);
         AddDownloadFileToDownloadQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(AddDownloadFileToDownloadQueueContextMenuAsync);
+        AddNewLinkMenuItemCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkMenuItemAsync);
+        ExportDataMenuItemCommand = ReactiveCommand.CreateFromTask(ExportDataMenuItemAsync);
+        ImportDataMenuItemCommand = ReactiveCommand.CreateFromTask(ImportDataMenuItemAsync);
+        ExportSettingsMenuItemCommand = ReactiveCommand.CreateFromTask(ExportSettingsMenuItemAsync);
+        ImportSettingsMenuItemCommand = ReactiveCommand.CreateFromTask(ImportSettingsMenuItemAsync);
+        ExitProgramMenuItemCommand = ReactiveCommand.CreateFromTask(ExitProgramMenuItemAsync);
     }
 
     private void LoadDownloadQueues()
@@ -560,7 +578,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private static async Task ExitProgramAsync()
+    private static async Task ExitProgramMenuItemAsync()
     {
         try
         {
@@ -919,7 +937,7 @@ public class MainWindowViewModel : ViewModelBase
                         AddToQueueDownloadQueues = downloadQueues
                             .Where(dq => dq.Id != downloadQueue.Id)
                             .ToObservableCollection();
-                        
+
                         if (AddToQueueDownloadQueues.Count == 0)
                             AddToQueueFlyout?.Hide();
                     }
@@ -1043,6 +1061,446 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occured while trying to add to queue.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task AddNewLinkMenuItemAsync(Window? owner)
+    {
+        await AddNewLinkAsync(owner);
+    }
+
+    private async Task ExportDataMenuItemAsync()
+    {
+        try
+        {
+            // Get main window
+            var mainWindow = App.Desktop?.MainWindow ?? throw new InvalidOperationException("Main window not found.");
+
+            // Get temp folder path
+            var tempPath = Path.GetTempPath();
+
+            // Check for downloading files
+            var downloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
+                .Where(df => df.IsDownloading || df.IsPaused)
+                .ToList();
+
+            // Stop downloading files
+            if (downloadFiles.Count > 0)
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Export data",
+                    "Some downloads are still in progress. To export now, you'll need to stop them. Continue with the export and stop the downloads?",
+                    DialogButtons.YesNo);
+
+                if (result != DialogResult.Yes)
+                    return;
+
+                var stopTasks = downloadFiles
+                    .ConvertAll(df => AppService.DownloadFileService.StopDownloadFileAsync(df, ensureStopped: true, playSound: false));
+
+                await Task.WhenAll(stopTasks);
+            }
+
+            // Export download files
+            downloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
+                .Where(df => !df.IsCompleted)
+                .ToList();
+
+            // Check for completed download files
+            var completedDownloadFiles = AppService
+                .DownloadFileService
+                .DownloadFiles
+                .Where(df => df.IsCompleted)
+                .ToList();
+
+            // Ask user if they want to export completed download files
+            if (completedDownloadFiles.Count > 0)
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Export data",
+                    "Some downloads are complete. Would you like to export the finished files?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    downloadFiles = downloadFiles
+                        .Union(completedDownloadFiles)
+                        .Distinct()
+                        .ToList();
+                }
+            }
+
+            // Get existing files
+            var filePathList = downloadFiles
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
+                .Where(File.Exists)
+                .ToList();
+
+            // Include original files in export
+            var includeFiles = false;
+            if (filePathList.Count > 0)
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Export data",
+                    "Would you like to include the original files in the export? This will create a larger export file, but ensures all data is preserved.",
+                    DialogButtons.YesNo);
+
+                includeFiles = result == DialogResult.Yes;
+            }
+
+            // Check disk space for creating export
+            if (includeFiles)
+            {
+                var totalFileSizes = filePathList.Sum(f => new FileInfo(f).Length);
+                var driveInfo = new DriveInfo(tempPath);
+                var availableSpace = driveInfo.AvailableFreeSpace;
+                const long ensureExistSpace = 10 * Constants.MegaByte;
+
+                // If total size + 10 MB greater than available space, notify user and don't save files with export
+                while (includeFiles && totalFileSizes + ensureExistSpace > availableSpace)
+                {
+                    var driveName = driveInfo.GetDriveName();
+                    var fileSize = totalFileSizes.ToFileSize(roundSize: true, roundToUpper: true);
+
+                    var result = await DialogBoxManager.ShowDangerDialogAsync("Export data",
+                        $"There isn't enough space on your '{driveName}' drive (about {fileSize} is needed) to include the downloaded files in the export. Would you like to " +
+                        "choose a different save location? If not, the downloaded files will be removed from the export.",
+                        DialogButtons.YesNoCancel);
+
+                    switch (result)
+                    {
+                        case DialogResult.No:
+                        {
+                            includeFiles = false;
+                            break;
+                        }
+
+                        case DialogResult.Yes:
+                        {
+                            var folderPickerOpenOptions = new FolderPickerOpenOptions
+                            {
+                                Title = "Export location",
+                                AllowMultiple = false
+                            };
+
+                            var folderPickerResult = await mainWindow.StorageProvider.OpenFolderPickerAsync(folderPickerOpenOptions);
+                            if (!folderPickerResult.Any())
+                                return;
+
+                            tempPath = folderPickerResult[0].Path.LocalPath;
+                            driveInfo = new DriveInfo(tempPath);
+                            availableSpace = driveInfo.AvailableFreeSpace;
+                            break;
+                        }
+
+                        default:
+                            return;
+                    }
+                }
+            }
+
+            // Create export download files
+            var exportDownloadFiles = downloadFiles
+                .ConvertAll(df =>
+                {
+                    var exportData = ExportDownloadFileViewModel.CreateExportFile(df);
+                    if (includeFiles)
+                        return exportData;
+
+                    exportData.FileName = string.Empty;
+                    exportData.Size = 0;
+                    exportData.Status = DownloadFileStatus.None;
+                    exportData.DownloadProgress = 0;
+                    exportData.DownloadPackage = null;
+                    return exportData;
+                });
+
+            // Export download queues
+            var exportDownloadQueues = new List<ExportDownloadQueueViewModel>();
+
+            // Check for download queues
+            var downloadQueues = AppService
+                .DownloadQueueService
+                .DownloadQueues
+                .Where(dq => dq.Title?.Equals(Constants.DefaultDownloadQueueTitle) != true)
+                .ToList();
+
+            // Create export download queues
+            if (downloadQueues.Count > 0)
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Export data",
+                    "Would you like to export your current download queues?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    // Convert download queues to export model
+                    exportDownloadQueues = downloadQueues.ConvertAll(ExportDownloadQueueViewModel.CreateExportFile);
+                }
+                else
+                {
+                    exportDownloadFiles = ClearDownloadQueuesFromExport(exportDownloadFiles);
+                }
+            }
+            else
+            {
+                exportDownloadFiles = ClearDownloadQueuesFromExport(exportDownloadFiles);
+            }
+
+            // Export settings
+            ExportSettingsViewModel? exportSettings = null;
+
+            // Let user choose for settings
+            var exportSettingsResult = await DialogBoxManager.ShowInfoDialogAsync("Export data",
+                "Would you like to include your current settings in the export file?",
+                DialogButtons.YesNo);
+
+            // Convert settings to export model
+            if (exportSettingsResult == DialogResult.Yes)
+                exportSettings = ExportSettingsData();
+
+            // Choose a unique directory
+            var tempFolderName = Guid.NewGuid().ToString();
+            var tempFolderPath = Path.Combine(tempPath, tempFolderName);
+            while (Directory.Exists(tempFolderPath))
+            {
+                tempFolderName = Guid.NewGuid().ToString();
+                tempFolderPath = Path.Combine(tempPath, tempFolderName);
+            }
+
+            // Define temp folders
+            var dataTempFolder = Path.Combine(tempFolderPath, "data");
+            var filesTempFolder = Path.Combine(tempFolderPath, "files");
+
+            // Create directories
+            Directory.CreateDirectory(tempFolderPath);
+            Directory.CreateDirectory(dataTempFolder);
+            Directory.CreateDirectory(filesTempFolder);
+
+            // Save download files data
+            var json = exportDownloadFiles.ConvertToJson();
+            await File.WriteAllTextAsync(Path.Combine(dataTempFolder, "download-files.json"), json);
+
+            // Save download queues data
+            json = exportDownloadQueues.ConvertToJson();
+            await File.WriteAllTextAsync(Path.Combine(dataTempFolder, "download-queues.json"), json);
+
+            // Save download queues data
+            json = exportSettings.ConvertToJson();
+            await File.WriteAllTextAsync(Path.Combine(dataTempFolder, "settings.json"), json);
+
+            // Save files
+            if (includeFiles)
+            {
+                foreach (var filePath in filePathList)
+                {
+                    var fileName = Path.GetFileName(filePath);
+                    var destinationFilePath = Path.Combine(filesTempFolder, fileName);
+                    await filePath.CopyFileAsync(destinationFilePath);
+                }
+            }
+
+            // Open save file picker and save export file
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            List<FilePickerFileType> fileTypes = [new("CDM export file") { Patterns = ["*.cdm"] }];
+
+            var savePickerOpenOptions = new FilePickerSaveOptions
+            {
+                Title = "Export data",
+                SuggestedStartLocation = await mainWindow.StorageProvider.TryGetFolderFromPathAsync(desktopPath),
+                SuggestedFileName = "cdm-data",
+                DefaultExtension = "cdm",
+                FileTypeChoices = fileTypes
+            };
+
+            var savePickerResult = await mainWindow.StorageProvider.SaveFilePickerAsync(savePickerOpenOptions);
+            if (savePickerResult == null)
+                return;
+
+            // Zip export file and save it
+            // savePickerResult.Path.LocalPath.ZipFolder(tempFolderPath);
+            await tempFolderPath.ZipDirectoryAsync(savePickerResult.Path.LocalPath);
+
+            // Remove temp folder
+            Directory.Delete(tempFolderPath, true);
+
+            // Show success message
+            await DialogBoxManager.ShowSuccessDialogAsync("Export data", "Your export has been created successfully.", DialogButtons.Ok);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to export data.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task ImportDataMenuItemAsync()
+    {
+        try
+        {
+            // Get main window
+            var mainWindow = App.Desktop?.MainWindow ?? throw new InvalidOperationException("Main window not found.");
+
+            // Open file picker
+            var filePickerOpenOptions = new FilePickerOpenOptions
+            {
+                Title = "Import data",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("CDM export file") { Patterns = ["*.cdm"] }]
+            };
+
+            var filePickerResult = await mainWindow.StorageProvider.OpenFilePickerAsync(filePickerOpenOptions);
+            if (!filePickerResult.Any())
+                return;
+
+            var filePath = filePickerResult[0].Path.LocalPath;
+            if (!filePath.EndsWith(".cdm", StringComparison.OrdinalIgnoreCase))
+            {
+                await DialogBoxManager.ShowDangerDialogAsync("Import data",
+                    "The file format could not be recognized. Please ensure you are importing a CDM export file.",
+                    DialogButtons.Ok);
+
+                return;
+            }
+
+            // Choose a unique directory
+            var tempPath = Path.GetTempPath();
+            var tempFolderName = Guid.NewGuid().ToString();
+            var tempExportPath = Path.Combine(tempPath, tempFolderName);
+            while (Directory.Exists(tempExportPath))
+            {
+                tempFolderName = Guid.NewGuid().ToString();
+                tempExportPath = Path.Combine(tempPath, tempFolderName);
+            }
+
+            // Create directory
+            Directory.CreateDirectory(tempExportPath);
+
+            // Unzip export file
+            await filePath.UnZipFileAsync(tempExportPath);
+
+            var dataTempFolder = Path.Combine(tempExportPath, "data");
+            var filesTempFolder = Path.Combine(tempExportPath, "files");
+
+            // Load download files data
+            var json = await File.ReadAllTextAsync(Path.Combine(dataTempFolder, "download-files.json"));
+            var downloadFiles = json.ConvertFromJson<List<ExportDownloadFileViewModel>>();
+
+            // Load download queues data
+            json = await File.ReadAllTextAsync(Path.Combine(dataTempFolder, "download-queues.json"));
+            var downloadQueues = json.ConvertFromJson<List<ExportDownloadQueueViewModel>>();
+
+            // Load settings data
+            json = await File.ReadAllTextAsync(Path.Combine(dataTempFolder, "settings.json"));
+            var settings = json.ConvertFromJson<ExportSettingsViewModel>();
+
+            // Import settings
+            await ImportSettingsAsync(settings);
+
+            // Import download queues
+            var addedDownloadQueues = await ImportDownloadQueuesAsync(downloadQueues);
+
+            // Import download files
+            var addedDownloadFiles = await ImportDownloadFilesAsync(downloadFiles, addedDownloadQueues);
+
+            // Import files
+            await ImportFilesAsync(filesTempFolder, addedDownloadFiles);
+
+            // Remove temp folder
+            Directory.Delete(tempExportPath, true);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to import data.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task ExportSettingsMenuItemAsync()
+    {
+        try
+        {
+            // Get main window
+            var mainWindow = App.Desktop?.MainWindow ?? throw new InvalidOperationException("Main window not found.");
+
+            // Open save file picker and save export file
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            List<FilePickerFileType> fileTypes =
+            [
+                new("Json file") { Patterns = ["*.json"] },
+                new("Text file") { Patterns = ["*.txt"] }
+            ];
+
+            var savePickerOpenOptions = new FilePickerSaveOptions
+            {
+                Title = "Export settings",
+                SuggestedStartLocation = await mainWindow.StorageProvider.TryGetFolderFromPathAsync(desktopPath),
+                SuggestedFileName = "cdm-settings",
+                DefaultExtension = "json",
+                FileTypeChoices = fileTypes
+            };
+
+            var savePickerResult = await mainWindow.StorageProvider.SaveFilePickerAsync(savePickerOpenOptions);
+            if (savePickerResult == null)
+                return;
+
+            var filePath = savePickerResult.Path.LocalPath;
+            if (filePath.IsNullOrEmpty())
+                return;
+
+            var directory = Path.GetDirectoryName(filePath);
+            if (directory.IsNullOrEmpty())
+                return;
+
+            if (!Directory.Exists(directory!))
+                Directory.CreateDirectory(directory!);
+
+            var exportSettings = ExportSettingsData();
+            var json = exportSettings.ConvertToJson();
+
+            await File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to export settings.");
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task ImportSettingsMenuItemAsync()
+    {
+        try
+        {
+            // Get main window
+            var mainWindow = App.Desktop?.MainWindow ?? throw new InvalidOperationException("Main window not found.");
+
+            // Open file picker
+            var filePickerOpenOptions = new FilePickerOpenOptions
+            {
+                Title = "Import settings",
+                AllowMultiple = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("Json file") { Patterns = ["*.json"] },
+                    new FilePickerFileType("Text file") { Patterns = ["*.txt"] }
+                ]
+            };
+
+            var filePickerResult = await mainWindow.StorageProvider.OpenFilePickerAsync(filePickerOpenOptions);
+            if (!filePickerResult.Any() || filePickerResult[0].Path.LocalPath.IsNullOrEmpty())
+                return;
+
+            var filePath = filePickerResult[0].Path.LocalPath;
+            var json = await File.ReadAllTextAsync(filePath);
+            var exportSettings = json.ConvertFromJson<ExportSettingsViewModel?>();
+            await ImportSettingsAsync(exportSettings);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to import settings.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1378,12 +1836,388 @@ public class MainWindowViewModel : ViewModelBase
             Size = urlDetails.FileSize
         };
 
-        await AppService
+        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile,
+            isUrlDuplicate: urlDetails.IsUrlDuplicate,
+            duplicateAction: duplicateAction,
+            isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
+            startDownloading: true);
+    }
+
+    private List<ExportDownloadFileViewModel> ClearDownloadQueuesFromExport(List<ExportDownloadFileViewModel> exportDownloadFiles)
+    {
+        var defaultDownloadQueue = AppService
+            .DownloadQueueService
+            .DownloadQueues
+            .FirstOrDefault(dq => dq.Title?.Equals(Constants.DefaultDownloadQueueTitle) == true);
+
+        // Remove download queue data from export download files
+        return exportDownloadFiles
+            .ConvertAll(df =>
+            {
+                df.AddedToDefaultQueue = df.DownloadQueueId != null && defaultDownloadQueue != null && defaultDownloadQueue.Id == df.DownloadQueueId;
+                df.DownloadQueueId = null;
+                df.DownloadQueuePriority = null;
+                return df;
+            });
+    }
+
+    private ExportSettingsViewModel ExportSettingsData()
+    {
+        var settings = AppService.SettingsService.Settings;
+        var proxies = settings.Proxies.ToList();
+        return ExportSettingsViewModel.CreateExportFile(settings, proxies);
+    }
+
+    private async Task ImportSettingsAsync(ExportSettingsViewModel? exportSettings)
+    {
+        if (exportSettings == null)
+            return;
+
+        var settings = AppService.SettingsService.Settings;
+
+        // Update settings with new values
+        settings.StartOnSystemStartup = exportSettings.StartOnSystemStartup;
+        settings.UseBrowserExtension = exportSettings.UseBrowserExtension;
+        settings.DarkMode = exportSettings.DarkMode;
+        settings.AlwaysKeepManagerOnTop = exportSettings.AlwaysKeepManagerOnTop;
+        settings.ShowStartDownloadDialog = exportSettings.ShowStartDownloadDialog;
+        settings.ShowCompleteDownloadDialog = exportSettings.ShowCompleteDownloadDialog;
+        settings.DuplicateDownloadLinkAction = exportSettings.DuplicateDownloadLinkAction;
+        settings.MaximumConnectionsCount = exportSettings.MaximumConnectionsCount;
+        settings.IsSpeedLimiterEnabled = exportSettings.IsSpeedLimiterEnabled;
+        settings.LimitSpeed = exportSettings.LimitSpeed;
+        settings.LimitUnit = exportSettings.LimitUnit;
+        settings.ProxyMode = exportSettings.ProxyMode;
+        settings.ProxyType = exportSettings.ProxyType;
+        settings.UseDownloadCompleteSound = exportSettings.UseDownloadCompleteSound;
+        settings.UseDownloadStoppedSound = exportSettings.UseDownloadStoppedSound;
+        settings.UseDownloadFailedSound = exportSettings.UseDownloadFailedSound;
+        settings.UseQueueStartedSound = exportSettings.UseQueueStartedSound;
+        settings.UseQueueStoppedSound = exportSettings.UseQueueStoppedSound;
+        settings.UseQueueFinishedSound = exportSettings.UseQueueFinishedSound;
+        settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
+
+        await AppService.SettingsService.SaveSettingsAsync(settings);
+
+        // Get saved proxies in database
+        var proxiesInDb = AppService.SettingsService.Settings.Proxies.ToList();
+
+        // Add new proxies
+        var newProxies = exportSettings
+            .Proxies
+            .Where(proxy => proxiesInDb.Find(p => proxy.Type.Equals(p.Type) && proxy.Host.Equals(p.Host) && proxy.Port.Equals(p.Port)) == null)
+            .Select(proxy => new ProxySettingsViewModel
+            {
+                Name = proxy.Name,
+                Type = proxy.Type,
+                Host = proxy.Host,
+                Port = proxy.Port,
+                Username = proxy.Username,
+                Password = proxy.Password
+            })
+            .ToList();
+
+        foreach (var proxy in newProxies)
+            await AppService.SettingsService.AddProxySettingsAsync(proxy);
+    }
+
+    private async Task<List<ExportAddedDownloadQueueDataViewModel>> ImportDownloadQueuesAsync(List<ExportDownloadQueueViewModel>? exportDownloadQueues)
+    {
+        if (exportDownloadQueues == null || exportDownloadQueues.Count == 0)
+            return [];
+
+        // Get saved download queues in database
+        var downloadQueuesInDb = AppService.DownloadQueueService.DownloadQueues.ToList();
+
+        // We have to store added data for adding download files to download queues
+        var data = new List<ExportAddedDownloadQueueDataViewModel>();
+        // Add download queues
+        foreach (var exportDownloadQueue in exportDownloadQueues)
+        {
+            var downloadQueueInDb = downloadQueuesInDb.Find(dq => dq.Title?.Equals(exportDownloadQueue.Title) == true);
+            if (downloadQueueInDb != null)
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Import data",
+                    $"A queue named '{exportDownloadQueue.Title}' already exists. Do you want to create another queue with the same name?",
+                    DialogButtons.YesNo);
+
+                // Add current primary key and continue
+                if (result != DialogResult.Yes)
+                {
+                    data.Add(new ExportAddedDownloadQueueDataViewModel(downloadQueueInDb.Id, exportDownloadQueue.Id));
+                    continue;
+                }
+            }
+
+            var downloadQueue = new DownloadQueue
+            {
+                Title = exportDownloadQueue.Title,
+                StartOnApplicationStartup = exportDownloadQueue.StartOnApplicationStartup,
+                StartDownloadSchedule = exportDownloadQueue.StartDownloadSchedule,
+                StopDownloadSchedule = exportDownloadQueue.StopDownloadSchedule,
+                IsDaily = exportDownloadQueue.IsDaily,
+                JustForDate = exportDownloadQueue.JustForDate,
+                DaysOfWeek = exportDownloadQueue.DaysOfWeek,
+                RetryOnDownloadingFailed = exportDownloadQueue.RetryOnDownloadingFailed,
+                RetryCount = exportDownloadQueue.RetryCount,
+                ShowAlarmWhenDone = exportDownloadQueue.ShowAlarmWhenDone,
+                ExitProgramWhenDone = exportDownloadQueue.ExitProgramWhenDone,
+                TurnOffComputerWhenDone = exportDownloadQueue.TurnOffComputerWhenDone,
+                TurnOffComputerMode = exportDownloadQueue.TurnOffComputerMode,
+                DownloadCountAtSameTime = exportDownloadQueue.DownloadCountAtSameTime,
+                IncludePausedFiles = exportDownloadQueue.IncludePausedFiles
+            };
+
+            var id = await AppService.DownloadQueueService.AddNewDownloadQueueAsync(downloadQueue);
+            data.Add(new ExportAddedDownloadQueueDataViewModel(id, exportDownloadQueue.Id));
+        }
+
+        return data;
+    }
+
+    private async Task<List<ExportAddedDownloadFileDataViewModel>> ImportDownloadFilesAsync(List<ExportDownloadFileViewModel>? exportDownloadFiles,
+        List<ExportAddedDownloadQueueDataViewModel> addedDownloadQueues)
+    {
+        if (exportDownloadFiles == null || exportDownloadFiles.Count == 0)
+            return [];
+
+        // Get saved download files in database
+        var downloadFilesInDb = AppService.DownloadFileService.DownloadFiles.ToList();
+
+        // We have to store added data for adding download files to storage
+        var data = new List<ExportAddedDownloadFileDataViewModel>();
+        // Add download files
+        foreach (var exportDownloadFile in exportDownloadFiles)
+        {
+            // Make sure download file has file name
+            // If file name is null or empty, we must get url details and use of it
+            var fileName = exportDownloadFile.FileName;
+            if (fileName.IsNullOrEmpty())
+            {
+                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url);
+                var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
+                if (!urlDetailsValidation.IsValid)
+                    continue;
+
+                fileName = urlDetails.FileName;
+                exportDownloadFile.Size = urlDetails.FileSize;
+            }
+
+            Category? category = null;
+            var downloadFileInDb = downloadFilesInDb.Find(df => df.Url?.Equals(exportDownloadFile.Url) == true);
+            if (downloadFileInDb != null)
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Import data",
+                    $"You already have a download with URL '{exportDownloadFile.Url}' in your list. \nWould you like to add it again?",
+                    DialogButtons.YesNo);
+
+                // Add current primary key and continue
+                if (result != DialogResult.Yes)
+                    continue;
+
+                // Find category and save location for the file
+                var extension = Path.GetExtension(fileName);
+                var fileExtension = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
+                    .GetAsync(where: fe => fe.Extension == extension, includeProperties: ["Category.CategorySaveDirectory"]);
+
+                // Check category and save location. If save location is null or empty, we must use general category for the file
+                if (fileExtension?.Category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
+                {
+                    // Get general category
+                    var generalCategory = await AppService
+                        .UnitOfWork
+                        .CategoryRepository
+                        .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle, includeProperties: ["CategorySaveDirectory"]);
+
+                    // If general category not found, set file name empty
+                    if (generalCategory?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
+                    {
+                        fileName = string.Empty;
+                    }
+                    else
+                    {
+                        var saveLocation = generalCategory.CategorySaveDirectory.SaveDirectory;
+                        fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                        category = generalCategory;
+                    }
+                }
+                else
+                {
+                    var saveLocation = fileExtension.Category.CategorySaveDirectory.SaveDirectory;
+                    fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                    category = fileExtension.Category;
+                }
+            }
+
+            // Make sure file name has value
+            if (fileName.IsNullOrEmpty())
+                continue;
+
+            // Find category if it is null
+            if (category == null)
+            {
+                var extension = Path.GetExtension(fileName);
+                var fileExtension = await AppService
+                    .UnitOfWork
+                    .CategoryFileExtensionRepository
+                    .GetAsync(where: fe => fe.Extension == extension, includeProperties: ["Category.CategorySaveDirectory"]);
+
+                if (fileExtension?.Category != null)
+                {
+                    category = fileExtension.Category;
+                }
+                else
+                {
+                    var generalCategory = await AppService
+                        .UnitOfWork
+                        .CategoryRepository
+                        .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle, includeProperties: ["CategorySaveDirectory"]);
+
+                    if (generalCategory != null)
+                    {
+                        category = generalCategory;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            // Find download queue id
+            int? downloadQueueId;
+            if (exportDownloadFile.AddedToDefaultQueue)
+            {
+                var userDefaultQueue = AppService.DownloadQueueService.DownloadQueues.FirstOrDefault(dq => dq.IsDefault);
+                var appDefaultQueue = AppService.DownloadQueueService.DownloadQueues.FirstOrDefault(dq => dq.Title?.Equals(Constants.DefaultDownloadQueueTitle) == true);
+
+                downloadQueueId = userDefaultQueue?.Id ?? appDefaultQueue?.Id;
+            }
+            else
+            {
+                downloadQueueId = addedDownloadQueues
+                    .Find(dq => dq.OldDownloadQueueId == exportDownloadFile.DownloadQueueId)?
+                    .NewDownloadQueueId;
+            }
+
+            // Find download queue priority
+            int? downloadQueuePriority = null;
+            if (downloadQueueId != null)
+            {
+                var maxDownloadQueuePriority = AppService
+                    .DownloadFileService
+                    .DownloadFiles
+                    .Where(df => df.DownloadQueueId == downloadQueueId)
+                    .Sum(df => df.DownloadQueuePriority ?? 0) + 1;
+
+                var sortedDownloadFiles = exportDownloadFiles
+                    .Where(df => df.DownloadQueueId == exportDownloadFile.DownloadQueueId && df.DownloadQueuePriority != null)
+                    .OrderBy(df => df.DownloadQueuePriority)
+                    .ToList();
+
+                if (sortedDownloadFiles.Count > 0)
+                {
+                    var currentIndex = sortedDownloadFiles.IndexOf(exportDownloadFile);
+                    downloadQueuePriority = maxDownloadQueuePriority + currentIndex;
+                }
+            }
+
+            // Create new instance of DownloadFileViewModel
+            var downloadFile = new DownloadFileViewModel
+            {
+                Url = exportDownloadFile.Url,
+                FileName = fileName,
+                DownloadQueueId = downloadQueueId,
+                Size = exportDownloadFile.Size,
+                Description = exportDownloadFile.Description,
+                Status = exportDownloadFile.Status,
+                DownloadQueuePriority = downloadQueuePriority,
+                DownloadProgress = exportDownloadFile.DownloadProgress,
+                DownloadPackage = exportDownloadFile.DownloadPackage,
+                CategoryId = category.Id
+            };
+
+            // Save download file
+            downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile);
+            // Add required data to result
+            var viewModel = new ExportAddedDownloadFileDataViewModel(oldFileName: exportDownloadFile.FileName,
+                newFileName: downloadFile?.FileName ?? string.Empty,
+                saveLocation: category.CategorySaveDirectory?.SaveDirectory ?? string.Empty,
+                newDownloadFileId: downloadFile?.Id ?? 0);
+
+            data.Add(viewModel);
+        }
+
+        return data;
+    }
+
+    private async Task ImportFilesAsync(string tempFolder, List<ExportAddedDownloadFileDataViewModel> addedDownloadFiles)
+    {
+        // Make sure temp folder has value and exist
+        if (tempFolder.IsNullOrEmpty() || !Directory.Exists(tempFolder))
+            return;
+
+        // Get all files exists in temp folder
+        var files = Directory.GetFiles(tempFolder);
+        if (files.Length == 0)
+            return;
+
+        // Move files from temp folder to new save location
+        foreach (var file in files)
+        {
+            var oldFileName = Path.GetFileName(file);
+            var data = addedDownloadFiles.Find(df => df.OldFileName.Equals(oldFileName));
+            if (data == null || data.NewFileName.IsNullOrEmpty() || data.SaveLocation.IsNullOrEmpty())
+                continue;
+
+            var filePath = Path.Combine(data.SaveLocation, data.NewFileName);
+            if (File.Exists(filePath))
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Import data",
+                    $"The file '{data.NewFileName}' already exists. Do you want to replace it?",
+                    DialogButtons.YesNo);
+
+                if (result != DialogResult.Yes)
+                {
+                    await RemoveStorageDataFromDownloadFileAsync(data.NewDownloadFileId);
+                    continue;
+                }
+            }
+
+            var fileInfo = new FileInfo(file);
+            var driveInfo = new DriveInfo(filePath);
+            if (fileInfo.Length > driveInfo.AvailableFreeSpace)
+            {
+                var driveName = driveInfo.GetDriveName();
+
+                await DialogBoxManager.ShowDangerDialogAsync("Import data",
+                    $"There isn't enough free space on your '{driveName}' drive to transfer the files. The transfer of '{data.NewFileName}' has been canceled.",
+                    DialogButtons.Ok);
+
+                await RemoveStorageDataFromDownloadFileAsync(data.NewDownloadFileId);
+                continue;
+            }
+
+            File.Move(file, filePath, true);
+        }
+    }
+
+    private async Task RemoveStorageDataFromDownloadFileAsync(int downloadFileId)
+    {
+        var downloadFile = AppService
             .DownloadFileService
-            .AddDownloadFileAsync(downloadFile,
-                isUrlDuplicate: urlDetails.IsUrlDuplicate,
-                duplicateAction: duplicateAction,
-                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
-                startDownloading: true);
+            .DownloadFiles
+            .FirstOrDefault(df => df.Id == downloadFileId);
+
+        if (downloadFile == null)
+            return;
+
+        downloadFile.Status = DownloadFileStatus.None;
+        downloadFile.DownloadProgress = 0;
+        downloadFile.DownloadPackage = null;
+
+        await AppService.DownloadFileService.UpdateDownloadFileAsync(downloadFile);
     }
 }

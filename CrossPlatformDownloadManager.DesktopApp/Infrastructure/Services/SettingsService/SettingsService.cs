@@ -113,7 +113,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while loading settings.");
+            Log.Error(ex, "An error occurred while loading settings. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

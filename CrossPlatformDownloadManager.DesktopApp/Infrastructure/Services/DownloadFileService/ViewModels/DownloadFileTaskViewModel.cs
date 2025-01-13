@@ -98,7 +98,7 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while closing download window.");
+            Log.Error(ex, "An error occurred while closing download window. Error message: {ErrorMessage}", ex.Message);
 
             await DialogBoxManager.ShowDangerDialogAsync("Error closing download window",
                 $"An error occurred while closing download window.\nError message: {ex.Message}",

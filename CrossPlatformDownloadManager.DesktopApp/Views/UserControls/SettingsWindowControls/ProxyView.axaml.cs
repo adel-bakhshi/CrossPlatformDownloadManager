@@ -28,7 +28,7 @@ public partial class ProxyView : MyUserControlBase<ProxyViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load available proxies.");
+            Log.Error(ex, "An error occured while trying to load available proxies. Error message: {ErrorMessage}", ex.Message);
         }
     }
 }

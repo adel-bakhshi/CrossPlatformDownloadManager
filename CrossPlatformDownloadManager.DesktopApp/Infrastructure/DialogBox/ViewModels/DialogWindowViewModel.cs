@@ -1,7 +1,12 @@
+using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Controls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.ViewModels;
 
@@ -13,6 +18,8 @@ public class DialogWindowViewModel : ViewModelBase
     private string _dialogMessage = string.Empty;
     private DialogButtons _dialogButtons = DialogButtons.Ok;
     private DialogType _dialogType = DialogType.Information;
+    private bool _copyToClipboardButtonIsVisible;
+    private string? _infoMessage;
 
     #endregion
 
@@ -74,10 +81,50 @@ public class DialogWindowViewModel : ViewModelBase
 
     public DialogResult DialogResult { get; set; } = DialogResult.None;
 
+    public bool CopyToClipboardButtonIsVisible
+    {
+        get => _copyToClipboardButtonIsVisible;
+        set => this.RaiseAndSetIfChanged(ref _copyToClipboardButtonIsVisible, value);
+    }
+
+    public string? InfoMessage
+    {
+        get => _infoMessage;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _infoMessage, value);
+            this.RaisePropertyChanged(nameof(InfoMessageIsVisible));
+        }
+    }
+
+    public bool InfoMessageIsVisible => !InfoMessage.IsNullOrEmpty();
+
+    #endregion
+
+    #region Commands
+
+    public ICommand CopyToClipboardCommand { get; }
+
     #endregion
 
     public DialogWindowViewModel(IAppService appService) : base(appService)
     {
+        CopyToClipboardCommand = ReactiveCommand.CreateFromTask<Window?>(CopyToClipboardAsync);
+    }
+
+    private async Task CopyToClipboardAsync(Window? owner)
+    {
+        try
+        {
+            if (owner?.Clipboard == null)
+                return;
+
+            await owner.Clipboard.SetTextAsync(DialogMessage);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to copy dialog message to clipboard. Error message: {ErrorMessage}", ex.Message);
+        }
     }
 
     public void SendDialogResult(Window? owner, DialogResult dialogResult)

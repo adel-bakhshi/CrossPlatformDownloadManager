@@ -119,7 +119,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the main window.");
+            Log.Error(ex, "An error occured while opening the main window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -148,7 +148,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while starting/stopping the download queue.");
+            Log.Error(ex, "An error occured while starting/stopping the download queue. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -192,7 +192,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while adding the download link.");
+            Log.Error(ex, "An error occured while adding the download link. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -209,7 +209,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while adding the download queue.");
+            Log.Error(ex, "An error occured while adding the download queue. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -226,7 +226,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the settings window.");
+            Log.Error(ex, "An error occured while opening the settings window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -238,7 +238,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the help window.");
+            Log.Error(ex, "An error occured while opening the help window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -250,7 +250,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the about us window.");
+            Log.Error(ex, "An error occured while opening the about us window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -272,7 +272,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while exit the app.");
+            Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -345,7 +345,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occured while refreshing proxies.");
+                Log.Error(ex, "An error occured while refreshing proxies. Error message: {ErrorMessage}", ex.Message);
                 await DialogBoxManager.ShowErrorDialogAsync(ex);
             }
         });
@@ -434,7 +434,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while changing proxy.");
+            Log.Error(ex, "An error occured while changing proxy. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

@@ -30,7 +30,7 @@ public partial class ChangeFileNameWindow : MyWindowBase<ChangeFileNameWindowVie
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open change file name window.");
+            Log.Error(ex, "An error occured while trying to open change file name window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
             
             Close();

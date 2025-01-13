@@ -66,7 +66,7 @@ public partial class OptionsView : MyUserControlBase<OptionsViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to change days of week.");
+            Log.Error(ex, "An error occured while trying to change days of week. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

@@ -350,10 +350,10 @@ public static class ExtensionMethods
             var buffer = new byte[4096];
 
             int readBytes;
-            while ((readBytes = await zippedStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while ((readBytes = await zippedStream.ReadAsync(buffer)) > 0)
             {
-                outputFile.Write(buffer, 0, readBytes);
-                outputFile.Flush();
+                await outputFile.WriteAsync(buffer.AsMemory(0, readBytes));
+                await outputFile.FlushAsync();
             }
         }
     }
@@ -388,10 +388,10 @@ public static class ExtensionMethods
             await using var fileStream = File.OpenRead(file);
             
             int sourceBytes;
-            while ((sourceBytes = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while ((sourceBytes = await fileStream.ReadAsync(buffer)) > 0)
             {
-                zipStream.Write(buffer, 0, sourceBytes);
-                zipStream.Flush();
+                await zipStream.WriteAsync(buffer.AsMemory(0, sourceBytes));
+                await zipStream.FlushAsync();
             }
 
             zipStream.CloseEntry();

@@ -113,7 +113,7 @@ public class UnitOfWork : IUnitOfWork
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while creating the database.");
+            Log.Error(ex, "An error occurred while creating the database. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

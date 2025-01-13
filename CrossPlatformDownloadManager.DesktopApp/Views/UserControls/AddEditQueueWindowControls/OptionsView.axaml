@@ -209,7 +209,8 @@
                                   OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{DynamicResource SecondaryColor}"
-                                  Text="{Binding DownloadQueueTitle}" />
+                                  Text="{Binding DownloadQueueTitle}"
+                                  IsReadOnly="{Binding IsApplicationDefaultQueue}" />
 
                 <!-- Is default button -->
                 <Button Grid.Column="1"

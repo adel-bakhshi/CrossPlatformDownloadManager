@@ -40,6 +40,7 @@ public class OptionsViewModel : ViewModelBase
     private string? _selectedStartDownloadDateOption;
     private ObservableCollection<string> _daysOfWeekOptions = [];
     private DateTime? _selectedDate;
+    private bool _isApplicationDefaultQueue;
 
     #endregion
 
@@ -190,6 +191,12 @@ public class OptionsViewModel : ViewModelBase
     public bool IsDaily { get; set; }
     public DaysOfWeekViewModel? DaysOfWeekViewModel { get; set; }
     public List<string> DaysOfWeek { get; set; } = [];
+    
+    public bool IsApplicationDefaultQueue
+    {
+        get => _isApplicationDefaultQueue;
+        set => this.RaiseAndSetIfChanged(ref _isApplicationDefaultQueue, value);
+    }
 
     #endregion
 
@@ -201,12 +208,13 @@ public class OptionsViewModel : ViewModelBase
 
     #endregion
 
-    public OptionsViewModel(IAppService appService, DownloadQueueViewModel downloadQueue) : base(appService)
+    public OptionsViewModel(IAppService appService, DownloadQueueViewModel downloadQueue, bool isApplicationDefaultQueue) : base(appService)
     {
         StartDownloadDateOptions = ["Once", "Daily"];
         SelectedStartDownloadDateOption = StartDownloadDateOptions.FirstOrDefault();
         DaysOfWeekOptions = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         SelectedDate = DateTime.Now;
+        IsApplicationDefaultQueue = isApplicationDefaultQueue;
         
         LoadDownloadQueueData(downloadQueue);
 

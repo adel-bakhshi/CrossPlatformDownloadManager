@@ -62,7 +62,7 @@
                     CommandParameter="{Binding $parent[Window]}"
                     Content="Delete"
                     IsVisible="{Binding IsEditMode}"
-                    IsEnabled="{Binding IsEditMode}" />
+                    IsEnabled="{Binding IsDeleteButtonEnabled}" />
 
             <Button Classes="button danger"
                     Command="{Binding CancelCommand}"

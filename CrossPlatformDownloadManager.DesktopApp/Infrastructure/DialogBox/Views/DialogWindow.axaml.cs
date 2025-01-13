@@ -48,7 +48,7 @@ public partial class DialogWindow : MyWindowBase<DialogWindowViewModel>
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while trying to save dialog result.");
+            Log.Error(ex, "An error occurred while trying to save dialog result. Error message: {ErrorMessage}", ex.Message);
             App.Desktop?.Shutdown();
         }
     }

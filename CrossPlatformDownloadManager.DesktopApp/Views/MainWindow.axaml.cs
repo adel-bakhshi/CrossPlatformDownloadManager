@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -66,7 +65,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 ViewModel.SelectedFilesTotalSize = "0 KB";
 
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to update total size of download files.");
+            Log.Error(ex, "An error occured while trying to update total size of download files. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -89,7 +88,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to open manager window.");
+            Log.Error(ex, "An error occured while trying to open manager window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -106,7 +105,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during opening context menu.");
+            Log.Error(ex, "An error occured during opening context menu. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -138,7 +137,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during closing window.");
+            Log.Error(ex, "An error occured during closing window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 }

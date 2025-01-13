@@ -134,7 +134,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while loading available proxies.");
+            Log.Error(ex, "An error occurred while loading available proxies. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -173,7 +173,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while changing proxy type.");
+            Log.Error(ex, "An error occurred while changing proxy type. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -248,7 +248,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while deleting proxy.");
+            Log.Error(ex, "An error occurred while deleting proxy. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -357,7 +357,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while saving proxy.");
+            Log.Error(ex, "An error occurred while saving proxy. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -389,7 +389,7 @@ public class ProxyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while setting selected proxy.");
+            Log.Error(ex, "An error occurred while setting selected proxy. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

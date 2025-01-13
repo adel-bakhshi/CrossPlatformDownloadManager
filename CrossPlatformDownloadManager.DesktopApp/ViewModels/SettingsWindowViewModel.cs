@@ -285,7 +285,7 @@ public class SettingsWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to save settings.");
+            Log.Error(ex, "An error occured while trying to save settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

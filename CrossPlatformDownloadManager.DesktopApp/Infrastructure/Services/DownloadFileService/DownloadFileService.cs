@@ -151,15 +151,17 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             Url = viewModel.Url!,
             FileName = viewModel.FileName!,
-            DownloadQueueId = null,
+            DownloadQueueId = viewModel.DownloadQueueId,
             Size = viewModel.Size!.Value,
             Description = viewModel.Description,
-            Status = DownloadFileStatus.None,
+            Status = viewModel.Status ?? DownloadFileStatus.None,
             LastTryDate = null,
             DateAdded = DateTime.Now,
-            DownloadQueuePriority = null,
+            DownloadQueuePriority = viewModel.DownloadQueuePriority,
             CategoryId = category!.Id,
             SaveLocation = category.CategorySaveDirectory!.SaveDirectory,
+            DownloadProgress = viewModel.DownloadProgress is > 0 ? viewModel.DownloadProgress.Value : 0,
+            DownloadPackage = viewModel.DownloadPackage
         };
 
         DownloadFileViewModel? result = null;
@@ -834,7 +836,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 $"An error occurred while downloading the file.\nError message: {ex.Message}",
                 DialogButtons.Ok);
 
-            Log.Error(ex, "An error occurred while downloading the file.");
+            Log.Error(ex, "An error occurred while downloading the file. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -859,7 +861,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while stopping the download.");
+            Log.Error(ex, "An error occurred while stopping the download. Error message: {ErrorMessage}", ex.Message);
 
             await DialogBoxManager.ShowDangerDialogAsync("Error stopping download",
                 $"An error occurred while stopping the download.\nError message: {ex.Message}",
@@ -881,7 +883,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while stopping operations.");
+            Log.Error(ex, "An error occurred while stopping operations. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -971,7 +973,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     $"An error occurred while downloading the file.\nError message: {exception.Message}",
                     DialogButtons.Ok);
 
-                Log.Error(exception, "An error occurred while downloading the file.");
+                Log.Error(exception, "An error occurred while downloading the file. Error message: {ErrorMessage}", exception.Message);
             }
 
             var allTasksAreNull = taskValues.TrueForAll(v => v == null);

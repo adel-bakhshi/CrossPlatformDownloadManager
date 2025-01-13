@@ -224,7 +224,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "And error occured while trying to save the category.");
+            Log.Error(ex, "And error occured while trying to save the category. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -274,7 +274,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "And error occured while trying to load the category.");
+            Log.Error(ex, "And error occured while trying to load the category. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

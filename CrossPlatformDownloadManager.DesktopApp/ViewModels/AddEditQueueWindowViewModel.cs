@@ -28,6 +28,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
     private DownloadQueueViewModel _downloadQueue = new();
     private OptionsViewModel? _optionsViewModel;
     private FilesViewModel? _filesViewModel;
+    private bool _isApplicationDefaultQueue;
 
     #endregion
 
@@ -35,6 +36,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
     public string Title => IsEditMode ? "CDM - Edit Queue" : "CDM - Add New Queue";
     public bool IsEditMode => DownloadQueue is { Id: > 0 };
+    public bool IsDeleteButtonEnabled => IsEditMode && !IsApplicationDefaultQueue;
 
     public ObservableCollection<string> TabItems
     {
@@ -55,6 +57,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _downloadQueue, value);
             this.RaisePropertyChanged(nameof(IsEditMode));
+            this.RaisePropertyChanged(nameof(IsDeleteButtonEnabled));
             this.RaisePropertyChanged(nameof(Title));
         }
     }
@@ -69,6 +72,16 @@ public class AddEditQueueWindowViewModel : ViewModelBase
     {
         get => _filesViewModel;
         set => this.RaiseAndSetIfChanged(ref _filesViewModel, value);
+    }
+
+    public bool IsApplicationDefaultQueue
+    {
+        get => _isApplicationDefaultQueue;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isApplicationDefaultQueue, value);
+            this.RaisePropertyChanged(nameof(IsDeleteButtonEnabled));
+        }
     }
 
     #endregion
@@ -88,10 +101,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         if (downloadQueue != null)
             DownloadQueue = downloadQueue;
 
+        IsApplicationDefaultQueue = DownloadQueue.Title?.Equals(Constants.DefaultDownloadQueueTitle) == true;
         TabItems = ["Options", "Files"];
         SelectedTabItem = TabItems.FirstOrDefault();
 
-        OptionsViewModel = new OptionsViewModel(appService, DownloadQueue);
+        OptionsViewModel = new OptionsViewModel(appService, DownloadQueue, IsApplicationDefaultQueue);
         FilesViewModel = new FilesViewModel(appService, DownloadQueue);
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
@@ -154,7 +168,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             // Calculate start and end schedule times
             TimeSpan? startSchedule = null;
             TimeSpan? stopSchedule = null;
-            
+
             if (OptionsViewModel.StartDownloadScheduleEnabled)
             {
                 switch (OptionsViewModel)
@@ -263,7 +277,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             DownloadQueue.DaysOfWeek = DownloadQueue.IsDaily ? OptionsViewModel.DaysOfWeekViewModel.ConvertToJson() : null;
             DownloadQueue.DownloadCountAtSameTime = FilesViewModel.DownloadCountAtSameTime;
             DownloadQueue.IncludePausedFiles = FilesViewModel.IncludePausedFiles;
-            
+
             // Get all download queues that are default
             var defaultDownloadQueues = AppService
                 .DownloadQueueService
@@ -313,11 +327,11 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                         await AppService
                             .DownloadFileService
                             .StopDownloadFileAsync(downloadFile, ensureStopped: true, playSound: false);
-                        
+
                         stoppedDownloadFiles.Add(downloadFile);
                     }
                 }
-                
+
                 await AppService
                     .DownloadQueueService
                     .RemoveDownloadFilesFromDownloadQueueAsync(DownloadQueue, oldDownloadFiles);
@@ -338,7 +352,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to save queue.");
+            Log.Error(ex, "An error occured while trying to save queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -383,7 +397,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to delete queue.");
+            Log.Error(ex, "An error occured while trying to delete queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -399,7 +413,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to cancel.");
+            Log.Error(ex, "An error occured while trying to cancel. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

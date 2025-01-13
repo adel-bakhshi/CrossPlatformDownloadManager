@@ -46,7 +46,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An unhandled exception occurred during initialization");
+            Log.Error(ex, "An error occurred during initialization. Error message: {ErrorMessage}", ex.Message);
             if (Desktop != null)
                 Desktop.Shutdown();
             else
@@ -69,7 +69,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while finishing the application.");
+            Log.Error(ex, "An error occurred while finishing the application. Error message: {ErrorMessage}", ex.Message);
             Environment.Exit(0);
         }
     }

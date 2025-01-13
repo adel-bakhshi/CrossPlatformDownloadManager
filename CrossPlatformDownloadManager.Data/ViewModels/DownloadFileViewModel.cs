@@ -615,7 +615,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while checking resume capability.");
+            Log.Error(ex, "An error occurred while checking resume capability. Error message: {ErrorMessage}", ex.Message);
         }
 
         CanResumeDownload = false;

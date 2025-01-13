@@ -92,7 +92,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while scheduling manager.");
+            Log.Error(ex, "An error occurred while scheduling manager. Error message: {ErrorMessage}", ex.Message);
 
             if (!_scheduleManagerTimer.IsEnabled)
                 _scheduleManagerTimer.Start();

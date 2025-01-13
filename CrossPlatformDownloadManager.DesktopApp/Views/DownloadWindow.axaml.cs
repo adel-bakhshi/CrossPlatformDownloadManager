@@ -54,7 +54,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during loading download window.");
+            Log.Error(ex, "An error occured during loading download window. Error message: {ErrorMessage}", ex.Message);
         }
     }
     

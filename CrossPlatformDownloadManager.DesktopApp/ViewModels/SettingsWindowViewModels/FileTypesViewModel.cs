@@ -116,7 +116,7 @@ public class FileTypesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occurred while adding a new file type.");
+            Log.Error(ex, "An error occurred while adding a new file type. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

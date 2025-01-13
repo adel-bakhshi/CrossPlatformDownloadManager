@@ -96,7 +96,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add new category.");
+            Log.Error(ex, "An error occured while trying to add new category. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

@@ -121,7 +121,7 @@ public class FilesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while opening the add files to queue window.");
+            Log.Error(ex, "An error occured while opening the add files to queue window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

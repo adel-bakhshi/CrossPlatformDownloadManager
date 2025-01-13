@@ -163,7 +163,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to save the file type.");
+            Log.Error(ex, "An error occured while trying to save the file type. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -176,7 +176,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "And error occured while trying to close the window.");
+            Log.Error(ex, "And error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -200,7 +200,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load categories.");
+            Log.Error(ex, "An error occured while trying to load categories. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -223,7 +223,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load category file extension data.");
+            Log.Error(ex, "An error occured while trying to load category file extension data. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

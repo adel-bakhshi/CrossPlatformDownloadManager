@@ -73,7 +73,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to close the window.");
+            Log.Error(ex, "An error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -87,8 +87,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
 
             if (!CurrentFileName.Equals(NewFileName))
             {
-                var result = await DialogBoxManager.ShowWarningDialogAsync(
-                    "Change file name",
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Change file name",
                     "Are you sure you want to discard the changes?",
                     DialogButtons.YesNoCancel);
 
@@ -111,7 +110,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to close the window.");
+            Log.Error(ex, "An error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -167,8 +166,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         var originalFileExtension = Path.GetExtension(filePath);
         if (!fileExtension.Equals(originalFileExtension))
         {
-            var result = await DialogBoxManager.ShowWarningDialogAsync(
-                "Change file extension", 
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Change file extension", 
                 "Are you sure you want to change the file extension?", 
                 DialogButtons.YesNo);
 

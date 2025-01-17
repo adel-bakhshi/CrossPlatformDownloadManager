@@ -6,6 +6,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Views;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 
@@ -102,6 +103,9 @@ public static class DialogBoxManager
         bool useMainWindowAsOwner = false)
     {
         var owner = useMainWindowAsOwner ? App.Desktop?.MainWindow : App.Desktop?.Windows.FirstOrDefault(w => w.IsFocused) ?? App.Desktop?.MainWindow;
+        if (App.Desktop?.MainWindow != null && owner == App.Desktop.MainWindow && !App.Desktop.MainWindow.IsVisible)
+            owner = App.Desktop.Windows.OfType<ManagerWindow>().FirstOrDefault();
+
         if (owner == null)
             return DialogResult.None;
 

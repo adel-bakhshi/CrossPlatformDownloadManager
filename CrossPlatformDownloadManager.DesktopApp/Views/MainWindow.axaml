@@ -554,9 +554,9 @@
                     <Menu VerticalAlignment="Center">
                         <!-- Task -->
                         <MenuItem Header="Task"
-                                  Classes="header">
+                                  Classes="headerMenuItem">
                             <MenuItem Header="Add new link"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding AddNewLinkMenuItemCommand}"
                                       CommandParameter="{Binding $parent[Window]}" />
@@ -565,12 +565,12 @@
                                        Margin="15, 5" />
 
                             <MenuItem Header="Export data"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding ExportDataMenuItemCommand}" />
 
                             <MenuItem Header="Import data"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding ImportDataMenuItemCommand}" />
 
@@ -578,12 +578,12 @@
                                        Margin="15, 5" />
 
                             <MenuItem Header="Export settings"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding ExportSettingsMenuItemCommand}" />
 
                             <MenuItem Header="Import settings"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding ImportSettingsMenuItemCommand}" />
 
@@ -591,26 +591,118 @@
                                        Margin="15, 5" />
 
                             <MenuItem Header="Exit"
-                                      Classes="listItem"
+                                      Classes="subMenuItem"
                                       Command="{Binding ExitProgramMenuItemCommand}"
                                       Width="250" />
                         </MenuItem>
 
-                        <!-- File -->
-                        <MenuItem Header="File"
-                                  Classes="header" />
-
                         <!-- Downloads -->
                         <MenuItem Header="Downloads"
-                                  Classes="header" />
+                                  Classes="headerMenuItem"
+                                  SubmenuOpened="FileMenuItemOnSubmenuOpened">
+                            <!-- Start all -->
+                            <MenuItem Header="Start all"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsStartAllDownloadsEnabled}"
+                                      Command="{Binding StartAllDownloadsMenuItemCommand}" />
+
+                            <!-- Stop all -->
+                            <MenuItem Header="Stop all"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsStopAllDownloadsEnabled}"
+                                      Command="{Binding StopAllDownloadsMenuItemCommand}" />
+
+                            <!-- Pause all -->
+                            <MenuItem Header="Pause all"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsPauseAllDownloadsEnabled}"
+                                      Command="{Binding PauseAllDownloadsMenuItemCommand}" />
+
+                            <!-- Resume all -->
+                            <MenuItem Header="Resume all"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsResumeAllDownloadsEnabled}"
+                                      Command="{Binding ResumeAllDownloadsMenuItemCommand}" />
+
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+
+                            <!-- Start download -->
+                            <MenuItem Header="Start download"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsStartDownloadsEnabled}"
+                                      Command="{Binding StartDownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <!-- Stop download -->
+                            <MenuItem Header="Stop download"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsStopDownloadsEnabled}"
+                                      Command="{Binding StopDownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <!-- Pause download -->
+                            <MenuItem Header="Pause download"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsPauseDownloadsEnabled}"
+                                      Command="{Binding PauseDownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <!-- Resume download -->
+                            <MenuItem Header="Resume download"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsResumeDownloadsEnabled}"
+                                      Command="{Binding ResumeDownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <!-- Pause download -->
+                            <MenuItem Header="Redownload"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsRedownloadEnabled}"
+                                      Command="{Binding RedownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+
+                            <!-- Delete -->
+                            <MenuItem Header="Delete"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsDeleteDownloadsEnabled}"
+                                      Command="{Binding DeleteDownloadMenuItemCommand}"
+                                      CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                            <!-- Delete all completed -->
+                            <MenuItem Header="Delete all completed"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      IsEnabled="{Binding MainMenuItemsEnabledState.IsDeleteAllCompletedEnabled}"
+                                      Command="{Binding DeleteAllCompletedDownloadsMenuItemCommand}" />
+
+                            <Separator Background="{DynamicResource SecondaryColor}"
+                                       Margin="15, 5" />
+
+                            <!-- Settings -->
+                            <MenuItem Header="Settings"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      Command="{Binding OpenSettingsMenuItemCommand}"
+                                      CommandParameter="{Binding $parent[Window]}" />
+                        </MenuItem>
 
                         <!-- View -->
                         <MenuItem Header="View"
-                                  Classes="header" />
-
-                        <!-- Help -->
-                        <MenuItem Header="Help"
-                                  Classes="header" />
+                                  Classes="headerMenuItem" />
                     </Menu>
                 </StackPanel>
 
@@ -784,7 +876,8 @@
 
                             <!-- File Name and File Type -->
                             <DataGridTemplateColumn Header="Name"
-                                                    MinWidth="150">
+                                                    MinWidth="150"
+                                                    SortMemberPath="FileName">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -809,7 +902,8 @@
 
                             <!-- Download Status -->
                             <DataGridTemplateColumn Header="Status"
-                                                    MinWidth="150">
+                                                    MinWidth="150"
+                                                    SortMemberPath="DownloadProgress">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Top">

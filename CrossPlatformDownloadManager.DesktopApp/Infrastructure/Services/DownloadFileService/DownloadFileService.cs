@@ -1011,22 +1011,21 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     private async Task EnsureDownloadFileStoppedAsync(int downloadFileId)
     {
-        // Wait for the service to stop
-        await Dispatcher.UIThread.InvokeAsync(async () =>
+        // Find tasks from the list
+        DownloadFileTaskViewModel? downloadFileTask;
+
+        // Check if the stop operation is finished
+        while (true)
         {
-            // Find tasks from the list
-            var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
+            downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
+            if (downloadFileTask?.StopOperationFinished == true)
+                break;
+            
+            await Task.Delay(100);
+        }
 
-            // Check if the stop operation is finished
-            while (downloadFileTask?.StopOperationFinished != true)
-            {
-                await Task.Delay(100);
-                downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
-            }
-
-            // Remove the task
-            _downloadFileTasks.Remove(downloadFileTask);
-        });
+        // Remove the task
+        _downloadFileTasks.Remove(downloadFileTask);
     }
 
     private async Task DeleteDuplicateDownloadFilesAsync(string url)

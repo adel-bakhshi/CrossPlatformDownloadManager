@@ -53,9 +53,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 .OfType<DownloadFileViewModel>()
                 .ToList();
 
-            ViewModel.SelectAllDownloadFiles = ViewModel.DownloadFiles.Count > 0 &&
-                                               downloadFiles.Count == ViewModel.DownloadFiles.Count;
-
+            ViewModel.SelectAllDownloadFiles = ViewModel.DownloadFiles.Count > 0 && downloadFiles.Count == ViewModel.DownloadFiles.Count;
             var totalSize = downloadFiles.Sum(downloadFile => downloadFile.Size ?? 0);
             ViewModel.SelectedFilesTotalSize = totalSize == 0 ? "0 KB" : totalSize.ToFileSize();
         }
@@ -138,6 +136,22 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured during closing window. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    private async void FileMenuItemOnSubmenuOpened(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (ViewModel == null)
+                return;
+            
+            ViewModel.ChangeFileSubMenusEnableState(DownloadFilesDataGrid);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured during opening context menu. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

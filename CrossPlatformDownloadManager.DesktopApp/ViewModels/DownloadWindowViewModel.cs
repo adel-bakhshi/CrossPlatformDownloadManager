@@ -111,6 +111,9 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         DownloadFile = downloadFile;
         DownloadStatusViewModel = new DownloadStatusViewModel(appService, DownloadFile);
+        
+        DownloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
+        DownloadFile.DownloadResumed += DownloadFileOnDownloadResumed;
 
         DownloadSpeedLimiterViewModel = new DownloadSpeedLimiterViewModel(appService);
         DownloadSpeedLimiterViewModel.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
@@ -152,6 +155,9 @@ public class DownloadWindowViewModel : ViewModelBase
 
     public void RemoveEventHandlers()
     {
+        DownloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
+        DownloadFile.DownloadResumed -= DownloadFileOnDownloadResumed;
+        
         DownloadStatusViewModel?.RemoveEventHandlers();
 
         if (DownloadSpeedLimiterViewModel != null)
@@ -172,16 +178,12 @@ public class DownloadWindowViewModel : ViewModelBase
                 AppService
                     .DownloadFileService
                     .ResumeDownloadFile(DownloadFile);
-
-                IsPaused = false;
             }
             else
             {
                 AppService
                     .DownloadFileService
                     .PauseDownloadFile(DownloadFile);
-
-                IsPaused = true;
             }
         }
         catch (Exception ex)
@@ -189,6 +191,16 @@ public class DownloadWindowViewModel : ViewModelBase
             Log.Error(ex, "An error occured while trying to resume/pause the download. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
+    {
+        IsPaused = true;
+    }
+
+    private void DownloadFileOnDownloadResumed(object? sender, DownloadFileEventArgs e)
+    {
+        IsPaused = false;
     }
 
     private async Task CancelDownloadAsync()

@@ -158,36 +158,9 @@ public class TrayMenuWindowViewModel : ViewModelBase
         {
             HideTrayMenu();
 
-            var url = string.Empty;
-            if (TrayMenuWindow!.Clipboard != null)
-                url = await TrayMenuWindow.Clipboard.GetTextAsync();
-
-            url = url?.Replace('\\', '/').Trim();
-            var urlIsValid = url.CheckUrlValidation();
-            var showStartDownloadDialog = AppService.SettingsService.Settings.ShowStartDownloadDialog;
-            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
-            if (showStartDownloadDialog)
-            {
-                var vm = new AddDownloadLinkWindowViewModel(AppService)
-                {
-                    IsLoadingUrl = urlIsValid,
-                    DownloadFile =
-                    {
-                        Url = urlIsValid ? url : null
-                    }
-                };
-
-                var window = new AddDownloadLinkWindow { DataContext = vm };
-                window.Show();
-            }
-            // Otherwise, add link to database and start it
-            else
-            {
-                if (!urlIsValid)
-                    return;
-
-                await AddNewDownloadFileAndStartItAsync(url!);
-            }
+            var vm = new CaptureUrlWindowViewModel(AppService);
+            var window = new CaptureUrlWindow { DataContext = vm };
+            window.Show();
         }
         catch (Exception ex)
         {
@@ -436,61 +409,6 @@ public class TrayMenuWindowViewModel : ViewModelBase
             await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occured while changing proxy. Error message: {ErrorMessage}", ex.Message);
         }
-    }
-
-    private async Task AddNewDownloadFileAndStartItAsync(string url)
-    {
-        // Get url details
-        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(url);
-        // Validate url details
-        var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
-        if (!validateResult.IsValid)
-        {
-            if (validateResult.Title.IsNullOrEmpty() || validateResult.Message.IsNullOrEmpty())
-            {
-                await DialogBoxManager.ShowDangerDialogAsync("Error downloading file",
-                    "An error occurred while downloading the file.",
-                    DialogButtons.Ok);
-            }
-            else
-            {
-                await DialogBoxManager.ShowDangerDialogAsync(validateResult.Title!, validateResult.Message!, DialogButtons.Ok);
-            }
-
-            return;
-        }
-
-        DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsUrlDuplicate)
-        {
-            var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
-            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
-            {
-                duplicateAction = await AppService
-                    .DownloadFileService
-                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
-            }
-            else
-            {
-                duplicateAction = savedDuplicateAction;
-            }
-        }
-
-        var downloadFile = new DownloadFileViewModel
-        {
-            Url = urlDetails.Url,
-            FileName = urlDetails.FileName,
-            CategoryId = urlDetails.Category?.Id,
-            Size = urlDetails.FileSize
-        };
-
-        await AppService
-            .DownloadFileService
-            .AddDownloadFileAsync(downloadFile,
-                isUrlDuplicate: urlDetails.IsUrlDuplicate,
-                duplicateAction: duplicateAction,
-                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
-                startDownloading: true);
     }
 
     #endregion

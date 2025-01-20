@@ -1,5 +1,6 @@
 using System;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -13,6 +14,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
     #region Private Fields
 
     private readonly DispatcherTimer _urlTextBoxChangedTimer;
+    private readonly DispatcherTimer _focusWindowTimer;
 
     #endregion
 
@@ -22,9 +24,20 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 
         _urlTextBoxChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _urlTextBoxChangedTimer.Tick += UrlTextBoxChangedTimerOnTick;
+
+        _focusWindowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _focusWindowTimer.Tick += FocusWindowTimerOnTick;
     }
 
-    private void UrlTextBox_OnTextChanged(object? sender, TextChangedEventArgs e)
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _focusWindowTimer.Start();
+    }
+
+    #region Helpers
+
+    private void UrlTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
     {
         // Reset timer when user still typing
         _urlTextBoxChangedTimer.Stop();
@@ -47,4 +60,17 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
             Log.Error(ex, "An error occured while trying to get url details. Error message: {ErrorMessage}", ex.Message);
         }
     }
+
+    private void FocusWindowTimerOnTick(object? sender, EventArgs e)
+    {
+        if (!IsFocused)
+        {
+            Focus();
+            return;
+        }
+
+        _focusWindowTimer.Stop();
+    }
+
+    #endregion
 }

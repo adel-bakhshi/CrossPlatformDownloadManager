@@ -3,6 +3,7 @@ using System;
 using CrossPlatformDownloadManager.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrossPlatformDownloadManager.Data.Migrations
 {
     [DbContext(typeof(DownloadManagerDbContext))]
-    partial class DownloadManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250117130321_AddShowCategoriesPanelToSettings")]
+    partial class AddShowCategoriesPanelToSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
@@ -310,10 +313,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<bool>("DarkMode")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("DataGridColumnsSettings")
-                        .HasMaxLength(5000)
-                        .HasColumnType("TEXT");
 
                     b.Property<byte>("DuplicateDownloadLinkAction")
                         .HasColumnType("INTEGER");

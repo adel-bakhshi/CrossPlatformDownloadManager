@@ -702,7 +702,110 @@
 
                         <!-- View -->
                         <MenuItem Header="View"
-                                  Classes="headerMenuItem" />
+                                  Classes="headerMenuItem">
+                            <!-- Show categories -->
+                            <MenuItem Header="Show categories"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding ShowCategoriesPanel, Mode=TwoWay}" />
+
+                            <!-- Show categories -->
+                            <MenuItem Header="Download list columns"
+                                      Classes="subMenuItem"
+                                      Width="250">
+                                <MenuItem Header="Name"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsNameColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Url"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsUrlColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Description"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsDescriptionColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Queue"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsQueueColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Priority in queue"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsPriorityInQueueColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Size"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsSizeColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Status"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsStatusColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Time left"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsTimeLeftColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Elapsed time"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsElapsedTimeColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Transfer rate"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsTransferRateColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Last try date"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsLastTryDateColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Date added"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsDateAddedColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+
+                                <MenuItem Header="Save location"
+                                          Classes="subMenuItem"
+                                          Width="250"
+                                          ToggleType="CheckBox"
+                                          IsChecked="{Binding DataGridColumnsSettings.IsSaveLocationColumnVisible, Mode=TwoWay}"
+                                          Command="{Binding SaveColumnsSettingsCommand}" />
+                            </MenuItem>
+                        </MenuItem>
                     </Menu>
                 </StackPanel>
 
@@ -745,7 +848,8 @@
                         CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Background="{DynamicResource SecondaryColor}"
                         Padding="20"
-                        Width="250">
+                        Width="250"
+                        IsVisible="{Binding ShowCategoriesPanel}">
                     <ListBox ItemsSource="{Binding CategoryHeaders}"
                              Classes="categoryList"
                              SelectedItem="{Binding SelectedCategoryHeader}"
@@ -755,7 +859,22 @@
                 <!-- Actions buttons and Download list -->
                 <Grid Grid.Column="1"
                       RowDefinitions="Auto, *"
-                      Margin="20, 0, 0, 0">
+                      Classes="mainGrid"
+                      Classes.marginZero="{Binding !ShowCategoriesPanel}">
+                    <!-- Styles -->
+                    <Grid.Styles>
+                        <Style Selector="Grid.mainGrid">
+                            <Setter Property="Margin"
+                                    Value="20, 0, 0, 0" />
+
+                            <!-- Margin zero styles -->
+                            <Style Selector="^.marginZero">
+                                <Setter Property="Margin"
+                                        Value="0" />
+                            </Style>
+                        </Style>
+                    </Grid.Styles>
+
                     <!-- Action buttons -->
                     <Grid Grid.Row="0"
                           RowDefinitions="Auto, Auto">
@@ -874,10 +993,11 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- File Name and File Type -->
+                            <!-- File name and file type -->
                             <DataGridTemplateColumn Header="Name"
                                                     MinWidth="150"
-                                                    SortMemberPath="FileName">
+                                                    SortMemberPath="FileName"
+                                                    IsVisible="{Binding DataGridColumnsSettings.IsNameColumnVisible}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -890,20 +1010,41 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- Queue Name -->
+                            <!-- Url -->
+                            <DataGridTextColumn Header="Url"
+                                                MinWidth="150"
+                                                Binding="{Binding Url, FallbackValue='', TargetNullValue=''}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsUrlColumnVisible}" />
+
+                            <!-- Description -->
+                            <DataGridTextColumn Header="Description"
+                                                MinWidth="200"
+                                                Binding="{Binding Description, FallbackValue='', TargetNullValue=''}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsDescriptionColumnVisible}" />
+
+                            <!-- Queue name -->
                             <DataGridTextColumn Header="Queue"
                                                 MinWidth="150"
-                                                Binding="{Binding DownloadQueueName}" />
+                                                Binding="{Binding DownloadQueueName}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsQueueColumnVisible}" />
 
-                            <!-- File Size -->
+                            <!-- Priority in queue -->
+                            <DataGridTextColumn Header="Priority in queue"
+                                                MinWidth="100"
+                                                Binding="{Binding DownloadQueuePriority, FallbackValue='', TargetNullValue=''}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsPriorityInQueueColumnVisible}" />
+
+                            <!-- File size -->
                             <DataGridTextColumn Header="Size"
                                                 MinWidth="150"
-                                                Binding="{Binding SizeAsString}" />
+                                                Binding="{Binding SizeAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsSizeColumnVisible}" />
 
-                            <!-- Download Status -->
+                            <!-- Download status -->
                             <DataGridTemplateColumn Header="Status"
                                                     MinWidth="150"
-                                                    SortMemberPath="DownloadProgress">
+                                                    SortMemberPath="DownloadProgress"
+                                                    IsVisible="{Binding DataGridColumnsSettings.IsStatusColumnVisible}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Top">
@@ -969,25 +1110,41 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- Time Left -->
-                            <DataGridTextColumn Header="Time Left"
+                            <!-- Time left -->
+                            <DataGridTextColumn Header="Time left"
                                                 MinWidth="150"
-                                                Binding="{Binding TimeLeftAsString}" />
+                                                Binding="{Binding TimeLeftAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsTimeLeftColumnVisible}" />
 
-                            <!-- Transfer Rate -->
-                            <DataGridTextColumn Header="Transfer Rate"
+                            <!-- Elapsed time -->
+                            <DataGridTextColumn Header="Elapsed time"
                                                 MinWidth="150"
-                                                Binding="{Binding TransferRateAsString}" />
+                                                Binding="{Binding ElapsedTimeAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsElapsedTimeColumnVisible}" />
 
-                            <!-- Last Try Date -->
-                            <DataGridTextColumn Header="Last Try Date"
-                                                MinWidth="250"
-                                                Binding="{Binding LastTryDateAsString}" />
+                            <!-- Transfer rate -->
+                            <DataGridTextColumn Header="Transfer rate"
+                                                MinWidth="150"
+                                                Binding="{Binding TransferRateAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsTransferRateColumnVisible}" />
 
-                            <!-- Date Added -->
-                            <DataGridTextColumn Header="Date Added"
+                            <!-- Last try date -->
+                            <DataGridTextColumn Header="Last try date"
                                                 MinWidth="250"
-                                                Binding="{Binding DateAddedAsString}" />
+                                                Binding="{Binding LastTryDateAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsLastTryDateColumnVisible}" />
+
+                            <!-- Date added -->
+                            <DataGridTextColumn Header="Date added"
+                                                MinWidth="250"
+                                                Binding="{Binding DateAddedAsString}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsDateAddedColumnVisible}" />
+
+                            <!-- Save location -->
+                            <DataGridTextColumn Header="Save location"
+                                                MinWidth="300"
+                                                Binding="{Binding SaveLocation, FallbackValue='', TargetNullValue=''}"
+                                                IsVisible="{Binding DataGridColumnsSettings.IsSaveLocationColumnVisible}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

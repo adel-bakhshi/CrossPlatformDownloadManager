@@ -126,6 +126,9 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasPrincipalKey(s => s.Id)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            options.Property(s => s.ShowCategoriesPanel)
+                .HasDefaultValue(true);
         });
 
         modelBuilder.Entity<ProxySettings>(options =>

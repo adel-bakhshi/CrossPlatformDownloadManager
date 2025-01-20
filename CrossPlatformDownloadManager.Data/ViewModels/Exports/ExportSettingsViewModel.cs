@@ -53,6 +53,11 @@ public class ExportSettingsViewModel
     [JsonProperty("useSystemNotifications")]
     public bool UseSystemNotifications { get; set; }
 
+    [JsonProperty("showCategoriesPanel")] public bool ShowCategoriesPanel { get; set; }
+
+    [JsonProperty("dataGridColumnsSettings")]
+    public string? DataGridColumnsSettings { get; set; }
+
     [JsonProperty("proxies")] public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
 
     #endregion
@@ -94,6 +99,8 @@ public class ExportSettingsViewModel
             UseQueueStoppedSound = settings.UseQueueStoppedSound,
             UseQueueFinishedSound = settings.UseQueueFinishedSound,
             UseSystemNotifications = settings.UseSystemNotifications,
+            ShowCategoriesPanel = settings.ShowCategoriesPanel,
+            DataGridColumnsSettings = settings.DataGridColumnsSettings.ConvertToJson(),
             Proxies = exportProxies
         };
     }

@@ -9,7 +9,6 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
-using ReactiveUI;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;

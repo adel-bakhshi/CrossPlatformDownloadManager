@@ -32,6 +32,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly DispatcherTimer _updateDownloadSpeedTimer;
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
+    private readonly DispatcherTimer _saveColumnsSettingsTimer;
 
     private MainWindow? _mainWindow;
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
@@ -50,6 +51,8 @@ public class MainWindowViewModel : ViewModelBase
     private ObservableCollection<DownloadQueueViewModel> _addToQueueDownloadQueues = [];
     private ContextFlyoutEnableStateViewMode _contextFlyoutEnableState = new();
     private MainMenuItemsEnabledState _mainMenuItemsEnabledState = new();
+    private bool _showCategoriesPanel = true;
+    private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
 
     #endregion
 
@@ -159,6 +162,24 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _mainMenuItemsEnabledState, value);
     }
 
+    public bool IsUpdatingDownloadFiles { get; private set; }
+
+    public bool ShowCategoriesPanel
+    {
+        get => _showCategoriesPanel;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _showCategoriesPanel, value);
+            _ = Dispatcher.UIThread.InvokeAsync(SaveShowCategoriesPanelOptionAsync);
+        }
+    }
+    
+    public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
+    {
+        get => _dataGridColumnsSettings;
+        set => this.RaiseAndSetIfChanged(ref _dataGridColumnsSettings, value);
+    }
+
     #endregion
 
     #region Commands
@@ -228,7 +249,7 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand StopAllDownloadsMenuItemCommand { get; }
 
     public ICommand PauseAllDownloadsMenuItemCommand { get; }
-    
+
     public ICommand ResumeAllDownloadsMenuItemCommand { get; }
 
     public ICommand StartDownloadMenuItemCommand { get; }
@@ -236,16 +257,18 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand StopDownloadMenuItemCommand { get; }
 
     public ICommand PauseDownloadMenuItemCommand { get; }
-    
+
     public ICommand ResumeDownloadMenuItemCommand { get; }
 
     public ICommand RedownloadMenuItemCommand { get; }
-    
+
     public ICommand DeleteDownloadMenuItemCommand { get; }
-    
+
     public ICommand DeleteAllCompletedDownloadsMenuItemCommand { get; }
-    
+
     public ICommand OpenSettingsMenuItemCommand { get; }
+    
+    public ICommand SaveColumnsSettingsCommand { get; }
 
     #endregion
 
@@ -259,12 +282,17 @@ public class MainWindowViewModel : ViewModelBase
         _updateActiveDownloadQueuesTimer.Tick += UpdateActiveDownloadQueuesTimerOnTick;
         _updateActiveDownloadQueuesTimer.Start();
 
+        _saveColumnsSettingsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _saveColumnsSettingsTimer.Tick += SaveColumnsSettingsTimerOnTick;
+
         LoadCategoriesAsync().GetAwaiter();
         FilterDownloadList();
         LoadDownloadQueues();
 
         DownloadSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
+        ShowCategoriesPanel = AppService.SettingsService.Settings.ShowCategoriesPanel;
+        DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
@@ -308,6 +336,7 @@ public class MainWindowViewModel : ViewModelBase
         DeleteDownloadMenuItemCommand = ReactiveCommand.CreateFromTask<DataGrid?>(DeleteDownloadMenuItemAsync);
         DeleteAllCompletedDownloadsMenuItemCommand = ReactiveCommand.CreateFromTask(DeleteAllCompletedDownloadsMenuItemAsync);
         OpenSettingsMenuItemCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsMenuItemAsync);
+        SaveColumnsSettingsCommand = ReactiveCommand.CreateFromTask(SaveColumnsSettingsAsync);
     }
 
     private void LoadDownloadQueues()
@@ -344,38 +373,11 @@ public class MainWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            var url = string.Empty;
-            if (owner.Clipboard != null)
-                url = await owner.Clipboard.GetTextAsync();
+            var vm = new CaptureUrlWindowViewModel(AppService);
+            var window = new CaptureUrlWindow { DataContext = vm };
+            window.Show(owner);
 
-            url = url?.Replace('\\', '/').Trim();
-            var urlIsValid = url.CheckUrlValidation();
-            var showStartDownloadDialog = AppService.SettingsService.Settings.ShowStartDownloadDialog;
-            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
-            if (showStartDownloadDialog)
-            {
-                var vm = new AddDownloadLinkWindowViewModel(AppService)
-                {
-                    IsLoadingUrl = urlIsValid,
-                    DownloadFile =
-                    {
-                        Url = urlIsValid ? url : null
-                    }
-                };
-
-                var window = new AddDownloadLinkWindow { DataContext = vm };
-                await window.ShowDialog(owner);
-
-                await LoadCategoriesAsync();
-            }
-            // Otherwise, add link to database and start it
-            else
-            {
-                if (!urlIsValid)
-                    return;
-
-                await AddNewDownloadFileAndStartItAsync(url!);
-            }
+            // await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
@@ -404,7 +406,7 @@ public class MainWindowViewModel : ViewModelBase
 
             if (downloadFiles.Count == 0)
                 return;
-            
+
             var cantOrUndefinedResumeDownloadFiles = downloadFiles
                 .Where(df => df.CanResumeDownload != true)
                 .ToList();
@@ -629,10 +631,7 @@ public class MainWindowViewModel : ViewModelBase
             if (App.Desktop == null)
                 return;
 
-            var result = await DialogBoxManager.ShowWarningDialogAsync("Exit",
-                "Are you sure you want to exit the app?",
-                DialogButtons.YesNo);
-
+            var result = await DialogBoxManager.ShowInfoDialogAsync("Exit", "Are you sure you want to exit the app?", DialogButtons.YesNo);
             if (result != DialogResult.Yes)
                 return;
 
@@ -837,6 +836,20 @@ public class MainWindowViewModel : ViewModelBase
     private async Task OpenSettingsMenuItemAsync(Window? owner)
     {
         await OpenSettingsWindowAsync(owner);
+    }
+
+    private async Task SaveColumnsSettingsAsync()
+    {
+        try
+        {
+            _saveColumnsSettingsTimer.Stop();
+            _saveColumnsSettingsTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 
     private async Task SelectAllRowsContextMenuAsync(DataGrid? dataGrid)
@@ -1085,7 +1098,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             // Clear previous data stored in AddToQueueDownloadQueues
-            AddToQueueDownloadQueues = [];
+            AddToQueueDownloadQueues.UpdateCollection([], dq => dq.Id);
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
             {
                 await HideContextMenuAsync();
@@ -1124,13 +1137,13 @@ public class MainWindowViewModel : ViewModelBase
                     var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFiles[0].DownloadQueueId);
                     if (downloadQueue == null)
                     {
-                        AddToQueueDownloadQueues = downloadQueues;
+                        AddToQueueDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
                     }
                     else
                     {
-                        AddToQueueDownloadQueues = downloadQueues
+                        AddToQueueDownloadQueues.UpdateCollection(downloadQueues
                             .Where(dq => dq.Id != downloadQueue.Id)
-                            .ToObservableCollection();
+                            .ToObservableCollection(), dq => dq.Id);
 
                         if (AddToQueueDownloadQueues.Count == 0)
                             AddToQueueFlyout?.Hide();
@@ -1152,9 +1165,9 @@ public class MainWindowViewModel : ViewModelBase
                         // If count of primary keys is equal to 1 then show all download queues except the one with primary key
                         case 1:
                         {
-                            AddToQueueDownloadQueues = downloadQueues
+                            AddToQueueDownloadQueues.UpdateCollection(downloadQueues
                                 .Where(dq => !primaryKeys.Contains(dq.Id))
-                                .ToObservableCollection();
+                                .ToObservableCollection(), dq => dq.Id);
 
                             if (AddToQueueDownloadQueues.Count == 0)
                                 AddToQueueFlyout?.Hide();
@@ -1165,7 +1178,7 @@ public class MainWindowViewModel : ViewModelBase
                         // If count of primary keys is 0 or more than 1 then show all download queues
                         default:
                         {
-                            AddToQueueDownloadQueues = downloadQueues;
+                            AddToQueueDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
                             break;
                         }
                     }
@@ -1732,7 +1745,7 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         if (isChanged)
-            ActiveDownloadQueues = downloadQueues;
+            ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
     }
 
     private async Task LoadCategoriesAsync()
@@ -1757,14 +1770,8 @@ public class MainWindowViewModel : ViewModelBase
                 })
                 .ToList();
 
-            CategoryHeaders = categoryHeaders.ToObservableCollection();
-            SelectedCategoryHeader ??= CategoryHeaders.FirstOrDefault();
-
-            if (CategoryHeaders.FirstOrDefault(ch => ch.Id == SelectedCategoryHeader?.Id) == null)
-            {
-                SelectedCategoryHeader = CategoryHeaders.FirstOrDefault();
-                FilterDownloadList();
-            }
+            CategoryHeaders.UpdateCollection(categoryHeaders.ToObservableCollection(), ch => ch.Id);
+            SelectedCategoryHeader = categoryHeaders.FirstOrDefault(ch => ch.Id == SelectedCategoryHeader?.Id) ?? CategoryHeaders.FirstOrDefault();
         }
         catch
         {
@@ -1776,6 +1783,11 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
+            if (IsUpdatingDownloadFiles)
+                return;
+
+            IsUpdatingDownloadFiles = true;
+
             var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles
@@ -1823,16 +1835,25 @@ public class MainWindowViewModel : ViewModelBase
 
             DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
         }
+        finally
+        {
+            IsUpdatingDownloadFiles = false;
+        }
     }
 
     protected override void OnDownloadFileServiceDataChanged()
     {
-        Dispatcher.UIThread.InvokeAsync(FilterDownloadList);
+        FilterDownloadList();
     }
 
     protected override void OnDownloadQueueServiceDataChanged()
     {
-        Dispatcher.UIThread.InvokeAsync(LoadDownloadQueues);
+        LoadDownloadQueues();
+    }
+
+    protected override void OnSettingsServiceDataChanged()
+    {
+        DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
     }
 
     private string GetToolTipText()
@@ -2070,59 +2091,6 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task AddNewDownloadFileAndStartItAsync(string url)
-    {
-        // Get url details
-        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(url);
-        // Validate url details
-        var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
-        if (!validateResult.IsValid)
-        {
-            if (validateResult.Title.IsNullOrEmpty() || validateResult.Message.IsNullOrEmpty())
-            {
-                await DialogBoxManager.ShowDangerDialogAsync("Error downloading file",
-                    "An error occurred while downloading the file.",
-                    DialogButtons.Ok);
-            }
-            else
-            {
-                await DialogBoxManager.ShowDangerDialogAsync(validateResult.Title!, validateResult.Message!, DialogButtons.Ok);
-            }
-
-            return;
-        }
-
-        DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsUrlDuplicate)
-        {
-            var savedDuplicateAction = AppService.SettingsService.Settings.DuplicateDownloadLinkAction;
-            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
-            {
-                duplicateAction = await AppService
-                    .DownloadFileService
-                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
-            }
-            else
-            {
-                duplicateAction = savedDuplicateAction;
-            }
-        }
-
-        var downloadFile = new DownloadFileViewModel
-        {
-            Url = urlDetails.Url,
-            FileName = urlDetails.FileName,
-            CategoryId = urlDetails.Category?.Id,
-            Size = urlDetails.FileSize
-        };
-
-        await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile,
-            isUrlDuplicate: urlDetails.IsUrlDuplicate,
-            duplicateAction: duplicateAction,
-            isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
-            startDownloading: true);
-    }
-
     private List<ExportDownloadFileViewModel> ClearDownloadQueuesFromExport(List<ExportDownloadFileViewModel> exportDownloadFiles)
     {
         var defaultDownloadQueue = AppService
@@ -2176,6 +2144,8 @@ public class MainWindowViewModel : ViewModelBase
         settings.UseQueueStoppedSound = exportSettings.UseQueueStoppedSound;
         settings.UseQueueFinishedSound = exportSettings.UseQueueFinishedSound;
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
+        settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
+        settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>() ?? settings.DataGridColumnsSettings;
 
         await AppService.SettingsService.SaveSettingsAsync(settings);
 
@@ -2502,5 +2472,40 @@ public class MainWindowViewModel : ViewModelBase
         downloadFile.DownloadPackage = null;
 
         await AppService.DownloadFileService.UpdateDownloadFileAsync(downloadFile);
+    }
+
+    private async Task SaveShowCategoriesPanelOptionAsync()
+    {
+        try
+        {
+            var showCategoriesPanel = AppService.SettingsService.Settings.ShowCategoriesPanel;
+            if (showCategoriesPanel == ShowCategoriesPanel)
+                return;
+
+            AppService.SettingsService.Settings.ShowCategoriesPanel = ShowCategoriesPanel;
+            await AppService.SettingsService.SaveSettingsAsync(AppService.SettingsService.Settings);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to save settings. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async void SaveColumnsSettingsTimerOnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _saveColumnsSettingsTimer.Stop();
+            
+            var settings = AppService.SettingsService.Settings;
+            settings.DataGridColumnsSettings = DataGridColumnsSettings;
+            await AppService.SettingsService.SaveSettingsAsync(settings);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 }

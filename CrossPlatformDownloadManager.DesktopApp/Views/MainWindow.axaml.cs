@@ -45,8 +45,16 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     {
         try
         {
-            if (ViewModel == null)
+            if (ViewModel == null || ViewModel.IsUpdatingDownloadFiles)
+            {
+                if (ViewModel?.IsUpdatingDownloadFiles != true)
+                    return;
+
+                foreach (var addedItem in e.AddedItems)
+                    DownloadFilesDataGrid.SelectedItems.Remove(addedItem);
+
                 return;
+            }
 
             var downloadFiles = DownloadFilesDataGrid
                 .SelectedItems
@@ -145,7 +153,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         {
             if (ViewModel == null)
                 return;
-            
+
             ViewModel.ChangeFileSubMenusEnableState(DownloadFilesDataGrid);
         }
         catch (Exception ex)

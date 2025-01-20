@@ -31,6 +31,8 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _useQueueFinishedSound;
     private bool _useSystemNotifications;
     private PointViewModel? _managerPoint;
+    private bool _showCategoriesPanel = true;
+    private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -173,6 +175,18 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _managerPoint;
         set => SetField(ref _managerPoint, value);
+    }
+
+    public bool ShowCategoriesPanel
+    {
+        get => _showCategoriesPanel;
+        set => SetField(ref _showCategoriesPanel, value);
+    }
+    
+    public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
+    {
+        get => _dataGridColumnsSettings;
+        set => SetField(ref _dataGridColumnsSettings, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

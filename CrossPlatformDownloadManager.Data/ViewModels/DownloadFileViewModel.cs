@@ -365,7 +365,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         _chunkProgresses = null;
 
         IsStopping = true;
-        _ = downloadService.CancelTaskAsync();
+        _ = downloadService.CancelTaskAsync().ConfigureAwait(false);
         DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 

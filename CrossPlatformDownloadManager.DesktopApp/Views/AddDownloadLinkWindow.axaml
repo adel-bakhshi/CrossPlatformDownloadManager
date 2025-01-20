@@ -140,7 +140,7 @@
                                       Background="{DynamicResource SecondaryColor}"
                                       BorderThickness="0"
                                       Text="{Binding DownloadFile.Url}"
-                                      TextChanged="UrlTextBox_OnTextChanged" />
+                                      TextChanged="UrlTextBoxOnTextChanged" />
 
                     <!-- Category -->
                     <Grid ColumnDefinitions="*, Auto">

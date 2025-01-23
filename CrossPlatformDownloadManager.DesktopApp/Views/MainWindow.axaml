@@ -851,9 +851,8 @@
                         Width="250"
                         IsVisible="{Binding ShowCategoriesPanel}">
                     <ListBox ItemsSource="{Binding CategoryHeaders}"
-                             Classes="categoryList"
                              SelectedItem="{Binding SelectedCategoryHeader}"
-                             Name="LstCategories" />
+                             Classes="categoryList" />
                 </Border>
 
                 <!-- Actions buttons and Download list -->

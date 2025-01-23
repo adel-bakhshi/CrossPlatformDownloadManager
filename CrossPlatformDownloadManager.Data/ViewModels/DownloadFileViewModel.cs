@@ -299,7 +299,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         var downloadPath = SaveLocation;
         if (downloadPath.IsNullOrEmpty())
         {
-            var saveDirectory = await unitOfWork.CategorySaveDirectoryRepository
+            var saveDirectory = await unitOfWork
+                .CategorySaveDirectoryRepository
                 .GetAsync(where: sd => sd.CategoryId == null);
 
             downloadPath = saveDirectory?.SaveDirectory;

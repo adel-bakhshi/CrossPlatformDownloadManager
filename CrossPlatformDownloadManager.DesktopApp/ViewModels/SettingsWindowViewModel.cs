@@ -192,36 +192,28 @@ public class SettingsWindowViewModel : ViewModelBase
             // Save categories settings
             var primaryKeys = SaveLocationsViewModel
                 .Categories
-                .Where(c => c.Id != null)
-                .Select(c => c.Id!.Value)
+                .Select(c => c.Id)
                 .ToList();
 
-            var saveDirectories = await AppService
-                .UnitOfWork
-                .CategorySaveDirectoryRepository
-                .GetAllAsync(where: csd => csd.CategoryId != null && primaryKeys.Contains(csd.CategoryId.Value));
+            var saveDirectories = AppService
+                .CategoryService
+                .Categories
+                .Select(c => c.CategorySaveDirectory)
+                .Where(csd => csd is { CategoryId: not null } && primaryKeys.Contains(csd.CategoryId.Value))
+                .ToList();
 
-            var isChanged = false;
             foreach (var saveDirectory in saveDirectories)
             {
                 var category = SaveLocationsViewModel
                     .Categories
-                    .FirstOrDefault(c => c.Id != null && c.Id == saveDirectory.CategoryId);
+                    .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
-                if (category?.CategorySaveDirectory.IsNullOrEmpty() != false || saveDirectory.SaveDirectory.Equals(category.CategorySaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
-                saveDirectory.SaveDirectory = category.CategorySaveDirectory!;
-                isChanged = true;
-            }
-
-            if (isChanged)
-            {
-                // Update all category save directories
-                await AppService
-                    .UnitOfWork
-                    .CategorySaveDirectoryRepository
-                    .UpdateAllAsync(saveDirectories);
+                saveDirectory.SaveDirectory = category.CategorySaveDirectory!.SaveDirectory;
+                // Update category save directory
+                await AppService.CategoryService.UpdateSaveDirectoryAsync(category, saveDirectory);
             }
 
             // Save downloads settings

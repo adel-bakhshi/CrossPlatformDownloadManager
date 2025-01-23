@@ -79,6 +79,5 @@
     <ItemGroup>
       <Folder Include="Assets\Bass\" />
       <Folder Include="Assets\Songs\" />
-      <Folder Include="Infrastructure\Services\" />
     </ItemGroup>
 </Project>

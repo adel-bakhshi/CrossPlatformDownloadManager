@@ -32,7 +32,7 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
     {
         try
         {
-            if (ViewModel?.SelectedCategory == null)
+            if (ViewModel?.SelectedCategory?.CategorySaveDirectory == null)
                 return;
 
             var topLevel = TopLevel.GetTopLevel(this);
@@ -50,7 +50,7 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
                 return;
 
             var directory = directories[0];
-            ViewModel.SelectedCategory.CategorySaveDirectory = directory.Path.LocalPath;
+            ViewModel.SelectedCategory.CategorySaveDirectory.SaveDirectory = directory.Path.LocalPath;
         }
         catch (Exception ex)
         {

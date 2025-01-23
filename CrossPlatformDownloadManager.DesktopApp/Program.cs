@@ -8,6 +8,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
@@ -16,7 +17,6 @@ using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
-using Serilog.Events;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
 
@@ -35,9 +35,6 @@ sealed class Program
         catch (Exception ex)
         {
             Log.Error(ex, "An error occured while starting the application. Error message: {ErrorMessage}", ex.Message);
-        }
-        finally
-        {
             Environment.Exit(0);
         }
     }
@@ -69,6 +66,9 @@ sealed class Program
 
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
+                
+                // Add CategoryService to services
+                services.AddSingleton<ICategoryService, CategoryService>();
 
                 // Add DownloadFileService to services
                 services.AddSingleton<IDownloadFileService, DownloadFileService>();

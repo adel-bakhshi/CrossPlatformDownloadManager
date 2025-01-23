@@ -8,8 +8,6 @@ public class CategoryFileExtensionProfile : Profile
 {
     public CategoryFileExtensionProfile()
     {
-        CreateMap<CategoryFileExtension, CategoryFileExtensionViewModel>()
-            .ForMember(dest => dest.CategoryTitle, opt => opt.MapFrom(src => src.Category.Title))
-            .ReverseMap();
+        CreateMap<CategoryFileExtension, CategoryFileExtensionViewModel>();
     }
 }

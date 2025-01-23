@@ -17,6 +17,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -39,6 +40,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ISettingsService _settingsService;
+    private readonly ICategoryService _categoryService;
 
     private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
     private bool _stopOperationIsRunning;
@@ -69,11 +71,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     #endregion
 
-    public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper, ISettingsService settingsService)
+    public DownloadFileService(IUnitOfWork unitOfWork, IMapper mapper, ISettingsService settingsService, ICategoryService categoryService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _settingsService = settingsService;
+        _categoryService = categoryService;
 
         _downloadFileTasks = [];
         _stopOperations = [];
@@ -143,9 +146,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (!isValid)
             return null;
 
-        var category = await _unitOfWork
-            .CategoryRepository
-            .GetAsync(where: c => c.Id == viewModel.CategoryId, includeProperties: ["CategorySaveDirectory"]);
+        var category = _categoryService
+            .Categories
+            .FirstOrDefault(c => c.Id == viewModel.CategoryId);
 
         var downloadFile = new DownloadFile
         {
@@ -580,42 +583,42 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // find category item by file extension
         var extension = Path.GetExtension(result.FileName);
         // Get all custom categories
-        var customCategories = await _unitOfWork
-            .CategoryRepository
-            .GetAllAsync(where: c => !c.IsDefault, includeProperties: ["FileExtensions", "CategorySaveDirectory"]);
+        var customCategories = _categoryService
+            .Categories
+            .Where(c => !c.IsDefault)
+            .ToList();
 
         // Find file extension by extension
-        CategoryFileExtension? fileExtension;
+        CategoryFileExtensionViewModel? fileExtension;
         var customCategory = customCategories
-            .Find(c => c.FileExtensions.Any(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase)));
+            .Find(c => c.FileExtensions.Any(fe => fe.Extension?.Equals(extension, StringComparison.CurrentCultureIgnoreCase) == true));
 
         if (customCategory != null)
         {
             fileExtension = customCategory
                 .FileExtensions
-                .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase));
+                .FirstOrDefault(fe => fe.Extension?.Equals(extension, StringComparison.CurrentCultureIgnoreCase) == true);
         }
         else
         {
-            fileExtension = await _unitOfWork
-                .CategoryFileExtensionRepository
-                .GetAsync(where: fe => fe.Extension.ToLower() == extension.ToLower(), includeProperties: "Category.CategorySaveDirectory");
+            var fileExtensionInDb = _categoryService
+                .Categories
+                .SelectMany(c => c.FileExtensions)
+                .FirstOrDefault(fe => fe.Extension?.Equals(extension, StringComparison.OrdinalIgnoreCase) == true);
+
+            fileExtension = _mapper.Map<CategoryFileExtensionViewModel?>(fileExtensionInDb);
         }
 
         // Find category by category file extension or choose general category
         if (fileExtension != null)
         {
-            var category = customCategory ?? fileExtension.Category;
-            result.Category = category == null ? null : _mapper.Map<CategoryViewModel>(category);
+            result.Category = customCategory ?? fileExtension.Category;
         }
         else
         {
-            var category = await _unitOfWork
-                .CategoryRepository
-                .GetAsync(where: c => c.Title.ToLower() == Constants.GeneralCategoryTitle.ToLower(),
-                    includeProperties: ["CategorySaveDirectory"]);
-
-            result.Category = category == null ? null : _mapper.Map<CategoryViewModel>(category);
+            result.Category = _categoryService
+                .Categories
+                .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
         }
 
         // Find a download file with the same url and handle it
@@ -624,7 +627,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             .FirstOrDefault(df => !df.FileName.IsNullOrEmpty()
                                   && df.FileName!.Equals(fileName)
                                   && !df.SaveLocation.IsNullOrEmpty()
-                                  && df.SaveLocation!.Equals(result.Category!.CategorySaveDirectory)) != null;
+                                  && df.SaveLocation!.Equals(result.Category!.CategorySaveDirectory!.SaveDirectory)) != null;
 
         return result;
     }
@@ -645,7 +648,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             title = "Link is not downloadable";
             message = "The link you selected does not return a downloadable file. This could be due to an incorrect link, restricted access, or unsupported content.";
         }
-        else if (viewModel.Category == null || viewModel.Category.CategorySaveDirectory.IsNullOrEmpty())
+        else if (viewModel.Category == null || viewModel.Category.CategorySaveDirectory == null || viewModel.Category.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty())
         {
             isValid = false;
             title = "Category not found";
@@ -670,9 +673,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // Get category from database
-        var category = await _unitOfWork
-            .CategoryRepository
-            .GetAsync(where: c => c.Id == viewModel.CategoryId, includeProperties: "CategorySaveDirectory");
+        var category = _categoryService
+            .Categories
+            .FirstOrDefault(c => c.Id == viewModel.CategoryId);
 
         // Check category
         if (category == null)
@@ -794,7 +797,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var originalFileName = Path.GetFileNameWithoutExtension(fileName);
         var newFileName = Path.GetFileName(fileName);
         var fileExtension = Path.GetExtension(fileName);
-        
+
         // Choose new name until it does not exist
         while (fileNames.Contains(newFileName) || File.Exists(Path.Combine(saveLocation, newFileName)))
         {
@@ -1020,7 +1023,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFileId);
             if (downloadFileTask?.StopOperationFinished == true)
                 break;
-            
+
             await Task.Delay(100);
         }
 

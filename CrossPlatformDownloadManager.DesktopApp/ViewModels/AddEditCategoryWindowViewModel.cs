@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -128,96 +127,66 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             CategoryTitle = CategoryTitle!.Trim();
             SaveDirectory = SaveDirectory!.Trim();
 
-            Category? category;
+            CategoryViewModel? category;
             if (IsEditMode)
             {
-                category = await AppService
-                    .UnitOfWork
-                    .CategoryRepository
-                    .GetAsync(where: c => c.Id == CategoryId,
-                        includeProperties: "FileExtensions");
+                category = AppService
+                    .CategoryService
+                    .Categories
+                    .FirstOrDefault(c => c.Id == CategoryId);
 
                 if (category == null)
                     return;
 
                 category.Title = CategoryTitle!;
                 category.AutoAddLinkFromSites = SiteAddresses.Any() ? SiteAddresses.ConvertToJson() : null;
+
+                await AppService.CategoryService.UpdateCategoryAsync(category);
             }
             else
             {
-                category = new Category
+                category = new CategoryViewModel
                 {
                     Icon = Constants.NewCategoryIcon,
                     Title = CategoryTitle!,
                     AutoAddLinkFromSites = SiteAddresses.Any() ? SiteAddresses.ConvertToJson() : null,
-                    IsDefault = false,
+                    IsDefault = false
                 };
 
-                await AppService
-                    .UnitOfWork
-                    .CategoryRepository
-                    .AddAsync(category);
+                category.Id = await AppService.CategoryService.AddNewCategoryAsync(category);
+                // Load added category
+                category = AppService.CategoryService.Categories.FirstOrDefault(c => c.Id == category.Id);
+                if (category == null)
+                    throw new InvalidOperationException("Category not found.");
             }
 
-            await AppService.UnitOfWork.SaveAsync();
-
+            // Remove old file extensions
             if (IsEditMode && category.FileExtensions.Count > 0)
-            {
-                await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .DeleteAllAsync(category.FileExtensions);
+                await AppService.CategoryService.DeleteAllFileExtensionsAsync(category);
 
-                await AppService.UnitOfWork.SaveAsync();
-            }
+            // Add new file extensions for selected category
+            await AppService.CategoryService.AddFileExtensionsAsync(category, FileExtensions.ToList());
 
-            var fileExtensions = FileExtensions
-                .Select(fe => new CategoryFileExtension
-                {
-                    CategoryId = category.Id,
-                    Extension = "." + fe.Extension!,
-                    Alias = fe.Alias!,
-                })
-                .ToList();
-
-            await AppService
-                .UnitOfWork
-                .CategoryFileExtensionRepository
-                .AddRangeAsync(fileExtensions);
-
-            await AppService.UnitOfWork.SaveAsync();
-
-            CategorySaveDirectory? saveDirectory;
+            CategorySaveDirectoryViewModel? saveDirectory;
             if (IsEditMode)
             {
-                saveDirectory = await AppService
-                    .UnitOfWork
-                    .CategorySaveDirectoryRepository
-                    .GetAsync(where: cs => cs.CategoryId == category.Id);
+                saveDirectory = AppService
+                    .CategoryService
+                    .Categories
+                    .FirstOrDefault(c => c.Id == category.Id)
+                    ?.CategorySaveDirectory;
 
                 if (saveDirectory == null)
                     return;
 
                 saveDirectory.SaveDirectory = SaveDirectory!;
+                await AppService.CategoryService.UpdateSaveDirectoryAsync(category, saveDirectory);
             }
             else
             {
-                saveDirectory = new CategorySaveDirectory
-                {
-                    SaveDirectory = SaveDirectory!,
-                    CategoryId = category.Id,
-                };
-
-                await AppService
-                    .UnitOfWork
-                    .CategorySaveDirectoryRepository
-                    .AddAsync(saveDirectory);
+                saveDirectory = new CategorySaveDirectoryViewModel { SaveDirectory = SaveDirectory! };
+                await AppService.CategoryService.AddSaveDirectoryAsync(category, saveDirectory);
             }
-
-            await AppService.UnitOfWork.SaveAsync();
-
-            category.CategorySaveDirectoryId = saveDirectory.Id;
-            await AppService.UnitOfWork.SaveAsync();
 
             owner.Close(true);
         }
@@ -234,18 +203,17 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         {
             if (CategoryId != null)
             {
-                var category = await AppService
-                    .UnitOfWork
-                    .CategoryRepository
-                    .GetAsync(where: c => c.Id == CategoryId, includeProperties: ["CategorySaveDirectory"]);
+                var category = AppService
+                    .CategoryService
+                    .Categories
+                    .FirstOrDefault(c => c.Id == CategoryId);
 
                 if (category == null)
                     return;
 
                 CategoryTitle = category.Title;
-                FileExtensions = AppService
-                    .Mapper
-                    .Map<List<CategoryFileExtensionViewModel>>(category.FileExtensions)
+                FileExtensions = category
+                    .FileExtensions
                     .Select(fe =>
                     {
                         fe.Extension = fe.Extension!.TrimStart('.');
@@ -260,10 +228,10 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             }
             else
             {
-                var generalCategory = await AppService
-                    .UnitOfWork
-                    .CategoryRepository
-                    .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle, includeProperties: ["CategorySaveDirectory"]);
+                var generalCategory = AppService
+                    .CategoryService
+                    .Categories
+                    .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
 
                 if (generalCategory?.CategorySaveDirectory == null)
                     return;

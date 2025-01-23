@@ -1,6 +1,5 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:models="using:CrossPlatformDownloadManager.Data.Models"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels">
@@ -15,7 +14,7 @@
             <converters:StringToGeometryConverter x:Key="StringToGeometryConverter" />
             <converters:StringToUpperConverter x:Key="StringToUpperConverter" />
 
-            <DataTemplate DataType="models:Category"
+            <DataTemplate DataType="viewModels:CategoryViewModel"
                           x:Key="CategoryListItemDataTemplate">
                 <StackPanel Orientation="Horizontal"
                             Spacing="5">
@@ -65,21 +64,19 @@
             </Setter>
 
             <Setter Property="ItemTemplate">
-                <DataTemplate DataType="models:CategoryHeader">
+                <DataTemplate DataType="viewModels:CategoryHeaderViewModel">
                     <Expander IsExpanded="{Binding $parent[ListBoxItem].IsSelected}">
                         <Expander.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="5">
-                                    <PathIcon
-                                        Data="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
-                                        Width="16"
-                                        Height="16"
-                                        Foreground="{Binding $parent[Expander].Foreground}" />
+                                    <PathIcon Width="16"
+                                              Height="16"
+                                              Data="{Binding $parent[ListBoxItem].((viewModels:CategoryHeaderViewModel)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
+                                              Foreground="{Binding $parent[Expander].Foreground}" />
 
-                                    <TextBlock
-                                        Text="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Title, FallbackValue='', TargetNullValue=''}"
-                                        FontWeight="Bold" />
+                                    <TextBlock Text="{Binding $parent[ListBoxItem].((viewModels:CategoryHeaderViewModel)DataContext).Title, FallbackValue='', TargetNullValue=''}"
+                                               FontWeight="Bold" />
                                 </StackPanel>
                             </DataTemplate>
                         </Expander.HeaderTemplate>
@@ -88,7 +85,7 @@
                                  Padding="20, 10, 20, 0"
                                  BorderThickness="0"
                                  Background="{DynamicResource TransparentColor}"
-                                 ItemsSource="{Binding $parent[ListBoxItem].((models:CategoryHeader)DataContext).Categories, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                 ItemsSource="{Binding $parent[ListBoxItem].((viewModels:CategoryHeaderViewModel)DataContext).Categories, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                  ItemTemplate="{StaticResource CategoryListItemDataTemplate}"
                                  ItemsPanel="{StaticResource CategoryListItemItemsPanelTemplate}"
                                  SelectionMode="Single"

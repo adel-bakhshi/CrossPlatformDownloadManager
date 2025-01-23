@@ -36,7 +36,7 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
             if (change.Property != IsVisibleProperty || !IsVisible || ViewModel == null)
                 return;
 
-            await ViewModel.LoadFileExtensionsAsync();
+            ViewModel.LoadFileExtensions();
         }
         catch (Exception ex)
         {

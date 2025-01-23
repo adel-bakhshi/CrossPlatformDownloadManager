@@ -172,7 +172,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
             {
                 duplicateAction = await AppService
                     .DownloadFileService
-                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
+                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!.SaveDirectory);
             }
             else
             {

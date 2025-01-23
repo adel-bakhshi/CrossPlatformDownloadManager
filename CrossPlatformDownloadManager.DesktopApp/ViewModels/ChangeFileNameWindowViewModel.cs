@@ -178,10 +178,11 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
 
         File.Move(filePath, newFilePath);
 
-        var categoryFileExtension = await AppService
-            .UnitOfWork
-            .CategoryFileExtensionRepository
-            .GetAsync(where: fe => fe.Extension.ToLower() == fileExtension.ToLower(), includeProperties: "Category");
+        var categoryFileExtension = AppService
+            .CategoryService
+            .Categories
+            .SelectMany(c => c.FileExtensions)
+            .FirstOrDefault(fe => fe.Extension?.Equals(fileExtension, StringComparison.OrdinalIgnoreCase) == true);
 
         if (categoryFileExtension?.Category != null && categoryFileExtension.Category.Id != downloadFile.CategoryId)
             downloadFile.CategoryId = categoryFileExtension.Category!.Id;

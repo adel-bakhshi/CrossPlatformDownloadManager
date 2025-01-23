@@ -32,6 +32,9 @@ public class AppInitializer : IAppInitializer
 
             // Initialize SettingsService
             await _appService.SettingsService.LoadSettingsAsync();
+            
+            // Initialize CategoryService
+            await _appService.CategoryService.LoadCategoriesAsync(loadHeaders: true);
 
             // Initialize DownloadFileService
             await _appService.DownloadFileService.LoadDownloadFilesAsync();

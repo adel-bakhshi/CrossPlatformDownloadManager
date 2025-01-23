@@ -1,5 +1,6 @@
 using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
@@ -15,16 +16,18 @@ public class AppService : IAppService
     public IDownloadFileService DownloadFileService { get; }
     public IDownloadQueueService DownloadQueueService { get; }
     public ISettingsService SettingsService { get; }
+    public ICategoryService CategoryService { get; }
 
     #endregion
 
     public AppService(IUnitOfWork unitOfWork, IDownloadFileService downloadFileService, IMapper mapper,
-        ISettingsService settingsService, IDownloadQueueService downloadQueueService)
+        ISettingsService settingsService, IDownloadQueueService downloadQueueService, ICategoryService categoryService)
     {
         Mapper = mapper;
         UnitOfWork = unitOfWork;
         DownloadFileService = downloadFileService;
         DownloadQueueService = downloadQueueService;
+        CategoryService = categoryService;
         SettingsService = settingsService;
     }
 }

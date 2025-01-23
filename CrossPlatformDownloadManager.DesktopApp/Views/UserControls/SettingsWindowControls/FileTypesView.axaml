@@ -117,7 +117,7 @@
                                         IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
 
                     <DataGridTextColumn Header="Category"
-                                        Binding="{Binding CategoryTitle}"
+                                        Binding="{Binding Category.Title, FallbackValue='', TargetNullValue=''}"
                                         MinWidth="200"
                                         IsVisible="{Binding !$parent[local:FileTypesView].((vm:FileTypesViewModel)DataContext).DependsOnCategory, FallbackValue=False, TargetNullValue=False}" />
 

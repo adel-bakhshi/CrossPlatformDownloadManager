@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -57,7 +55,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _categoryFileExtensionId, value);
-            LoadCategoryFileExtensionDataAsync().GetAwaiter();
+            LoadCategoryFileExtensionData();
         }
     }
 
@@ -97,7 +95,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
     public AddEditFileTypeWindowViewModel(IAppService appService) : base(appService)
     {
-        LoadCategoriesAsync().GetAwaiter();
+        LoadCategories();
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
         CloseCommand = ReactiveCommand.CreateFromTask<Window?>(CloseAsync);
@@ -118,45 +116,42 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
             if (IsEditMode)
             {
-                var fileExtension = await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .GetAsync(where: fe => fe.Id == CategoryFileExtensionId);
+                var fileExtension = AppService
+                    .CategoryService
+                    .Categories
+                    .SelectMany(c => c.FileExtensions)
+                    .FirstOrDefault(fe => fe.Id == CategoryFileExtensionId);
 
                 if (fileExtension == null)
                     return;
 
                 fileExtension.Extension = Extension!;
                 fileExtension.Alias = Alias!;
+                
+                await AppService.CategoryService.UpdateFileExtensionAsync(SelectedCategory, fileExtension);
             }
             else
             {
-                // If there is a CategoryFileExtension with Extension and CategoryId entries, it should not be added to the database 
-                var fileExtension = await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .GetAsync(where: fe =>
-                        fe.Extension.ToLower() == Extension.ToLower() && fe.CategoryId == SelectedCategory.Id);
+                var fileExtension = AppService
+                    .CategoryService
+                    .Categories
+                    .SelectMany(c => c.FileExtensions)
+                    .FirstOrDefault(fe => fe.Extension?.Equals(Extension, StringComparison.OrdinalIgnoreCase) == true
+                                          && fe.Category != null 
+                                          && fe.Category.Id == SelectedCategory.Id);
 
                 if (fileExtension != null)
                     return;
 
-                fileExtension = new CategoryFileExtension
+                fileExtension = new CategoryFileExtensionViewModel
                 {
                     Extension = Extension!,
                     Alias = Alias!,
                     CategoryId = SelectedCategory.Id
                 };
 
-                await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .AddAsync(fileExtension);
+                await AppService.CategoryService.AddFileExtensionAsync(SelectedCategory, fileExtension);
             }
-
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
 
             owner.Close(true);
         }
@@ -180,51 +175,33 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadCategoriesAsync()
+    private void LoadCategories()
     {
-        try
-        {
-            var categories = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAllAsync();
-
-            var categoryViewModels = AppService.Mapper.Map<List<CategoryViewModel>>(categories);
-            Categories = categoryViewModels
-                .Where(c => c.Title?.Equals(Constants.GeneralCategoryTitle) != true)
-                .ToObservableCollection();
-
-            if (!IsEditMode)
-                SelectedCategory = Categories.FirstOrDefault();
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load categories. Error message: {ErrorMessage}", ex.Message);
-        }
+        var categories = AppService
+            .CategoryService
+            .Categories
+            .Where(c => !c.Title.Equals(Constants.GeneralCategoryTitle))
+            .ToObservableCollection();
+        
+        Categories.UpdateCollection(categories, c => c.Id);
+        if (!IsEditMode)
+            SelectedCategory = Categories.FirstOrDefault();
     }
 
-    private async Task LoadCategoryFileExtensionDataAsync()
+    private void LoadCategoryFileExtensionData()
     {
-        try
-        {
-            var fileExtension = await AppService
-                .UnitOfWork
-                .CategoryFileExtensionRepository
-                .GetAsync(where: fe => fe.Id == CategoryFileExtensionId);
+        var fileExtension = AppService
+            .CategoryService
+            .Categories
+            .SelectMany(c => c.FileExtensions)
+            .FirstOrDefault(fe => fe.Id == CategoryFileExtensionId);
 
-            if (fileExtension == null)
-                return;
+        if (fileExtension == null)
+            return;
 
-            Extension = fileExtension.Extension;
-            Alias = fileExtension.Alias;
-            SelectedCategory = Categories.FirstOrDefault(c => c.Id == fileExtension.CategoryId);
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load category file extension data. Error message: {ErrorMessage}", ex.Message);
-        }
+        Extension = fileExtension.Extension;
+        Alias = fileExtension.Alias;
+        SelectedCategory = Categories.FirstOrDefault(c => c.Id == fileExtension.CategoryId);
     }
 
     public void SetSelectedCategory(int? categoryId, bool disableCategoryComboBox = false)
@@ -232,5 +209,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == categoryId);
         if (disableCategoryComboBox)
             CategoryComboBoxIsEnabled = false;
+    }
+
+    protected override void OnCategoryServiceCategoriesChanged()
+    {
+        base.OnCategoryServiceCategoriesChanged();
+        LoadCategories();
     }
 }

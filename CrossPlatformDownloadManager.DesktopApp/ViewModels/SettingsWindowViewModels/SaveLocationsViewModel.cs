@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,7 +66,7 @@ public class SaveLocationsViewModel : ViewModelBase
     {
         FileTypesViewModel = new FileTypesViewModel(appService) { DependsOnCategory = true };
 
-        LoadCategoriesAsync().GetAwaiter();
+        LoadCategories();
 
         AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
         EditCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(EditCategoryAsync);
@@ -91,7 +90,7 @@ public class SaveLocationsViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            await LoadCategoriesAsync();
+            LoadCategories();
             SelectedCategory = Categories.LastOrDefault();
         }
         catch (Exception ex)
@@ -120,7 +119,7 @@ public class SaveLocationsViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            await LoadCategoriesAsync();
+            LoadCategories();
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId);
         }
         catch (Exception ex)
@@ -137,56 +136,36 @@ public class SaveLocationsViewModel : ViewModelBase
             if (SelectedCategory == null)
                 return;
 
-            var category = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAsync(where: c => c.Id == SelectedCategory.Id, includeProperties: ["CategorySaveDirectory", "FileExtensions", "DownloadFiles"]);
+            var category = AppService
+                .CategoryService
+                .Categories
+                .FirstOrDefault(c => c.Id == SelectedCategory.Id);
 
             if (category == null)
                 return;
 
             if (category.IsDefault)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Delete category", "This default category cannot be deleted.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Delete category", "This is a default category and cannot be deleted.", DialogButtons.Ok);
                 return;
             }
 
             var result = await DialogBoxManager.ShowDangerDialogAsync("Delete category",
-                "All data within this category will be permanently deleted. Are you sure you want to proceed?",
+                $"Deleting the '{category.Title}' category will permanently remove all associated information. Do you wish to continue?",
                 DialogButtons.YesNo);
 
             if (result != DialogResult.Yes)
                 return;
 
             await AppService
-                .UnitOfWork
-                .CategorySaveDirectoryRepository
-                .DeleteAsync(category.CategorySaveDirectory);
+                .CategoryService
+                .DeleteCategoryAsync(category);
 
-            await AppService
-                .UnitOfWork
-                .CategoryFileExtensionRepository
-                .DeleteAllAsync(category.FileExtensions);
-
-            await AppService
-                .UnitOfWork
-                .DownloadFileRepository
-                .DeleteAllAsync(category.DownloadFiles);
-
-            await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .DeleteAsync(category);
-
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
-
+            // When user choose to delete download files in this category, we must to update the list of download files
+            // In any case we have to do that
             await AppService
                 .DownloadFileService
                 .LoadDownloadFilesAsync();
-
-            await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
@@ -195,28 +174,17 @@ public class SaveLocationsViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadCategoriesAsync()
+    private void LoadCategories()
     {
-        try
-        {
-            var categories = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAllAsync(includeProperties: ["CategorySaveDirectory"]);
+        var categories = AppService
+            .CategoryService
+            .Categories
+            .Where(c => !c.Title.Equals(Constants.GeneralCategoryTitle))
+            .ToObservableCollection();
 
-            var categoryViewModels = AppService.Mapper.Map<List<CategoryViewModel>>(categories);
-            Categories = categoryViewModels
-                .Where(c => c.Title?.Equals(Constants.GeneralCategoryTitle) != true)
-                .ToObservableCollection();
-
-            SelectedCategory = Categories.FirstOrDefault();
-            LoadFileExtensions();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occured while trying to load categories.");
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        Categories.UpdateCollection(categories, c => c.Id);
+        SelectedCategory = Categories.FirstOrDefault();
+        LoadFileExtensions();
     }
 
     public void LoadFileExtensions()
@@ -225,5 +193,11 @@ public class SaveLocationsViewModel : ViewModelBase
             return;
 
         FileTypesViewModel.CategoryId = SelectedCategory.Id;
+    }
+
+    protected override void OnCategoryServiceCategoriesChanged()
+    {
+        base.OnCategoryServiceCategoriesChanged();
+        LoadCategories();
     }
 }

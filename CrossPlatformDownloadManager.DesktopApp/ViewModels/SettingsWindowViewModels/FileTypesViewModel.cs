@@ -61,7 +61,7 @@ public class FileTypesViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _categoryId, value);
-            LoadFileExtensionsAsync().GetAwaiter();
+            LoadFileExtensions();
         }
     }
 
@@ -71,7 +71,7 @@ public class FileTypesViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _dependsOnCategory, value);
-            LoadFileExtensionsAsync().GetAwaiter();
+            LoadFileExtensions();
         }
     }
 
@@ -91,7 +91,7 @@ public class FileTypesViewModel : ViewModelBase
     {
         _dbFileExtensions = [];
 
-        LoadFileExtensionsAsync().GetAwaiter();
+        LoadFileExtensions();
 
         AddNewFileTypeCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewFileTypeAsync);
         EditFileTypeCommand = ReactiveCommand.CreateFromTask<Window?>(EditFileTypeAsync);
@@ -112,7 +112,7 @@ public class FileTypesViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            await LoadFileExtensionsAsync();
+            LoadFileExtensions();
         }
         catch (Exception ex)
         {
@@ -139,7 +139,7 @@ public class FileTypesViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            await LoadFileExtensionsAsync();
+            LoadFileExtensions();
         }
         catch (Exception ex)
         {
@@ -155,24 +155,25 @@ public class FileTypesViewModel : ViewModelBase
             if (SelectedFileExtension == null)
                 return;
 
-            var fileExtension = await AppService
-                .UnitOfWork
-                .CategoryFileExtensionRepository
-                .GetAsync(where: fe => fe.Id == SelectedFileExtension.Id);
+            var category = AppService
+                .CategoryService
+                .Categories
+                .FirstOrDefault(c => c.Id == CategoryId);
+
+            if (category == null)
+                return;
+
+            var fileExtension = AppService
+                .CategoryService
+                .Categories
+                .SelectMany(c => c.FileExtensions)
+                .FirstOrDefault(fe => fe.Id == SelectedFileExtension.Id);
 
             if (fileExtension == null)
                 return;
 
-            await AppService
-                .UnitOfWork
-                .CategoryFileExtensionRepository
-                .DeleteAsync(fileExtension);
-
-            await AppService
-                .UnitOfWork
-                .SaveAsync();
-
-            await LoadFileExtensionsAsync();
+            await AppService.CategoryService.DeleteFileExtensionAsync(category, fileExtension);
+            LoadFileExtensions();
         }
         catch (Exception ex)
         {
@@ -181,40 +182,35 @@ public class FileTypesViewModel : ViewModelBase
         }
     }
 
-    public async Task LoadFileExtensionsAsync()
+    public void LoadFileExtensions()
     {
-        try
-        {
-            _dbFileExtensions.Clear();
+        _dbFileExtensions.Clear();
 
-            List<CategoryFileExtension> fileExtensions;
-            if (DependsOnCategory)
-            {
-                fileExtensions = await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .GetAllAsync(where: fe => fe.CategoryId == CategoryId,
-                        orderBy: o => o.OrderBy(fe => fe.Category!.Id).ThenBy(fe => fe.Extension),
-                        includeProperties: ["Category"]);
-            }
-            else
-            {
-                fileExtensions = await AppService
-                    .UnitOfWork
-                    .CategoryFileExtensionRepository
-                    .GetAllAsync(orderBy: o => o.OrderBy(fe => fe.Category!.Id).ThenBy(fe => fe.Extension),
-                        includeProperties: ["Category"]);
-            }
-
-            var fileExtensionViewModels = AppService.Mapper.Map<List<CategoryFileExtensionViewModel>>(fileExtensions);
-            _dbFileExtensions.AddRange(fileExtensionViewModels);
-            FilterFileExtensions();
-        }
-        catch (Exception ex)
+        List<CategoryFileExtensionViewModel> fileExtensions;
+        if (DependsOnCategory)
         {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load file extensions.");
+            fileExtensions = AppService
+                .CategoryService
+                .Categories
+                .SelectMany(c => c.FileExtensions)
+                .Where(fe => fe.CategoryId == CategoryId)
+                .OrderBy(fe => fe.Category!.Id)
+                .ThenBy(fe => fe.Extension)
+                .ToList();
         }
+        else
+        {
+            fileExtensions = AppService
+                .CategoryService
+                .Categories
+                .SelectMany(c => c.FileExtensions)
+                .OrderBy(fe => fe.Category!.Id)
+                .ThenBy(fe => fe.Extension)
+                .ToList();
+        }
+
+        _dbFileExtensions.AddRange(fileExtensions);
+        FilterFileExtensions();
     }
 
     #region Helpers
@@ -229,9 +225,9 @@ public class FileTypesViewModel : ViewModelBase
         else
         {
             FileExtensions = _dbFileExtensions
-                .FindAll(fe => fe.Extension?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true ||
-                               fe.Alias?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true)
-                .OrderBy(fe => fe.CategoryTitle)
+                .FindAll(fe => fe.Extension?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true
+                               || fe.Alias?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true)
+                .OrderBy(fe => fe.Category?.Title)
                 .ThenBy(fe => fe.Extension)
                 .ToObservableCollection();
         }

@@ -18,6 +18,7 @@ public abstract class ViewModelBase : ReactiveObject
         AppService.DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
         AppService.DownloadQueueService.DataChanged += DownloadQueueServiceOnDataChanged;
         AppService.SettingsService.DataChanged += SettingsServiceOnDataChanged;
+        AppService.CategoryService.CategoriesChanged += CategoryServiceOnCategoriesChanged;
     }
 
     #region Virtual Methods
@@ -34,6 +35,10 @@ public abstract class ViewModelBase : ReactiveObject
     {
     }
 
+    protected virtual void OnCategoryServiceCategoriesChanged()
+    {
+    }
+
     #endregion
 
     #region Helpers
@@ -43,6 +48,8 @@ public abstract class ViewModelBase : ReactiveObject
     private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e) => OnDownloadQueueServiceDataChanged();
 
     private void SettingsServiceOnDataChanged(object? sender, EventArgs e) => OnSettingsServiceDataChanged();
+    
+    private void CategoryServiceOnCategoriesChanged(object? sender, EventArgs e) => OnCategoryServiceCategoriesChanged();
 
     #endregion
 }

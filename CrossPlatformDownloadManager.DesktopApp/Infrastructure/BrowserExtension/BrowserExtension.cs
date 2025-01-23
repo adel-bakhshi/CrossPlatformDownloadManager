@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -141,10 +142,13 @@ public class BrowserExtension : IBrowserExtension
                             break;
                         }
 
-                        var fileExtensions = await _appService
-                            .UnitOfWork
-                            .CategoryFileExtensionRepository
-                            .GetAllAsync(select: fe => fe.Extension, distinct: true);
+                        var fileExtensions = _appService
+                            .CategoryService
+                            .Categories
+                            .SelectMany(c => c.FileExtensions)
+                            .Select(fe => fe.Extension)
+                            .Distinct()
+                            .ToList();
 
                         var isExtensionExists = !fileExtension.IsNullOrEmpty() && fileExtensions.Contains(fileExtension);
                         var message = $"CDM is {(isExtensionExists ? "supporting" : "not supporting")} '{fileExtension}' file types.";
@@ -271,7 +275,7 @@ public class BrowserExtension : IBrowserExtension
             {
                 duplicateAction = await _appService
                     .DownloadFileService
-                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!);
+                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!.SaveDirectory);
             }
             else
             {

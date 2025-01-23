@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
@@ -6,37 +7,65 @@ public class CategoryViewModel : PropertyChangedBase
 {
     #region Private Fields
 
-    private int? _id;
-    private string? _title;
-    private string? _icon;
-    private string? _categorySaveDirectory;
+    private int _id;
+    private string _title = string.Empty;
+    private string _icon = string.Empty;
+    private bool _isDefault;
+    private string? _autoAddLinkFromSites;
+    private int? _categorySaveDirectoryId;
+    private CategorySaveDirectoryViewModel? _categorySaveDirectory;
+    private ObservableCollection<CategoryFileExtensionViewModel> _fileExtensions = [];
 
     #endregion
 
     #region Properties
 
-    public int? Id
+    public int Id
     {
         get => _id;
         set => SetField(ref _id, value);
     }
 
-    public string? Title
+    public string Title
     {
         get => _title;
         set => SetField(ref _title, value);
     }
     
-    public string? Icon
+    public string Icon
     {
         get => _icon;
         set => SetField(ref _icon, value);
     }
 
-    public string? CategorySaveDirectory
+    public bool IsDefault
+    {
+        get => _isDefault;
+        set => SetField(ref _isDefault, value);
+    }
+
+    public string? AutoAddLinkFromSites
+    {
+        get => _autoAddLinkFromSites;
+        set => SetField(ref _autoAddLinkFromSites, value);
+    }
+
+    public int? CategorySaveDirectoryId
+    {
+        get => _categorySaveDirectoryId;
+        set => SetField(ref _categorySaveDirectoryId, value);
+    }
+
+    public CategorySaveDirectoryViewModel? CategorySaveDirectory
     {
         get => _categorySaveDirectory;
         set => SetField(ref _categorySaveDirectory, value);
+    }
+
+    public ObservableCollection<CategoryFileExtensionViewModel> FileExtensions
+    {
+        get => _fileExtensions;
+        set => SetField(ref _fileExtensions, value);
     }
 
     #endregion

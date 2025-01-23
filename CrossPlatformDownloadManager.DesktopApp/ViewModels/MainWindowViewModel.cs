@@ -38,9 +38,9 @@ public class MainWindowViewModel : ViewModelBase
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
 
     // Properties
-    private ObservableCollection<CategoryHeader> _categoryHeaders = [];
-    private CategoryHeader? _selectedCategoryHeader;
-    private Category? _selectedCategory;
+    private ObservableCollection<CategoryHeaderViewModel> _categoryHeaders = [];
+    private CategoryHeaderViewModel? _selectedCategoryHeader;
+    private CategoryViewModel? _selectedCategory;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
     private bool _selectAllDownloadFiles;
     private string _downloadSpeed = "0 KB";
@@ -58,13 +58,13 @@ public class MainWindowViewModel : ViewModelBase
 
     #region Properties
 
-    public ObservableCollection<CategoryHeader> CategoryHeaders
+    public ObservableCollection<CategoryHeaderViewModel> CategoryHeaders
     {
         get => _categoryHeaders;
         set => this.RaiseAndSetIfChanged(ref _categoryHeaders, value);
     }
 
-    public CategoryHeader? SelectedCategoryHeader
+    public CategoryHeaderViewModel? SelectedCategoryHeader
     {
         get => _selectedCategoryHeader;
         set
@@ -77,7 +77,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public Category? SelectedCategory
+    public CategoryViewModel? SelectedCategory
     {
         get => _selectedCategory;
         set
@@ -173,7 +173,7 @@ public class MainWindowViewModel : ViewModelBase
             _ = Dispatcher.UIThread.InvokeAsync(SaveShowCategoriesPanelOptionAsync);
         }
     }
-    
+
     public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
     {
         get => _dataGridColumnsSettings;
@@ -267,7 +267,7 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand DeleteAllCompletedDownloadsMenuItemCommand { get; }
 
     public ICommand OpenSettingsMenuItemCommand { get; }
-    
+
     public ICommand SaveColumnsSettingsCommand { get; }
 
     #endregion
@@ -285,7 +285,7 @@ public class MainWindowViewModel : ViewModelBase
         _saveColumnsSettingsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _saveColumnsSettingsTimer.Tick += SaveColumnsSettingsTimerOnTick;
 
-        LoadCategoriesAsync().GetAwaiter();
+        LoadCategories();
         FilterDownloadList();
         LoadDownloadQueues();
 
@@ -1748,35 +1748,12 @@ public class MainWindowViewModel : ViewModelBase
             ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
     }
 
-    private async Task LoadCategoriesAsync()
+    private void LoadCategories()
     {
-        try
-        {
-            var categoryHeaders = await AppService
-                .UnitOfWork
-                .CategoryHeaderRepository
-                .GetAllAsync();
+        var selectedCategoryHeaderId = SelectedCategoryHeader?.Id;
 
-            var categories = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAllAsync();
-
-            categoryHeaders = categoryHeaders
-                .Select(c =>
-                {
-                    c.Categories = categories;
-                    return c;
-                })
-                .ToList();
-
-            CategoryHeaders.UpdateCollection(categoryHeaders.ToObservableCollection(), ch => ch.Id);
-            SelectedCategoryHeader = categoryHeaders.FirstOrDefault(ch => ch.Id == SelectedCategoryHeader?.Id) ?? CategoryHeaders.FirstOrDefault();
-        }
-        catch
-        {
-            CategoryHeaders = [];
-        }
+        CategoryHeaders.UpdateCollection(AppService.CategoryService.CategoryHeaders, ch => ch.Id);
+        SelectedCategoryHeader = CategoryHeaders.FirstOrDefault(ch => ch.Id == selectedCategoryHeaderId) ?? CategoryHeaders.FirstOrDefault();
     }
 
     private void FilterDownloadList()
@@ -2245,16 +2222,17 @@ public class MainWindowViewModel : ViewModelBase
         // We have to store added data for adding download files to storage
         var data = new List<ExportAddedDownloadFileDataViewModel>();
         // Get all file extensions
-        var fileExtensions = await AppService
-            .UnitOfWork
-            .CategoryFileExtensionRepository
-            .GetAllAsync(includeProperties: ["Category.CategorySaveDirectory"]);
+        var fileExtensions = AppService
+            .CategoryService
+            .Categories
+            .SelectMany(c => c.FileExtensions)
+            .ToList();
 
         // Get general category
-        var generalCategory = await AppService
-            .UnitOfWork
-            .CategoryRepository
-            .GetAsync(where: c => c.Title == Constants.GeneralCategoryTitle, includeProperties: ["CategorySaveDirectory"]);
+        var generalCategory = AppService
+            .CategoryService
+            .Categories
+            .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
 
         // Add download files
         foreach (var exportDownloadFile in exportDownloadFiles)
@@ -2273,7 +2251,7 @@ public class MainWindowViewModel : ViewModelBase
                 exportDownloadFile.Size = urlDetails.FileSize;
             }
 
-            Category? category = null;
+            CategoryViewModel? category = null;
             var downloadFileInDb = downloadFilesInDb.Find(df => df.Url?.Equals(exportDownloadFile.Url) == true);
             if (downloadFileInDb != null)
             {
@@ -2287,7 +2265,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 // Find category and save location for the file
                 var extension = Path.GetExtension(fileName);
-                var fileExtension = fileExtensions.Find(fe => fe.Extension.Equals(extension));
+                var fileExtension = fileExtensions.Find(fe => fe.Extension?.Equals(extension) == true);
 
                 // Check category and save location. If save location is null or empty, we must use general category for the file
                 if (fileExtension?.Category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
@@ -2320,7 +2298,7 @@ public class MainWindowViewModel : ViewModelBase
             if (category == null)
             {
                 var extension = Path.GetExtension(fileName);
-                var fileExtension = fileExtensions.Find(fe => fe.Extension.Equals(extension));
+                var fileExtension = fileExtensions.Find(fe => fe.Extension?.Equals(extension) == true);
 
                 if (fileExtension?.Category != null)
                 {
@@ -2497,7 +2475,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             _saveColumnsSettingsTimer.Stop();
-            
+
             var settings = AppService.SettingsService.Settings;
             settings.DataGridColumnsSettings = DataGridColumnsSettings;
             await AppService.SettingsService.SaveSettingsAsync(settings);
@@ -2507,5 +2485,11 @@ public class MainWindowViewModel : ViewModelBase
             Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    protected override void OnCategoryServiceCategoriesChanged()
+    {
+        base.OnCategoryServiceCategoriesChanged();
+        LoadCategories();
     }
 }

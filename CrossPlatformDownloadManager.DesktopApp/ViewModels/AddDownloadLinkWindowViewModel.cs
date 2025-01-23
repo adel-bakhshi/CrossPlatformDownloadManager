@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -119,7 +118,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public AddDownloadLinkWindowViewModel(IAppService appService) : base(appService)
     {
-        LoadCategoriesAsync().GetAwaiter();
+        LoadCategories();
         LoadDownloadQueues();
 
         AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
@@ -175,11 +174,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             var vm = new AddEditCategoryWindowViewModel(AppService);
             var window = new AddEditCategoryWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool?>(owner);
-            if (result != true)
-                return;
-
-            await LoadCategoriesAsync();
+            await window.ShowDialog(owner);
         }
         catch (Exception ex)
         {
@@ -327,7 +322,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             {
                 duplicateAction = await AppService
                     .DownloadFileService
-                    .GetUserDuplicateActionAsync(_urlDetails.Url, _urlDetails.FileName, _urlDetails.Category!.CategorySaveDirectory!);
+                    .GetUserDuplicateActionAsync(_urlDetails.Url, _urlDetails.FileName, _urlDetails.Category!.CategorySaveDirectory!.SaveDirectory);
             }
             else
             {
@@ -369,23 +364,19 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         return defaultQueue ?? lastChoice ?? DownloadQueues.FirstOrDefault();
     }
 
-    private async Task LoadCategoriesAsync()
+    private void LoadCategories()
     {
-        try
-        {
-            var categories = await AppService
-                .UnitOfWork
-                .CategoryRepository
-                .GetAllAsync();
+        // Store selected category id
+        var selectedCategoryId = SelectedCategory?.Id;
+        // Get all categories
+        var categories = AppService
+            .CategoryService
+            .Categories;
 
-            var viewModels = AppService.Mapper.Map<List<CategoryViewModel>>(categories);
-            Categories = viewModels.ToObservableCollection();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occured while trying to load categories. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        // Update collection
+        Categories.UpdateCollection(categories, c => c.Id);
+        // Re select previous category
+        SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
     }
 
     public async Task GetUrlDetailsAsync()
@@ -419,5 +410,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         base.OnDownloadQueueServiceDataChanged();
         LoadDownloadQueues();
+    }
+
+    protected override void OnCategoryServiceCategoriesChanged()
+    {
+        base.OnCategoryServiceCategoriesChanged();
+        LoadCategories();
     }
 }

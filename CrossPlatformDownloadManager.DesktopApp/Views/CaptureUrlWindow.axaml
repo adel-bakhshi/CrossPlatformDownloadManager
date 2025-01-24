@@ -35,12 +35,15 @@
                           IconSize="{DynamicResource SmallIconSize}"
                           Padding="12, 10"
                           HorizontalAlignment="Stretch"
-                          VerticalAlignment="Top"
+                          VerticalAlignment="Stretch"
                           OnFocusBorderColor="{DynamicResource SecondaryColor}"
                           OnHoverBorderColor="{DynamicResource SecondaryColor}"
                           BorderThickness="1"
                           BorderBrush="{DynamicResource SecondaryColor}"
-                          Text="{Binding DownloadAddress, FallbackValue='', TargetNullValue=''}" />
+                          Text="{Binding DownloadAddress, FallbackValue='', TargetNullValue=''}"
+                          AcceptsReturn="True"
+                          TextWrapping="Wrap"
+                          VerticalIconAlignment="Top" />
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="1"

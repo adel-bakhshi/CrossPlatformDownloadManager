@@ -6,6 +6,7 @@ using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using ReactiveUI;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
@@ -17,26 +18,20 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         InitializeComponent();
     }
 
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close(false);
-    }
-
     private async void BrowseButtonOnClick(object? sender, RoutedEventArgs e)
     {
         try
         {
-            var topLevel = GetTopLevel(this);
-            if (topLevel == null || ViewModel == null)
+            if (ViewModel == null)
                 return;
-
+            
             var options = new FolderPickerOpenOptions
             {
                 Title = "Select Directory",
-                AllowMultiple = false,
+                AllowMultiple = false
             };
 
-            var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+            var directories = await StorageProvider.OpenFolderPickerAsync(options);
             if (!directories.Any())
                 return;
 
@@ -48,5 +43,17 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
             Log.Error(ex, "An error occured while trying to select directory. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private void ExtensionTextBlockOnTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        ViewModel?.RaisePropertyChanged(nameof(ViewModel.IsDeleteClearFileExtensionButtonEnabled));
+        ViewModel?.RaisePropertyChanged(nameof(ViewModel.IsSaveFileExtensionButtonEnabled));
+    }
+
+    private void AlisTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        ViewModel?.RaisePropertyChanged(nameof(ViewModel.IsDeleteClearFileExtensionButtonEnabled));
+        ViewModel?.RaisePropertyChanged(nameof(ViewModel.IsSaveFileExtensionButtonEnabled));
     }
 }

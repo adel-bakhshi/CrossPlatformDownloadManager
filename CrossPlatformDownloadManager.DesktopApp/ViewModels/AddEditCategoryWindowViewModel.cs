@@ -21,12 +21,14 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
     private string? _categoryTitle;
     private ObservableCollection<CategoryFileExtensionViewModel> _fileExtensions = [];
-    private CategoryFileExtensionViewModel _newFileExtension = new();
+    private CategoryFileExtensionViewModel? _selectedFileExtension;
+    private CategoryFileExtensionViewModel _currentFileExtension = new();
     private ObservableCollection<string> _siteAddresses = [];
-    private string? _siteAddress;
+    private string? _selectedSiteAddress;
     private string? _saveDirectory;
     private bool _isEditMode;
     private int? _categoryId;
+    private bool _isDefaultCategory;
 
     #endregion
 
@@ -41,25 +43,58 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     public ObservableCollection<CategoryFileExtensionViewModel> FileExtensions
     {
         get => _fileExtensions;
-        set => this.RaiseAndSetIfChanged(ref _fileExtensions, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _fileExtensions, value);
+            this.RaisePropertyChanged(nameof(IsFileTypesDataGridVisible));
+        }
     }
 
-    public CategoryFileExtensionViewModel NewFileExtension
+    public CategoryFileExtensionViewModel? SelectedFileExtension
     {
-        get => _newFileExtension;
-        set => this.RaiseAndSetIfChanged(ref _newFileExtension, value);
+        get => _selectedFileExtension;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedFileExtension, value);
+            if (SelectedFileExtension != null)
+            {
+                CurrentFileExtension = new CategoryFileExtensionViewModel
+                {
+                    Id = SelectedFileExtension.Id,
+                    Extension = SelectedFileExtension.Extension,
+                    Alias = SelectedFileExtension.Alias,
+                    CategoryId = SelectedFileExtension.CategoryId,
+                    Category = SelectedFileExtension.Category
+                };
+            }
+        }
+    }
+
+    public CategoryFileExtensionViewModel CurrentFileExtension
+    {
+        get => _currentFileExtension;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _currentFileExtension, value);
+            this.RaisePropertyChanged(nameof(IsDeleteClearFileExtensionButtonEnabled));
+            this.RaisePropertyChanged(nameof(IsSaveFileExtensionButtonEnabled));
+        }
     }
 
     public ObservableCollection<string> SiteAddresses
     {
         get => _siteAddresses;
-        set => this.RaiseAndSetIfChanged(ref _siteAddresses, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _siteAddresses, value);
+            this.RaisePropertyChanged(nameof(IsSiteAddressesDataGridVisible));
+        }
     }
 
-    public string? SiteAddress
+    public string? SelectedSiteAddress
     {
-        get => _siteAddress;
-        set => this.RaiseAndSetIfChanged(ref _siteAddress, value);
+        get => _selectedSiteAddress;
+        set => this.RaiseAndSetIfChanged(ref _selectedSiteAddress, value);
     }
 
     public string? SaveDirectory
@@ -86,35 +121,151 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _categoryId, value);
-            LoadCategoryAsync().GetAwaiter();
+            LoadCategory();
         }
     }
+
+    public bool IsDefaultCategory
+    {
+        get => _isDefaultCategory;
+        set => this.RaiseAndSetIfChanged(ref _isDefaultCategory, value);
+    }
+
+    public bool IsFileTypesDataGridVisible => FileExtensions.Count > 0;
+    public bool IsSiteAddressesDataGridVisible => SiteAddresses.Count > 0;
+
+    public bool IsDeleteClearFileExtensionButtonEnabled =>
+        CurrentFileExtension.Id > 0 || !CurrentFileExtension.Extension.IsNullOrEmpty() || !CurrentFileExtension.Alias.IsNullOrEmpty();
+
+    public bool IsSaveFileExtensionButtonEnabled => !CurrentFileExtension.Extension.IsNullOrEmpty() && !CurrentFileExtension.Alias.IsNullOrEmpty();
 
     #endregion
 
     #region Commands
 
-    public ICommand AddNewFileExtensionCommand { get; }
+    public ICommand SaveFileExtensionCommand { get; }
 
-    public ICommand DeleteFileExtensionCommand { get; }
+    public ICommand DeleteClearFileExtensionCommand { get; }
 
-    public ICommand AddNewSiteAddressCommand { get; }
+    public ICommand SaveSiteAddressCommand { get; }
 
-    public ICommand DeleteSiteAddressCommand { get; }
+    public ICommand DeleteClearSiteAddressCommand { get; }
 
     public ICommand SaveCommand { get; }
+
+    public ICommand CancelCommand { get; }
 
     #endregion
 
     public AddEditCategoryWindowViewModel(IAppService appService) : base(appService)
     {
-        LoadCategoryAsync().GetAwaiter();
+        LoadCategory();
 
-        AddNewFileExtensionCommand = ReactiveCommand.Create<Window?>(AddNewFileExtension);
-        DeleteFileExtensionCommand = ReactiveCommand.Create<CategoryFileExtensionViewModel?>(DeleteFileExtension);
-        AddNewSiteAddressCommand = ReactiveCommand.Create(AddNewSiteAddress);
-        DeleteSiteAddressCommand = ReactiveCommand.Create<string?>(DeleteSiteAddress);
+        SaveFileExtensionCommand = ReactiveCommand.Create(SaveFileExtension);
+        DeleteClearFileExtensionCommand = ReactiveCommand.Create(DeleteClearFileExtension);
+        SaveSiteAddressCommand = ReactiveCommand.Create(SaveSiteAddress);
+        DeleteClearSiteAddressCommand = ReactiveCommand.Create(DeleteClearSiteAddress);
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
+        CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
+    }
+
+    private void SaveFileExtension()
+    {
+        CurrentFileExtension.Extension = CurrentFileExtension.Extension.Trim('.').Replace(".", "").Replace(" ", "").ToLower();
+        CurrentFileExtension.Alias = CurrentFileExtension.Alias.Trim();
+        if (CurrentFileExtension.Extension.IsNullOrEmpty() || CurrentFileExtension.Alias.IsNullOrEmpty())
+            return;
+
+        var existingFileExtension = FileExtensions
+            .FirstOrDefault(fe => fe.Extension.Equals("." + CurrentFileExtension.Extension, StringComparison.OrdinalIgnoreCase));
+
+        if (existingFileExtension != null)
+        {
+            existingFileExtension.Alias = CurrentFileExtension.Alias.Trim();
+            CurrentFileExtension = new CategoryFileExtensionViewModel();
+            SelectedFileExtension = null;
+            return;
+        }
+
+        var newFileExtension = new CategoryFileExtensionViewModel
+        {
+            Extension = "." + CurrentFileExtension.Extension,
+            Alias = CurrentFileExtension.Alias
+        };
+
+        FileExtensions.Add(newFileExtension);
+        this.RaisePropertyChanged(nameof(FileExtensions));
+        SelectedFileExtension = null;
+        CurrentFileExtension = new CategoryFileExtensionViewModel();
+    }
+
+    private void DeleteClearFileExtension()
+    {
+        // If editing an existing file extension, remove file extension from list
+        if (CurrentFileExtension.Id > 0)
+        {
+            var fileExtension = FileExtensions.FirstOrDefault(fe => fe.Id == CurrentFileExtension.Id);
+            if (fileExtension == null || !fileExtension.Extension.Equals(CurrentFileExtension.Extension))
+            {
+                CurrentFileExtension = new CategoryFileExtensionViewModel();
+                SelectedFileExtension = null;
+                return;
+            }
+
+            FileExtensions.Remove(fileExtension);
+            this.RaisePropertyChanged(nameof(FileExtensions));
+        }
+        // If creating a new file extension, clear current file extension
+        else
+        {
+            var fileExtension = FileExtensions
+                .FirstOrDefault(fe => fe.Extension.Equals(CurrentFileExtension.Extension, StringComparison.OrdinalIgnoreCase)
+                                      && fe.Alias.Equals(CurrentFileExtension.Alias, StringComparison.OrdinalIgnoreCase));
+
+            if (fileExtension is { Id: <= 0 })
+            {
+                FileExtensions.Remove(fileExtension);
+                this.RaisePropertyChanged(nameof(FileExtensions));
+            }
+
+            CurrentFileExtension = new CategoryFileExtensionViewModel();
+            SelectedFileExtension = null;
+        }
+    }
+
+    private void SaveSiteAddress()
+    {
+        SelectedSiteAddress = SelectedSiteAddress?.Trim().Replace('\\', '/').Replace(" ", "");
+        if (SelectedSiteAddress.IsNullOrEmpty() || !SelectedSiteAddress.CheckUrlValidation())
+            return;
+
+        if (SiteAddresses.Any(sa => sa.Equals(SelectedSiteAddress)))
+        {
+            SelectedSiteAddress = string.Empty;
+            return;
+        }
+        
+        SiteAddresses.Add(SelectedSiteAddress!);
+        SelectedSiteAddress = string.Empty;
+    }
+
+    private void DeleteClearSiteAddress()
+    {
+        if (SelectedSiteAddress.IsNullOrEmpty())
+        {
+            SelectedSiteAddress = string.Empty;
+            return;
+        }
+
+        var existingSiteAddress = SiteAddresses.FirstOrDefault(sa => sa.Equals(SelectedSiteAddress!));
+        if (existingSiteAddress.IsNullOrEmpty())
+        {
+            SelectedSiteAddress = string.Empty;
+            return;
+        }
+
+        SiteAddresses.Remove(existingSiteAddress!);
+        SelectedSiteAddress = string.Empty;
     }
 
     private async Task SaveAsync(Window? owner)
@@ -163,9 +314,18 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             // Remove old file extensions
             if (IsEditMode && category.FileExtensions.Count > 0)
                 await AppService.CategoryService.DeleteAllFileExtensionsAsync(category);
+            
+            // Convert file extensions to correct format
+            var fileExtensions = FileExtensions
+                .Select(fe =>
+                {
+                    fe.Id = 0;
+                    return fe;
+                })
+                .ToList();
 
             // Add new file extensions for selected category
-            await AppService.CategoryService.AddFileExtensionsAsync(category, FileExtensions.ToList());
+            await AppService.CategoryService.AddFileExtensionsAsync(category, fileExtensions);
 
             CategorySaveDirectoryViewModel? saveDirectory;
             if (IsEditMode)
@@ -188,120 +348,61 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
                 await AppService.CategoryService.AddSaveDirectoryAsync(category, saveDirectory);
             }
 
+            // Close window
             owner.Close(true);
         }
         catch (Exception ex)
         {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "And error occured while trying to save the category. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async Task LoadCategoryAsync()
+    private static async Task CancelAsync(Window? owner)
     {
         try
         {
-            if (CategoryId != null)
-            {
-                var category = AppService
-                    .CategoryService
-                    .Categories
-                    .FirstOrDefault(c => c.Id == CategoryId);
-
-                if (category == null)
-                    return;
-
-                CategoryTitle = category.Title;
-                FileExtensions = category
-                    .FileExtensions
-                    .Select(fe =>
-                    {
-                        fe.Extension = fe.Extension!.TrimStart('.');
-                        return fe;
-                    })
-                    .ToObservableCollection();
-
-                var json = category.AutoAddLinkFromSites;
-                SiteAddresses = json.IsNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();
-                if (category.CategorySaveDirectory != null)
-                    SaveDirectory = category.CategorySaveDirectory.SaveDirectory;
-            }
-            else
-            {
-                var generalCategory = AppService
-                    .CategoryService
-                    .Categories
-                    .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
-
-                if (generalCategory?.CategorySaveDirectory == null)
-                    return;
-
-                SaveDirectory = generalCategory.CategorySaveDirectory.SaveDirectory;
-            }
+            owner?.Close();
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "And error occured while trying to cancel. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "And error occured while trying to load the category. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
-    private void DeleteSiteAddress(string? siteAddress)
+    private void LoadCategory()
     {
-        if (siteAddress.IsNullOrEmpty())
-            return;
-
-        var siteAddresses = SiteAddresses.ToList();
-        siteAddresses.Remove(siteAddress!);
-        SiteAddresses = siteAddresses.ToObservableCollection();
-    }
-
-    private void AddNewSiteAddress()
-    {
-        if (SiteAddress.IsNullOrEmpty())
-            return;
-
-        if (SiteAddresses.Any(sa => sa.Equals(SiteAddress)))
-            return;
-
-        var siteAddresses = SiteAddresses.ToList();
-        siteAddresses.Add(SiteAddress!.Trim().Replace(" ", ""));
-        SiteAddresses = siteAddresses.ToObservableCollection();
-
-        SiteAddress = string.Empty;
-    }
-
-    private void AddNewFileExtension(Window? owner)
-    {
-        if (NewFileExtension.Extension.IsNullOrEmpty() || NewFileExtension.Alias.IsNullOrEmpty())
-            return;
-
-        var isExist = FileExtensions
-            .Any(fe => fe.Extension!.Equals(NewFileExtension.Extension, StringComparison.OrdinalIgnoreCase));
-
-        if (isExist)
+        if (CategoryId != null)
         {
-            NewFileExtension = new CategoryFileExtensionViewModel();
-            return;
+            var category = AppService
+                .CategoryService
+                .Categories
+                .FirstOrDefault(c => c.Id == CategoryId);
+
+            if (category == null)
+                return;
+
+            CategoryTitle = category.Title;
+            IsDefaultCategory = category.IsDefault;
+            FileExtensions = category.FileExtensions;
+
+            var json = category.AutoAddLinkFromSites;
+            SiteAddresses = json.IsNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();
+            if (category.CategorySaveDirectory != null)
+                SaveDirectory = category.CategorySaveDirectory.SaveDirectory;
         }
-
-        var newFileExtension = new CategoryFileExtensionViewModel
+        else
         {
-            Extension = NewFileExtension.Extension!.Trim().Replace(".", "").Replace(" ", "").ToLower(),
-            Alias = NewFileExtension.Alias!.Trim(),
-        };
+            var generalCategory = AppService
+                .CategoryService
+                .Categories
+                .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
 
-        FileExtensions.Add(newFileExtension);
-        this.RaisePropertyChanged(nameof(FileExtensions));
-        NewFileExtension = new CategoryFileExtensionViewModel();
-    }
+            if (generalCategory?.CategorySaveDirectory == null)
+                return;
 
-    private void DeleteFileExtension(CategoryFileExtensionViewModel? fileExtension)
-    {
-        if (fileExtension == null)
-            return;
-
-        FileExtensions.Remove(fileExtension);
-        this.RaisePropertyChanged(nameof(FileExtensions));
+            SaveDirectory = generalCategory.CategorySaveDirectory.SaveDirectory;
+        }
     }
 }

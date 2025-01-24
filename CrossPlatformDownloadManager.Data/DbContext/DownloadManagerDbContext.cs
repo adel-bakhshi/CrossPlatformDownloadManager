@@ -61,8 +61,6 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
                 .HasPrincipalKey(c => c.Id)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            options.HasIndex(c => c.CategorySaveDirectoryId);
         });
 
         modelBuilder.Entity<CategoryFileExtension>(options =>
@@ -79,12 +77,6 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         modelBuilder.Entity<CategorySaveDirectory>(options =>
         {
-            options.HasOne<Category>(sd => sd.Category)
-                .WithOne(c => c.CategorySaveDirectory)
-                .HasForeignKey<Category>(c => c.CategorySaveDirectoryId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
-
             options.HasIndex(sd => sd.CategoryId);
         });
 

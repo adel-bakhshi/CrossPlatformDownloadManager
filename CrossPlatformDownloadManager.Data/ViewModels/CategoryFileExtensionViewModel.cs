@@ -7,8 +7,8 @@ public class CategoryFileExtensionViewModel : PropertyChangedBase
     #region Private Fields
 
     private int _id;
-    private string? _extension;
-    private string? _alias;
+    private string _extension = string.Empty;
+    private string _alias = string.Empty;
     private int? _categoryId;
     private CategoryViewModel? _category;
 
@@ -22,13 +22,13 @@ public class CategoryFileExtensionViewModel : PropertyChangedBase
         set => SetField(ref _id, value);
     }
 
-    public string? Extension
+    public string Extension
     {
         get => _extension;
         set => SetField(ref _extension, value);
     }
 
-    public string? Alias
+    public string Alias
     {
         get => _alias;
         set => SetField(ref _alias, value);

@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
 using Avalonia.Media;
 
 namespace CrossPlatformDownloadManager.DesktopApp.CustomControls;
@@ -9,8 +9,8 @@ public class CustomTextBox : TextBox
 {
     #region Properties
 
-    public static readonly StyledProperty<Geometry?> IconDataProperty =
-        AvaloniaProperty.Register<CustomTextBox, Geometry?>("IconData", defaultValue: null);
+    public static readonly StyledProperty<Geometry?> IconDataProperty = AvaloniaProperty
+        .Register<CustomTextBox, Geometry?>(nameof(IconData), defaultValue: null);
 
     public Geometry? IconData
     {
@@ -18,8 +18,8 @@ public class CustomTextBox : TextBox
         set => SetValue(IconDataProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> IconColorProperty =
-        AvaloniaProperty.Register<CustomTextBox, IBrush?>("IconColor", SolidColorBrush.Parse("#000000"));
+    public static readonly StyledProperty<IBrush?> IconColorProperty = AvaloniaProperty
+        .Register<CustomTextBox, IBrush?>(nameof(IconColor), SolidColorBrush.Parse("#000000"));
 
     public IBrush? IconColor
     {
@@ -27,7 +27,8 @@ public class CustomTextBox : TextBox
         set => SetValue(IconColorProperty, value);
     }
 
-    public static readonly StyledProperty<double> IconSizeProperty = AvaloniaProperty.Register<CustomTextBox, double>("IconSize", defaultValue: 16);
+    public static readonly StyledProperty<double> IconSizeProperty = AvaloniaProperty
+        .Register<CustomTextBox, double>(nameof(IconSize), defaultValue: 16);
 
     public double IconSize
     {
@@ -35,8 +36,26 @@ public class CustomTextBox : TextBox
         set => SetValue(IconSizeProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnFocusBorderColorProperty =
-        AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnFocusBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
+    public static readonly StyledProperty<VerticalAlignment> VerticalIconAlignmentProperty = AvaloniaProperty.Register<CustomTextBox, VerticalAlignment>(
+        nameof(VerticalIconAlignment));
+
+    public VerticalAlignment VerticalIconAlignment
+    {
+        get => GetValue(VerticalIconAlignmentProperty);
+        set => SetValue(VerticalIconAlignmentProperty, value);
+    }
+
+    public static readonly StyledProperty<Thickness> IconMarginProperty = AvaloniaProperty.Register<CustomTextBox, Thickness>(
+        nameof(IconMargin), defaultValue: new Thickness(0, 0, 10, 0));
+
+    public Thickness IconMargin
+    {
+        get => GetValue(IconMarginProperty);
+        set => SetValue(IconMarginProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush?> OnFocusBorderColorProperty = AvaloniaProperty
+        .Register<CustomTextBox, IBrush?>(nameof(OnFocusBorderColor), defaultValue: SolidColorBrush.Parse("#727272"));
 
     public IBrush? OnFocusBorderColor
     {
@@ -44,8 +63,8 @@ public class CustomTextBox : TextBox
         set => SetValue(OnFocusBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnHoverBorderColorProperty =
-        AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnHoverBorderColor", defaultValue: SolidColorBrush.Parse("#727272"));
+    public static readonly StyledProperty<IBrush?> OnHoverBorderColorProperty = AvaloniaProperty
+        .Register<CustomTextBox, IBrush?>(nameof(OnHoverBorderColor), defaultValue: SolidColorBrush.Parse("#727272"));
 
     public IBrush? OnHoverBorderColor
     {
@@ -53,7 +72,8 @@ public class CustomTextBox : TextBox
         set => SetValue(OnHoverBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> OnErrorBorderColorProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>("OnErrorBorderColor");
+    public static readonly StyledProperty<IBrush?> OnErrorBorderColorProperty = AvaloniaProperty
+        .Register<CustomTextBox, IBrush?>(nameof(OnErrorBorderColor));
 
     public IBrush? OnErrorBorderColor
     {
@@ -61,7 +81,8 @@ public class CustomTextBox : TextBox
         set => SetValue(OnErrorBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty = AvaloniaProperty.Register<CustomTextBox, IBrush?>("WatermarkForeground");
+    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty = AvaloniaProperty
+        .Register<CustomTextBox, IBrush?>(nameof(WatermarkForeground));
 
     public IBrush? WatermarkForeground
     {
@@ -69,7 +90,8 @@ public class CustomTextBox : TextBox
         set => SetValue(WatermarkForegroundProperty, value);
     }
 
-    public static readonly StyledProperty<bool> ShowPasswordRevealButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>("ShowPasswordRevealButton");
+    public static readonly StyledProperty<bool> ShowPasswordRevealButtonProperty = AvaloniaProperty
+        .Register<CustomTextBox, bool>(nameof(ShowPasswordRevealButton));
 
     public bool ShowPasswordRevealButton
     {
@@ -77,7 +99,8 @@ public class CustomTextBox : TextBox
         set => SetValue(ShowPasswordRevealButtonProperty, value);
     }
 
-    public static readonly StyledProperty<bool> ShowClearButtonProperty = AvaloniaProperty.Register<CustomTextBox, bool>("ShowClearButton");
+    public static readonly StyledProperty<bool> ShowClearButtonProperty = AvaloniaProperty
+        .Register<CustomTextBox, bool>(nameof(ShowClearButton));
 
     public bool ShowClearButton
     {

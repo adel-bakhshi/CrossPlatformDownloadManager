@@ -133,7 +133,7 @@
                           Width="{Binding $parent[controls:CustomTextBox].IconSize}"
                           Height="{Binding $parent[controls:CustomTextBox].IconSize}"
                           Classes.hasIcon="{Binding $parent[controls:CustomTextBox].IconData, Converter={x:Static ObjectConverters.IsNotNull}}"
-                          VerticalAlignment="Center"
+                          VerticalAlignment="{Binding $parent[controls:CustomTextBox].VerticalIconAlignment}"
                           HorizontalAlignment="Center">
                     <PathIcon.Styles>
                         <Style Selector="PathIcon">
@@ -145,7 +145,7 @@
 
                         <Style Selector="PathIcon.hasIcon">
                             <Setter Property="Margin"
-                                    Value="0, 0, 10, 0" />
+                                    Value="{Binding $parent[controls:CustomTextBox].IconMargin}" />
                             <Setter Property="IsVisible"
                                     Value="True" />
                         </Style>

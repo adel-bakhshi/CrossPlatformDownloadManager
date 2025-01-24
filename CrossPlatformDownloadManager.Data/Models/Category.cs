@@ -20,9 +20,6 @@ public class Category : DbModelBase
 
     [MaxLength(1000)] public string? AutoAddLinkFromSites { get; set; }
 
-    public int? CategorySaveDirectoryId { get; set; }
-
-    [ForeignKey(nameof(CategorySaveDirectoryId))]
     public CategorySaveDirectory? CategorySaveDirectory { get; set; }
 
     [JsonProperty("fileExtensions")] public ICollection<CategoryFileExtension> FileExtensions { get; set; } = [];
@@ -38,6 +35,5 @@ public class Category : DbModelBase
         Icon = category.Icon;
         IsDefault = category.IsDefault;
         AutoAddLinkFromSites = category.AutoAddLinkFromSites;
-        CategorySaveDirectoryId = category.CategorySaveDirectoryId;
     }
 }

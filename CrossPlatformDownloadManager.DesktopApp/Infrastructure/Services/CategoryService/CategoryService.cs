@@ -136,7 +136,7 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         CategoryHeadersChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<int> AddNewCategoryAsync(CategoryViewModel? viewModel)
+    public async Task<int> AddNewCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true)
     {
         if (viewModel == null || viewModel.Id > 0)
             return 0;
@@ -145,11 +145,13 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryRepository.AddAsync(category);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
+
         return category.Id;
     }
 
-    public async Task UpdateCategoryAsync(CategoryViewModel? viewModel)
+    public async Task UpdateCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null)
@@ -159,10 +161,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryRepository.UpdateAsync(categoryInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task DeleteCategoryAsync(CategoryViewModel? viewModel)
+    public async Task DeleteCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null)
@@ -217,10 +220,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryRepository.DeleteAsync(categoryInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task DeleteFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension)
+    public async Task DeleteFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || fileExtension == null)
@@ -245,10 +249,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryFileExtensionRepository.DeleteAsync(fileExtensionInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task DeleteAllFileExtensionsAsync(CategoryViewModel? viewModel)
+    public async Task DeleteAllFileExtensionsAsync(CategoryViewModel? viewModel, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null)
@@ -258,10 +263,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryFileExtensionRepository.DeleteAllAsync(fileExtensions);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task AddFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension)
+    public async Task AddFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || fileExtension == null || fileExtension.Id > 0)
@@ -280,10 +286,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryFileExtensionRepository.AddAsync(categoryFileExtension);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task AddFileExtensionsAsync(CategoryViewModel? viewModel, List<CategoryFileExtensionViewModel>? fileExtensions)
+    public async Task AddFileExtensionsAsync(CategoryViewModel? viewModel, List<CategoryFileExtensionViewModel>? fileExtensions, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || fileExtensions == null || fileExtensions.Count == 0)
@@ -314,10 +321,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryFileExtensionRepository.AddRangeAsync(categoryFileExtensions);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task UpdateFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension)
+    public async Task UpdateFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || fileExtension is not { Id: > 0 })
@@ -343,10 +351,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategoryFileExtensionRepository.UpdateAsync(fileExtensionInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task AddSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory)
+    public async Task AddSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || saveDirectory == null || saveDirectory.Id > 0)
@@ -365,10 +374,11 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategorySaveDirectoryRepository.AddAsync(saveDirectoryInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 
-    public async Task UpdateSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory)
+    public async Task UpdateSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory, bool reloadData = true)
     {
         var category = Categories.FirstOrDefault(c => c.Id == viewModel?.Id);
         if (category == null || saveDirectory == null)
@@ -394,6 +404,7 @@ public class CategoryService : PropertyChangedBase, ICategoryService
         await _unitOfWork.CategorySaveDirectoryRepository.UpdateAsync(saveDirectoryInDb);
         await _unitOfWork.SaveAsync();
 
-        await LoadCategoriesAsync(loadHeaders: false);
+        if (reloadData)
+            await LoadCategoriesAsync(loadHeaders: false);
     }
 }

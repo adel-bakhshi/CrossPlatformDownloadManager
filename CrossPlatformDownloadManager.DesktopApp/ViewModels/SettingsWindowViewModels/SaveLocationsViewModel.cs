@@ -150,7 +150,7 @@ public class SaveLocationsViewModel : ViewModelBase
                 return;
             }
 
-            var result = await DialogBoxManager.ShowDangerDialogAsync("Delete category",
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete category",
                 $"Deleting the '{category.Title}' category will permanently remove all associated information. Do you wish to continue?",
                 DialogButtons.YesNo);
 
@@ -176,6 +176,7 @@ public class SaveLocationsViewModel : ViewModelBase
 
     private void LoadCategories()
     {
+        var selectedCategoryId = SelectedCategory?.Id;
         var categories = AppService
             .CategoryService
             .Categories
@@ -183,7 +184,7 @@ public class SaveLocationsViewModel : ViewModelBase
             .ToObservableCollection();
 
         Categories.UpdateCollection(categories, c => c.Id);
-        SelectedCategory = Categories.FirstOrDefault();
+        SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
         LoadFileExtensions();
     }
 

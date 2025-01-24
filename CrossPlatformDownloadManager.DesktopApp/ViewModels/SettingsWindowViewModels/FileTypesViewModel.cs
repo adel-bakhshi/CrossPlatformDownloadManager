@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -204,7 +203,7 @@ public class FileTypesViewModel : ViewModelBase
                 .CategoryService
                 .Categories
                 .SelectMany(c => c.FileExtensions)
-                .OrderBy(fe => fe.Category!.Id)
+                .OrderBy(fe => fe.CategoryId)
                 .ThenBy(fe => fe.Extension)
                 .ToList();
         }
@@ -217,7 +216,7 @@ public class FileTypesViewModel : ViewModelBase
 
     private void FilterFileExtensions()
     {
-        var selectedFileExtension = SelectedFileExtension;
+        var selectedFileExtensionId = SelectedFileExtension?.Id;
         if (SearchText.IsNullOrEmpty())
         {
             FileExtensions = _dbFileExtensions.ToObservableCollection();
@@ -225,15 +224,15 @@ public class FileTypesViewModel : ViewModelBase
         else
         {
             FileExtensions = _dbFileExtensions
-                .FindAll(fe => fe.Extension?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true
-                               || fe.Alias?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) == true)
+                .FindAll(fe => fe.Extension.Contains(SearchText!, StringComparison.OrdinalIgnoreCase)
+                               || fe.Alias.Contains(SearchText!, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(fe => fe.Category?.Title)
                 .ThenBy(fe => fe.Extension)
                 .ToObservableCollection();
         }
 
-        if (selectedFileExtension != null)
-            SelectedFileExtension = FileExtensions.FirstOrDefault(fe => fe.Id == selectedFileExtension.Id);
+        if (selectedFileExtensionId != null)
+            SelectedFileExtension = FileExtensions.FirstOrDefault(fe => fe.Id == selectedFileExtensionId);
     }
 
     #endregion

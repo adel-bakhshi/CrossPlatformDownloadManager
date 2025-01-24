@@ -107,12 +107,11 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-
+            
+            Extension = "." + Extension?.Trim('.').Replace(".", "").Replace(" ", "").ToLower();
+            Alias = Alias?.Trim();
             if (Extension.IsNullOrEmpty() || Alias.IsNullOrEmpty() || SelectedCategory == null)
                 return;
-
-            Extension = "." + Extension!.Trim().Replace(".", "").Replace(" ", "").ToLower();
-            Alias = Alias!.Trim();
 
             if (IsEditMode)
             {
@@ -136,7 +135,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
                     .CategoryService
                     .Categories
                     .SelectMany(c => c.FileExtensions)
-                    .FirstOrDefault(fe => fe.Extension?.Equals(Extension, StringComparison.OrdinalIgnoreCase) == true
+                    .FirstOrDefault(fe => fe.Extension.Equals(Extension, StringComparison.OrdinalIgnoreCase)
                                           && fe.Category != null 
                                           && fe.Category.Id == SelectedCategory.Id);
 

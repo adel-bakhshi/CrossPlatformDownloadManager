@@ -11,9 +11,10 @@
 
     <Styles.Resources>
         <ResourceDictionary>
+            <!-- String to geometry converter -->
             <converters:StringToGeometryConverter x:Key="StringToGeometryConverter" />
-            <converters:StringToUpperConverter x:Key="StringToUpperConverter" />
 
+            <!-- Category list item data template -->
             <DataTemplate DataType="viewModels:CategoryViewModel"
                           x:Key="CategoryListItemDataTemplate">
                 <StackPanel Orientation="Horizontal"
@@ -27,6 +28,7 @@
                 </StackPanel>
             </DataTemplate>
 
+            <!-- Category list item items panel template -->
             <ItemsPanelTemplate x:Key="CategoryListItemItemsPanelTemplate">
                 <StackPanel Orientation="Vertical"
                             Spacing="10" />
@@ -65,7 +67,8 @@
 
             <Setter Property="ItemTemplate">
                 <DataTemplate DataType="viewModels:CategoryHeaderViewModel">
-                    <Expander IsExpanded="{Binding $parent[ListBoxItem].IsSelected}">
+                    <Expander IsExpanded="{Binding $parent[ListBoxItem].IsSelected}"
+                              Width="{Binding $parent[ListBox].Bounds.Width}">
                         <Expander.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"
@@ -76,7 +79,8 @@
                                               Foreground="{Binding $parent[Expander].Foreground}" />
 
                                     <TextBlock Text="{Binding $parent[ListBoxItem].((viewModels:CategoryHeaderViewModel)DataContext).Title, FallbackValue='', TargetNullValue=''}"
-                                               FontWeight="Bold" />
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </DataTemplate>
                         </Expander.HeaderTemplate>
@@ -89,7 +93,9 @@
                                  ItemTemplate="{StaticResource CategoryListItemDataTemplate}"
                                  ItemsPanel="{StaticResource CategoryListItemItemsPanelTemplate}"
                                  SelectionMode="Single"
-                                 SelectedItem="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectedCategory, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+                                 SelectedItem="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectedCategory, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                 ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                     </Expander>
                 </DataTemplate>
             </Setter>
@@ -151,76 +157,6 @@
                 <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
                             Value="{DynamicResource CategoryItemHoverColor}" />
-                </Style>
-            </Style>
-        </Style>
-
-        <Style Selector="^.wrapListBox">
-            <Setter Property="ItemsPanel">
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </Setter>
-
-            <Setter Property="ItemTemplate">
-                <DataTemplate DataType="viewModels:CategoryFileExtensionViewModel">
-                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                            Padding="10"
-                            Background="{DynamicResource PrimaryColor}">
-                        <Grid ColumnDefinitions="*, Auto">
-                            <TextBlock Grid.Column="0"
-                                       Text="{Binding Extension, Converter={StaticResource StringToUpperConverter}}"
-                                       VerticalAlignment="Center" />
-
-                            <Button Grid.Column="1"
-                                    Margin="10, 0, 0, 0"
-                                    Classes="button none"
-                                    Padding="0"
-                                    BorderThickness="0"
-                                    CornerRadius="0"
-                                    Command="{Binding $parent[Window].((vm:AddEditCategoryWindowViewModel)DataContext).DeleteFileExtensionCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
-                                    CommandParameter="{Binding}"
-                                    Background="{DynamicResource TransparentColor}">
-                                <PathIcon Width="16"
-                                          Height="16"
-                                          Data="{DynamicResource XMark}"
-                                          Foreground="{DynamicResource DangerGradientBrush}"
-                                          VerticalAlignment="Center" />
-                            </Button>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </Setter>
-
-            <Style Selector="^ ListBoxItem">
-                <Setter Property="Padding"
-                        Value="0" />
-                <Setter Property="Margin"
-                        Value="0, 10, 10, 0" />
-
-                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
-                </Style>
-
-                <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
-                </Style>
-
-                <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
-                </Style>
-
-                <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
-                </Style>
-
-                <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background"
-                            Value="{DynamicResource TransparentColor}" />
                 </Style>
             </Style>
         </Style>

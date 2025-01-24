@@ -145,7 +145,7 @@
                                           OnHoverBorderColor="{DynamicResource PrimaryColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource PrimaryColor}"
-                                          Text="{Binding SelectedCategory.CategorySaveDirectory, FallbackValue='', TargetNullValue=''}"
+                                          Text="{Binding SelectedCategory.CategorySaveDirectory.SaveDirectory, FallbackValue='', TargetNullValue=''}"
                                           IsReadOnly="True" />
 
                         <Button Name="BrowseButton"

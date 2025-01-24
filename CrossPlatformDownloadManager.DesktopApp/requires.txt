@@ -2,4 +2,4 @@ Start on system startup حتما باید در لینوکس تست بشه
 هر جا از DialogBoxManager استفاده کردی، متن پیام و عنوانش رو باید یه چیز معقولی بگذاری
 TODO ها رو انجام بده
 WindowChrome تمام پنجره ها رو درست کن
-باید یه سرویس برای Category هات درست کنی و بعد داخل MainWindowViewModel و متد AddNewLinkAsync باید ازش استفاده کنی
+برای آیکون ها از IconColor استف کن

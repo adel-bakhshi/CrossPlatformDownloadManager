@@ -591,22 +591,20 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Find file extension by extension
         CategoryFileExtensionViewModel? fileExtension;
         var customCategory = customCategories
-            .Find(c => c.FileExtensions.Any(fe => fe.Extension?.Equals(extension, StringComparison.CurrentCultureIgnoreCase) == true));
+            .Find(c => c.FileExtensions.Any(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase)));
 
         if (customCategory != null)
         {
             fileExtension = customCategory
                 .FileExtensions
-                .FirstOrDefault(fe => fe.Extension?.Equals(extension, StringComparison.CurrentCultureIgnoreCase) == true);
+                .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase));
         }
         else
         {
-            var fileExtensionInDb = _categoryService
+            fileExtension = _categoryService
                 .Categories
                 .SelectMany(c => c.FileExtensions)
-                .FirstOrDefault(fe => fe.Extension?.Equals(extension, StringComparison.OrdinalIgnoreCase) == true);
-
-            fileExtension = _mapper.Map<CategoryFileExtensionViewModel?>(fileExtensionInDb);
+                .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase));
         }
 
         // Find category by category file extension or choose general category

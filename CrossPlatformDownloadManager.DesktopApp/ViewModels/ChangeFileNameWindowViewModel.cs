@@ -166,8 +166,8 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         var originalFileExtension = Path.GetExtension(filePath);
         if (!fileExtension.Equals(originalFileExtension))
         {
-            var result = await DialogBoxManager.ShowWarningDialogAsync("Change file extension", 
-                "Are you sure you want to change the file extension?", 
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Change file extension",
+                "Are you sure you want to change the file extension?",
                 DialogButtons.YesNo);
 
             if (result == DialogResult.No)
@@ -182,7 +182,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
             .CategoryService
             .Categories
             .SelectMany(c => c.FileExtensions)
-            .FirstOrDefault(fe => fe.Extension?.Equals(fileExtension, StringComparison.OrdinalIgnoreCase) == true);
+            .FirstOrDefault(fe => fe.Extension.Equals(fileExtension, StringComparison.OrdinalIgnoreCase));
 
         if (categoryFileExtension?.Category != null && categoryFileExtension.Category.Id != downloadFile.CategoryId)
             downloadFile.CategoryId = categoryFileExtension.Category!.Id;

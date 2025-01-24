@@ -26,23 +26,23 @@ public interface ICategoryService
 
     Task LoadCategoryHeadersAsync();
 
-    Task<int> AddNewCategoryAsync(CategoryViewModel? viewModel);
+    Task<int> AddNewCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true);
 
-    Task UpdateCategoryAsync(CategoryViewModel? viewModel);
+    Task UpdateCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true);
 
-    Task DeleteCategoryAsync(CategoryViewModel? viewModel);
+    Task DeleteCategoryAsync(CategoryViewModel? viewModel, bool reloadData = true);
 
-    Task DeleteFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension);
+    Task DeleteFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true);
     
-    Task DeleteAllFileExtensionsAsync(CategoryViewModel? viewModel);
+    Task DeleteAllFileExtensionsAsync(CategoryViewModel? viewModel, bool reloadData = true);
 
-    Task AddFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension);
+    Task AddFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true);
     
-    Task AddFileExtensionsAsync(CategoryViewModel? viewModel, List<CategoryFileExtensionViewModel>? fileExtensions);
+    Task AddFileExtensionsAsync(CategoryViewModel? viewModel, List<CategoryFileExtensionViewModel>? fileExtensions, bool reloadData = true);
 
-    Task UpdateFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension);
+    Task UpdateFileExtensionAsync(CategoryViewModel? viewModel, CategoryFileExtensionViewModel? fileExtension, bool reloadData = true);
 
-    Task AddSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory);
+    Task AddSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory, bool reloadData = true);
 
-    Task UpdateSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory);
+    Task UpdateSaveDirectoryAsync(CategoryViewModel? viewModel, CategorySaveDirectoryViewModel? saveDirectory, bool reloadData = true);
 }

@@ -4,6 +4,7 @@ using CrossPlatformDownloadManager.Data.Services.Repository.Interfaces;
 using CrossPlatformDownloadManager.Data.Services.Repository.Services;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.Data.Services.UnitOfWork;
@@ -49,6 +50,24 @@ public class UnitOfWork : IUnitOfWork
             return;
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task CreateDatabaseAsync()
+    {
+        try
+        {
+            if (_dbContext == null)
+                return;
+
+            // await _dbContext.Database.EnsureCreatedAsync();
+            var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
+            if (migrations.Any())
+                await _dbContext.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while creating the database. Error message: {ErrorMessage}", ex.Message);
+        }
     }
 
     public async Task CreateCategoriesAsync()
@@ -99,22 +118,28 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    public async Task CreateDatabaseAsync()
+    public async Task<IDbContextTransaction?> BeginTransactionAsync()
     {
-        try
-        {
-            if (_dbContext == null)
-                return;
+        if (_dbContext == null)
+            return null;
 
-            // await _dbContext.Database.EnsureCreatedAsync();
-            var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
-            if (migrations.Any())
-                await _dbContext.Database.MigrateAsync();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while creating the database. Error message: {ErrorMessage}", ex.Message);
-        }
+        return await _dbContext.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        if (_dbContext == null)
+            return;
+        
+        await _dbContext.Database.CommitTransactionAsync();
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        if (_dbContext == null)
+            return;
+        
+        await _dbContext.Database.RollbackTransactionAsync();
     }
 
     public void Dispose()
@@ -176,7 +201,6 @@ public class UnitOfWork : IUnitOfWork
         await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
         await SaveAsync();
 
-        category.CategorySaveDirectoryId = saveDirectory.Id;
         await CategoryRepository.UpdateAsync(category);
         await SaveAsync();
     }

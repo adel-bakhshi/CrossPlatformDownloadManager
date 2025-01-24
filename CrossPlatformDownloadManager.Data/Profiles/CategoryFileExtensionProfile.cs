@@ -9,5 +9,8 @@ public class CategoryFileExtensionProfile : Profile
     public CategoryFileExtensionProfile()
     {
         CreateMap<CategoryFileExtension, CategoryFileExtensionViewModel>();
+        
+        CreateMap<CategoryFileExtensionViewModel, CategoryFileExtension>()
+            .ForMember(dest => dest.Category, opt => opt.Ignore());
     }
 }

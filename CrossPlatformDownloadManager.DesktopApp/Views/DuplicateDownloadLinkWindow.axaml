@@ -16,9 +16,6 @@
         MinHeight="460"
         MaxWidth="640"
         MaxHeight="460"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
 
     <!-- Main content -->

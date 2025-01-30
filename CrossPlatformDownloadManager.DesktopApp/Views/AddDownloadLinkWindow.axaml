@@ -6,6 +6,7 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
@@ -16,13 +17,14 @@
         Height="270"
         MinWidth="570"
         MinHeight="270"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="-1">
+        CanResize="False">
 
     <!-- Resources -->
     <Window.Resources>
         <ResourceDictionary>
+            <!-- IsGreaterThanZeroConverter -->
+            <converters:IsGreaterThanZeroConverter x:Key="IsGreaterThanZeroConverter" />
+
             <!-- Download later content -->
             <Flyout x:Key="DownloadLaterContentFlyout"
                     Placement="TopEdgeAlignedLeft"
@@ -39,7 +41,7 @@
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
                                            OnHoverToggleIconColor="{DynamicResource TextColor}"
                                            IconData="{DynamicResource Queue}"
-                                           IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                           IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
                                            MaxDropDownHeight="120"
@@ -131,7 +133,7 @@
                     <cc:CustomTextBox Name="UrlTextBox"
                                       IconData="{DynamicResource AddUrl}"
                                       IconSize="{DynamicResource SmallIconSize}"
-                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      IconColor="{DynamicResource IconColor}"
                                       Watermark="Url"
                                       WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
@@ -144,13 +146,14 @@
 
                     <!-- Category -->
                     <Grid ColumnDefinitions="*, Auto">
+                        <!-- Category ComboBox -->
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"
                                            Background="{DynamicResource SecondaryColor}"
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
                                            OnHoverToggleIconColor="{DynamicResource TextColor}"
                                            IconData="{DynamicResource Category}"
-                                           IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                           IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
                                            SelectedItem="{Binding SelectedCategory}"
@@ -163,6 +166,7 @@
                             </cc:CustomComboBox.ItemTemplate>
                         </cc:CustomComboBox>
 
+                        <!-- Add new category button -->
                         <Button Grid.Column="1"
                                 Classes="button success"
                                 Height="{Binding $parent[Grid].Bounds.Height}"
@@ -182,7 +186,7 @@
                     <!-- File Name -->
                     <cc:CustomTextBox IconData="{DynamicResource FileName}"
                                       IconSize="{DynamicResource SmallIconSize}"
-                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      IconColor="{DynamicResource IconColor}"
                                       Watermark="Name"
                                       WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
@@ -195,7 +199,7 @@
                     <!-- Description -->
                     <cc:CustomTextBox IconData="{DynamicResource Description}"
                                       IconSize="{DynamicResource SmallIconSize}"
-                                      IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                      IconColor="{DynamicResource IconColor}"
                                       Watermark="Description"
                                       WatermarkForeground="{DynamicResource TertiaryColor}"
                                       VerticalContentAlignment="Center"
@@ -216,6 +220,7 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top">
                     <Grid>
+                        <!-- File info -->
                         <StackPanel HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Orientation="Vertical"
@@ -224,14 +229,16 @@
                             <PathIcon Width="{DynamicResource LargeIconSize}"
                                       Height="{DynamicResource LargeIconSize}"
                                       Data="{Binding SelectedCategory.Icon, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
-                                      Foreground="{DynamicResource ProgressBarGradientBrush}"
+                                      Foreground="{DynamicResource IconColor}"
                                       HorizontalAlignment="Center" />
 
                             <TextBlock Text="{Binding DownloadFile.SizeAsString}"
                                        FontWeight="Bold"
-                                       HorizontalAlignment="Center" />
+                                       HorizontalAlignment="Center"
+                                       IsVisible="{Binding DownloadFile.Size, Converter={StaticResource IsGreaterThanZeroConverter}}" />
                         </StackPanel>
 
+                        <!-- Loading -->
                         <uc:LoadingControl IsVisible="{Binding IsLoadingUrl}"
                                            Width="64"
                                            Height="64"

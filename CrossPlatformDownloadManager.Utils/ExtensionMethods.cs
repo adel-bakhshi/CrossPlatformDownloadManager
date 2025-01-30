@@ -367,6 +367,15 @@ public static class ExtensionMethods
         return driveName;
     }
 
+    public static string? GetDomainFromUrl(this string? url)
+    {
+        if (!url.CheckUrlValidation())
+            return null;
+        
+        var uri = new Uri(url!);
+        return uri.Host;
+    }
+
     #region Helpers
 
     private static async Task CompressFolderAsync(string sourceFolder, ZipOutputStream zipStream, int folderOffset)

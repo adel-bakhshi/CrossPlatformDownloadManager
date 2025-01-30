@@ -81,8 +81,7 @@ public static class DialogBoxManager
     public static async Task<DialogResult> ShowErrorDialogAsync(Exception exception, bool useMainWindowAsOwner = false)
     {
         const string dialogHeader = "Error";
-        const string emailAddress = "adelbakhshi78@yahoo.com";
-        const string dialogMessage = $"An unexpected error has occurred. Please try again. If the problem persists, you may send the error details to {emailAddress}.";
+        const string dialogMessage = "We ran into an unexpected issue. Please give it another try. If the problem continues, feel free to report it to us so we can help.";
 
         return await ShowDangerDialogAsync(dialogHeader,
             dialogMessage,

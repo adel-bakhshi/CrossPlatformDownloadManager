@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -18,7 +16,7 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
 {
     #region Private Fields
-    
+
     private readonly string _url;
     private readonly string _saveLocation;
 
@@ -126,7 +124,10 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
 
                 default:
                 {
-                    await DialogBoxManager.ShowInfoDialogAsync("Select an option", "You haven't selected any options. Please make a selection and try again.", DialogButtons.Ok);
+                    await DialogBoxManager.ShowInfoDialogAsync("Select an option",
+                        "You haven't selected any options. Please make a selection and try again.",
+                        DialogButtons.Ok);
+
                     return;
                 }
             }

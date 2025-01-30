@@ -65,14 +65,14 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
         {
             if (DownloadFile.SaveLocation.IsNullOrEmpty() || DownloadFile.FileName.IsNullOrEmpty())
             {
-                await DialogBoxManager.ShowDangerDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowDangerDialogAsync("Open file", "File not found.", DialogButtons.Ok);
                 return;
             }
 
             var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found.", DialogButtons.Ok);
                 return;
             }
 
@@ -90,11 +90,11 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     {
         try
         {
-            if (DownloadFile.SaveLocation.IsNullOrEmpty() 
+            if (DownloadFile.SaveLocation.IsNullOrEmpty()
                 || !Directory.Exists(DownloadFile.SaveLocation!)
                 || DownloadFile.FileName.IsNullOrEmpty())
             {
-                await DialogBoxManager.ShowDangerDialogAsync("Open folder", "Folder not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowDangerDialogAsync("Open folder", "Folder not found.", DialogButtons.Ok);
                 return;
             }
 

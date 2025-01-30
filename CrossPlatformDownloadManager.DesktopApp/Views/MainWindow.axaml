@@ -818,7 +818,7 @@
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource Search}"
-                                  IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                  IconColor="{DynamicResource IconColor}"
                                   IconSize="{DynamicResource SmallIconSize}"
                                   Padding="12, 10"
                                   VerticalAlignment="Center"

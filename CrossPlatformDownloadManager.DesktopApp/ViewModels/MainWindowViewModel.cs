@@ -882,7 +882,7 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found.", DialogButtons.Ok);
                 return;
             }
 
@@ -915,7 +915,7 @@ public class MainWindowViewModel : ViewModelBase
 
             if (filePathList.Count == 0)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open folder", "No folders found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder", "No folders found.", DialogButtons.Ok);
                 return;
             }
 
@@ -944,7 +944,7 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Rename", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Rename", "File not found.", DialogButtons.Ok);
                 return;
             }
 
@@ -976,21 +976,21 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File not found.", DialogButtons.Ok);
                 return;
             }
 
             var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
             if (newSaveLocation.IsNullOrEmpty())
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found.", DialogButtons.Ok);
                 return;
             }
 
             var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
             if (File.Exists(newFilePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File already exists", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File already exists.", DialogButtons.Ok);
                 return;
             }
 
@@ -2175,7 +2175,7 @@ public class MainWindowViewModel : ViewModelBase
                     continue;
                 }
 
-                // Stop download queue if is already running
+                // Stop download queue if it is already running
                 if (downloadQueueInDb.IsRunning)
                 {
                     await AppService
@@ -2265,7 +2265,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 // Find category and save location for the file
                 var extension = Path.GetExtension(fileName);
-                var fileExtension = fileExtensions.Find(fe => fe.Extension?.Equals(extension) == true);
+                var fileExtension = fileExtensions.Find(fe => fe.Extension.Equals(extension));
 
                 // Check category and save location. If save location is null or empty, we must use general category for the file
                 if (fileExtension?.Category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
@@ -2298,7 +2298,7 @@ public class MainWindowViewModel : ViewModelBase
             if (category == null)
             {
                 var extension = Path.GetExtension(fileName);
-                var fileExtension = fileExtensions.Find(fe => fe.Extension?.Equals(extension) == true);
+                var fileExtension = fileExtensions.Find(fe => fe.Extension.Equals(extension));
 
                 if (fileExtension?.Category != null)
                 {

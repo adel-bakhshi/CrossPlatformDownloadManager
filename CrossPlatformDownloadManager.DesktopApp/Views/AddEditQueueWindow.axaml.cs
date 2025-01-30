@@ -1,4 +1,3 @@
-using Avalonia.Interactivity;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 

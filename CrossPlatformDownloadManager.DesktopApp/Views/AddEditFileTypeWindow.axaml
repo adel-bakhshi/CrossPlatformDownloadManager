@@ -17,10 +17,9 @@
         MinHeight="200"
         MaxWidth="450"
         MaxHeight="200"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
+    
+    <!-- Main content -->
     <Grid RowDefinitions="*, Auto"
           Margin="20">
         <StackPanel Grid.Row="0"

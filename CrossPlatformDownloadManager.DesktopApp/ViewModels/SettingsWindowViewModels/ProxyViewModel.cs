@@ -259,7 +259,10 @@ public class ProxyViewModel : ViewModelBase
         {
             if (ProxySettings.Type.IsNullOrEmpty())
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Attention", "Make sure you select a proxy type and try again. Selected proxy type is not defined.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Attention",
+                    "Make sure you select a proxy type and try again. Selected proxy type is not defined.",
+                    DialogButtons.Ok);
+
                 return;
             }
 

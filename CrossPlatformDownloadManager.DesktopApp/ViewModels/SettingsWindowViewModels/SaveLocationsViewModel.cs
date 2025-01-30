@@ -146,7 +146,10 @@ public class SaveLocationsViewModel : ViewModelBase
 
             if (category.IsDefault)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Delete category", "This is a default category and cannot be deleted.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Delete category",
+                    "This is a default category and cannot be deleted.",
+                    DialogButtons.Ok);
+
                 return;
             }
 

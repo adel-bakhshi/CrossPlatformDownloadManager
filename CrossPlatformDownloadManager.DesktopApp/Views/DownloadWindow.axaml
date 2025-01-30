@@ -15,9 +15,6 @@
         Height="600"
         MinWidth="800"
         MinHeight="600"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="-1"
         CanResize="False">
 
     <!-- Resources -->

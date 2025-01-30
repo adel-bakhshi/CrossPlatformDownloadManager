@@ -200,7 +200,7 @@
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource Queue}"
                                   IconSize="16"
-                                  IconColor="{DynamicResource ProgressBarGradientBrush}"
+                                  IconColor="{DynamicResource IconColor}"
                                   Watermark="Queue title"
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   HorizontalAlignment="Stretch"

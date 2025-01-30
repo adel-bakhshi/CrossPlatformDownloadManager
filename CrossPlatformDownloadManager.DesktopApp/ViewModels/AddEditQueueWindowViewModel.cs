@@ -122,7 +122,10 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             if (DownloadQueue.IsRunning)
             {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("Warning", "Queue is running. Do you want to stop it?", DialogButtons.YesNo);
+                var result = await DialogBoxManager.ShowWarningDialogAsync("Warning",
+                    "The queue is currently running and needs to be stopped to save your changes. Would you like to stop it now?",
+                    DialogButtons.YesNo);
+
                 if (result != DialogResult.Yes)
                     return;
 

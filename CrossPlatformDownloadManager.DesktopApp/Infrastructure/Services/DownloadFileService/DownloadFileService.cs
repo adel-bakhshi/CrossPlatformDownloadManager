@@ -607,16 +607,29 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase));
         }
 
-        // Find category by category file extension or choose general category
-        if (fileExtension != null)
-        {
-            result.Category = customCategory ?? fileExtension.Category;
-        }
-        else
+        // Find category by domain
+        var siteDomain = result.Url.GetDomainFromUrl();
+        if (!siteDomain.IsNullOrEmpty())
         {
             result.Category = _categoryService
                 .Categories
-                .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(c => c.AutoAddedLinksFromSitesList.Contains(siteDomain!));
+        }
+
+        // Find category by file extension
+        if (result.Category == null)
+        {
+            // Find category by category file extension or choose general category
+            if (fileExtension != null)
+            {
+                result.Category = customCategory ?? fileExtension.Category;
+            }
+            else
+            {
+                result.Category = _categoryService
+                    .Categories
+                    .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         // Find a download file with the same url and handle it
@@ -666,7 +679,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check url validation
         if (viewModel.Url.IsNullOrEmpty() || !viewModel.Url.CheckUrlValidation())
         {
-            await DialogBoxManager.ShowDangerDialogAsync("Url", "Please enter a valid url.", DialogButtons.Ok);
+            await DialogBoxManager.ShowDangerDialogAsync("Url", "Please provide a valid URL to continue.", DialogButtons.Ok);
             return false;
         }
 
@@ -678,21 +691,30 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check category
         if (category == null)
         {
-            await DialogBoxManager.ShowDangerDialogAsync("Category", "Please choose a category for your file.", DialogButtons.Ok);
+            await DialogBoxManager.ShowDangerDialogAsync("Category",
+                "The specified file category could not be located. Please verify the file URL and try again. If the issue persists, please contact our support team for further assistance.",
+                DialogButtons.Ok);
+
             return false;
         }
 
         // Check category save directory
         if (category.CategorySaveDirectory == null)
         {
-            await DialogBoxManager.ShowDangerDialogAsync("Save location", "Can't find save location for this category.", DialogButtons.Ok);
+            await DialogBoxManager.ShowDangerDialogAsync("Save location",
+                $"The save location for '{category.Title}' category could not be found. Please verify your settings and try again.",
+                DialogButtons.Ok);
+
             return false;
         }
 
         // Check file name
         if (viewModel.FileName.IsNullOrEmpty())
         {
-            await DialogBoxManager.ShowDangerDialogAsync("File name", "Please enter a file name.", DialogButtons.Ok);
+            await DialogBoxManager.ShowDangerDialogAsync("File name", 
+                "Please provide a name for the file, ensuring it includes the appropriate extension.", 
+                DialogButtons.Ok);
+            
             return false;
         }
 

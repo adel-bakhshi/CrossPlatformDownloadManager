@@ -114,6 +114,7 @@ public class DownloadWindowViewModel : ViewModelBase
         
         DownloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
         DownloadFile.DownloadResumed += DownloadFileOnDownloadResumed;
+        DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
 
         DownloadSpeedLimiterViewModel = new DownloadSpeedLimiterViewModel(appService);
         DownloadSpeedLimiterViewModel.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
@@ -157,6 +158,7 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         DownloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
         DownloadFile.DownloadResumed -= DownloadFileOnDownloadResumed;
+        DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
         
         DownloadStatusViewModel?.RemoveEventHandlers();
 
@@ -201,6 +203,26 @@ public class DownloadWindowViewModel : ViewModelBase
     private void DownloadFileOnDownloadResumed(object? sender, DownloadFileEventArgs e)
     {
         IsPaused = false;
+    }
+
+    private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
+    {
+        DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+        
+        if (TurnOffComputerAfterDownloadFinished)
+        {
+            return;
+        }
+
+        if (ExitProgramAfterDownloadFinished)
+        {
+            return;
+        }
+
+        if (OpenFolderAfterDownloadFinished)
+        {
+            
+        }
     }
 
     private async Task CancelDownloadAsync()

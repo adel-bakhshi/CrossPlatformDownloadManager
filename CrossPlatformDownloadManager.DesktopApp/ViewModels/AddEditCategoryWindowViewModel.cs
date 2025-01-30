@@ -194,7 +194,8 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         };
 
         FileExtensions.Add(newFileExtension);
-        this.RaisePropertyChanged(nameof(FileExtensions));
+        this.RaisePropertyChanged(nameof(IsFileTypesDataGridVisible));
+
         SelectedFileExtension = null;
         CurrentFileExtension = new CategoryFileExtensionViewModel();
     }
@@ -213,7 +214,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             }
 
             FileExtensions.Remove(fileExtension);
-            this.RaisePropertyChanged(nameof(FileExtensions));
+            this.RaisePropertyChanged(nameof(IsFileTypesDataGridVisible));
         }
         // If creating a new file extension, clear current file extension
         else
@@ -225,7 +226,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             if (fileExtension is { Id: <= 0 })
             {
                 FileExtensions.Remove(fileExtension);
-                this.RaisePropertyChanged(nameof(FileExtensions));
+                this.RaisePropertyChanged(nameof(IsFileTypesDataGridVisible));
             }
 
             CurrentFileExtension = new CategoryFileExtensionViewModel();
@@ -235,17 +236,19 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
     private void SaveSiteAddress()
     {
-        SelectedSiteAddress = SelectedSiteAddress?.Trim().Replace('\\', '/').Replace(" ", "");
-        if (SelectedSiteAddress.IsNullOrEmpty() || !SelectedSiteAddress.CheckUrlValidation())
+        var siteAddress = SelectedSiteAddress?.Trim().Replace('\\', '/').Replace(" ", "").GetDomainFromUrl();
+        if (siteAddress.IsNullOrEmpty())
             return;
 
-        if (SiteAddresses.Any(sa => sa.Equals(SelectedSiteAddress)))
+        if (SiteAddresses.Any(sa => sa.Equals(siteAddress!)))
         {
             SelectedSiteAddress = string.Empty;
             return;
         }
+
+        SiteAddresses.Add(siteAddress!);
+        this.RaisePropertyChanged(nameof(IsSiteAddressesDataGridVisible));
         
-        SiteAddresses.Add(SelectedSiteAddress!);
         SelectedSiteAddress = string.Empty;
     }
 
@@ -265,6 +268,8 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
 
         SiteAddresses.Remove(existingSiteAddress!);
+        this.RaisePropertyChanged(nameof(IsSiteAddressesDataGridVisible));
+        
         SelectedSiteAddress = string.Empty;
     }
 
@@ -314,7 +319,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             // Remove old file extensions
             if (IsEditMode && category.FileExtensions.Count > 0)
                 await AppService.CategoryService.DeleteAllFileExtensionsAsync(category);
-            
+
             // Convert file extensions to correct format
             var fileExtensions = FileExtensions
                 .Select(fe =>

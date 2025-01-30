@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
@@ -31,7 +32,7 @@ public class CategoryViewModel : PropertyChangedBase
         get => _title;
         set => SetField(ref _title, value);
     }
-    
+
     public string Icon
     {
         get => _icon;
@@ -47,8 +48,15 @@ public class CategoryViewModel : PropertyChangedBase
     public string? AutoAddLinkFromSites
     {
         get => _autoAddLinkFromSites;
-        set => SetField(ref _autoAddLinkFromSites, value);
+        set
+        {
+            var isChanged = SetField(ref _autoAddLinkFromSites, value);
+            if (isChanged)
+                OnPropertyChanged(nameof(AutoAddedLinksFromSitesList));
+        }
     }
+
+    public List<string> AutoAddedLinksFromSitesList => AutoAddLinkFromSites.IsNullOrEmpty() ? [] : AutoAddLinkFromSites.ConvertFromJson<List<string>?>() ?? [];
 
     public int? CategorySaveDirectoryId
     {

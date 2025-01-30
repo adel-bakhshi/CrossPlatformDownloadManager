@@ -162,7 +162,8 @@
         <!-- Use system notifications -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
-                Background="{DynamicResource SecondaryColor}">
+                Background="{DynamicResource SecondaryColor}"
+                IsVisible="False">
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Stretch"

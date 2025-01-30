@@ -10,7 +10,7 @@
         d:DesignHeight="600"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DownloadWindow"
         x:DataType="vm:DownloadWindowViewModel"
-        Title="CDM - Download"
+        Title="{Binding Title}"
         Width="800"
         Height="600"
         MinWidth="800"
@@ -19,6 +19,7 @@
 
     <!-- Resources -->
     <Window.Resources>
+        <!-- SelectedTabItemToViewVisibilityConverter -->
         <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
     </Window.Resources>
 

@@ -149,7 +149,7 @@
                                         VerticalAlignment="Center"
                                         Command="{Binding DeleteProxyCommand}"
                                         IsEnabled="{Binding SelectedAvailableProxy, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                    <PathIcon Data="{DynamicResource XMark}"
+                                    <PathIcon Data="{DynamicResource XMarkSvgIcon}"
                                               Foreground="{DynamicResource TextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
@@ -173,11 +173,11 @@
                                         <PathIcon.Styles>
                                             <Style Selector="PathIcon">
                                                 <Setter Property="Data"
-                                                        Value="{DynamicResource Plus}" />
+                                                        Value="{DynamicResource PlusSvgIcon}" />
 
                                                 <Style Selector="^.editingProxy">
                                                     <Setter Property="Data"
-                                                            Value="{DynamicResource Finished}" />
+                                                            Value="{DynamicResource CheckSvgIcon}" />
                                                 </Style>
                                             </Style>
                                         </PathIcon.Styles>
@@ -190,7 +190,7 @@
                                         Width="{Binding $self.Bounds.Height}"
                                         VerticalAlignment="Center"
                                         Command="{Binding ClearProxyCommand}">
-                                    <PathIcon Data="{DynamicResource Eraser}"
+                                    <PathIcon Data="{DynamicResource EraserSvgIcon}"
                                               Foreground="{DynamicResource TextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
@@ -208,7 +208,7 @@
                                               Watermark="Host"
                                               WatermarkForeground="{DynamicResource TertiaryColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                              IconData="{DynamicResource Server}"
+                                              IconData="{DynamicResource ServerSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
                                               IconSize="{DynamicResource SmallIconSize}"
                                               Padding="12, 10"
@@ -226,7 +226,7 @@
                                               Watermark="Port"
                                               WatermarkForeground="{DynamicResource TertiaryColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                              IconData="{DynamicResource Ethernet}"
+                                              IconData="{DynamicResource EthernetSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
                                               IconSize="{DynamicResource SmallIconSize}"
                                               Padding="12, 10"
@@ -254,7 +254,7 @@
                                               Watermark="Username"
                                               WatermarkForeground="{DynamicResource TertiaryColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                              IconData="{DynamicResource User}"
+                                              IconData="{DynamicResource UserSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
                                               IconSize="{DynamicResource SmallIconSize}"
                                               Padding="12, 10"
@@ -272,7 +272,7 @@
                                               Watermark="Password"
                                               WatermarkForeground="{DynamicResource TertiaryColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                              IconData="{DynamicResource UnlockKeyhole}"
+                                              IconData="{DynamicResource UnlockKeyholeSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
                                               IconSize="{DynamicResource SmallIconSize}"
                                               Padding="12, 10"
@@ -298,7 +298,7 @@
                                           Watermark="Proxy name"
                                           WatermarkForeground="{DynamicResource TertiaryColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                          IconData="{DynamicResource FileName}"
+                                          IconData="{DynamicResource ICursorSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"
                                           IconSize="{DynamicResource SmallIconSize}"
                                           Padding="12, 10"

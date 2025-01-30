@@ -169,7 +169,7 @@
                                       Height="{Binding $self.Width}"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
-                                      Data="{DynamicResource ChevronDown}" />
+                                      Data="{DynamicResource ChevronDownSvgIcon}" />
                         </ToggleButton>
 
                         <Popup Grid.Column="0"

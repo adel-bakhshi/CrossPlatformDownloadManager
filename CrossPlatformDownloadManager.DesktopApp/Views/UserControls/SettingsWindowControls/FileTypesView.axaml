@@ -36,7 +36,7 @@
                                   Watermark="Search file type"
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                  IconData="{DynamicResource Search}"
+                                  IconData="{DynamicResource MagnifyingGlassSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
                                   IconSize="{DynamicResource SmallIconSize}"
                                   Padding="12, 10"
@@ -59,7 +59,7 @@
                             VerticalAlignment="Center"
                             Command="{Binding DeleteFileTypeCommand}"
                             IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <PathIcon Data="{DynamicResource XMark}"
+                        <PathIcon Data="{DynamicResource XMarkSvgIcon}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"
@@ -74,7 +74,7 @@
                             Command="{Binding EditFileTypeCommand}"
                             CommandParameter="{Binding $parent[Window]}"
                             IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <PathIcon Data="{DynamicResource Pen}"
+                        <PathIcon Data="{DynamicResource PenSvgIcon}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"
@@ -88,7 +88,7 @@
                             VerticalAlignment="Center"
                             Command="{Binding AddNewFileTypeCommand}"
                             CommandParameter="{Binding $parent[Window]}">
-                        <PathIcon Data="{DynamicResource Plus}"
+                        <PathIcon Data="{DynamicResource PlusSvgIcon}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"

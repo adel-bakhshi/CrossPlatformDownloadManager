@@ -51,7 +51,7 @@
                                             Padding="12, 10"
                                             CornerRadius="{DynamicResource DefaultCornerRadius}"
                                             Background="{DynamicResource SecondaryColor}"
-                                            IconData="{DynamicResource Ban}"
+                                            IconData="{DynamicResource BanSvgIcon}"
                                             IconColor="{DynamicResource IconColor}"
                                             IconSize="{DynamicResource SmallIconSize}"
                                             BorderThickness="0"

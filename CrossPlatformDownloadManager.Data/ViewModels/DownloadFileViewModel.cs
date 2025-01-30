@@ -184,10 +184,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 return;
 
             OnPropertyChanged(nameof(DownloadProgressAsString));
+            OnPropertyChanged(nameof(CeilingDownloadProgressAsString));
         }
     }
 
     public string DownloadProgressAsString => DownloadProgress == null ? "00.00%" : $"{DownloadProgress ?? 0:00.00}%";
+    public string CeilingDownloadProgressAsString => DownloadProgress == null ? "00.00%" : $"{Math.Ceiling(DownloadProgress ?? 0):00}%";
 
     public string? DownloadedSizeAsString
     {

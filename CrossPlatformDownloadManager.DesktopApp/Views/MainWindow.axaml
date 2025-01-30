@@ -218,13 +218,13 @@
                                                 <PathIcon.Styles>
                                                     <Style Selector="PathIcon">
                                                         <Setter Property="Data"
-                                                                Value="{DynamicResource StartQueueIcon}" />
+                                                                Value="{DynamicResource PlaySvgIcon}" />
                                                         <Setter Property="Foreground"
                                                                 Value="{DynamicResource SuccessGradientBrush}" />
 
                                                         <Style Selector="^.isRunning">
                                                             <Setter Property="Data"
-                                                                    Value="{DynamicResource StopQueueIcon}" />
+                                                                    Value="{DynamicResource PauseSvgIcon}" />
                                                             <Setter Property="Foreground"
                                                                     Value="{DynamicResource DangerGradientBrush}" />
                                                         </Style>
@@ -240,7 +240,7 @@
                                                 Tag="{Binding Id}">
                                             <PathIcon Width="16"
                                                       Height="16"
-                                                      Data="{DynamicResource ShowQueueDetailsIcon}"
+                                                      Data="{DynamicResource EllipsisVerticalSvgIcon}"
                                                       Foreground="{DynamicResource InfoGradientBrush}" />
                                         </Button>
                                     </StackPanel>
@@ -342,7 +342,7 @@
                                         CommandParameter="{Binding}">
                                     <PathIcon Width="16"
                                               Height="16"
-                                              Data="{DynamicResource StopQueueIcon}"
+                                              Data="{DynamicResource PauseSvgIcon}"
                                               Foreground="{DynamicResource DangerGradientBrush}" />
                                 </Button>
                             </Grid>
@@ -510,7 +510,7 @@
                                    VerticalAlignment="Center" />
 
                         <PathIcon Grid.Column="1"
-                                  Data="{DynamicResource ChevronDown}"
+                                  Data="{DynamicResource ChevronDownSvgIcon}"
                                   Foreground="{DynamicResource TextColor}"
                                   Width="8"
                                   Height="8"
@@ -817,7 +817,7 @@
                                   Watermark="Search in the list"
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                  IconData="{DynamicResource Search}"
+                                  IconData="{DynamicResource MagnifyingGlassSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
                                   IconSize="{DynamicResource SmallIconSize}"
                                   Padding="12, 10"
@@ -884,7 +884,7 @@
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
                                 <uc:ActionButton Text="Add Url"
-                                                 IconData="{DynamicResource AddUrl}"
+                                                 IconData="{DynamicResource LinkSvgIcon}"
                                                  IconColor="{DynamicResource SuccessGradientBrush}"
                                                  Command="{Binding AddNewLinkCommand}"
                                                  CommandParameter="{Binding $parent[Window]}" />
@@ -898,19 +898,19 @@
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
                                 <uc:ActionButton Text="Resume"
-                                                 IconData="{DynamicResource Resume}"
+                                                 IconData="{DynamicResource BoltSvgIcon}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
                                                  Command="{Binding ResumeDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop"
-                                                 IconData="{DynamicResource Stop}"
+                                                 IconData="{DynamicResource StopSvgIcon}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
                                                  Command="{Binding StopDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop All"
-                                                 IconData="{DynamicResource StopAll}"
+                                                 IconData="{DynamicResource HandSvgIcon}"
                                                  IconColor="{DynamicResource WarningGradientBrush}"
                                                  Command="{Binding StopAllDownloadFilesCommand}" />
                             </StackPanel>
@@ -923,13 +923,13 @@
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
                                 <uc:ActionButton Text="Delete"
-                                                 IconData="{DynamicResource Delete}"
+                                                 IconData="{DynamicResource TrashSvgIcon}"
                                                  IconColor="{DynamicResource DangerGradientBrush}"
                                                  Command="{Binding DeleteDownloadFilesCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Delete Completed"
-                                                 IconData="{DynamicResource DeleteCompleted}"
+                                                 IconData="{DynamicResource FolderMinusSvgIcon}"
                                                  IconColor="{DynamicResource DangerGradientBrush}"
                                                  Command="{Binding DeleteCompletedDownloadFilesCommand}" />
                             </StackPanel>
@@ -942,18 +942,18 @@
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
                                 <uc:ActionButton Text="Settings"
-                                                 IconData="{DynamicResource Settings}"
+                                                 IconData="{DynamicResource GearSvgIcon}"
                                                  IconColor="{DynamicResource InfoGradientBrush}"
                                                  Command="{Binding OpenSettingsWindowCommand}"
                                                  CommandParameter="{Binding $parent[Window]}" />
 
                                 <uc:ActionButton Text="Queues"
-                                                 IconData="{DynamicResource Queues}"
+                                                 IconData="{DynamicResource ListOlSvgIcon}"
                                                  IconColor="{DynamicResource InfoGradientBrush}"
                                                  Flyout="{StaticResource QueuesListFlyout}" />
 
                                 <uc:ActionButton Text="Share"
-                                                 IconData="{DynamicResource Share}"
+                                                 IconData="{DynamicResource ShareSvgIcon}"
                                                  IconColor="{DynamicResource InfoGradientBrush}" />
                             </StackPanel>
                         </StackPanel>
@@ -1202,7 +1202,7 @@
                         </Button.Styles>
 
                         <!-- Button content -->
-                        <PathIcon Data="{DynamicResource ActiveQueue}"
+                        <PathIcon Data="{DynamicResource ClockRotateLeftSvgIcon}"
                                   Foreground="{DynamicResource TertiaryColor}"
                                   Width="16"
                                   Height="16" />
@@ -1212,7 +1212,7 @@
                     <StackPanel Orientation="Horizontal"
                                 Spacing="5"
                                 VerticalAlignment="Center">
-                        <PathIcon Data="{DynamicResource Size}"
+                        <PathIcon Data="{DynamicResource CubeSvgIcon}"
                                   Foreground="{DynamicResource TertiaryColor}"
                                   Width="16"
                                   Height="16" />
@@ -1225,7 +1225,7 @@
                 <StackPanel Orientation="Horizontal"
                             Spacing="5"
                             VerticalAlignment="Center">
-                    <PathIcon Data="{DynamicResource Download}"
+                    <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
                               Foreground="{DynamicResource SuccessGradientBrush}"
                               Width="16"
                               Height="16"

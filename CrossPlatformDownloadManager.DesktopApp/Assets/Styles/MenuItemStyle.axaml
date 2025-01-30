@@ -287,7 +287,7 @@
                               Grid.Column="4"
                               Margin="10, 0, 15,0"
                               VerticalAlignment="Center"
-                              Data="{DynamicResource ChevronDown}"
+                              Data="{DynamicResource ChevronDownSvgIcon}"
                               Fill="{DynamicResource ThemeForegroundBrush}"
                               RenderTransform="rotate(-90deg)"
                               Stretch="Uniform"
@@ -361,7 +361,7 @@
                 <Template>
                     <Path VerticalAlignment="Center"
                           HorizontalAlignment="Center"
-                          Data="{DynamicResource Finished}"
+                          Data="{DynamicResource CheckSvgIcon}"
                           Width="10"
                           Height="10"
                           Stretch="Uniform"

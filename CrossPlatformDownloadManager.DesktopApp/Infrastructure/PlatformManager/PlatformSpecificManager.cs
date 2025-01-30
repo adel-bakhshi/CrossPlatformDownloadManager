@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.FileExplorerManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.PowerManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
 using Serilog;
 
@@ -14,6 +15,7 @@ public static class PlatformSpecificManager
 
     private static IStartupManager? _startupManager;
     private static IFileExplorerManager? _fileExplorerManager;
+    private static IPowerManager? _powerManager;
 
     #endregion
 
@@ -183,5 +185,113 @@ public static class PlatformSpecificManager
             _fileExplorerManager = fileExplorerManager;
 
         fileExplorerManager.OpenFile(filePath);
+    }
+
+    public static void Shutdown()
+    {
+        IPowerManager powerManager;
+        if (OperatingSystem.IsWindows())
+        {
+            powerManager = _powerManager is WindowsPowerManager ? _powerManager : new WindowsPowerManager();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            powerManager = _powerManager is MacPowerManager ? _powerManager : new MacPowerManager();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            powerManager = _powerManager is LinuxPowerManager ? _powerManager : new LinuxPowerManager();
+        }
+        else
+        {
+            Log.Error("Unsupported operating system.");
+            return;
+        }
+
+        if (_powerManager == null || _powerManager.GetType() != powerManager.GetType())
+            _powerManager = powerManager;
+
+        powerManager.Shutdown();
+    }
+
+    public static void Sleep()
+    {
+        IPowerManager powerManager;
+        if (OperatingSystem.IsWindows())
+        {
+            powerManager = _powerManager is WindowsPowerManager ? _powerManager : new WindowsPowerManager();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            powerManager = _powerManager is MacPowerManager ? _powerManager : new MacPowerManager();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            powerManager = _powerManager is LinuxPowerManager ? _powerManager : new LinuxPowerManager();
+        }
+        else
+        {
+            Log.Error("Unsupported operating system.");
+            return;
+        }
+
+        if (_powerManager == null || _powerManager.GetType() != powerManager.GetType())
+            _powerManager = powerManager;
+
+        powerManager.Sleep();
+    }
+
+    public static void Hibernate()
+    {
+        IPowerManager powerManager;
+        if (OperatingSystem.IsWindows())
+        {
+            powerManager = _powerManager is WindowsPowerManager ? _powerManager : new WindowsPowerManager();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            powerManager = _powerManager is MacPowerManager ? _powerManager : new MacPowerManager();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            powerManager = _powerManager is LinuxPowerManager ? _powerManager : new LinuxPowerManager();
+        }
+        else
+        {
+            Log.Error("Unsupported operating system.");
+            return;
+        }
+
+        if (_powerManager == null || _powerManager.GetType() != powerManager.GetType())
+            _powerManager = powerManager;
+
+        powerManager.Hibernate();
+    }
+
+    public static bool IsHibernateEnabled()
+    {
+        IPowerManager powerManager;
+        if (OperatingSystem.IsWindows())
+        {
+            powerManager = _powerManager is WindowsPowerManager ? _powerManager : new WindowsPowerManager();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            powerManager = _powerManager is MacPowerManager ? _powerManager : new MacPowerManager();
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            powerManager = _powerManager is LinuxPowerManager ? _powerManager : new LinuxPowerManager();
+        }
+        else
+        {
+            Log.Error("Unsupported operating system.");
+            return false;
+        }
+
+        if (_powerManager == null || _powerManager.GetType() != powerManager.GetType())
+            _powerManager = powerManager;
+
+        return powerManager.IsHibernateEnabled();
     }
 }

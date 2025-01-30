@@ -24,7 +24,7 @@ public static class Constants
 
     // Turn off computer modes
     public static readonly List<string> TurnOffComputerModes = Enum
-        .GetNames(typeof(TurnOffComputerMode))
+        .GetNames<TurnOffComputerMode>()
         .Select(n =>
         {
             if (n.Equals(Enum.GetName(TurnOffComputerMode.Shutdown)))
@@ -63,7 +63,7 @@ public static class Constants
     ];
 
     public static readonly List<string> ProxyTypes = Enum
-        .GetNames(typeof(ProxyType))
+        .GetNames<ProxyType>()
         .Select(pt =>
         {
             if (pt.Equals(Enum.GetName(ProxyType.Socks5)))

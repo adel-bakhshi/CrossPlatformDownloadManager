@@ -40,7 +40,7 @@
                                     VerticalAlignment="Center">
                                 <PathIcon HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
-                                          Data="{DynamicResource ChevronDown}"
+                                          Data="{DynamicResource ChevronDownSvgIcon}"
                                           Foreground="{TemplateBinding Foreground}"
                                           Width="16"
                                           Height="16">

@@ -54,7 +54,7 @@
                         Spacing="5"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
-                <PathIcon Data="{DynamicResource Download}"
+                <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
                           Foreground="{DynamicResource TextColor}"
                           Width="16"
                           Height="16"
@@ -73,7 +73,7 @@
                         Command="{Binding ExitProgramCommand}">
                     <PathIcon Width="16"
                               Height="16"
-                              Data="{DynamicResource CircleXMark}"
+                              Data="{DynamicResource CircleXMarkSvgIcon}"
                               Foreground="{DynamicResource TextColor}" />
                 </Button>
             </StackPanel>

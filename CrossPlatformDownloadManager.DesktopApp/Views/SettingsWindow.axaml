@@ -10,7 +10,7 @@
         d:DesignHeight="450"
         x:Class="CrossPlatformDownloadManager.DesktopApp.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Title="CDM - Add New Category"
+        Title="CDM - Settings"
         Width="800"
         Height="600"
         MinWidth="800"

@@ -40,7 +40,7 @@
                                            Background="{DynamicResource SecondaryColor}"
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
                                            OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                           IconData="{DynamicResource Queue}"
+                                           IconData="{DynamicResource ListOlSvgIcon}"
                                            IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
@@ -62,7 +62,7 @@
                                 Margin="10, 0, 0, 0"
                                 Command="{Binding AddNewQueueCommand}"
                                 CommandParameter="{Binding $parent[Window]}">
-                            <PathIcon Data="{DynamicResource Plus}"
+                            <PathIcon Data="{DynamicResource PlusSvgIcon}"
                                       Foreground="{DynamicResource TextColor}"
                                       Width="{DynamicResource SmallIconSize}"
                                       Height="{DynamicResource SmallIconSize}"
@@ -131,7 +131,7 @@
                             VerticalAlignment="Top">
                     <!-- Url -->
                     <cc:CustomTextBox Name="UrlTextBox"
-                                      IconData="{DynamicResource AddUrl}"
+                                      IconData="{DynamicResource LinkSvgIcon}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Url"
@@ -152,7 +152,7 @@
                                            Background="{DynamicResource SecondaryColor}"
                                            ToggleIconColor="{DynamicResource TertiaryColor}"
                                            OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                           IconData="{DynamicResource Category}"
+                                           IconData="{DynamicResource LayerGroupSvgIcon}"
                                            IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
                                            BorderThickness="0"
@@ -174,7 +174,7 @@
                                 Margin="10, 0, 0, 0"
                                 Command="{Binding AddNewCategoryCommand}"
                                 CommandParameter="{Binding $parent[Window]}">
-                            <PathIcon Data="{DynamicResource Plus}"
+                            <PathIcon Data="{DynamicResource PlusSvgIcon}"
                                       Foreground="{DynamicResource TextColor}"
                                       Width="{DynamicResource SmallIconSize}"
                                       Height="{DynamicResource SmallIconSize}"
@@ -184,7 +184,7 @@
                     </Grid>
 
                     <!-- File Name -->
-                    <cc:CustomTextBox IconData="{DynamicResource FileName}"
+                    <cc:CustomTextBox IconData="{DynamicResource ICursorSvgIcon}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Name"
@@ -197,7 +197,7 @@
                                       Text="{Binding DownloadFile.FileName}" />
 
                     <!-- Description -->
-                    <cc:CustomTextBox IconData="{DynamicResource Description}"
+                    <cc:CustomTextBox IconData="{DynamicResource QuoteLeftSvgIcon}"
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Description"

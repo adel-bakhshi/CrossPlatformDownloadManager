@@ -1,14 +1,18 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.DownloadWindowViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using ReactiveUI;
@@ -19,9 +23,14 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class DownloadWindowViewModel : ViewModelBase
 {
     #region Private Fields
-
+    
     private bool _detailsIsVisible = true;
     private double _detailsHeight;
+    
+    private bool _openFolderAfterDownloadFinished;
+    private bool _exitProgramAfterDownloadFinished;
+    private bool _turnOffComputerAfterDownloadFinished;
+    private string? _turnOffComputerMode;
 
     private ObservableCollection<string> _tabItems = [];
     private string? _selectedTabItem;
@@ -81,7 +90,11 @@ public class DownloadWindowViewModel : ViewModelBase
     public bool IsPaused
     {
         get => _isPaused;
-        set => this.RaiseAndSetIfChanged(ref _isPaused, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isPaused, value);
+            this.RaisePropertyChanged(nameof(Title));
+        }
     }
 
     public string? HideDetailsButtonContent
@@ -90,10 +103,7 @@ public class DownloadWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _hideDetailsButtonContent, value);
     }
 
-    public bool OpenFolderAfterDownloadFinished { get; set; }
-    public bool ExitProgramAfterDownloadFinished { get; set; }
-    public bool TurnOffComputerAfterDownloadFinished { get; set; }
-    public string? TurnOffComputerMode { get; set; }
+    public string Title => $"CDM - {(IsPaused ? "Paused" : "Downloading")} {DownloadFile.CeilingDownloadProgressAsString}";
 
     #endregion
 
@@ -207,22 +217,69 @@ public class DownloadWindowViewModel : ViewModelBase
 
     private void DownloadFileOnDownloadFinished(object? sender, DownloadFileEventArgs e)
     {
+        // Remove event handlers
         DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
         
-        if (TurnOffComputerAfterDownloadFinished)
+        // Check if the user wants to turn off the computer
+        if (_turnOffComputerAfterDownloadFinished)
         {
-            return;
-        }
+            if (_turnOffComputerMode.IsNullOrEmpty())
+                return;
 
-        if (ExitProgramAfterDownloadFinished)
-        {
-            return;
-        }
-
-        if (OpenFolderAfterDownloadFinished)
-        {
+            Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                try
+                {
+                    // Show the power off window
+                    var vm = new PowerOffWindowViewModel(AppService, _turnOffComputerMode!, TimeSpan.FromSeconds(30));
+                    var window = new PowerOffWindow { DataContext = vm };
+                    window.Show();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "An error occured while trying to show the power off window. Error message: {ErrorMessage}", ex.Message);
+                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                }
+            });
             
+            return;
         }
+
+        // Check if the user wants to exit the program
+        if (_exitProgramAfterDownloadFinished)
+        {
+            Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                try
+                {
+                    // Exit the program
+                    App.Desktop?.Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                }
+            });
+            
+            return;
+        }
+
+        // Check if the user wants to open the folder
+        if (!_openFolderAfterDownloadFinished)
+            return;
+        
+        // Make sure file name and save location are not null
+        if (DownloadFile.FileName.IsNullOrEmpty() || DownloadFile.SaveLocation.IsNullOrEmpty())
+            return;
+            
+        // Make sure the file exists
+        var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
+        if (!File.Exists(filePath))
+            return;
+            
+        // Open the folder and select the file
+        PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
     }
 
     private async Task CancelDownloadAsync()
@@ -272,17 +329,24 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         try
         {
+            long speed;
             if (!e.Enabled)
             {
+                var globalSpeedLimit = AppService.SettingsService.Settings.LimitSpeed ?? 0;
+                var globalSpeedLimitUnit = AppService.SettingsService.Settings.LimitUnit;
+                speed = (long)(globalSpeedLimitUnit.IsNullOrEmpty()
+                    ? 0
+                    : globalSpeedLimit * (globalSpeedLimitUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte));
+                
                 AppService
                     .DownloadFileService
-                    .LimitDownloadFileSpeed(DownloadFile, 0);
+                    .LimitDownloadFileSpeed(DownloadFile, speed);
 
                 return;
             }
 
             var unit = e.Unit.IsNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte;
-            var speed = (long)(e.Speed == null ? 0 : e.Speed.Value * unit);
+            speed = (long)(e.Speed == null ? 0 : e.Speed.Value * unit);
 
             AppService
                 .DownloadFileService
@@ -297,10 +361,10 @@ public class DownloadWindowViewModel : ViewModelBase
 
     private void DownloadOptionsViewModelOnOptionsChanged(object? sender, DownloadOptionsChangedEventArgs e)
     {
-        OpenFolderAfterDownloadFinished = e.OpenFolderAfterDownloadFinished;
-        ExitProgramAfterDownloadFinished = e.ExitProgramAfterDownloadFinished;
-        TurnOffComputerAfterDownloadFinished = e.TurnOffComputerAfterDownloadFinished;
-        TurnOffComputerMode = e.TurnOffComputerMode;
+        _openFolderAfterDownloadFinished = e.OpenFolderAfterDownloadFinished;
+        _exitProgramAfterDownloadFinished = e.ExitProgramAfterDownloadFinished;
+        _turnOffComputerAfterDownloadFinished = e.TurnOffComputerAfterDownloadFinished;
+        _turnOffComputerMode = e.TurnOffComputerMode;
     }
 
     #endregion

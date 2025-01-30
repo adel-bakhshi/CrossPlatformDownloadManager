@@ -231,7 +231,7 @@
                                                   Margin="0, 0, 4, 0"
                                                   Width="16"
                                                   Height="16"
-                                                  Data="{DynamicResource ActiveQueue}"
+                                                  Data="{DynamicResource ClockRotateLeftSvgIcon}"
                                                   Foreground="{DynamicResource TextColor}" />
 
                                         <!-- Queue title -->
@@ -252,13 +252,13 @@
                                                 <PathIcon.Styles>
                                                     <Style Selector="PathIcon">
                                                         <Setter Property="Data"
-                                                                Value="{DynamicResource StartQueueIcon}" />
+                                                                Value="{DynamicResource PlaySvgIcon}" />
                                                         <Setter Property="Foreground"
                                                                 Value="{DynamicResource SuccessGradientBrush}" />
 
                                                         <Style Selector="^.isRunning">
                                                             <Setter Property="Data"
-                                                                    Value="{DynamicResource StopQueueIcon}" />
+                                                                    Value="{DynamicResource PauseSvgIcon}" />
                                                             <Setter Property="Foreground"
                                                                     Value="{DynamicResource DangerGradientBrush}" />
                                                         </Style>
@@ -290,7 +290,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource Plus}"
+                                  Data="{DynamicResource PlusSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->
@@ -312,7 +312,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource Plus}"
+                                  Data="{DynamicResource PlusSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->
@@ -340,7 +340,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource Settings}"
+                                  Data="{DynamicResource GearSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->
@@ -453,7 +453,7 @@
                                                   Margin="0, 0, 4, 0"
                                                   Width="16"
                                                   Height="16"
-                                                  Data="{DynamicResource ArrowsLeftRightToLine}"
+                                                  Data="{DynamicResource ArrowsLeftRightToLineSvgIcon}"
                                                   Foreground="{Binding $parent[ListBoxItem].Foreground}" />
 
                                         <!-- Proxy title -->
@@ -486,7 +486,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource CircleQuestion}"
+                                  Data="{DynamicResource CircleQuestionSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->
@@ -508,7 +508,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource CircleInfo}"
+                                  Data="{DynamicResource CircleInfoSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->
@@ -536,7 +536,7 @@
                                   Margin="0, 0, 4, 0"
                                   Width="16"
                                   Height="16"
-                                  Data="{DynamicResource CircleXMark}"
+                                  Data="{DynamicResource CircleXMarkSvgIcon}"
                                   Foreground="{DynamicResource TextColor}" />
 
                         <!-- Title -->

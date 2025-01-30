@@ -27,7 +27,7 @@
                           Watermark="Download address"
                           WatermarkForeground="{DynamicResource TertiaryColor}"
                           CornerRadius="{DynamicResource DefaultCornerRadius}"
-                          IconData="{DynamicResource AddUrl}"
+                          IconData="{DynamicResource LinkSvgIcon}"
                           IconColor="{DynamicResource IconColor}"
                           IconSize="{DynamicResource SmallIconSize}"
                           Padding="12, 10"

@@ -314,7 +314,7 @@
                         <Button Classes="helperButton"
                                 IsVisible="{Binding InfoMessageIsVisible}"
                                 ToolTip.Tip="{Binding InfoMessage, TargetNullValue='', FallbackValue=''}">
-                            <PathIcon Data="{DynamicResource Info}"
+                            <PathIcon Data="{DynamicResource InfoSvgIcon}"
                                       Foreground="{DynamicResource IconColor}"
                                       Width="16"
                                       Height="16" />
@@ -325,7 +325,7 @@
                                 Command="{Binding CopyToClipboardCommand}"
                                 CommandParameter="{Binding $parent[Window]}"
                                 IsVisible="{Binding CopyToClipboardButtonIsVisible}">
-                            <PathIcon Data="{DynamicResource Clipboard}"
+                            <PathIcon Data="{DynamicResource ClipboardSvgIcon}"
                                       Foreground="{DynamicResource IconColor}"
                                       Width="16"
                                       Height="16" />

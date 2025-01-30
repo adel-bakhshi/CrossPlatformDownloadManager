@@ -50,7 +50,7 @@
                         VerticalAlignment="Center"
                         Command="{Binding ChangePriorityToHigherLevelCommand}"
                         CommandParameter="{Binding #FilesDataGrid}">
-                    <PathIcon Data="{DynamicResource LongArrowUp}"
+                    <PathIcon Data="{DynamicResource ArrowUpLongSvgIcon}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"
@@ -65,7 +65,7 @@
                         VerticalAlignment="Center"
                         Command="{Binding ChangePriorityToLowerLevelCommand}"
                         CommandParameter="{Binding #FilesDataGrid}">
-                    <PathIcon Data="{DynamicResource LongArrowDown}"
+                    <PathIcon Data="{DynamicResource ArrowDownLongSvgIcon}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"
@@ -80,7 +80,7 @@
                         VerticalAlignment="Center"
                         Command="{Binding DeleteItemFromDataGridCommand}"
                         CommandParameter="{Binding #FilesDataGrid}">
-                    <PathIcon Data="{DynamicResource XMark}"
+                    <PathIcon Data="{DynamicResource XMarkSvgIcon}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"
@@ -95,7 +95,7 @@
                         VerticalAlignment="Center"
                         Command="{Binding AddItemToDataGridCommand}"
                         CommandParameter="{Binding $parent[Window]}">
-                    <PathIcon Data="{DynamicResource Plus}"
+                    <PathIcon Data="{DynamicResource PlusSvgIcon}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"

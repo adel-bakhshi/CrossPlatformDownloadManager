@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.PowerOffWindow"
+        x:DataType="vm:PowerOffWindowViewModel"
+        Title="CDM - Power off computer"
+        Width="450"
+        Height="200"
+        MinWidth="450"
+        MinHeight="200"
+        MaxWidth="450"
+        MaxHeight="200"
+        CanResize="False">
+
+    <!-- Main content -->
+    <Grid RowDefinitions="Auto, Auto, *, Auto"
+          Margin="20">
+        <!-- Header -->
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Margin="0, 0, 0, 20">
+            <!-- Title -->
+            <TextBlock Text="{Binding Title}"
+                       VerticalAlignment="Center" />
+
+            <!-- Time left -->
+            <TextBlock VerticalAlignment="Center">
+                <Run Text="{Binding TimeRemaining}"
+                     FontWeight="Bold"
+                     Foreground="{DynamicResource DangerGradientBrush}" />
+
+                <Run Text="{Binding TimeUnit}" />
+            </TextBlock>
+        </StackPanel>
+
+        <!-- Progress bar -->
+        <ProgressBar Grid.Row="1"
+                     Classes="customProgressBar dataGridProgressBar"
+                     Foreground="{DynamicResource DangerGradientBrush}"
+                     Background="{DynamicResource SecondaryColor}"
+                     Margin="0, 0, 0, 10"
+                     Value="{Binding Progress}" />
+
+        <!-- Title -->
+        <TextBlock Grid.Row="2"
+                   Text="{Binding Message}"
+                   TextWrapping="Wrap"
+                   TextTrimming="CharacterEllipsis"
+                   Foreground="{DynamicResource WarningGradientBrush}" />
+
+        <Button Grid.Row="3"
+                Classes="button danger"
+                Command="{Binding CancelCommand}"
+                CommandParameter="{Binding $parent[Window]}"
+                Content="Cancel"
+                HorizontalAlignment="Right" />
+    </Grid>
+</Window>

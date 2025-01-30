@@ -198,7 +198,7 @@
                                   Padding="12, 10"
                                   Background="{DynamicResource SecondaryColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                  IconData="{DynamicResource Queue}"
+                                  IconData="{DynamicResource ListOlSvgIcon}"
                                   IconSize="16"
                                   IconColor="{DynamicResource IconColor}"
                                   Watermark="Queue title"
@@ -229,7 +229,7 @@
                         </Style>
                     </Button.Styles>
 
-                    <PathIcon Data="{DynamicResource Finished}"
+                    <PathIcon Data="{DynamicResource CheckSvgIcon}"
                               Foreground="{DynamicResource TextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"
@@ -416,7 +416,7 @@
                                     VerticalAlignment="Center">
                                 <PathIcon Width="16"
                                           Height="16"
-                                          Data="{DynamicResource CalendarDays}"
+                                          Data="{DynamicResource CalendarDaysSvgIcon}"
                                           Foreground="{DynamicResource IconColor}" />
                             </Button>
                         </Grid>

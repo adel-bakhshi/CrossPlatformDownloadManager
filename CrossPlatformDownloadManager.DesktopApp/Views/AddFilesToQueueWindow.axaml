@@ -31,6 +31,7 @@
                   ItemsSource="{Binding DownloadFiles}"
                   Classes="minimalDataGrid darkRows invertColors"
                   SelectionMode="Extended"
+                  Background="{DynamicResource TransparentColor}"
                   SelectionChanged="FilesDataGridOnSelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="File Name"

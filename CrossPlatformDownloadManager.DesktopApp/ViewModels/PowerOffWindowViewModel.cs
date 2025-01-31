@@ -81,6 +81,13 @@ public class PowerOffWindowViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
+    public void StopReverseTimer()
+    {
+        // Stop reverse timer
+        _reverseTimer.Stop();
+        _reverseTimer.Tick -= ReverseTimerOnTick;
+    }
+
     private void InitializePowerOff()
     {
         if (_duration.TotalSeconds < 1)

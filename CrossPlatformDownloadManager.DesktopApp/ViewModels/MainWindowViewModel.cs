@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -199,6 +200,8 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand DeleteCompletedDownloadFilesCommand { get; }
 
     public ICommand OpenSettingsWindowCommand { get; }
+    
+    public ICommand ShareCommand { get; }
 
     public ICommand StartStopDownloadQueueCommand { get; }
 
@@ -269,6 +272,8 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand OpenSettingsMenuItemCommand { get; }
 
     public ICommand SaveColumnsSettingsCommand { get; }
+    
+    public ICommand OpenAboutUsWindowCommand { get; }
 
     #endregion
 
@@ -302,6 +307,7 @@ public class MainWindowViewModel : ViewModelBase
         DeleteDownloadFilesCommand = ReactiveCommand.CreateFromTask<DataGrid?>(DeleteDownloadFilesAsync);
         DeleteCompletedDownloadFilesCommand = ReactiveCommand.CreateFromTask(DeleteCompletedDownloadFilesAsync);
         OpenSettingsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsWindowAsync);
+        ShareCommand = ReactiveCommand.CreateFromTask(ShareAsync);
         StartStopDownloadQueueCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(StartStopDownloadQueueAsync);
         ShowDownloadQueueDetailsCommand = ReactiveCommand.CreateFromTask<Button?>(ShowDownloadQueueDetailsAsync);
         AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewDownloadQueueAsync);
@@ -337,6 +343,7 @@ public class MainWindowViewModel : ViewModelBase
         DeleteAllCompletedDownloadsMenuItemCommand = ReactiveCommand.CreateFromTask(DeleteAllCompletedDownloadsMenuItemAsync);
         OpenSettingsMenuItemCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsMenuItemAsync);
         SaveColumnsSettingsCommand = ReactiveCommand.CreateFromTask(SaveColumnsSettingsAsync);
+        OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenAboutUsWindowAsync);
     }
 
     private void LoadDownloadQueues()
@@ -538,6 +545,25 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occured while trying to open settings window. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private static async Task ShareAsync()
+    {
+        try
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = Constants.GithubProjectUrl,
+                UseShellExecute = true
+            };
+            
+            Process.Start(processStartInfo);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to share. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -848,6 +874,24 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async Task OpenAboutUsWindowAsync(Window? owner)
+    {
+        try
+        {
+            if (owner == null)
+                return;
+
+            var vm = new AboutUsWindowViewModel(AppService);
+            var window = new AboutUsWindow { DataContext = vm };
+            await window.ShowDialog(owner);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occured while trying to open about us window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

@@ -4,17 +4,26 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Avalonia;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
+using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using Microsoft.Extensions.DependencyInjection;
+using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
@@ -26,6 +35,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IDownloadFileService _downloadFileService;
+    private readonly ISettingsService _settingsService;
 
     private ObservableCollection<DownloadQueueViewModel> _downloadQueues;
     private readonly DispatcherTimer _scheduleManagerTimer;
@@ -48,12 +58,13 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
     #endregion
 
-    public DownloadQueueService(IUnitOfWork unitOfWork, IMapper mapper, IDownloadFileService downloadFileService)
+    public DownloadQueueService(IUnitOfWork unitOfWork, IMapper mapper, IDownloadFileService downloadFileService, ISettingsService settingsService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _downloadFileService = downloadFileService;
         _downloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
+        _settingsService = settingsService;
 
         _downloadQueues = [];
 
@@ -192,7 +203,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
         var downloadFiles = _downloadFileService
             .DownloadFiles
-            .Where(df => df.DownloadQueueId == downloadQueue.Id && (df.IsDownloading || df.IsPaused))
+            .Where(df => df.DownloadQueueId == downloadQueue.Id && (df.IsDownloading || df.IsPaused) && !df.IsStopping)
             .ToList();
 
         downloadFiles.ForEach(df =>
@@ -217,7 +228,63 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile, playSound: false));
         await Task.WhenAll(tasks);
 
-        if (playSound)
+        // Turn off computer
+        if (downloadQueue.TurnOffComputerWhenDone)
+        {
+            if (downloadQueue.TurnOffComputerMode == null)
+                return;
+
+            var turnOffComputerMode = downloadQueue.TurnOffComputerMode! switch
+            {
+                TurnOffComputerMode.Shutdown => "shut down",
+                TurnOffComputerMode.Sleep => "sleep",
+                TurnOffComputerMode.Hibernate => "hibernate",
+                _ => throw new InvalidOperationException("TurnOffComputerMode is not valid.")
+            };
+
+            _ = Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                try
+                {
+                    var serviceProvider = Application.Current?.GetServiceProvider();
+                    var appService = serviceProvider?.GetService<IAppService>();
+                    if (appService == null)
+                        throw new InvalidOperationException("AppService not found.");
+                    
+                    var vm = new PowerOffWindowViewModel(appService, turnOffComputerMode, TimeSpan.FromSeconds(30));
+                    var window = new PowerOffWindow { DataContext = vm };
+                    window.Show();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "An error occured while trying to power off the computer. Error message: {ErrorMessage}", ex.Message);
+                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                }
+            });
+                
+            return;
+        }
+        
+        // Exit program
+        if (downloadQueue.ExitProgramWhenDone)
+        {
+            _ = Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                try
+                {
+                    App.Desktop?.Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                }
+            });
+                
+            return;
+        }
+
+        if (playSound && _settingsService.Settings.UseQueueStoppedSound)
             _ = AudioManager.PlayAsync(AppNotificationType.QueueStopped);
     }
 
@@ -454,15 +521,10 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
     private async Task ContinueDownloadQueueAsync(DownloadQueueViewModel viewModel)
     {
-        var primaryKeys = await _unitOfWork
-            .DownloadFileRepository
-            .GetAllAsync(where: df => df.DownloadQueueId == viewModel.Id, select: df => df.Id, distinct: true);
-
         var downloadFiles = _downloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId == viewModel.Id
-                         && primaryKeys.Contains(df.Id)
-                         && df is { IsDownloading: false, IsPaused: false, IsCompleted: false }
+                         && df is { IsDownloading: false, IsPaused: false, IsCompleted: false, IsStopping: false }
                          && (!viewModel.RetryOnDownloadingFailed || df.CountOfError < viewModel.RetryCount))
             .ToList();
 
@@ -471,8 +533,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             var pausedDownloadFiles = _downloadFileService
                 .DownloadFiles
                 .Where(df => df.DownloadQueueId == viewModel.Id
-                             && primaryKeys.Contains(df.Id)
-                             && df.IsPaused
+                             && df is { IsPaused: true, IsStopping: false }
                              && (!viewModel.RetryOnDownloadingFailed || df.CountOfError < viewModel.RetryCount))
                 .ToList();
 
@@ -489,11 +550,13 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         // All download files are finished
         if (downloadFiles.Count == 0 && viewModel.DownloadingFiles.Count == 0)
         {
-            // Play queue finished sound when start queue sound is already played
-            if (viewModel.IsStartSoundPlayed)
+            // Check for play finished sound
+            var playFinishedSound = viewModel.IsStartSoundPlayed && _settingsService.Settings.UseQueueFinishedSound;
+            // Play sound when possible
+            if (playFinishedSound || viewModel.ShowAlarmWhenDone)
                 _ = AudioManager.PlayAsync(AppNotificationType.QueueFinished);
 
-            await StopDownloadQueueAsync(viewModel, playSound: false);
+            await StopDownloadQueueAsync(viewModel, playSound: !playFinishedSound);
             return;
         }
 
@@ -522,7 +585,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             return;
         }
 
-        if (!viewModel.IsStartSoundPlayed)
+        if (!viewModel.IsStartSoundPlayed && _settingsService.Settings.UseQueueStartedSound)
         {
             _ = AudioManager.PlayAsync(AppNotificationType.QueueStarted);
             viewModel.IsStartSoundPlayed = true;

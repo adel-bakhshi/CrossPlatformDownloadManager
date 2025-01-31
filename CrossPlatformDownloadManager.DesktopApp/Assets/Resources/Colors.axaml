@@ -94,4 +94,37 @@
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GithubIconGradientBrush"
+                         StartPoint="50%, 0%"
+                         EndPoint="50%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#7110C6"
+                          Offset="0" />
+            <GradientStop Color="#9A4ADF"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="TelegramIconGradientBrush"
+                         StartPoint="50%, 0%"
+                         EndPoint="50%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#1841E5"
+                          Offset="0" />
+            <GradientStop Color="#5872DC"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="EmailIconGradientBrush"
+                         StartPoint="50%, 0%"
+                         EndPoint="50%, 100%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#0DB79A"
+                          Offset="0" />
+            <GradientStop Color="#5AE3CC"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
 </ResourceDictionary>

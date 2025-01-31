@@ -806,6 +806,15 @@
                                           Command="{Binding SaveColumnsSettingsCommand}" />
                             </MenuItem>
                         </MenuItem>
+
+                        <MenuItem Header="Help"
+                                  Classes="headerMenuItem">
+                            <MenuItem Header="About CDM"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      Command="{Binding OpenAboutUsWindowCommand}"
+                                      CommandParameter="{Binding $parent[Window]}" />
+                        </MenuItem>
                     </Menu>
                 </StackPanel>
 
@@ -954,7 +963,8 @@
 
                                 <uc:ActionButton Text="Share"
                                                  IconData="{DynamicResource ShareSvgIcon}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}" />
+                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 Command="{Binding ShareCommand}" />
                             </StackPanel>
                         </StackPanel>
 

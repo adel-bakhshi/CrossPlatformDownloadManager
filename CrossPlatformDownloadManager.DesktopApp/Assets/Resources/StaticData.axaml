@@ -5,9 +5,11 @@
 
     <!-- Font size -->
     <x:Double x:Key="DefaultFontSize">14</x:Double>
+    <x:Double x:Key="LargeFontSize">18</x:Double>
 
     <!-- Line Height -->
     <x:Double x:Key="DefaultLineHeight">16</x:Double>
+    <x:Double x:Key="LargeLineHeight">21</x:Double>
 
     <!-- Icon size -->
     <x:Double x:Key="SmallIconSize">16</x:Double>

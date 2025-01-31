@@ -314,7 +314,8 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     .UpdateDownloadQueueAsync(downloadQueue);
             }
 
-            List<DownloadFileViewModel> stoppedDownloadFiles = [];
+            var downloadFiles = FilesViewModel.DownloadFiles.ToList();
+            var stoppedDownloadFiles = new List<DownloadFileViewModel>();
             if (IsEditMode)
             {
                 var oldDownloadFiles = AppService
@@ -323,9 +324,9 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     .Where(df => df.DownloadQueueId == DownloadQueue.Id)
                     .ToList();
 
-                if (oldDownloadFiles.Exists(df => df.IsDownloading || df.IsPaused))
+                if (oldDownloadFiles.Exists(df => (df.IsDownloading || df.IsPaused) && !df.IsStopping))
                 {
-                    foreach (var downloadFile in oldDownloadFiles.Where(df => df.IsDownloading || df.IsPaused).ToList())
+                    foreach (var downloadFile in oldDownloadFiles.Where(df => (df.IsDownloading || df.IsPaused) && !df.IsStopping).ToList())
                     {
                         await AppService
                             .DownloadFileService
@@ -342,7 +343,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
 
             await AppService
                 .DownloadQueueService
-                .AddDownloadFilesToDownloadQueueAsync(DownloadQueue, FilesViewModel.DownloadFiles.ToList());
+                .AddDownloadFilesToDownloadQueueAsync(DownloadQueue, downloadFiles);
 
             foreach (var downloadFile in stoppedDownloadFiles)
             {

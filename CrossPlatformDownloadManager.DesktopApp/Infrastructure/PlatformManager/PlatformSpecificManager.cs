@@ -19,12 +19,12 @@ public static class PlatformSpecificManager
 
     #endregion
 
-    public static bool IsStartupRegistered()
+    public static bool IsStartupRegistered(bool forAllUsers = false)
     {
         IStartupManager startupManager;
         if (OperatingSystem.IsWindows())
         {
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName, forAllUsers);
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -48,12 +48,12 @@ public static class PlatformSpecificManager
         return startupManager.IsRegistered();
     }
 
-    public static void RegisterStartup()
+    public static void RegisterStartup(bool forAllUsers = false)
     {
         IStartupManager startupManager;
         if (OperatingSystem.IsWindows())
         {
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName, forAllUsers);
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -62,7 +62,7 @@ public static class PlatformSpecificManager
         }
         else if (OperatingSystem.IsLinux())
         {
-            var appExec = Path.Combine(Environment.CurrentDirectory, AppName);
+            var appExec = Path.Combine(Environment.CurrentDirectory, $"{AppName}");
             startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
         }
         else
@@ -77,12 +77,12 @@ public static class PlatformSpecificManager
         startupManager.Register();
     }
 
-    public static void DeleteStartup()
+    public static void DeleteStartup(bool forAllUsers = false)
     {
         IStartupManager startupManager;
         if (OperatingSystem.IsWindows())
         {
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName, forAllUsers);
         }
         else if (OperatingSystem.IsMacOS())
         {

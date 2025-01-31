@@ -40,7 +40,7 @@ public static class AudioManager
             throw new DllNotFoundException("Bass library not found.");
 
         var dllName = Path.GetFileName(dependencyUri.LocalPath);
-        var dllPath = Path.Combine(Environment.CurrentDirectory, dllName);
+        var dllPath = Path.Combine(Constants.MainDirectory, dllName);
         if (!File.Exists(dllPath))
         {
             using var stream = AssetLoader.Open(dependencyUri);
@@ -48,7 +48,7 @@ public static class AudioManager
             stream.CopyTo(fileStream);
         }
 
-        var songsDirectory = Path.Combine(Environment.CurrentDirectory, "Songs");
+        var songsDirectory = Path.Combine(Constants.MainDirectory, "Songs");
         if (!Directory.Exists(songsDirectory))
             Directory.CreateDirectory(songsDirectory);
 
@@ -84,53 +84,53 @@ public static class AudioManager
     public static async Task PlayAsync(AppNotificationType notificationType)
     {
         string filePath;
-        var songsDirectory = Path.Combine(Environment.CurrentDirectory, "Songs");
+        var songsDirectory = Path.Combine(Constants.MainDirectory, "Songs");
         if (!Directory.Exists(songsDirectory))
             throw new InvalidOperationException("Songs directory not found.");
 
         switch (notificationType)
         {
             case AppNotificationType.DownloadCompleted:
-            {
-                const string fileName = "download-completed.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "download-completed.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             case AppNotificationType.DownloadStopped:
-            {
-                const string fileName = "download-stopped.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "download-stopped.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             case AppNotificationType.DownloadFailed:
-            {
-                const string fileName = "download-failed.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "download-failed.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             case AppNotificationType.QueueStarted:
-            {
-                const string fileName = "queue-started.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "queue-started.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             case AppNotificationType.QueueStopped:
-            {
-                const string fileName = "queue-stopped.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "queue-stopped.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             case AppNotificationType.QueueFinished:
-            {
-                const string fileName = "queue-finished.mp3";
-                filePath = Path.Combine(songsDirectory, fileName);
-                break;
-            }
+                {
+                    const string fileName = "queue-finished.mp3";
+                    filePath = Path.Combine(songsDirectory, fileName);
+                    break;
+                }
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null);

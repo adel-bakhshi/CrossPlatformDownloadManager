@@ -17,6 +17,7 @@ using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
+using CrossPlatformDownloadManager.Utils;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
 
@@ -42,9 +43,8 @@ sealed class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
-        var startupPath = Environment.CurrentDirectory;
         const string fileName = "logs.txt";
-        var logFilePath = Path.Combine(startupPath, fileName);
+        var logFilePath = Path.Combine(Constants.MainDirectory, fileName);
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
@@ -66,7 +66,7 @@ sealed class Program
 
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
-                
+
                 // Add CategoryService to services
                 services.AddSingleton<ICategoryService, CategoryService>();
 

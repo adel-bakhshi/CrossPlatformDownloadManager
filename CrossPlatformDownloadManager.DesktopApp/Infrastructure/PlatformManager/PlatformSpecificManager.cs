@@ -3,6 +3,7 @@ using System.IO;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.FileExplorerManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.PowerManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
+using CrossPlatformDownloadManager.Utils;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
@@ -28,12 +29,12 @@ public static class PlatformSpecificManager
         }
         else if (OperatingSystem.IsMacOS())
         {
-            var appPath = Path.Combine(Environment.CurrentDirectory, $"{AppName}.app");
+            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
             startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
         }
         else if (OperatingSystem.IsLinux())
         {
-            var appExec = Path.Combine(Environment.CurrentDirectory, AppName);
+            var appExec = Path.Combine(Constants.MainDirectory, AppName);
             startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
         }
         else
@@ -57,12 +58,12 @@ public static class PlatformSpecificManager
         }
         else if (OperatingSystem.IsMacOS())
         {
-            var appPath = Path.Combine(Environment.CurrentDirectory, $"{AppName}.app");
+            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
             startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
         }
         else if (OperatingSystem.IsLinux())
         {
-            var appExec = Path.Combine(Environment.CurrentDirectory, AppName);
+            var appExec = Path.Combine(Constants.MainDirectory, AppName);
             startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
         }
         else
@@ -86,12 +87,12 @@ public static class PlatformSpecificManager
         }
         else if (OperatingSystem.IsMacOS())
         {
-            var appPath = Path.Combine(Environment.CurrentDirectory, $"{AppName}.app");
+            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
             startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
         }
         else if (OperatingSystem.IsLinux())
         {
-            var appExec = Path.Combine(Environment.CurrentDirectory, AppName);
+            var appExec = Path.Combine(Constants.MainDirectory, AppName);
             startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
         }
         else

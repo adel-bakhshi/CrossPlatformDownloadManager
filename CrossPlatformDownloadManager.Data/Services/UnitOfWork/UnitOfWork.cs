@@ -130,7 +130,7 @@ public class UnitOfWork : IUnitOfWork
     {
         if (_dbContext == null)
             return;
-        
+
         await _dbContext.Database.CommitTransactionAsync();
     }
 
@@ -138,7 +138,7 @@ public class UnitOfWork : IUnitOfWork
     {
         if (_dbContext == null)
             return;
-        
+
         await _dbContext.Database.RollbackTransactionAsync();
     }
 
@@ -157,18 +157,15 @@ public class UnitOfWork : IUnitOfWork
         if (fileExtensions.Count == 0)
         {
             fileExtensions = extensions
-                .Select(fe =>
+                .ConvertAll(fe =>
                 {
                     fe.CategoryId = categoryId;
                     return fe;
-                })
-                .ToList();
+                });
         }
         else
         {
-            var extensionsInDb = fileExtensions
-                .Select(fe => fe.Extension.ToLower())
-                .ToList();
+            var extensionsInDb = fileExtensions.ConvertAll(fe => fe.Extension.ToLower());
 
             fileExtensions = extensions
                 .Where(fe => !extensionsInDb.Contains(fe.Extension.ToLower()))

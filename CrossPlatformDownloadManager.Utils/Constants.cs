@@ -78,11 +78,25 @@ public static class Constants
     // Listening urls
     public const string CheckFileTypeSupportUrl = "http://localhost:5000/cdm/download/check/";
     public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
-    
+
     // Links
     public const string GithubProjectUrl = "https://github.com/adel-bakhshi/CrossPlatformDownloadManager";
     public const string TelegramUrl = "https://t.me/ADdy2142";
     public const string Email = "adelbakhshi78@yahoo.com";
+
+    // Main directory
+    public static string MainDirectory
+    {
+        get
+        {
+            var processPath = Environment.ProcessPath;
+            var directory = Path.GetDirectoryName(processPath);
+            if (directory.IsNullOrEmpty())
+                throw new InvalidOperationException("Main directory not found.");
+
+            return directory!;
+        }
+    }
 
     #endregion
 

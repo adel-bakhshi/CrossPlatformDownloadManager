@@ -1,4 +1,5 @@
 using CrossPlatformDownloadManager.Data.Models;
+using CrossPlatformDownloadManager.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrossPlatformDownloadManager.Data.DbContext;
@@ -26,7 +27,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
 
     public DownloadManagerDbContext()
     {
-        _dbPath = Path.Combine(Environment.CurrentDirectory, "ApplicationData.db");
+        _dbPath = Path.Combine(Constants.MainDirectory, "ApplicationData.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

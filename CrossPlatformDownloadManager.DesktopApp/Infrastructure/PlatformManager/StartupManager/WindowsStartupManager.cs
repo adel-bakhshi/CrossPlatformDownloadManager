@@ -1,3 +1,4 @@
+using CrossPlatformDownloadManager.Utils;
 using System;
 using System.IO;
 using System.Runtime.Versioning;
@@ -31,7 +32,7 @@ public class WindowsStartupManager : IStartupManager
     {
         string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
         string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
-        string exePath = Path.Combine(Environment.CurrentDirectory, $"{_appName}.exe");
+        string exePath = Path.Combine(Constants.MainDirectory, $"{_appName}.exe");
 
         using var shortcut = new WindowsShortcut
         {

@@ -1,8 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.Versioning;
-using Microsoft.Win32;
-using Serilog;
+using WindowsShortcutFactory;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
 
@@ -12,50 +11,43 @@ public class WindowsStartupManager : IStartupManager
     #region Private Fields
 
     private readonly string _appName;
-    private readonly bool _forAllUsers;
 
     #endregion
 
-    public WindowsStartupManager(string appName, bool forAllUsers)
+    public WindowsStartupManager(string appName)
     {
         _appName = appName;
-        _forAllUsers = forAllUsers;
     }
 
     public bool IsRegistered()
     {
-        var key = _forAllUsers
-            ? Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run")
-            : Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
 
-        return key?.GetValue(_appName) != null;
+        return File.Exists(shortcutPath);
     }
 
     public void Register()
     {
-        var key = _forAllUsers
-            ? Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true)
-            : Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
+        string exePath = Path.Combine(Environment.CurrentDirectory, $"{_appName}.exe");
 
-        if (key == null)
+        using var shortcut = new WindowsShortcut
         {
-            Log.Information("Could not open registry key. Admin rights may be required.");
-            return; // Or throw an exception
-        }
+            Path = exePath,
+            Description = "Cross platform Download Manager (CDM)",
+        };
 
-        var executablePath = Path.Combine(Environment.CurrentDirectory, $"{_appName}.exe");
-        if (!File.Exists(executablePath))
-            throw new FileNotFoundException("The executable file was not found.");
-
-        key.SetValue(_appName, executablePath);
+        shortcut.Save(shortcutPath);
     }
 
     public void Delete()
     {
-        var key = _forAllUsers
-            ? Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true)
-            : Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
 
-        key?.DeleteValue(_appName, false);
+        if (File.Exists(shortcutPath))
+            File.Delete(shortcutPath);
     }
 }

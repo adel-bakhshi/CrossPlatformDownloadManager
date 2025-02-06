@@ -390,11 +390,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (downloadFile == null)
             return;
 
-        var service = _downloadFileTasks.Find(task => task.Key == downloadFile.Id)?.Service;
-        if (service == null)
+        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+        if (downloadFileTask?.Service == null)
             return;
 
-        downloadFile.ResumeDownloadFile(service);
+        downloadFile.ResumeDownloadFile(downloadFileTask.Service);
+        ShowOrFocusDownloadWindow(downloadFile);
     }
 
     public void PauseDownloadFile(DownloadFileViewModel? viewModel)
@@ -826,6 +827,19 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         return newFileName;
+    }
+
+    public void ShowOrFocusDownloadWindow(DownloadFileViewModel? viewModel)
+    {
+        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
+        if (downloadFile == null)
+            return;
+        
+        var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
+        if (downloadFileTask == null)
+            return;
+        
+        Dispatcher.UIThread.Post(() => downloadFileTask.ShowOrFocusWindow());
     }
 
     #region Helpers

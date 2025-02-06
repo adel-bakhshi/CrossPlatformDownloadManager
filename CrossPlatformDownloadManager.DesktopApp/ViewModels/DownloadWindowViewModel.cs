@@ -23,10 +23,10 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 public class DownloadWindowViewModel : ViewModelBase
 {
     #region Private Fields
-    
+
     private bool _detailsIsVisible = true;
     private double _detailsHeight;
-    
+
     private bool _openFolderAfterDownloadFinished;
     private bool _exitProgramAfterDownloadFinished;
     private bool _turnOffComputerAfterDownloadFinished;
@@ -104,6 +104,7 @@ public class DownloadWindowViewModel : ViewModelBase
     }
 
     public string Title => $"CDM - {(IsPaused ? "Paused" : "Downloading")} {DownloadFile.CeilingDownloadProgressAsString}";
+    public bool CanCloseWindow { get; set; }
 
     #endregion
 
@@ -121,7 +122,7 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         DownloadFile = downloadFile;
         DownloadStatusViewModel = new DownloadStatusViewModel(appService, DownloadFile);
-        
+
         DownloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
         DownloadFile.DownloadResumed += DownloadFileOnDownloadResumed;
         DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
@@ -156,6 +157,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 .StopDownloadFileAsync(DownloadFile);
 
             RemoveEventHandlers();
+            CanCloseWindow = true;
         }
         catch (Exception ex)
         {
@@ -169,7 +171,7 @@ public class DownloadWindowViewModel : ViewModelBase
         DownloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
         DownloadFile.DownloadResumed -= DownloadFileOnDownloadResumed;
         DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-        
+
         DownloadStatusViewModel?.RemoveEventHandlers();
 
         if (DownloadSpeedLimiterViewModel != null)
@@ -219,9 +221,9 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         // Remove event handlers
         DownloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-        
+
         // Check if the user wants to turn off the computer
-        if (_turnOffComputerAfterDownloadFinished)
+        if (_turnOffComputerAfterDownloadFinished && DownloadFile.IsCompleted)
         {
             if (_turnOffComputerMode.IsNullOrEmpty())
                 return;
@@ -241,45 +243,43 @@ public class DownloadWindowViewModel : ViewModelBase
                     await DialogBoxManager.ShowErrorDialogAsync(ex);
                 }
             });
-            
-            return;
-        }
 
-        // Check if the user wants to exit the program
-        if (_exitProgramAfterDownloadFinished)
-        {
-            Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                try
-                {
-                    // Exit the program
-                    App.Desktop?.Shutdown();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
-                    await DialogBoxManager.ShowErrorDialogAsync(ex);
-                }
-            });
-            
             return;
         }
 
         // Check if the user wants to open the folder
-        if (!_openFolderAfterDownloadFinished)
+        if (_openFolderAfterDownloadFinished)
+        {
+            // Make sure file name and save location are not null
+            if (DownloadFile.FileName.IsNullOrEmpty() || DownloadFile.SaveLocation.IsNullOrEmpty())
+                return;
+
+            // Make sure the file exists
+            var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
+            if (!File.Exists(filePath))
+                return;
+
+            // Open the folder and select the file
+            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+        }
+
+        // Check if the user wants to exit the program
+        if (!_exitProgramAfterDownloadFinished)
             return;
-        
-        // Make sure file name and save location are not null
-        if (DownloadFile.FileName.IsNullOrEmpty() || DownloadFile.SaveLocation.IsNullOrEmpty())
-            return;
-            
-        // Make sure the file exists
-        var filePath = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
-        if (!File.Exists(filePath))
-            return;
-            
-        // Open the folder and select the file
-        PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+
+        Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            try
+            {
+                // Exit the program
+                App.Desktop?.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     private async Task CancelDownloadAsync()
@@ -337,7 +337,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 speed = (long)(globalSpeedLimitUnit.IsNullOrEmpty()
                     ? 0
                     : globalSpeedLimit * (globalSpeedLimitUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte));
-                
+
                 AppService
                     .DownloadFileService
                     .LimitDownloadFileSpeed(DownloadFile, speed);

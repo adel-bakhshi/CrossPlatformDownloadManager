@@ -4,6 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
@@ -29,6 +31,9 @@ public partial class App : Application
         try
         {
             var serviceProvider = this.TryGetServiceProvider();
+            var appViewModel = serviceProvider?.GetService<AppViewModel>();
+            DataContext = appViewModel ?? throw new NullReferenceException(nameof(appViewModel));
+            
             var mainWindow = serviceProvider?.GetService<MainWindow>();
             if (mainWindow == null)
                 throw new NullReferenceException(nameof(mainWindow));
@@ -55,6 +60,19 @@ public partial class App : Application
     }
 
     #region Helpers
+
+    private async void TrayIconOnClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            Desktop?.MainWindow?.Show();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to show main window. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
 
     private async void ApplicationOnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {

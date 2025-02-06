@@ -1,4 +1,3 @@
-using System;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using ReactiveUI;
@@ -12,6 +11,7 @@ public class GeneralsViewModel : ViewModelBase
     private bool _startOnSystemStartup;
     private bool _useBrowserExtension;
     private bool _darkMode;
+    private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
 
     #endregion
@@ -35,6 +35,12 @@ public class GeneralsViewModel : ViewModelBase
         get => _darkMode;
         set => this.RaiseAndSetIfChanged(ref _darkMode, value);
     }
+    
+    public bool UseManager
+    {
+        get => _useManager;
+        set => this.RaiseAndSetIfChanged(ref _useManager, value);
+    }
 
     public bool AlwaysKeepManagerOnTop
     {
@@ -57,6 +63,7 @@ public class GeneralsViewModel : ViewModelBase
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
         DarkMode = settings.DarkMode;
+        UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
     }
 

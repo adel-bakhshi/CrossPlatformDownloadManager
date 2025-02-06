@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -45,23 +46,27 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     {
         try
         {
-            if (ViewModel == null || ViewModel.IsUpdatingDownloadFiles)
-            {
-                if (ViewModel?.IsUpdatingDownloadFiles != true)
-                    return;
+            // Make sure ViewModel is not null
+            if (ViewModel == null)
+                return;
 
+            // For some reason, when updating download files, selected items will be changed
+            // We must remove the added items from selected items when updating download files
+            if (ViewModel.IsUpdatingDownloadFiles)
+            {
                 foreach (var addedItem in e.AddedItems)
                     DownloadFilesDataGrid.SelectedItems.Remove(addedItem);
-
-                return;
             }
 
+            // Get selected download files
             var downloadFiles = DownloadFilesDataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
                 .ToList();
 
+            // Check if all download files are selected
             ViewModel.SelectAllDownloadFiles = ViewModel.DownloadFiles.Count > 0 && downloadFiles.Count == ViewModel.DownloadFiles.Count;
+            // Calculate total size
             var totalSize = downloadFiles.Sum(downloadFile => downloadFile.Size ?? 0);
             ViewModel.SelectedFilesTotalSize = totalSize == 0 ? "0 KB" : totalSize.ToFileSize();
         }
@@ -161,5 +166,23 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             Log.Error(ex, "An error occured during opening context menu. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private void DownloadFilesDataGridOnLoadingRow(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.DoubleTapped += DownloadFilesDataGridRowOnDoubleTapped;
+    }
+
+    private void DownloadFilesDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.DoubleTapped -= DownloadFilesDataGridRowOnDoubleTapped;
+    }
+
+    private void DownloadFilesDataGridRowOnDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (ViewModel == null || sender is not DataGridRow { DataContext: DownloadFileViewModel downloadFile })
+            return;
+
+        ViewModel.DataGridRowDoubleTapAction(downloadFile);
     }
 }

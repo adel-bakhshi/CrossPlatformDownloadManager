@@ -70,6 +70,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Grid x:Name="SwitchAreaGrid"
+                                      Grid.Row="0"
+                                      Grid.Column="0"
                                       Grid.RowSpan="3"
                                       Grid.ColumnSpan="3"
                                       Background="Transparent"
@@ -77,6 +79,7 @@
                                       Margin="0" />
 
                                 <ContentPresenter x:Name="PART_OffContentPresenter"
+                                                  Grid.Row="0"
                                                   Grid.RowSpan="3"
                                                   Grid.Column="2"
                                                   Content="{TemplateBinding OffContent}"
@@ -86,6 +89,7 @@
                                                   IsVisible="{TemplateBinding OffContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
                                 <ContentPresenter x:Name="PART_OnContentPresenter"
+                                                  Grid.Row="0"
                                                   Grid.RowSpan="3"
                                                   Grid.Column="2"
                                                   Content="{TemplateBinding OnContent}"
@@ -96,6 +100,7 @@
 
                                 <Border x:Name="OuterBorder"
                                         Grid.Row="1"
+                                        Grid.Column="0"
                                         Height="20"
                                         Width="40"
                                         CornerRadius="10"
@@ -105,6 +110,7 @@
 
                                 <Border x:Name="SwitchKnobBounds"
                                         Grid.Row="1"
+                                        Grid.Column="0"
                                         Height="20"
                                         Width="40"
                                         CornerRadius="10"
@@ -114,6 +120,7 @@
 
                                 <Canvas x:Name="PART_SwitchKnob"
                                         Grid.Row="1"
+                                        Grid.Column="0"
                                         HorizontalAlignment="Left"
                                         Width="20"
                                         Height="20">
@@ -209,6 +216,8 @@
 
                 <!-- DisabledState -->
                 <Style Selector="^:disabled">
+                    <Setter Property="Opacity"
+                            Value="0.5" />
                     <Setter Property="Foreground"
                             Value="{DynamicResource ThemeForegroundLowColor}" />
                 </Style>
@@ -217,17 +226,17 @@
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeForegroundLowColor}" />
                     <Setter Property="Background"
-                            Value="Transparent" />
+                            Value="{DynamicResource TertiaryColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOff">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ThemeForegroundLowColor}" />
+                            Value="{DynamicResource TextColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOn">
                     <Setter Property="Fill"
-                            Value="{DynamicResource HighlightForegroundColor}" />
+                            Value="{DynamicResource TextColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Border#SwitchKnobBounds">

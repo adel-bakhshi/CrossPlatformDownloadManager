@@ -36,6 +36,7 @@ public class ManagerWindowViewModel : ViewModelBase
 
     public bool IsMenuVisible { get; set; }
     public PointViewModel? ManagerPoint => AppService.SettingsService.Settings.ManagerPoint;
+    public bool UseManager => AppService.SettingsService.Settings.UseManager;
     public bool AlwaysKeepManagerOnTop => AppService.SettingsService.Settings.AlwaysKeepManagerOnTop;
 
     #endregion
@@ -55,8 +56,6 @@ public class ManagerWindowViewModel : ViewModelBase
         _updateDownloadSpeedTimer.Start();
 
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
-
-        AppService.SettingsService.Settings.PropertyChanged += SettingsOnPropertyChanged;
     }
 
     public void ShowMenu(Window? owner)
@@ -118,10 +117,12 @@ public class ManagerWindowViewModel : ViewModelBase
             .GetDownloadSpeed();
     }
 
-    private void SettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    protected override void OnSettingsServiceDataChanged()
     {
-        if (e.PropertyName?.Equals(nameof(AppService.SettingsService.Settings.AlwaysKeepManagerOnTop)) == true)
-            this.RaisePropertyChanged(nameof(AlwaysKeepManagerOnTop));
+        base.OnSettingsServiceDataChanged();
+        
+        this.RaisePropertyChanged(nameof(UseManager));
+        this.RaisePropertyChanged(nameof(AlwaysKeepManagerOnTop));
     }
 
     #endregion

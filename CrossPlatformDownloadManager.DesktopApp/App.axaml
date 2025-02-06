@@ -1,8 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="CrossPlatformDownloadManager.DesktopApp.App"
              xmlns:local="using:CrossPlatformDownloadManager.DesktopApp"
-             RequestedThemeVariant="Dark">
+             xmlns:vm="clr-namespace:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+             RequestedThemeVariant="Dark"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.App"
+             x:DataType="vm:AppViewModel">
 
     <Application.DataTemplates>
         <local:ViewLocator />
@@ -52,4 +54,14 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
+
+    <!-- TrayIcon -->
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/cdm-logo.ico"
+                      ToolTipText="Cross platform Download Manager (CDM)"
+                      IsVisible="{Binding IsTrayIconVisible}"
+                      Clicked="TrayIconOnClicked" />
+        </TrayIcons>
+    </TrayIcon.Icons>
 </Application>

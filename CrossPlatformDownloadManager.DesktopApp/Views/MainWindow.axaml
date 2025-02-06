@@ -980,7 +980,9 @@
                               Classes="mainDataGrid"
                               ItemsSource="{Binding DownloadFiles}"
                               ContextFlyout="{StaticResource DownloadQueuesDataGridContextMenu}"
-                              SelectionChanged="DownloadFilesDataGridOnSelectionChanged">
+                              SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
+                              LoadingRow="DownloadFilesDataGridOnLoadingRow"
+                              UnloadingRow="DownloadFilesDataGridOnUnloadingRow">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">
@@ -1166,75 +1168,88 @@
                 Padding="20, 10"
                 Margin="0, 20, 0, 0">
             <StackPanel Orientation="Horizontal"
-                        Spacing="20"
+                        Spacing="10"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
-                <!-- Size and active queues -->
+                <!-- Active queues -->
+                <Button ToolTip.Tip="{Binding ActiveDownloadQueuesToolTipText}"
+                        IsVisible="{Binding ActiveDownloadQueueExists}"
+                        Flyout="{StaticResource ActiveQueuesListFlyout}">
+                    <!-- Styles -->
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="Margin"
+                                    Value="0" />
+                            <Setter Property="Background"
+                                    Value="{DynamicResource TransparentColor}" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Setter Property="CornerRadius"
+                                    Value="0" />
+
+                            <!-- Template -->
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                CornerRadius="{TemplateBinding CornerRadius}"
+                                                ClipToBounds="{TemplateBinding ClipToBounds}">
+                                            <ContentPresenter Content="{TemplateBinding Content}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Margin="{TemplateBinding Padding}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Styles>
+
+                    <!-- Button content -->
+                    <PathIcon Data="{DynamicResource ClockRotateLeftSvgIcon}"
+                              Foreground="{DynamicResource TertiaryColor}"
+                              Width="16"
+                              Height="16" />
+                </Button>
+
+                <!-- Size -->
                 <StackPanel Orientation="Horizontal"
-                            Spacing="10"
-                            VerticalAlignment="Center">
-                    <!-- Active queues -->
-                    <Button ToolTip.Tip="{Binding ActiveDownloadQueuesToolTipText}"
-                            IsVisible="{Binding ActiveDownloadQueueExists}"
-                            Flyout="{StaticResource ActiveQueuesListFlyout}">
-                        <!-- Styles -->
-                        <Button.Styles>
-                            <Style Selector="Button">
-                                <Setter Property="Padding"
-                                        Value="0" />
-                                <Setter Property="Margin"
-                                        Value="0" />
-                                <Setter Property="Background"
-                                        Value="{DynamicResource TransparentColor}" />
-                                <Setter Property="BorderThickness"
-                                        Value="0" />
-                                <Setter Property="CornerRadius"
-                                        Value="0" />
-
-                                <!-- Template -->
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    CornerRadius="{TemplateBinding CornerRadius}"
-                                                    ClipToBounds="{TemplateBinding ClipToBounds}">
-                                                <ContentPresenter Content="{TemplateBinding Content}"
-                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                                  Margin="{TemplateBinding Padding}" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Styles>
-
-                        <!-- Button content -->
-                        <PathIcon Data="{DynamicResource ClockRotateLeftSvgIcon}"
-                                  Foreground="{DynamicResource TertiaryColor}"
-                                  Width="16"
-                                  Height="16" />
-                    </Button>
-
-                    <!-- Size -->
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="5"
-                                VerticalAlignment="Center">
-                        <PathIcon Data="{DynamicResource CubeSvgIcon}"
-                                  Foreground="{DynamicResource TertiaryColor}"
-                                  Width="16"
-                                  Height="16" />
-                        <TextBlock Text="{Binding SelectedFilesTotalSize}"
-                                   Foreground="{DynamicResource TertiaryColor}" />
-                    </StackPanel>
+                            Spacing="5"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Total size of selected files">
+                    <PathIcon Data="{DynamicResource CubeSvgIcon}"
+                              Foreground="{DynamicResource TertiaryColor}"
+                              Width="16"
+                              Height="16" />
+                    <TextBlock Text="{Binding SelectedFilesTotalSize}"
+                               Foreground="{DynamicResource TertiaryColor}" />
+                </StackPanel>
+                
+                <!-- Global speed limit -->
+                <StackPanel Orientation="Horizontal"
+                            Spacing="5"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Global speed limit"
+                            IsVisible="{Binding IsGlobalSpeedLimitVisible}">
+                    <PathIcon Data="{DynamicResource GaugeHighSvgIcon}"
+                              Foreground="{DynamicResource WarningGradientBrush}"
+                              Width="16"
+                              Height="16"
+                              VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding GlobalSpeedLimit}"
+                               Foreground="{DynamicResource WarningGradientBrush}"
+                               VerticalAlignment="Center" />
                 </StackPanel>
 
                 <!-- Download speed -->
                 <StackPanel Orientation="Horizontal"
                             Spacing="5"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Total download speed">
                     <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
                               Foreground="{DynamicResource SuccessGradientBrush}"
                               Width="16"

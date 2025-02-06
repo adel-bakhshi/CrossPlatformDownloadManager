@@ -72,4 +72,6 @@ public interface IDownloadFileService
     string GetNewFileName(string url, string fileName, string saveLocation);
     
     string GetNewFileName(string fileName, string saveLocation);
+
+    void ShowOrFocusDownloadWindow(DownloadFileViewModel? viewModel);
 }

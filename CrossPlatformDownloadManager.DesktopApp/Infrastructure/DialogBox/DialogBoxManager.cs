@@ -105,8 +105,8 @@ public static class DialogBoxManager
         if (App.Desktop?.MainWindow != null && owner == App.Desktop.MainWindow && !App.Desktop.MainWindow.IsVisible)
             owner = App.Desktop.Windows.OfType<ManagerWindow>().FirstOrDefault();
 
-        if (owner == null)
-            return DialogResult.None;
+        if (owner is { IsVisible: false })
+            owner = null;
 
         var serviceProvider = Application.Current?.GetServiceProvider();
         var appService = serviceProvider?.GetService<IAppService>();
@@ -124,7 +124,20 @@ public static class DialogBoxManager
         };
 
         var window = new DialogWindow { DataContext = vm };
-        await window.ShowDialog(owner);
+        if (owner != null)
+        {
+            await window.ShowDialog(owner);
+        }
+        else
+        {
+            var isDialogWindowClosed = false;
+            window.Topmost = true;
+            window.Closed += (_, _) => isDialogWindowClosed = true;
+            window.Show();
+
+            while (!isDialogWindowClosed)
+                await Task.Delay(100);
+        }
 
         return vm.DialogResult;
     }

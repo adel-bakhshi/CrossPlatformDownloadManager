@@ -54,6 +54,8 @@ public class MainWindowViewModel : ViewModelBase
     private MainMenuItemsEnabledState _mainMenuItemsEnabledState = new();
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
+    private string _globalSpeedLimit = "0 KB";
+    private bool _isGlobalSpeedLimitVisible;
 
     #endregion
 
@@ -181,6 +183,18 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _dataGridColumnsSettings, value);
     }
 
+    public string GlobalSpeedLimit
+    {
+        get => _globalSpeedLimit;
+        set => this.RaiseAndSetIfChanged(ref _globalSpeedLimit, value);
+    }
+
+    public bool IsGlobalSpeedLimitVisible
+    {
+        get => _isGlobalSpeedLimitVisible;
+        set => this.RaiseAndSetIfChanged(ref _isGlobalSpeedLimitVisible, value);
+    }
+
     #endregion
 
     #region Commands
@@ -200,7 +214,7 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand DeleteCompletedDownloadFilesCommand { get; }
 
     public ICommand OpenSettingsWindowCommand { get; }
-    
+
     public ICommand ShareCommand { get; }
 
     public ICommand StartStopDownloadQueueCommand { get; }
@@ -272,7 +286,7 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand OpenSettingsMenuItemCommand { get; }
 
     public ICommand SaveColumnsSettingsCommand { get; }
-    
+
     public ICommand OpenAboutUsWindowCommand { get; }
 
     #endregion
@@ -298,6 +312,8 @@ public class MainWindowViewModel : ViewModelBase
         SelectedFilesTotalSize = "0 KB";
         ShowCategoriesPanel = AppService.SettingsService.Settings.ShowCategoriesPanel;
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
+
+        CalculateGlobalSpeedLimit();
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
@@ -558,7 +574,7 @@ public class MainWindowViewModel : ViewModelBase
                 FileName = Constants.GithubProjectUrl,
                 UseShellExecute = true
             };
-            
+
             Process.Start(processStartInfo);
         }
         catch (Exception ex)
@@ -916,9 +932,9 @@ public class MainWindowViewModel : ViewModelBase
         {
             await HideContextMenuAsync();
 
-            if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsDownloading: true } downloadFile ||
-                downloadFile.SaveLocation.IsNullOrEmpty() ||
-                downloadFile.FileName.IsNullOrEmpty())
+            if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsDownloading: true } downloadFile
+                || downloadFile.SaveLocation.IsNullOrEmpty()
+                || downloadFile.FileName.IsNullOrEmpty())
             {
                 return;
             }
@@ -1087,18 +1103,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task ResumeContextMenuAsync(DataGrid? dataGrid)
     {
-        try
-        {
-            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
-                return;
-
-            await ResumeDownloadFileOperationAsync(dataGrid, includePausedFiles: true);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occured while trying to resume the download. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+        await ResumeDownloadFileOperationAsync(dataGrid);
     }
 
     private async Task StopContextMenuAsync(DataGrid? dataGrid)
@@ -1875,6 +1880,23 @@ public class MainWindowViewModel : ViewModelBase
     protected override void OnSettingsServiceDataChanged()
     {
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
+        CalculateGlobalSpeedLimit();
+    }
+
+    private void CalculateGlobalSpeedLimit()
+    {
+        var settings = AppService.SettingsService.Settings;
+        var limitSpeed = settings.LimitSpeed ?? 0;
+        var limitUnit = settings.LimitUnit;
+
+        if (limitSpeed <= 0 || limitUnit.IsNullOrEmpty())
+        {
+            IsGlobalSpeedLimitVisible = false;
+            return;
+        }
+
+        IsGlobalSpeedLimitVisible = true;
+        GlobalSpeedLimit = $"{limitSpeed} {limitUnit}";
     }
 
     private string GetToolTipText()
@@ -1982,7 +2004,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task ResumeDownloadFileOperationAsync(DataGrid? dataGrid, bool includePausedFiles = false)
+    private async Task ResumeDownloadFileOperationAsync(DataGrid? dataGrid)
     {
         try
         {
@@ -1992,29 +2014,15 @@ public class MainWindowViewModel : ViewModelBase
             var downloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => df is { IsDownloading: false, IsPaused: false, IsCompleted: false, IsStopping: false })
+                .Where(df => df is { IsDownloading: false, IsCompleted: false, IsStopping: false })
                 .ToList();
-
-            if (includePausedFiles)
-            {
-                var pausedFiles = dataGrid
-                    .SelectedItems
-                    .OfType<DownloadFileViewModel>()
-                    .Where(df => df is { IsStopping: false, IsPaused: true })
-                    .ToList();
-
-                downloadFiles = downloadFiles
-                    .Union(pausedFiles)
-                    .Distinct()
-                    .ToList();
-            }
 
             if (downloadFiles.Count == 0)
                 return;
 
             foreach (var downloadFile in downloadFiles)
             {
-                if (includePausedFiles && downloadFile.IsPaused)
+                if (downloadFile.IsPaused)
                 {
                     AppService
                         .DownloadFileService
@@ -2022,9 +2030,6 @@ public class MainWindowViewModel : ViewModelBase
                 }
                 else
                 {
-                    if (downloadFile.IsPaused)
-                        continue;
-
                     _ = AppService
                         .DownloadFileService
                         .StartDownloadFileAsync(downloadFile);
@@ -2074,7 +2079,7 @@ public class MainWindowViewModel : ViewModelBase
             if (existingDownloadFiles.Count > 0)
             {
                 var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
-                    $"Do you want to delete the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your computer?",
+                    $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
                     DialogButtons.YesNo);
 
                 if (result == DialogResult.Yes)
@@ -2535,5 +2540,44 @@ public class MainWindowViewModel : ViewModelBase
     {
         base.OnCategoryServiceCategoriesChanged();
         LoadCategories();
+    }
+
+    public void DataGridRowDoubleTapAction(DownloadFileViewModel? downloadFile)
+    {
+        if (downloadFile == null || downloadFile.IsStopping)
+            return;
+
+        switch (downloadFile.Status)
+        {
+            case DownloadFileStatus.None:
+            {
+                AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
+                break;
+            }
+
+            case DownloadFileStatus.Downloading:
+            case DownloadFileStatus.Paused:
+            {
+                AppService.DownloadFileService.ShowOrFocusDownloadWindow(downloadFile);
+                break;
+            }
+
+            default:
+            {
+                if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                    break;
+
+                var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+                if (!File.Exists(filePath))
+                    break;
+
+                if (downloadFile.IsCompleted)
+                    PlatformSpecificManager.OpenFile(filePath);
+                else
+                    PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+
+                break;
+            }
+        }
     }
 }

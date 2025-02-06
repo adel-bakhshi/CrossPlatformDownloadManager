@@ -175,7 +175,8 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.StartOnSystemStartup = GeneralsViewModel.StartOnSystemStartup;
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
             AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
-            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
+            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
 
             // Register app for startup
             if (GeneralsViewModel.StartOnSystemStartup)

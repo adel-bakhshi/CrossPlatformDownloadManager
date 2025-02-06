@@ -8,7 +8,7 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.GeneralsView"
              x:DataType="vm:GeneralsViewModel">
-    
+
     <!-- Content -->
     <StackPanel Orientation="Vertical"
                 Spacing="15">
@@ -91,19 +91,46 @@
             </Grid>
         </Border>
 
-        <!-- Always keep manager on top -->
+        <!-- Use manager -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
                 Background="{DynamicResource SecondaryColor}">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0"
+            <Grid RowDefinitions="Auto, Auto"
+                  ColumnDefinitions="*, Auto">
+                <!-- Use manager -->
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Center"
                            TextAlignment="Left"
-                           Text="Always keep manager on top"
-                           FontWeight="Bold" />
+                           Text="Use manager"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 10" />
 
-                <ToggleSwitch Grid.Column="1"
+                <ToggleSwitch Grid.Row="0"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0, 0, 0, 10"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding UseManager}" />
+
+                <!-- Always keep manager on top -->
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Always on top"
+                           IsEnabled="{Binding UseManager}" />
+
+                <ToggleSwitch Grid.Row="1"
+                              Grid.Column="1"
                               OffContent="{x:Null}"
                               OnContent="{x:Null}"
                               Margin="0"
@@ -113,7 +140,8 @@
                               HorizontalContentAlignment="Right"
                               VerticalContentAlignment="Center"
                               Width="40"
-                              IsChecked="{Binding AlwaysKeepManagerOnTop}" />
+                              IsChecked="{Binding AlwaysKeepManagerOnTop}"
+                              IsEnabled="{Binding UseManager}" />
             </Grid>
         </Border>
     </StackPanel>

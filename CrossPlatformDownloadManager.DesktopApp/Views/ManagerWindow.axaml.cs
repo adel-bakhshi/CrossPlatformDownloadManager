@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -51,9 +52,20 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
     {
         base.OnLoaded(e);
 
+        // Make sure ViewModel and Screens.Primary are not null
         if (Screens.Primary == null || ViewModel == null)
             return;
 
+        // Subscribe to PropertyChanged event and keep an eye on UseManager property
+        ViewModel.PropertyChanged += ManagerWindowViewModelOnPropertyChanged;
+        
+        // Check for show or hide manager
+        if (ViewModel.UseManager)
+            Show();
+        else
+            Hide();
+
+        // Calculate position and set
         int x, y;
         var point = ViewModel.ManagerPoint;
         if (point == null)
@@ -71,6 +83,25 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         }
 
         Position = new PixelPoint(x, y);
+    }
+
+    private void ManagerWindowViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (ViewModel == null)
+            return;
+
+        switch (e.PropertyName)
+        {
+            case nameof(ViewModel.UseManager):
+            {
+                if (ViewModel.UseManager)
+                    Show();
+                else
+                    Hide();
+                
+                break;
+            }
+        }
     }
 
     private void ManagerWindowOnPointerPressed(object? sender, PointerPressedEventArgs e)

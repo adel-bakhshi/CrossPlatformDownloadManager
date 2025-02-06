@@ -17,6 +17,10 @@ public class Settings : DbModelBase
     [Required] [JsonProperty("darkMode")] public bool DarkMode { get; set; }
 
     [Required]
+    [JsonProperty("useManager")]
+    public bool UseManager { get; set; }
+    
+    [Required]
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
 
@@ -96,6 +100,7 @@ public class Settings : DbModelBase
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
         DarkMode = settings.DarkMode;
+        UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
         ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
         ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;

@@ -80,6 +80,7 @@ sealed class Program
                 services.AddSingleton<IAppService, AppService>();
 
                 // Add ViewModels to services
+                services.AddSingleton<AppViewModel>();
                 services.AddSingleton<MainWindowViewModel>();
                 services.AddSingleton<TrayMenuWindowViewModel>();
 

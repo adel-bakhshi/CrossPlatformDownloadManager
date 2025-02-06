@@ -77,10 +77,26 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
         var viewModel = new DownloadWindowViewModel(appService, downloadFile);
         DownloadWindow = new DownloadWindow { DataContext = viewModel };
         DownloadWindow.Closing += DownloadWindowOnClosing;
-        
+
         if (showWindow)
             Dispatcher.UIThread.Post(() => DownloadWindow.Show());
     }
+
+    public void ShowOrFocusWindow()
+    {
+        if (DownloadWindow == null)
+            return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!DownloadWindow.IsVisible)
+                DownloadWindow.Show();
+            else
+                DownloadWindow.Focus();
+        });
+    }
+
+    #region Helpers
 
     private async void DownloadWindowOnClosing(object? sender, WindowClosingEventArgs e)
     {
@@ -88,7 +104,14 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
         {
             if (DownloadWindow is not { DataContext: DownloadWindowViewModel viewModel })
                 return;
-            
+
+            if (!viewModel.CanCloseWindow)
+            {
+                e.Cancel = true;
+                Dispatcher.UIThread.Post(() => DownloadWindow!.Hide());
+                return;
+            }
+
             DownloadWindow.Closing -= DownloadWindowOnClosing;
             DownloadWindow.StopUpdateChunksDataTimer();
             viewModel.RemoveEventHandlers();
@@ -105,4 +128,6 @@ public class DownloadFileTaskViewModel : PropertyChangedBase
                 DialogButtons.Ok);
         }
     }
+
+    #endregion
 }

@@ -12,6 +12,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _startOnSystemStartup;
     private bool _useBrowserExtension;
     private bool _darkMode;
+    private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
     private bool _showStartDownloadDialog;
     private bool _showCompleteDownloadDialog;
@@ -61,6 +62,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _darkMode;
         set => SetField(ref _darkMode, value);
+    }
+    
+    public bool UseManager
+    {
+        get => _useManager;
+        set => SetField(ref _useManager, value);
     }
 
     public bool AlwaysKeepManagerOnTop

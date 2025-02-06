@@ -2,6 +2,7 @@
   "startOnSystemStartup": true,
   "UseBrowserExtension": true,
   "darkMode": true,
+  "useManager": true,
   "alwaysKeepManagerOnTop": true,
   "showStartDownloadDialog": true,
   "showCompleteDownloadDialog": true,

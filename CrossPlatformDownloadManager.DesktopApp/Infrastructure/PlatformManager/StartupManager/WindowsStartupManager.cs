@@ -22,31 +22,29 @@ public class WindowsStartupManager : IStartupManager
 
     public bool IsRegistered()
     {
-        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
+        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
 
         return File.Exists(shortcutPath);
     }
 
     public void Register()
     {
-        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
-        string exePath = Path.Combine(Constants.MainDirectory, $"{_appName}.exe");
+        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
+        var exePath = Path.Combine(Constants.MainDirectory, $"{_appName}.exe");
 
-        using var shortcut = new WindowsShortcut
-        {
-            Path = exePath,
-            Description = "Cross platform Download Manager (CDM)",
-        };
+        using var shortcut = new WindowsShortcut();
+        shortcut.Path = exePath;
+        shortcut.Description = "Cross platform Download Manager (CDM)";
 
         shortcut.Save(shortcutPath);
     }
 
     public void Delete()
     {
-        string startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        string shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
+        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
 
         if (File.Exists(shortcutPath))
             File.Delete(shortcutPath);

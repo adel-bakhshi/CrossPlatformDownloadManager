@@ -8,6 +8,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/adel-bakhshi/CrossPlatformDownloadManager?style=flat)
 ![GitHub license](https://img.shields.io/github/license/adel-bakhshi/CrossPlatformDownloadManager?style=flat)
 ![GitHub issues](https://img.shields.io/github/issues/adel-bakhshi/CrossPlatformDownloadManager?style=flat)
+![GitHub all releases](https://img.shields.io/github/downloads/adel-bakhshi/CrossPlatformDownloadManager/total?style=flat)
 
 ---
 
@@ -161,7 +162,7 @@ For more details, see the project's [GitHub Page](https://github.com/adel-bakhsh
 
 ## 📜 License
 
-This project is licensed under the terms of the [AGPL-3 License](https://github.com/adel-bakhshi/CrossPlatformDownloadManager?tab=readme-ov-file#). Feel free to use, modify, and distribute the software as per the license agreement.
+This project is licensed under the terms of the [AGPL-3 License](https://github.com/adel-bakhshi/CrossPlatformDownloadManager?tab=AGPL-3.0-1-ov-file#). Feel free to use, modify, and distribute the software as per the license agreement.
 
 ---
 

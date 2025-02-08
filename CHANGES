@@ -1,3 +1,13 @@
+- Version 0.2.0; 2025-02-06
+
+* Updated Application Icon: The application now features a new, modern icon.
+* User Interface Enhancements:
+  - Added the ability to choose between using the Manager or the System Tray for better flexibility.
+  - Introduced a Global Speed Limit indicator in the status bar for easier monitoring of download speeds.
+  - You can now close the download window without interrupting active downloads.
+  - Added multiple functions triggered by double-clicking on the download table for improved usability.
+* Bug Fixes: Resolved several minor bugs to improve overall stability and performance.
+
 - Version 0.1.0; 2025-01-31
 
 * Initial release

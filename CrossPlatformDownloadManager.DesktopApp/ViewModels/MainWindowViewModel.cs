@@ -932,7 +932,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             await HideContextMenuAsync();
 
-            if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsDownloading: true } downloadFile
+            if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true, IsStopping: false } downloadFile
                 || downloadFile.SaveLocation.IsNullOrEmpty()
                 || downloadFile.FileName.IsNullOrEmpty())
             {
@@ -946,7 +946,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+            PlatformSpecificManager.OpenFile(filePath);
         }
         catch (Exception ex)
         {

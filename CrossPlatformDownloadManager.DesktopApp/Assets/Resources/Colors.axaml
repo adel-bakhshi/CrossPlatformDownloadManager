@@ -22,9 +22,9 @@
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#0F8814"
+            <GradientStop Color="#09A500"
                           Offset="0" />
-            <GradientStop Color="#5CA813"
+            <GradientStop Color="#0ABA00"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -33,9 +33,9 @@
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#2C3DC1"
+            <GradientStop Color="#0A20CC"
                           Offset="0" />
-            <GradientStop Color="#3A8ACC"
+            <GradientStop Color="#2459BC"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -44,9 +44,9 @@
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#980C0C"
+            <GradientStop Color="#CF0509"
                           Offset="0" />
-            <GradientStop Color="#9E165C"
+            <GradientStop Color="#DD0030"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -55,9 +55,9 @@
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#D22700"
+            <GradientStop Color="#EA2F00"
                           Offset="0" />
-            <GradientStop Color="#B76834"
+            <GradientStop Color="#DF4812"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -66,9 +66,11 @@
                          StartPoint="0%, 50%"
                          EndPoint="100%, 50%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#00DBDE"
+            <GradientStop Color="#007BFF"
                           Offset="0" />
-            <GradientStop Color="#FC00FF"
+            <GradientStop Color="#8000FF"
+                          Offset="0.5" />
+            <GradientStop Color="#FF007F"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -88,9 +90,9 @@
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#0F8814"
+            <GradientStop Color="#09A500"
                           Offset="0" />
-            <GradientStop Color="#5CA813"
+            <GradientStop Color="#0ABA00"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>

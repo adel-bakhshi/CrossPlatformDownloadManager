@@ -28,17 +28,17 @@ Below are some screenshots showcasing the key features of CDM:
 
 ### Main Interface
 
-![Main Interface](https://i.imghippo.com/files/lZA2254kks.png)  
+![Main Interface](https://i.imghippo.com/files/My7601Ow.png)  
 _The primary interface where you can manage your downloads._
 
 ### Download
 
-![Download Window](https://i.imghippo.com/files/N8202oLU.png)  
+![Download Window](https://i.imghippo.com/files/Y4484BE.png)  
 _Easily download your file and see its status._
 
 ### Settings
 
-![Settings Window](https://i.imghippo.com/files/Tip6814Pu.png)  
+![Settings Window](https://i.imghippo.com/files/sP2053pNc.png)  
 _Easily adjust the app settings to fit your preferences.._
 
 ---
@@ -78,7 +78,22 @@ Since we haven't been able to publish the browser extension on the Chrome Web St
 
 #### **For Firefox:**
 
-Firefox support for the extension is **coming soon**! Stay tuned for updates as we work on bringing this functionality to more browsers.
+1. **Download the Extension:**  
+   Visit the [official Mozilla Add-ons page](https://addons.mozilla.org/en-US/firefox/addon/cdm-browser-extension/) and click the **Add to Firefox** button.
+
+2. **Install the Extension:**  
+   After clicking **Add to Firefox**, follow the prompts to complete the installation. Once installed, the extension will appear in your list of add-ons.
+
+3. **You're All Set!** The extension will now be installed and ready to use in Firefox.
+
+> **Note:** The Firefox extension is fully supported and maintained under the same GitHub project as the Chromium-based extension: [Github project link](https://github.com/adel-bakhshi/cdm-browser-extension). Release updates are synchronized across both platforms.
+
+---
+
+### Additional Notes:
+
+- Both the Chromium-based and Firefox extensions are built and maintained under the same GitHub project. This ensures consistent functionality and updates across all supported browsers.
+- If you encounter any issues during installation or usage, please [report the issue](https://github.com/adel-bakhshi/cdm-browser-extension/issues) so we can assist you.
 
 ---
 
@@ -90,7 +105,7 @@ Firefox support for the extension is **coming soon**! Stay tuned for updates as 
 - **Cross-Platform Support:** Works seamlessly on Windows, macOS, and Linux.
 - **Faster Download Speeds:** Utilizes multi-threaded downloading for maximum efficiency.
 - **Download Queues:** Manage multiple downloads effortlessly with automatic queue processing.
-- **Browser Extension:** Capture download links directly from Google Chrome or Other Chromium-Based Browsers (with upcoming support for Firefox).
+- **Browser Extension:** Capture download links directly from Google Chrome, Firefox, and other Chromium-Based Browsers.
 - **Pause & Resume:** Temporarily stop downloads and resume them later without losing progress.
 - **Speed Limiting:** Control bandwidth usage by setting download speed caps.
 - **User-Friendly Interface:** Intuitive design for both beginners and advanced users.
@@ -207,7 +222,6 @@ We're committed to making CDM better with every update. Here are some ideas we'r
 ### **For the Browser Extension:**
 
 - **Publishing the Extension:** We are actively working on publishing the extension to the Chrome Web Store. While we've encountered some challenges, your support and patience will help us complete this process.
-- **Firefox Support:** Expand browser extension support to Firefox.
 - **Stream Downloads:** Add the ability to download streams such as movies, music, and live content.
 - **Batch Link Handling:** Enable users to capture and add multiple links at once instead of adding them individually.
 

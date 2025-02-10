@@ -1,3 +1,14 @@
+- Version 0.2.1; 2025-02-10
+
+* Bug Fixes:
+
+  - Fixed an issue where files would not open correctly from the right-click menu in the download list.
+  - Resolved a problem with the application failing to start on Windows startup.
+
+* Enhancements:
+  - Updated color scheme: Improved the app's visual design by adjusting some colors for better user experience.
+  - Added Firefox support: The extension is now fully compatible with Firefox, in addition to Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera.
+
 - Version 0.2.0; 2025-02-06
 
 * Updated Application Icon: The application now features a new, modern icon.

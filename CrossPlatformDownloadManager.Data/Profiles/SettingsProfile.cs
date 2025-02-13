@@ -15,8 +15,8 @@ public class SettingsProfile : Profile
             .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => MapDataGridColumnsSettings(src.DataGridColumnsSettings)));
 
         CreateMap<SettingsViewModel, Settings>()
-            .ForMember(dest => dest.ManagerPoint, opt => opt.MapFrom(src => src.ManagerPoint.ConvertToJson()))
-            .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => src.DataGridColumnsSettings.ConvertToJson()));
+            .ForMember(dest => dest.ManagerPoint, opt => opt.MapFrom(src => src.ManagerPoint.ConvertToJson(null)))
+            .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => src.DataGridColumnsSettings.ConvertToJson(null)));
     }
 
     private static PointViewModel? MapPoint(string? point)

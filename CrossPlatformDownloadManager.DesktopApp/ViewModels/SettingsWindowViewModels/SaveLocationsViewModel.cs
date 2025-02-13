@@ -40,6 +40,7 @@ public class SaveLocationsViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedCategory, value);
+            this.RaisePropertyChanged(nameof(IsGeneralCategory));
             LoadFileExtensions();
         }
     }
@@ -49,6 +50,8 @@ public class SaveLocationsViewModel : ViewModelBase
         get => _fileTypesViewModel;
         set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
     }
+    
+    public bool IsGeneralCategory => SelectedCategory != null && SelectedCategory.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase);
 
     #endregion
 
@@ -183,7 +186,7 @@ public class SaveLocationsViewModel : ViewModelBase
         var categories = AppService
             .CategoryService
             .Categories
-            .Where(c => !c.Title.Equals(Constants.GeneralCategoryTitle))
+            .Select(c => c.DeepCopy(ignoreLoops: true)!)
             .ToObservableCollection();
 
         Categories.UpdateCollection(categories, c => c.Id);

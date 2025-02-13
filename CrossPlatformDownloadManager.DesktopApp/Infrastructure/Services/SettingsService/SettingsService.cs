@@ -137,8 +137,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         if (Settings.StartOnSystemStartup)
         {
-            if (!PlatformSpecificManager.IsStartupRegistered())
-                PlatformSpecificManager.RegisterStartup();
+            RegisterStartup();
         }
         else
         {

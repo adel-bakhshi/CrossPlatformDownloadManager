@@ -1,3 +1,8 @@
+- Version 0.2.2
+
+* Bug Fixes:
+  - Fixed the issue with changing the save location of categories. You can now change the save location for categories.
+
 - Version 0.2.1; 2025-02-10
 
 * Bug Fixes:

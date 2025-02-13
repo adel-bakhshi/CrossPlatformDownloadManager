@@ -293,7 +293,7 @@
             <!-- Dialog message -->
             <ScrollViewer Grid.Row="1"
                           HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Auto"
                           Margin="20, 0">
                 <TextBlock Text="{Binding DialogMessage}"
                            TextWrapping="Wrap" />

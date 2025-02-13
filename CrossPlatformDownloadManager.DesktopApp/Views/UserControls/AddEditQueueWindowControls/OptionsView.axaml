@@ -187,7 +187,7 @@
 
     <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden">
+                  VerticalScrollBarVisibility="Auto">
         <StackPanel Orientation="Vertical"
                     Spacing="15">
             <!-- Must have 20px margin bottom. 15px spacing + 5px margin bottom -->

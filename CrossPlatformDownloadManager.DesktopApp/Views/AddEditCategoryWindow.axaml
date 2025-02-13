@@ -24,7 +24,7 @@
         <!-- Main content -->
         <ScrollViewer Grid.Row="0"
                       HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Hidden">
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical"
                         Spacing="15">
                 <!-- Category title -->

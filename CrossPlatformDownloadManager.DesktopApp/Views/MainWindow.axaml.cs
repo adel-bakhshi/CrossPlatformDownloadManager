@@ -8,8 +8,8 @@ using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,15 +86,27 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         {
             base.OnLoaded(e);
 
+            // Get settings service and show manager if needed
             var serviceProvider = this.GetServiceProvider();
-            var appService = serviceProvider.GetService<IAppService>();
-            var trayMenuWindow = serviceProvider.GetService<TrayMenuWindow>();
-            var vm = new ManagerWindowViewModel(appService!, trayMenuWindow!);
-            var window = new ManagerWindow { DataContext = vm };
-            window.Show();
+            var settingsService = serviceProvider.GetService<ISettingsService>() ?? throw new InvalidOperationException("Settings service not found");
+            if (settingsService.Settings.UseManager)
+                settingsService.ShowManager();
 
+            // Start download queues manager timer to manage queues
             var downloadQueueService = serviceProvider.GetService<IDownloadQueueService>();
             downloadQueueService!.StartScheduleManagerTimer();
+
+            // Check if application has been run yet.
+            // If application has been run before, hide window
+            if (settingsService.Settings.HasApplicationBeenRunYet)
+            {
+                Hide();
+            }
+            else
+            {
+                settingsService.Settings.HasApplicationBeenRunYet = true;
+                await settingsService.SaveSettingsAsync(settingsService.Settings, reloadData: true);
+            }
         }
         catch (Exception ex)
         {

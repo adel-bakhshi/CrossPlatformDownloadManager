@@ -20,6 +20,7 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
     private double? _speedLimit;
     private ObservableCollection<string> _speedUnits = [];
     private string? _selectedSpeedUnit;
+    private string? _speedLimitInfo;
 
     #endregion
 
@@ -33,7 +34,8 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _isSpeedLimiterEnabled, value);
             if (!value)
                 SpeedLimit = null;
-            
+
+            ChangeSpeedLimitInfo();
             RaiseSpeedLimiterChanged();
         }
     }
@@ -44,7 +46,8 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _speedLimit, value);
-            
+            ChangeSpeedLimitInfo();
+
             // Restart timer
             _speedLimitValueChangedTimer.Stop();
             _speedLimitValueChangedTimer.Start();
@@ -63,8 +66,15 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedSpeedUnit, value);
+            ChangeSpeedLimitInfo();
             RaiseSpeedLimiterChanged();
         }
+    }
+
+    public string? SpeedLimitInfo
+    {
+        get => _speedLimitInfo;
+        set => this.RaiseAndSetIfChanged(ref _speedLimitInfo, value);
     }
 
     #endregion
@@ -79,10 +89,12 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
     {
         _speedLimitValueChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _speedLimitValueChangedTimer.Tick += SpeedLimitValueChangedTimerOnTick;
-        
+
         SpeedUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         SelectedSpeedUnit = SpeedUnits.FirstOrDefault();
     }
+
+    #region Helpers
 
     private void SpeedLimitValueChangedTimerOnTick(object? sender, EventArgs e)
     {
@@ -99,4 +111,17 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
             Unit = SelectedSpeedUnit
         });
     }
+
+    private void ChangeSpeedLimitInfo()
+    {
+        if (!IsSpeedLimiterEnabled || SpeedLimit == null || SpeedLimit <= 0)
+        {
+            SpeedLimitInfo = "Speed limiter is disabled";
+            return;
+        }
+
+        SpeedLimitInfo = $"Your download speed is limited to a maximum of {SpeedLimit} {SelectedSpeedUnit}/s";
+    }
+
+    #endregion
 }

@@ -9,149 +9,22 @@
              d:DesignHeight="450"
              x:Class="CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls.DownloadsView"
              x:DataType="vm:DownloadsViewModel">
-    
+
     <!-- Content -->
-    <StackPanel Orientation="Vertical"
-                Spacing="15">
-        <!-- Show start download dialog -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Show start download dialog"
-                           FontWeight="Bold" />
-
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding ShowStartDownloadDialog}" />
-            </Grid>
-        </Border>
-
-        <!-- Show complete download dialog -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Show complete download dialog"
-                           FontWeight="Bold" />
-
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding ShowCompleteDownloadDialog}" />
-            </Grid>
-        </Border>
-
-        <!-- Duplicate download link action -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid RowDefinitions="Auto, *">
-                <!-- Title -->
-                <TextBlock Grid.Row="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Duplicate download link action"
-                           FontWeight="Bold"
-                           Margin="0, 0, 0, 10" />
-
-                <cc:CustomComboBox Grid.Row="1"
-                                   PlaceholderText="Duplicate download link action"
-                                   Background="{DynamicResource PrimaryColor}"
-                                   ToggleIconColor="{DynamicResource TertiaryColor}"
-                                   OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                   IconData="{DynamicResource SignsPostSvgIcon}"
-                                   IconColor="{DynamicResource IconColor}"
-                                   IconSize="{DynamicResource SmallIconSize}"
-                                   BorderThickness="0"
-                                   SelectedItem="{Binding SelectedDuplicateDownloadLinkAction}"
-                                   ItemsSource="{Binding DuplicateDownloadLinkActions}"
-                                   MaxDropDownHeight="300"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Stretch">
-                    <cc:CustomComboBox.ItemTemplate>
-                        <DataTemplate DataType="x:String">
-                            <TextBlock Text="{Binding}" />
-                        </DataTemplate>
-                    </cc:CustomComboBox.ItemTemplate>
-                </cc:CustomComboBox>
-            </Grid>
-        </Border>
-
-        <!-- Maximum connections count -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <Grid RowDefinitions="Auto, *">
-                <!-- Title -->
-                <TextBlock Grid.Row="0"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           TextAlignment="Left"
-                           Text="Maximum connections count"
-                           FontWeight="Bold"
-                           Margin="0, 0, 0, 10" />
-
-                <cc:CustomComboBox Grid.Row="1"
-                                   PlaceholderText="Maximum connections count"
-                                   Background="{DynamicResource PrimaryColor}"
-                                   ToggleIconColor="{DynamicResource TertiaryColor}"
-                                   OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                   IconData="{DynamicResource ArrowsDownToLineSvgIcon}"
-                                   IconColor="{DynamicResource IconColor}"
-                                   IconSize="{DynamicResource SmallIconSize}"
-                                   BorderThickness="0"
-                                   SelectedItem="{Binding SelectedMaximumConnectionsCount}"
-                                   ItemsSource="{Binding MaximumConnectionsCount}"
-                                   MaxDropDownHeight="300"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Stretch">
-                    <cc:CustomComboBox.ItemTemplate>
-                        <DataTemplate DataType="x:Int32">
-                            <TextBlock Text="{Binding}" />
-                        </DataTemplate>
-                    </cc:CustomComboBox.ItemTemplate>
-                </cc:CustomComboBox>
-            </Grid>
-        </Border>
-
-        <!-- Limit download speed -->
-        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Padding="15"
-                Background="{DynamicResource SecondaryColor}">
-            <StackPanel Orientation="Vertical"
-                        Spacing="10">
-                <!-- Title and switch -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel Orientation="Vertical"
+                    Spacing="15">
+            <!-- Show start download dialog -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
                 <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
-                               Text="Limit download speed"
-                               VerticalAlignment="Center"
                                HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
                                TextAlignment="Left"
+                               Text="Show start download dialog"
                                FontWeight="Bold" />
 
                     <ToggleSwitch Grid.Column="1"
@@ -164,42 +37,61 @@
                                   HorizontalContentAlignment="Right"
                                   VerticalContentAlignment="Center"
                                   Width="40"
-                                  IsChecked="{Binding IsSpeedLimiterEnabled}" />
+                                  IsChecked="{Binding ShowStartDownloadDialog}" />
                 </Grid>
+            </Border>
 
-                <!-- Speed and unit -->
+            <!-- Show complete download dialog -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
                 <Grid ColumnDefinitions="*, Auto">
-                    <!-- Speed  -->
-                    <cc:CustomNumericUpDown Grid.Column="0"
-                                            Watermark="Maximum download speed"
-                                            WatermarkForeground="{DynamicResource TertiaryColor}"
-                                            Padding="12, 10"
-                                            CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                            Background="{DynamicResource PrimaryColor}"
-                                            IconData="{DynamicResource BanSvgIcon}"
-                                            IconColor="{DynamicResource IconColor}"
-                                            IconSize="{DynamicResource SmallIconSize}"
-                                            BorderThickness="0"
-                                            HorizontalAlignment="Stretch"
-                                            VerticalAlignment="Center"
-                                            IsEnabled="{Binding IsSpeedLimiterEnabled}"
-                                            Value="{Binding SpeedLimit}"
-                                            ShowButtonSpinner="False"
-                                            Increment="1"
-                                            Minimum="0"
-                                            ClipValueToMinMax="True"
-                                            Margin="0, 0, 10, 0" />
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Show complete download dialog"
+                               FontWeight="Bold" />
 
-                    <!-- Unit -->
-                    <cc:CustomComboBox Grid.Column="1"
-                                       PlaceholderText="Unit"
-                                       MinWidth="80"
+                    <ToggleSwitch Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding ShowCompleteDownloadDialog}" />
+                </Grid>
+            </Border>
+
+            <!-- Duplicate download link action -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <Grid RowDefinitions="Auto, *">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Duplicate download link action"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 10" />
+
+                    <cc:CustomComboBox Grid.Row="1"
+                                       PlaceholderText="Duplicate download link action"
                                        Background="{DynamicResource PrimaryColor}"
                                        ToggleIconColor="{DynamicResource TertiaryColor}"
                                        OnHoverToggleIconColor="{DynamicResource TextColor}"
-                                       ItemsSource="{Binding SpeedUnits}"
-                                       SelectedItem="{Binding SelectedSpeedUnit}"
-                                       IsEnabled="{Binding IsSpeedLimiterEnabled}"
+                                       IconData="{DynamicResource SignsPostSvgIcon}"
+                                       IconColor="{DynamicResource IconColor}"
+                                       IconSize="{DynamicResource SmallIconSize}"
+                                       BorderThickness="0"
+                                       SelectedItem="{Binding SelectedDuplicateDownloadLinkAction}"
+                                       ItemsSource="{Binding DuplicateDownloadLinkActions}"
                                        MaxDropDownHeight="300"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Stretch">
@@ -210,7 +102,124 @@
                         </cc:CustomComboBox.ItemTemplate>
                     </cc:CustomComboBox>
                 </Grid>
-            </StackPanel>
-        </Border>
-    </StackPanel>
+            </Border>
+
+            <!-- Maximum connections count -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <Grid RowDefinitions="Auto, *">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Maximum connections count"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 10" />
+
+                    <cc:CustomComboBox Grid.Row="1"
+                                       PlaceholderText="Maximum connections count"
+                                       Background="{DynamicResource PrimaryColor}"
+                                       ToggleIconColor="{DynamicResource TertiaryColor}"
+                                       OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                       IconData="{DynamicResource ArrowsDownToLineSvgIcon}"
+                                       IconColor="{DynamicResource IconColor}"
+                                       IconSize="{DynamicResource SmallIconSize}"
+                                       BorderThickness="0"
+                                       SelectedItem="{Binding SelectedMaximumConnectionsCount}"
+                                       ItemsSource="{Binding MaximumConnectionsCount}"
+                                       MaxDropDownHeight="300"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Stretch">
+                        <cc:CustomComboBox.ItemTemplate>
+                            <DataTemplate DataType="x:Int32">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomComboBox.ItemTemplate>
+                    </cc:CustomComboBox>
+                </Grid>
+            </Border>
+
+            <!-- Limit download speed -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <StackPanel Orientation="Vertical"
+                            Spacing="5">
+                    <!-- Title and switch -->
+                    <Grid ColumnDefinitions="*, Auto"
+                          Margin="0, 0, 0, 5">
+                        <TextBlock Grid.Column="0"
+                                   Text="Limit download speed"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   TextAlignment="Left"
+                                   FontWeight="Bold" />
+
+                        <ToggleSwitch Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40"
+                                      IsChecked="{Binding IsSpeedLimiterEnabled}" />
+                    </Grid>
+
+                    <!-- Speed and unit -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <!-- Speed  -->
+                        <cc:CustomNumericUpDown Grid.Column="0"
+                                                Watermark="Maximum download speed"
+                                                WatermarkForeground="{DynamicResource TertiaryColor}"
+                                                Padding="12, 10"
+                                                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                                Background="{DynamicResource PrimaryColor}"
+                                                IconData="{DynamicResource BanSvgIcon}"
+                                                IconColor="{DynamicResource IconColor}"
+                                                IconSize="{DynamicResource SmallIconSize}"
+                                                BorderThickness="0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                IsEnabled="{Binding IsSpeedLimiterEnabled}"
+                                                Value="{Binding SpeedLimit}"
+                                                ShowButtonSpinner="False"
+                                                Increment="1"
+                                                Minimum="0"
+                                                ClipValueToMinMax="True"
+                                                Margin="0, 0, 10, 0" />
+
+                        <!-- Unit -->
+                        <cc:CustomComboBox Grid.Column="1"
+                                           PlaceholderText="Unit"
+                                           MinWidth="80"
+                                           Background="{DynamicResource PrimaryColor}"
+                                           ToggleIconColor="{DynamicResource TertiaryColor}"
+                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           ItemsSource="{Binding SpeedUnits}"
+                                           SelectedItem="{Binding SelectedSpeedUnit}"
+                                           IsEnabled="{Binding IsSpeedLimiterEnabled}"
+                                           MaxDropDownHeight="300"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+                    </Grid>
+
+                    <!-- Speed limit info -->
+                    <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                               FontStyle="Italic"
+                               Text="{Binding SpeedLimitInfo}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

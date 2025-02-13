@@ -21,6 +21,7 @@ public class DownloadsViewModel : ViewModelBase
     private double? _speedLimit;
     private ObservableCollection<string> _speedUnits = [];
     private string? _selectedSpeedUnit;
+    private string? _speedLimitInfo;
 
     #endregion
 
@@ -65,13 +66,21 @@ public class DownloadsViewModel : ViewModelBase
     public bool IsSpeedLimiterEnabled
     {
         get => _isSpeedLimiterEnabled;
-        set => this.RaiseAndSetIfChanged(ref _isSpeedLimiterEnabled, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isSpeedLimiterEnabled, value);
+            ChangeSpeedLimitInfo();
+        }
     }
 
     public double? SpeedLimit
     {
         get => _speedLimit;
-        set => this.RaiseAndSetIfChanged(ref _speedLimit, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _speedLimit, value);
+            ChangeSpeedLimitInfo();
+        }
     }
 
     public ObservableCollection<string> SpeedUnits
@@ -83,7 +92,17 @@ public class DownloadsViewModel : ViewModelBase
     public string? SelectedSpeedUnit
     {
         get => _selectedSpeedUnit;
-        set => this.RaiseAndSetIfChanged(ref _selectedSpeedUnit, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedSpeedUnit, value);
+            ChangeSpeedLimitInfo();
+        }
+    }
+
+    public string? SpeedLimitInfo
+    {
+        get => _speedLimitInfo;
+        set => this.RaiseAndSetIfChanged(ref _speedLimitInfo, value);
     }
 
     #endregion
@@ -112,6 +131,17 @@ public class DownloadsViewModel : ViewModelBase
         IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled;
         SpeedLimit = settings.LimitSpeed;
         SelectedSpeedUnit = SpeedUnits.FirstOrDefault(su => su.Equals(settings.LimitUnit)) ?? SpeedUnits.FirstOrDefault();
+    }
+
+    private void ChangeSpeedLimitInfo()
+    {
+        if (!IsSpeedLimiterEnabled || SpeedLimit == null || SpeedLimit <= 0)
+        {
+            SpeedLimitInfo = "Global speed limiter is disabled";
+            return;
+        }
+
+        SpeedLimitInfo = $"Your download speed is limited to a maximum of {SpeedLimit} {SelectedSpeedUnit}/s per file";
     }
 
     #endregion

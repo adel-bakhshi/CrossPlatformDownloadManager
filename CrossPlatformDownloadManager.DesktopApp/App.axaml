@@ -34,6 +34,7 @@
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/FlyoutPresenterStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuFlyoutPresenterStyle.axaml" />
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/HyperlinkButtonStyle.axaml" />
+        <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Styles/ScrollBarStyle.axaml" />
 
         <!-- Custom Controls Themes -->
         <StyleInclude Source="avares://CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" />

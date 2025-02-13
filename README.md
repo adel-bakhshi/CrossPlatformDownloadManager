@@ -1,6 +1,6 @@
 # 🌐 Cross Platform Download Manager (CDM)
 
-![CDM Banner](https://i.imghippo.com/files/MyJ1642OPo.png)
+![CDM Banner](https://i.imghippo.com/files/bWZH1863FvY.png)
 
 ---
 

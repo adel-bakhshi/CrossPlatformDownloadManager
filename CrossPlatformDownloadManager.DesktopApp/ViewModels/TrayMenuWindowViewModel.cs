@@ -106,10 +106,12 @@ public class TrayMenuWindowViewModel : ViewModelBase
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
     }
 
-    private static async Task OpenMainWindowAsync()
+    private async Task OpenMainWindowAsync()
     {
         try
         {
+            HideTrayMenu();
+            
             var mainWindow = App.Desktop?.MainWindow;
             if (mainWindow == null)
                 throw new InvalidOperationException("Could not find main window.");

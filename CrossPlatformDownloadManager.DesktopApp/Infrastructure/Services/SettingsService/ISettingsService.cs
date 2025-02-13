@@ -41,4 +41,8 @@ public interface ISettingsService
     Task UseSystemProxySettingsAsync();
 
     Task UseCustomProxyAsync(ProxySettingsViewModel? viewModel);
+
+    void ShowManager();
+    
+    void HideManager();
 }

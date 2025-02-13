@@ -2,13 +2,19 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Avalonia;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using Microsoft.Extensions.DependencyInjection;
+using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
@@ -21,6 +27,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     private readonly IMapper _mapper;
 
     private bool _isSettingsSets;
+    private ManagerWindow? _managerWindow;
 
     private SettingsViewModel _settings = null!;
 
@@ -135,14 +142,27 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (reloadData)
             await LoadSettingsAsync();
 
+        // Register or delete the program from Startup.
         if (Settings.StartOnSystemStartup)
         {
-            RegisterStartup();
+            if (!PlatformSpecificManager.IsStartupRegistered())
+                RegisterStartup();
         }
         else
         {
             if (PlatformSpecificManager.IsStartupRegistered())
                 PlatformSpecificManager.DeleteStartup();
+        }
+
+        // Show or hide the manager.
+        if (Settings.UseManager)
+        {
+            if (_managerWindow == null)
+                ShowManager();
+        }
+        else
+        {
+            HideManager();
         }
     }
 
@@ -292,6 +312,27 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         Settings.ProxyMode = ProxyMode.UseCustomProxy;
         Settings.ProxyType = proxyType;
         await SaveSettingsAsync(Settings);
+    }
+
+    public void ShowManager()
+    {
+        var serviceProvider = Application.Current?.GetServiceProvider();
+        var appService = serviceProvider?.GetService<IAppService>();
+        var trayMenuWindow = serviceProvider?.GetService<TrayMenuWindow>();
+        if (appService == null || trayMenuWindow == null)
+            throw new InvalidOperationException("App service or tray menu window not found.");
+
+        var vm = new ManagerWindowViewModel(appService, trayMenuWindow);
+        var window = new ManagerWindow { DataContext = vm };
+        window.Show();
+
+        _managerWindow = window;
+    }
+
+    public void HideManager()
+    {
+        _managerWindow?.Close();
+        _managerWindow = null;
     }
 
     #region Helpers

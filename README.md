@@ -152,20 +152,23 @@ If you find **Cross Platform Download Manager (CDM)** useful and would like to s
   </thead>
   <tbody>
     <tr>
-      <td>
-        <img src="./Currency/Bitcoin.jpeg" width="500px" alt="Donate via Bitcoin">
-         **Bitcoin Address:** 
-         `bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k`
+      <td align="center">
+        <img src="./Currency/Bitcoin.jpeg" width="200px" alt="Donate via Bitcoin">
+         <br>
+         Bitcoin Address:
+         bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k
       </td>
-      <td>
-        <img src="./Currency/Ethereum.jpeg" width="500px" alt="Donate via Tether">
-         **Ethereum Address:** 
-         `0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27`
+      <td align="center">
+        <img src="./Currency/Ethereum.jpeg" width="200px" alt="Donate via Tether">
+         <br>
+         Ethereum Address:
+         0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27
       </td>
-       <td>
-        <img src="./Currency/Tether.jpeg" width="500px" alt="Donate via Tether">
-          **Tether Address:** 
-          `TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu`
+       <td align="center">
+        <img src="./Currency/Tether.jpeg" width="200px" alt="Donate via Tether">
+          <br>
+          Tether Address:
+          TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu
       </td>
     </tr>
   </tbody>

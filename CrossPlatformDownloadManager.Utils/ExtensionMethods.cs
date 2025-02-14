@@ -18,9 +18,9 @@ public static class ExtensionMethods
         return json.IsNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!);
     }
 
-    public static string ConvertToJson(this object? value)
+    public static string ConvertToJson(this object? value, JsonSerializerSettings? serializerSettings = null)
     {
-        return JsonConvert.SerializeObject(value);
+        return JsonConvert.SerializeObject(value, serializerSettings);
     }
 
     public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T>? items)
@@ -232,10 +232,20 @@ public static class ExtensionMethods
         return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
     }
 
-    public static T? DeepCopy<T>(this T? obj)
+    public static T? DeepCopy<T>(this T? obj, JsonSerializerSettings? serializerSettings = null)
     {
-        var json = obj.ConvertToJson();
+        var json = obj.ConvertToJson(serializerSettings);
         return json.ConvertFromJson<T>();
+    }
+
+    public static T? DeepCopy<T>(this T? obj, bool ignoreLoops)
+    {
+        var serializerSettings = new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
+
+        return DeepCopy(obj, serializerSettings);
     }
 
     public static void UpdateList<T, TKey>(this List<T> oldList, List<T> newList, Func<T, TKey> keySelector) where TKey : notnull
@@ -333,17 +343,17 @@ public static class ExtensionMethods
 
         foreach (ZipEntry entry in zipFile)
         {
-            if (entry.Size <= 0) 
+            if (entry.Size <= 0)
                 continue;
-            
+
             var targetFile = Path.Combine(destinationDir, entry.Name).Replace('/', '\\');
             var directoryPath = Path.GetDirectoryName(targetFile);
             if (directoryPath.IsNullOrEmpty())
                 continue;
-            
+
             if (!Directory.Exists(directoryPath))
                 Directory.CreateDirectory(directoryPath!);
-            
+
             await using var outputFile = File.Create(targetFile);
 
             await using var zippedStream = zipFile.GetInputStream(entry);
@@ -371,7 +381,7 @@ public static class ExtensionMethods
     {
         if (!url.CheckUrlValidation())
             return null;
-        
+
         var uri = new Uri(url!);
         return uri.Host;
     }
@@ -395,7 +405,7 @@ public static class ExtensionMethods
 
             var buffer = new byte[4096];
             await using var fileStream = File.OpenRead(file);
-            
+
             int sourceBytes;
             while ((sourceBytes = await fileStream.ReadAsync(buffer)) > 0)
             {

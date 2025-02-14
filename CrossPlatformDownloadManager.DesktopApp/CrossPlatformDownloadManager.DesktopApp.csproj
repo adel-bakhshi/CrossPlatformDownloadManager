@@ -8,7 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-        <AssemblyVersion>0.2.1</AssemblyVersion>
+        <AssemblyVersion>0.2.2</AssemblyVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,17 +31,17 @@
         <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.3" />
         <PackageReference Include="Downloader" Version="3.3.3" />
         <PackageReference Include="ManagedBass" Version="3.1.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.3.1" />
-        <PackageReference Include="Serilog" Version="4.2.1-dev-02337" />
+        <PackageReference Include="Serilog" Version="4.2.1-dev-02340" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
         <PackageReference Include="SharpZipLib" Version="1.4.2" />

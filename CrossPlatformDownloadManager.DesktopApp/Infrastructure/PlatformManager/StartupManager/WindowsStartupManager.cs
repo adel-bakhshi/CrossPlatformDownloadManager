@@ -22,17 +22,14 @@ public class WindowsStartupManager : IStartupManager
 
     public bool IsRegistered()
     {
-        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
-
+        var shortcutPath = GetShortcutPath();
         return File.Exists(shortcutPath);
     }
 
     public void Register()
     {
-        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
-        var exePath = Path.Combine(Constants.MainDirectory, $"{_appName}.exe");
+        var shortcutPath = GetShortcutPath();
+        var exePath = GetExePath();
 
         using var shortcut = new WindowsShortcut();
         shortcut.Path = exePath;
@@ -43,10 +40,23 @@ public class WindowsStartupManager : IStartupManager
 
     public void Delete()
     {
-        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
-        var shortcutPath = Path.Combine(startUpFolderPath, $"{_appName}.lnk");
-
+        var shortcutPath = GetShortcutPath();
         if (File.Exists(shortcutPath))
             File.Delete(shortcutPath);
     }
+
+    #region Helpers
+
+    private string GetShortcutPath()
+    {
+        var startUpFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        return Path.Combine(startUpFolderPath, $"{_appName}.lnk");
+    }
+
+    private string GetExePath()
+    {
+        return Path.Combine(Constants.MainDirectory, $"{_appName}.exe");
+    }
+
+    #endregion
 }

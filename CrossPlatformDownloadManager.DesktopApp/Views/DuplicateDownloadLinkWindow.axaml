@@ -30,7 +30,7 @@
         <!-- Radio buttons -->
         <ScrollViewer Grid.Row="1"
                       HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Hidden">
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical"
                         Spacing="10">
                 <!-- Add duplicate with number -->

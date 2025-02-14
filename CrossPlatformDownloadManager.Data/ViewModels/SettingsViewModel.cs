@@ -34,6 +34,7 @@ public class SettingsViewModel : PropertyChangedBase
     private PointViewModel? _managerPoint;
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
+    private bool _hasApplicationBeenRunYet;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -194,6 +195,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _dataGridColumnsSettings;
         set => SetField(ref _dataGridColumnsSettings, value);
+    }
+    
+    public bool HasApplicationBeenRunYet
+    {
+        get => _hasApplicationBeenRunYet;
+        set => SetField(ref _hasApplicationBeenRunYet, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

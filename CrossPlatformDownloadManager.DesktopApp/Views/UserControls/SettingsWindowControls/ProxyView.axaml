@@ -21,7 +21,7 @@
 
     <!-- Content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden">
+                  VerticalScrollBarVisibility="Auto">
         <StackPanel Orientation="Vertical"
                     Spacing="15">
             <!-- Disable proxy -->

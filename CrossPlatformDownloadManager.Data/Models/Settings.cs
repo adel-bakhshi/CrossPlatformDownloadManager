@@ -89,7 +89,10 @@ public class Settings : DbModelBase
     [MaxLength(5000)]
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
+    
+    public bool HasApplicationBeenRunYet { get; set; }
 
+    // ReSharper disable once CollectionNeverUpdated.Global
     public ICollection<ProxySettings> Proxies { get; } = [];
 
     public override void UpdateDbModel(DbModelBase? model)
@@ -121,5 +124,6 @@ public class Settings : DbModelBase
         ManagerPoint = settings.ManagerPoint;
         ShowCategoriesPanel = settings.ShowCategoriesPanel;
         DataGridColumnsSettings = settings.DataGridColumnsSettings;
+        HasApplicationBeenRunYet = settings.HasApplicationBeenRunYet;
     }
 }

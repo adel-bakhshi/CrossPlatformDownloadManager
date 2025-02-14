@@ -24,7 +24,7 @@
         <!-- Main content -->
         <ScrollViewer Grid.Row="0"
                       HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Hidden">
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical"
                         Spacing="15">
                 <!-- Category title -->
@@ -50,7 +50,8 @@
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
                         Background="{DynamicResource SecondaryColor}"
-                        MaxHeight="300">
+                        MaxHeight="300"
+                        IsVisible="{Binding !IsGeneralCategory}">
                     <Grid RowDefinitions="Auto, Auto, *">
                         <!-- Title bar -->
                         <TextBlock Grid.Row="0"
@@ -168,7 +169,8 @@
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
                         Background="{DynamicResource SecondaryColor}"
-                        MaxHeight="300">
+                        MaxHeight="300"
+                        IsVisible="{Binding !IsGeneralCategory}">
                     <Grid RowDefinitions="Auto, Auto, *">
                         <!-- Title bar -->
                         <TextBlock Grid.Row="0"

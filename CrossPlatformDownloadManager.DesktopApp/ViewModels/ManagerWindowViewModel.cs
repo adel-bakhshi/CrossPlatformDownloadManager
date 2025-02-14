@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -36,7 +35,6 @@ public class ManagerWindowViewModel : ViewModelBase
 
     public bool IsMenuVisible { get; set; }
     public PointViewModel? ManagerPoint => AppService.SettingsService.Settings.ManagerPoint;
-    public bool UseManager => AppService.SettingsService.Settings.UseManager;
     public bool AlwaysKeepManagerOnTop => AppService.SettingsService.Settings.AlwaysKeepManagerOnTop;
 
     #endregion
@@ -120,8 +118,6 @@ public class ManagerWindowViewModel : ViewModelBase
     protected override void OnSettingsServiceDataChanged()
     {
         base.OnSettingsServiceDataChanged();
-        
-        this.RaisePropertyChanged(nameof(UseManager));
         this.RaisePropertyChanged(nameof(AlwaysKeepManagerOnTop));
     }
 

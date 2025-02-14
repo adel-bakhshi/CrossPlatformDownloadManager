@@ -22,13 +22,13 @@ public class LinuxStartupManager : IStartupManager
 
     public bool IsRegistered()
     {
-        var desktopEntryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autostart", $"{_appName}.desktop");
+        var desktopEntryPath = GetDesktopEntryPath();
         return File.Exists(desktopEntryPath);
     }
 
     public void Register()
     {
-        var desktopEntryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autostart", $"{_appName}.desktop");
+        var desktopEntryPath = GetDesktopEntryPath();
         var desktopEntryContent = $"""
                                    [Desktop Entry]
                                    Type=Application
@@ -45,8 +45,17 @@ public class LinuxStartupManager : IStartupManager
 
     public void Delete()
     {
-        var desktopEntryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autostart", $"{_appName}.desktop");
+        var desktopEntryPath = GetDesktopEntryPath();
         if (File.Exists(desktopEntryPath))
             File.Delete(desktopEntryPath);
     }
+
+    #region Helpers
+
+    private string GetDesktopEntryPath()
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autostart", $"{_appName}.desktop");
+    }
+
+    #endregion
 }

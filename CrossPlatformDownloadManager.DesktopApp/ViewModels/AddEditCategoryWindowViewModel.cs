@@ -29,6 +29,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     private bool _isEditMode;
     private int? _categoryId;
     private bool _isDefaultCategory;
+    private bool _isGeneralCategory;
 
     #endregion
 
@@ -129,6 +130,12 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     {
         get => _isDefaultCategory;
         set => this.RaiseAndSetIfChanged(ref _isDefaultCategory, value);
+    }
+    
+    public bool IsGeneralCategory
+    {
+        get => _isGeneralCategory;
+        set => this.RaiseAndSetIfChanged(ref _isGeneralCategory, value);
     }
 
     public bool IsFileTypesDataGridVisible => FileExtensions.Count > 0;
@@ -390,7 +397,8 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
             CategoryTitle = category.Title;
             IsDefaultCategory = category.IsDefault;
-            FileExtensions = category.FileExtensions;
+            FileExtensions = category.FileExtensions.DeepCopy(ignoreLoops: true)!;
+            IsGeneralCategory = category.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase);
 
             var json = category.AutoAddLinkFromSites;
             SiteAddresses = json.IsNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();

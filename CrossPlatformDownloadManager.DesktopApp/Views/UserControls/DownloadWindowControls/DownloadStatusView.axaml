@@ -75,7 +75,7 @@
 
     <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden">
+                  VerticalScrollBarVisibility="Auto">
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto"
               ColumnDefinitions="Auto, *"
               HorizontalAlignment="Stretch"

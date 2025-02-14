@@ -12,16 +12,17 @@
 
     <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden">
+                  VerticalScrollBarVisibility="Auto">
         <Border Padding="15"
                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Background="{DynamicResource PrimaryColor}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Top">
             <StackPanel Orientation="Vertical"
-                        Spacing="10">
+                        Spacing="5">
                 <!-- Title and switch -->
-                <Grid ColumnDefinitions="*, Auto">
+                <Grid ColumnDefinitions="*, Auto"
+                      Margin="0, 0, 0, 5">
                     <TextBlock Grid.Column="0"
                                Text="Limit speed"
                                VerticalAlignment="Center"
@@ -85,6 +86,11 @@
                         </cc:CustomComboBox.ItemTemplate>
                     </cc:CustomComboBox>
                 </Grid>
+
+                <!-- Speed limit info -->
+                <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                           FontStyle="Italic"
+                           Text="{Binding SpeedLimitInfo}" />
             </StackPanel>
         </Border>
     </ScrollViewer>

@@ -19,7 +19,7 @@
 
     <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Auto"
                   Margin="20">
         <Grid ColumnDefinitions="Auto, *">
             <!-- Logo -->

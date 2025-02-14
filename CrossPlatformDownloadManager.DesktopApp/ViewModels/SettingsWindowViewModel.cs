@@ -140,6 +140,19 @@ public class SettingsWindowViewModel : ViewModelBase
                 throw new InvalidOperationException("An error occured while trying to save settings.");
             }
 
+            var categoryWithNoSaveDirectory = SaveLocationsViewModel
+                .Categories
+                .FirstOrDefault(c => c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
+
+            if (categoryWithNoSaveDirectory != null)
+            {
+                await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
+                    $"Please specify a save directory for the category '{categoryWithNoSaveDirectory.Title}'.",
+                    DialogButtons.Ok);
+                
+                return;
+            }
+
             // Validate settings before save
             if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
             {
@@ -203,6 +216,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 .Where(csd => csd is { CategoryId: not null } && primaryKeys.Contains(csd.CategoryId.Value))
                 .ToList();
 
+            var saveCategoryDirectories = false;
             foreach (var saveDirectory in saveDirectories)
             {
                 var category = SaveLocationsViewModel
@@ -214,8 +228,12 @@ public class SettingsWindowViewModel : ViewModelBase
 
                 saveDirectory.SaveDirectory = category.CategorySaveDirectory!.SaveDirectory;
                 // Update category save directory
-                await AppService.CategoryService.UpdateSaveDirectoryAsync(category, saveDirectory);
+                await AppService.CategoryService.UpdateSaveDirectoryAsync(category, saveDirectory, reloadData: false);
+                saveCategoryDirectories = true;
             }
+
+            if (saveCategoryDirectories)
+                await AppService.CategoryService.LoadCategoriesAsync();
 
             // Save downloads settings
             AppService.SettingsService.Settings.ShowStartDownloadDialog = DownloadsViewModel.ShowStartDownloadDialog;
@@ -270,10 +288,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseQueueFinishedSound = NotificationsViewModel.QueueFinished;
             AppService.SettingsService.Settings.UseSystemNotifications = NotificationsViewModel.UseSystemNotifications;
 
-            await AppService
-                .SettingsService
-                .SaveSettingsAsync(AppService.SettingsService.Settings);
-
+            await AppService.SettingsService.SaveSettingsAsync(AppService.SettingsService.Settings);
             owner.Close();
         }
         catch (Exception ex)

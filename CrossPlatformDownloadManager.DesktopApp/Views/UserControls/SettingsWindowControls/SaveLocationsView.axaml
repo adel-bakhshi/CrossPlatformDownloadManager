@@ -14,7 +14,7 @@
 
     <!-- Content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollBarVisibility="Hidden">
+                  VerticalScrollBarVisibility="Auto">
         <StackPanel Orientation="Vertical"
                     Spacing="15">
             <!-- Manage categories -->
@@ -111,6 +111,7 @@
 
             <!-- Manage file types -->
             <local:FileTypesView DataGridHeight="200"
+                                 IsVisible="{Binding !$parent[local:SaveLocationsView].((vm:SaveLocationsViewModel)DataContext).IsGeneralCategory}"
                                  DataContext="{Binding $parent[local:SaveLocationsView].((vm:SaveLocationsViewModel)DataContext).FileTypesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
 
             <!-- Manage save location -->

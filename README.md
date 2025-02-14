@@ -1,6 +1,6 @@
 # 🌐 Cross Platform Download Manager (CDM)
 
-![CDM Banner](https://i.imghippo.com/files/MyJ1642OPo.png)
+![CDM Banner](https://i.imghippo.com/files/bWZH1863FvY.png)
 
 ---
 
@@ -222,7 +222,6 @@ We're committed to making CDM better with every update. Here are some ideas we'r
 ### **For the Browser Extension:**
 
 - **Publishing the Extension:** We are actively working on publishing the extension to the Chrome Web Store. While we've encountered some challenges, your support and patience will help us complete this process.
-- **Stream Downloads:** Add the ability to download streams such as movies, music, and live content.
 - **Batch Link Handling:** Enable users to capture and add multiple links at once instead of adding them individually.
 
 Stay tuned for updates, and feel free to suggest features you'd like to see!

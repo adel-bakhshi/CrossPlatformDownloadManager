@@ -1,15 +1,18 @@
-- Version 0.2.2
+- Version 0.2.2; 2025-02-14
 
-* Bug Fixes:
-  - Fixed the issue with changing the save location of categories. You can now change the save location for categories.
+* Fixed Bugs:
+  - Resolved the issue where the save location for categories was not updating. You can now successfully set and change the save location for your categories.
+  - Fixed minor bugs to improve overall stability and performance.
+* Changes:
+  - Updated the styling of scrollbars for a smoother and more modern user experience.
+* Performance Improvements:
+  - Enhanced the overall performance of the application for faster and more efficient operation.
 
 - Version 0.2.1; 2025-02-10
 
 * Bug Fixes:
-
   - Fixed an issue where files would not open correctly from the right-click menu in the download list.
   - Resolved a problem with the application failing to start on Windows startup.
-
 * Enhancements:
   - Updated color scheme: Improved the app's visual design by adjusting some colors for better user experience.
   - Added Firefox support: The extension is now fully compatible with Firefox, in addition to Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera.

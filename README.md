@@ -1,6 +1,9 @@
-# 🌐 Cross Platform Download Manager (CDM)
-
-![CDM Banner](https://i.imghippo.com/files/bWZH1863FvY.png)
+<div align="center">
+   <a href="https://github.com/Rayiumir/Ranger" target="_blank">
+      <img src="./Deploy/cdm-logo.svg" width="300" alt="Ranger Logo">
+   </a>
+   <h4> Cross Platform Download Manager (CDM) </h4>
+</div>
 
 ---
 
@@ -26,20 +29,29 @@ _"A fast, free, and open-source download manager for Windows, macOS, and Linux."
 
 Below are some screenshots showcasing the key features of CDM:
 
-### Main Interface
 
-![Main Interface](https://i.imghippo.com/files/My7601Ow.png)  
-_The primary interface where you can manage your downloads._
-
-### Download
-
-![Download Window](https://i.imghippo.com/files/Y4484BE.png)  
-_Easily download your file and see its status._
-
-### Settings
-
-![Settings Window](https://i.imghippo.com/files/sP2053pNc.png)  
-_Easily adjust the app settings to fit your preferences.._
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col" width="1000px">Main Interface</th>
+      <th scope="col" width="1000px">Download</th>
+       <th scope="col" width="1000px">Settings</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <img src="./Screenshots/1.png" width="100%" alt="Main Interface">
+      </td>
+      <td>
+        <img src="./Screenshots/2.png" width="100%" alt="Download">
+      </td>
+       <td>
+        <img src="./Screenshots/3.png" width="100%" alt="Settings">
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
@@ -130,32 +142,37 @@ If you encounter any other issues, please report them via the [GitHub Issues Pag
 
 If you find **Cross Platform Download Manager (CDM)** useful and would like to support its development, consider making a donation. Your contributions help cover development costs and ensure the continued improvement of the program.
 
-### Donate via Bitcoin:
-
-**Bitcoin Address:** `bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k`
-
-You can also scan the QR code below to donate:
-
-<!-- ![Bitcoin QR Code](https://i.imghippo.com/files/HE3726Jbo.jpg)   -->
-<img src="https://i.imghippo.com/files/HE3726Jbo.jpg" alt="Bitcoin QR Code" width="200"/>
-
-### Donate via Ethereum:
-
-**Ethereum Address:** `0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27`
-
-You can also scan the QR code below to donate:
-
-<!-- ![Bitcoin QR Code](https://i.imghippo.com/files/HE3726Jbo.jpg)   -->
-<img src="https://i.imghippo.com/files/QWu8692hZw.jpg" alt="Bitcoin QR Code" width="200"/>
-
-### Donate via Tether:
-
-**Tether Address:** `TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu`
-
-You can also scan the QR code below to donate:
-
-<!-- ![Bitcoin QR Code](https://i.imghippo.com/files/HE3726Jbo.jpg)   -->
-<img src="https://i.imghippo.com/files/kEWb3852dU.jpg" alt="Bitcoin QR Code" width="200"/>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col" width="1000px">Donate via Bitcoin</th>
+      <th scope="col" width="1000px">Donate via Ethereum</th>
+       <th scope="col" width="1000px">Donate via Tether</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <img src="./Currency/Bitcoin.jpeg" width="200px" alt="Donate via Bitcoin">
+         <br>
+         Bitcoin Address:
+         bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k
+      </td>
+      <td align="center">
+        <img src="./Currency/Ethereum.jpeg" width="200px" alt="Donate via Tether">
+         <br>
+         Ethereum Address:
+         0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27
+      </td>
+       <td align="center">
+        <img src="./Currency/Tether.jpeg" width="200px" alt="Donate via Tether">
+          <br>
+          Tether Address:
+          TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 Thank you for your support! Every contribution makes a difference and helps keep CDM free and open-source for everyone.
 

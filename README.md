@@ -1,9 +1,6 @@
-<div align="center">
-   <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager" target="_blank">
-      <img src="./ScreenShots/banner.png" width="100%" alt="CDM Banner">
-   </a>
-   <h4> Cross platform Download Manager (CDM) </h4>
-</div>
+# 🌐 Cross Platform Download Manager (CDM)
+
+![CDM Banner](./Screenshots/banner.png)
 
 ---
 

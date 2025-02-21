@@ -123,7 +123,7 @@ public class DialogWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to copy dialog message to clipboard. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to copy dialog message to clipboard. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

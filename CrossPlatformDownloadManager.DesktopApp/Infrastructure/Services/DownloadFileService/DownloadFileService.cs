@@ -95,9 +95,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
 
         var viewModels = _mapper.Map<List<DownloadFileViewModel>>(downloadFiles);
-        var primaryKeys = viewModels
-            .Select(df => df.Id)
-            .ToList();
+        var primaryKeys = viewModels.ConvertAll(df => df.Id);
 
         var deletedDownloadFiles = DownloadFiles
             .Where(df => !primaryKeys.Contains(df.Id))
@@ -324,11 +322,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
             case ProxyMode.UseCustomProxy:
             {
-                var activeProxy = _settingsService
-                    .Settings
-                    .Proxies
-                    .FirstOrDefault(p => p.IsActive);
-
+                var activeProxy = _settingsService.Settings.Proxies.FirstOrDefault(p => p.IsActive);
                 if (activeProxy == null)
                     break;
 
@@ -712,10 +706,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check file name
         if (viewModel.FileName.IsNullOrEmpty())
         {
-            await DialogBoxManager.ShowDangerDialogAsync("File name", 
-                "Please provide a name for the file, ensuring it includes the appropriate extension.", 
+            await DialogBoxManager.ShowDangerDialogAsync("File name",
+                "Please provide a name for the file, ensuring it includes the appropriate extension.",
                 DialogButtons.Ok);
-            
+
             return false;
         }
 
@@ -834,11 +828,11 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
-        
+
         var downloadFileTask = _downloadFileTasks.Find(task => task.Key == downloadFile.Id);
         if (downloadFileTask == null)
             return;
-        
+
         Dispatcher.UIThread.Post(() => downloadFileTask.ShowOrFocusWindow());
     }
 

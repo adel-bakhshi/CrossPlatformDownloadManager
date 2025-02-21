@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +29,6 @@ public class BrowserExtension : IBrowserExtension
 
         // Initialize HttpListener
         _httpListener = new HttpListener();
-        _httpListener.Prefixes.Add(Constants.CheckFileTypeSupportUrl);
         _httpListener.Prefixes.Add(Constants.AddDownloadFileUrl);
     }
 
@@ -77,164 +75,101 @@ public class BrowserExtension : IBrowserExtension
 
     private async Task ProcessRequestAsync(HttpListenerContext context)
     {
+        var response = new ResponseViewModel
+        {
+            IsSuccessful = false,
+            Message = string.Empty
+        };
+
         try
         {
-            // Initialize variables
-            var request = context.Request;
-            var response = context.Response;
-            string? json;
-            byte[] buffer;
-            var result = new ResponseViewModel();
-
             // Check if browser extension is enabled
             var useBrowserExtension = _appService.SettingsService.Settings.UseBrowserExtension;
             if (!useBrowserExtension)
             {
-                result.IsSuccessful = false;
-                result.Message = "Browser extension is disabled. Please enable it and try again.";
-
-                json = result.ConvertToJson();
-                buffer = Encoding.UTF8.GetBytes(json);
-                response.ContentLength64 = buffer.Length;
-
-                await response.OutputStream.WriteAsync(buffer);
-                response.OutputStream.Close();
-
+                response.Message = "Browser extension is disabled. Please enable it and try again.";
+                await SendResponseAsync(context, response);
                 return;
             }
 
             // Make sure this is a POST request
-            if (!request.HttpMethod.Equals("POST"))
-                return;
-
-            using var reader = new StreamReader(request.InputStream);
-            json = await reader.ReadToEndAsync();
-
-            var requestViewModel = json.ConvertFromJson<RequestViewModel>();
-            if (requestViewModel == null)
-                return;
-
-            switch (request.Url?.OriginalString.ToLower())
+            if (!context.Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
             {
-                case Constants.CheckFileTypeSupportUrl:
+                response.Message = "We encountered an issue while processing your request. Please try again. If the problem persists, report it to be investigated.";
+                await SendResponseAsync(context, response);
+                return;
+            }
+
+            using var reader = new StreamReader(context.Request.InputStream);
+            var json = await reader.ReadToEndAsync();
+            if (json.IsNullOrEmpty())
+            {
+                response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+                await SendResponseAsync(context, response);
+                return;
+            }
+
+            var requestViewModel = json.ConvertFromJson<RequestViewModel?>();
+            if (requestViewModel == null)
+            {
+                response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+                await SendResponseAsync(context, response);
+                return;
+            }
+
+            var urlIsValid = requestViewModel.Url.CheckUrlValidation();
+            if (!urlIsValid)
+            {
+                response.Message = "CDM can't accept this URL.";
+                await SendResponseAsync(context, response);
+                return;
+            }
+
+            // Change URL to correct format
+            requestViewModel.Url = requestViewModel.Url!.Replace('\\', '/').Trim();
+
+            // Check for user option for showing start download dialog
+            var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
+            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
+            if (showStartDownloadDialog)
+            {
+                ShowStartDownloadDialog(requestViewModel.Url);
+            }
+            // Otherwise, add link to database and start it
+            else
+            {
+                var addResult = await AddNewDownloadFileAndStartItAsync(requestViewModel.Url);
+                if (!addResult.IsSuccessful)
                 {
-                    if (requestViewModel.Url.IsNullOrEmpty())
-                    {
-                        result.IsSuccessful = false;
-                        result.Message = "Url is empty.";
-                    }
-                    else
-                    {
-                        var urlDetails = await _appService.DownloadFileService.GetUrlDetailsAsync(requestViewModel.Url!);
-                        var validateUrlDetails = _appService.DownloadFileService.ValidateUrlDetails(urlDetails);
-                        if (!validateUrlDetails.IsValid)
-                        {
-                            result.IsSuccessful = validateUrlDetails.IsValid;
-                            result.Message = validateUrlDetails.Message;
-                            break;
-                        }
-
-                        var fileExtension = Path.GetExtension(urlDetails.FileName);
-                        if (fileExtension.IsNullOrEmpty())
-                        {
-                            result.IsSuccessful = false;
-                            result.Message = "Can't get file extension.";
-                            break;
-                        }
-
-                        var fileExtensions = _appService
-                            .CategoryService
-                            .Categories
-                            .SelectMany(c => c.FileExtensions)
-                            .Select(fe => fe.Extension)
-                            .Distinct()
-                            .ToList();
-
-                        var isExtensionExists = !fileExtension.IsNullOrEmpty() && fileExtensions.Contains(fileExtension);
-                        var message = $"CDM is {(isExtensionExists ? "supporting" : "not supporting")} '{fileExtension}' file types.";
-
-                        result.IsSuccessful = isExtensionExists;
-                        result.Message = message;
-
-                        Log.Information(message);
-                    }
-
-                    break;
-                }
-
-                case Constants.AddDownloadFileUrl:
-                {
-                    var urlIsValid = requestViewModel.Url.CheckUrlValidation();
-                    if (!urlIsValid)
-                    {
-                        result.IsSuccessful = false;
-                        result.Message = "CDM can't accept this URL.";
-                        break;
-                    }
-
-                    // Make url for correct
-                    requestViewModel.Url = requestViewModel.Url!.Replace('\\', '/').Trim();
-
-                    // Check for user option for showing start download dialog
-                    var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
-                    // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
-                    if (showStartDownloadDialog)
-                    {
-                        ShowStartDownloadDialog(requestViewModel.Url);
-                    }
-                    // Otherwise, add link to database and start it
-                    else
-                    {
-                        var addResult = await AddNewDownloadFileAndStartItAsync(requestViewModel.Url);
-                        if (!addResult.IsSuccessful)
-                        {
-                            result.IsSuccessful = addResult.IsSuccessful;
-                            result.Message = addResult.Message;
-                            break;
-                        }
-                    }
-
-                    result.IsSuccessful = true;
-                    result.Message = "Link added to CDM.";
-
-                    Log.Information($"Captured URL: {requestViewModel.Url}");
-                    break;
-                }
-
-                default:
-                {
-                    result.IsSuccessful = false;
-                    result.Message = "Your request url is not supported.";
-                    break;
+                    response.Message = addResult.Message;
+                    await SendResponseAsync(context, response);
+                    return;
                 }
             }
 
-            json = result.ConvertToJson();
+            response.IsSuccessful = true;
+            response.Message = "Link added to CDM.";
 
-            // Send a response back to the browser extension if needed
-            buffer = Encoding.UTF8.GetBytes(json);
-            response.ContentLength64 = buffer.Length;
-
-            await response.OutputStream.WriteAsync(buffer);
-            response.OutputStream.Close();
+            Log.Information($"Captured URL: {requestViewModel.Url}");
         }
         catch (Exception ex)
         {
-            var result = new ResponseViewModel
-            {
-                IsSuccessful = false,
-                Message = ex.Message
-            };
-
-            var json = result.ConvertToJson();
-
-            // Send a response back to the browser extension if needed
-            var buffer = Encoding.UTF8.GetBytes(json);
-            context.Response.ContentLength64 = buffer.Length;
-
-            await context.Response.OutputStream.WriteAsync(buffer);
-            context.Response.OutputStream.Close();
+            response.Message = $"An error occurred while trying to add link to CDM. Error message: {ex.Message}";
+            Log.Error(ex, response.Message);
         }
+
+        await SendResponseAsync(context, response);
+    }
+
+    private static async Task SendResponseAsync(HttpListenerContext context, ResponseViewModel response)
+    {
+        var json = response.ConvertToJson();
+
+        var buffer = Encoding.UTF8.GetBytes(json);
+        context.Response.ContentLength64 = buffer.Length;
+
+        await context.Response.OutputStream.WriteAsync(buffer);
+        context.Response.OutputStream.Close();
     }
 
     private void ShowStartDownloadDialog(string url)

@@ -137,7 +137,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 ProxyViewModel == null ||
                 NotificationsViewModel == null)
             {
-                throw new InvalidOperationException("An error occured while trying to save settings.");
+                throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
 
             var categoryWithNoSaveDirectory = SaveLocationsViewModel
@@ -276,7 +276,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 }
 
                 default:
-                    throw new InvalidOperationException("An error occured while trying to save settings.");
+                    throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
 
             // Save notifications settings
@@ -293,7 +293,7 @@ public class SettingsWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to save settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to save settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

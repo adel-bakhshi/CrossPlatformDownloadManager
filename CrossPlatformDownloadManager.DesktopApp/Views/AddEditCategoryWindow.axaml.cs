@@ -40,7 +40,7 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to select directory. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to select directory. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

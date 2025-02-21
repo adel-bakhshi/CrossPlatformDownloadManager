@@ -10,6 +10,8 @@ using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
+using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
 using Serilog;
 using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 
@@ -19,9 +21,17 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 {
     #region Private Fields
 
+    private const int NumberOfSamples = 101;
+
     // ElapsedTime timer
     private DispatcherTimer? _elapsedTimeTimer;
     private TimeSpan? _elapsedTimeOfStartingDownload;
+
+    // TimeLeft timer
+    private DispatcherTimer? _timeLeftTimer;
+    private long _receivedBytesSize;
+    private readonly List<double> _downloadSpeeds = [];
+    private readonly List<double> _medianDownloadSpeeds = [];
 
     // UpdateChunksData timer
     private DispatcherTimer? _updateChunksDataTimer;
@@ -118,19 +128,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         get => _status;
         set
         {
+            var oldStatus = Status;
             if (!SetField(ref _status, value))
                 return;
 
-            OnPropertyChanged(nameof(IsCompleted));
-            OnPropertyChanged(nameof(IsDownloading));
-            OnPropertyChanged(nameof(IsStopped));
-            OnPropertyChanged(nameof(IsPaused));
-            OnPropertyChanged(nameof(IsError));
+            NotifyDownloadStatusChanged(oldStatus);
+            NotifyDownloadStatusChanged(Status);
         }
     }
 
     public bool IsCompleted => Status == DownloadFileStatus.Completed;
     public bool IsDownloading => Status == DownloadFileStatus.Downloading;
+    public bool IsStopping => Status == DownloadFileStatus.Stopping;
     public bool IsStopped => Status == DownloadFileStatus.Stopped;
     public bool IsPaused => Status == DownloadFileStatus.Paused;
     public bool IsError => Status == DownloadFileStatus.Error;
@@ -269,7 +278,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         set => SetField(ref _canResumeDownload, value);
     }
 
-    public bool IsStopping { get; set; }
     public bool PlayStopSound { get; set; } = true;
     public int? TempDownloadQueueId { get; set; }
 
@@ -335,10 +343,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             // Load previous chunks data
             LoadChunksData(downloadPackage.Chunks);
 
-            var urls = downloadPackage
-                .Urls
-                .ToList();
-
+            var urls = downloadPackage.Urls.ToList();
             var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
             if (currentUrl.IsNullOrEmpty())
             {
@@ -359,16 +364,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
         _downloadService = downloadService;
 
-        _elapsedTimeTimer?.Stop();
-        _updateChunksDataTimer?.Stop();
+        ResetDownload();
 
-        _elapsedTimeTimer = null;
-        _elapsedTimeOfStartingDownload = null;
-        _updateChunksDataTimer = null;
-        _chunkProgresses = null;
-
-        IsStopping = true;
-        _ = downloadService.CancelTaskAsync().ConfigureAwait(false);
+        Status = DownloadFileStatus.Stopping;
+        _ = downloadService.CancelTaskAsync();
         DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
@@ -381,6 +380,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
         downloadService.Resume();
         _elapsedTimeTimer?.Start();
+        _timeLeftTimer?.Start();
         _updateChunksDataTimer?.Start();
         Status = DownloadFileStatus.Downloading;
 
@@ -396,6 +396,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
         downloadService.Pause();
         _elapsedTimeTimer?.Stop();
+        _timeLeftTimer?.Stop();
         _updateChunksDataTimer?.Stop();
         Status = DownloadFileStatus.Paused;
         UpdateChunksDataTimerOnTick(null, EventArgs.Empty);
@@ -417,6 +418,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         bool isSuccess;
         Exception? error = null;
 
+        // Save download package
+        SaveDownloadPackage(_downloadService!.Package);
+        // Clear timers
+        ResetDownload();
+
+        // Change download status and if error occurred, store that
         if (e is { Error: not null, Cancelled: false })
         {
             Status = DownloadFileStatus.Error;
@@ -434,6 +441,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             isSuccess = true;
         }
 
+        // Create an object of DownloadFileEventArgs
         var eventArgs = new DownloadFileEventArgs
         {
             Id = Id,
@@ -441,29 +449,46 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             Error = error,
         };
 
+        // Raise download finished event
+        DownloadFinished?.Invoke(this, eventArgs);
+    }
+
+    private void ResetDownload()
+    {
+        // Clear elapsed time timer
         if (_elapsedTimeTimer != null)
         {
             _elapsedTimeTimer.Stop();
             _elapsedTimeTimer.Tick -= ElapsedTimeTimerOnTick;
+            _elapsedTimeTimer = null;
         }
 
+        // Clear time left timer
+        if (_timeLeftTimer != null)
+        {
+            _timeLeftTimer.Stop();
+            _timeLeftTimer.Tick -= TimeLeftTimerOnTick;
+            _timeLeftTimer = null;
+        }
+
+        // Clear update chunks data timer
         if (_updateChunksDataTimer != null)
         {
             _updateChunksDataTimer.Stop();
             _updateChunksDataTimer.Tick -= UpdateChunksDataTimerOnTick;
+            _updateChunksDataTimer = null;
         }
 
+        // Reset elapsed time of starting download
         _elapsedTimeOfStartingDownload = null;
+        // Reset chunk progresses
         _chunkProgresses = null;
-
-        if (_downloadService == null)
-            eventArgs.Error = new InvalidOperationException("Download service is null or undefined.");
-        else
-            SaveDownloadPackage(_downloadService.Package);
-
+        // Clear download speeds list
+        _downloadSpeeds.Clear();
+        // Clear median download speeds list
+        _medianDownloadSpeeds.Clear();
+        // Reset resume capability
         CanResumeDownload = null;
-        IsStopping = false;
-        DownloadFinished?.Invoke(this, eventArgs);
     }
 
     private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
@@ -472,9 +497,49 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         TransferRate = (float)e.BytesPerSecondSpeed;
         DownloadedSizeAsString = e.ReceivedBytesSize.ToFileSize();
 
+        // Save required data to calculate time left
+        _receivedBytesSize = e.ReceivedBytesSize;
+        // Store average download speeds to find median
+        _downloadSpeeds.Add(e.AverageBytesPerSecondSpeed);
+        // Store specified number of samples
+        // For calculating median it's better to have odd number of samples
+        if (_downloadSpeeds.Count > NumberOfSamples)
+            _downloadSpeeds.RemoveAt(0);
+
+        // Initialize time left timer and start it to calculate time left
+        if (_timeLeftTimer != null)
+            return;
+
+        _timeLeftTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _timeLeftTimer.Tick += TimeLeftTimerOnTick;
+        _timeLeftTimer.Start();
+    }
+
+    private void TimeLeftTimerOnTick(object? sender, EventArgs e)
+    {
         var timeLeft = TimeSpan.Zero;
-        var remainSizeToReceive = (Size ?? 0) - e.ReceivedBytesSize;
-        var remainSeconds = remainSizeToReceive / e.BytesPerSecondSpeed;
+
+        // Calculate median download speed
+        var median = _downloadSpeeds.Median();
+        // Store median download speed to calculate average better
+        _medianDownloadSpeeds.Add(median);
+        // Store specified number of samples
+        if (_medianDownloadSpeeds.Count > NumberOfSamples)
+            _medianDownloadSpeeds.RemoveAt(0);
+
+        // Calculate average download speed
+        var averageDownloadSpeed = _medianDownloadSpeeds.Mean();
+        // Make sure download speeds count is greater than 1
+        if (averageDownloadSpeed <= 0)
+        {
+            TimeLeft = timeLeft;
+            return;
+        }
+
+        // Calculate remain size
+        var remainSizeToReceive = (Size ?? 0) - _receivedBytesSize;
+        // Calculate remain seconds by average download speed
+        var remainSeconds = (remainSizeToReceive / averageDownloadSpeed).Round(0);
         if (!double.IsInfinity(remainSeconds))
             timeLeft = TimeSpan.FromSeconds(remainSeconds);
 
@@ -637,6 +702,51 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
             chunkProgress.ReceivedBytesSize = chunk.IsDownloadCompleted() ? chunk.Length : chunk.Position;
             chunkProgress.TotalBytesToReceive = chunk.Length;
+        }
+    }
+
+    private void NotifyDownloadStatusChanged(DownloadFileStatus? status)
+    {
+        if (status == null)
+            return;
+
+        switch (status)
+        {
+            case DownloadFileStatus.Completed:
+            {
+                OnPropertyChanged(nameof(IsCompleted));
+                break;
+            }
+
+            case DownloadFileStatus.Downloading:
+            {
+                OnPropertyChanged(nameof(IsDownloading));
+                break;
+            }
+
+            case DownloadFileStatus.Stopping:
+            {
+                OnPropertyChanged(nameof(IsStopping));
+                break;
+            }
+
+            case DownloadFileStatus.Stopped:
+            {
+                OnPropertyChanged(nameof(IsStopped));
+                break;
+            }
+
+            case DownloadFileStatus.Paused:
+            {
+                OnPropertyChanged(nameof(IsPaused));
+                break;
+            }
+
+            case DownloadFileStatus.Error:
+            {
+                OnPropertyChanged(nameof(IsError));
+                break;
+            }
         }
     }
 

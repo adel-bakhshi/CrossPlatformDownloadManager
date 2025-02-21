@@ -90,11 +90,11 @@ public class DownloadStatusViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenFolder(DownloadFile.SaveLocation);
+            PlatformSpecificManager.OpenContainingFolderAndSelectFile(DownloadFile.SaveLocation);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open the folder.");
+            Log.Error(ex, "An error occurred while trying to open the folder.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

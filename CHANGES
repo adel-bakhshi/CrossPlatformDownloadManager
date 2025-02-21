@@ -1,3 +1,23 @@
+- Version 0.3.0; 2025-02-21
+
+* Performance Improvements:
+  - Increased overall speed and efficiency.
+  - Enhanced accuracy in calculating remaining download time.
+  - Faster link retrieval from the browser extension.
+* Bug Fixes:
+  - Fixed file corruption issues after canceling and resuming downloads.
+  - Resolved the download completion window display issue when the related option was disabled.
+  - Addressed the problem of file type settings not applying after saving.
+  - Fixed the crash occurring when double-clicking on rows in the file table.
+  - Solved the issue of the "Add Download Link" window not displaying when links were transferred from the browser extension.
+  - Corrected spelling errors throughout the application.
+* New Features:
+  - Added support for new file types: .iso, .dmg, .pkg, .deb, and .rpm.
+  - Introduced the ability to delete downloaded files using the Delete key.
+* Technical Updates:
+  - Upgraded to Avalonia version 11.2.4.
+  - Improved the process of deleting downloaded files from the program.
+
 - Version 0.2.2; 2025-02-14
 
 * Fixed Bugs:

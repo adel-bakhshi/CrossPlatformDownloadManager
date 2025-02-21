@@ -121,7 +121,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the main window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while opening the main window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -150,7 +150,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while starting/stopping the download queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while starting/stopping the download queue. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -167,7 +167,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while adding the download link. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while adding the download link. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -184,7 +184,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while adding the download queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while adding the download queue. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -201,7 +201,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the settings window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while opening the settings window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -213,7 +213,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the help window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while opening the help window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -225,7 +225,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while opening the about us window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while opening the about us window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -247,7 +247,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -320,7 +320,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occured while refreshing proxies. Error message: {ErrorMessage}", ex.Message);
+                Log.Error(ex, "An error occurred while refreshing proxies. Error message: {ErrorMessage}", ex.Message);
                 await DialogBoxManager.ShowErrorDialogAsync(ex);
             }
         });
@@ -409,7 +409,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while changing proxy. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while changing proxy. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

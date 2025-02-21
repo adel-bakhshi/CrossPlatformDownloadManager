@@ -162,7 +162,7 @@ public class DownloadWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to stop download. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to stop download. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -202,7 +202,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to resume/pause the download. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to resume/pause the download. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -239,7 +239,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "An error occured while trying to show the power off window. Error message: {ErrorMessage}", ex.Message);
+                    Log.Error(ex, "An error occurred while trying to show the power off window. Error message: {ErrorMessage}", ex.Message);
                     await DialogBoxManager.ShowErrorDialogAsync(ex);
                 }
             });
@@ -276,7 +276,7 @@ public class DownloadWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                Log.Error(ex, "An error occurred while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
                 await DialogBoxManager.ShowErrorDialogAsync(ex);
             }
         });
@@ -320,7 +320,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to show/hide the details. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to show/hide the details. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -354,7 +354,7 @@ public class DownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to limit the download speed. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to limit the download speed. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

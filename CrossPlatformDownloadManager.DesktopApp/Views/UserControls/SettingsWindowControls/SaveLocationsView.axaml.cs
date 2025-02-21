@@ -55,7 +55,7 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to select directory for a category. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to select directory for a category. Error message: {ErrorMessage}", ex.Message);
         }
     }
 }

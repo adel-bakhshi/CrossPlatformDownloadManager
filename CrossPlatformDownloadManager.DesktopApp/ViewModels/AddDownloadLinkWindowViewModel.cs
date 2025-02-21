@@ -137,7 +137,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -147,7 +147,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to start download.");
+                throw new InvalidOperationException("An error occurred while trying to start download.");
 
             var downloadFile = await AddDownloadFileAsync();
             if (downloadFile == null)
@@ -160,7 +160,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to start download. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to start download. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -170,7 +170,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to add new category.");
+                throw new InvalidOperationException("An error occurred while trying to add new category.");
 
             var vm = new AddEditCategoryWindowViewModel(AppService);
             var window = new AddEditCategoryWindow { DataContext = vm };
@@ -178,7 +178,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add new category. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add new category. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -188,7 +188,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to add new queue.");
+                throw new InvalidOperationException("An error occurred while trying to add new queue.");
 
             var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
@@ -200,7 +200,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add new queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add new queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -210,7 +210,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to add file to queue.");
+                throw new InvalidOperationException("An error occurred while trying to add file to queue.");
 
             if (SelectedDownloadQueue == null)
             {
@@ -263,7 +263,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add file to queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add file to queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -273,7 +273,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to add file to default queue.");
+                throw new InvalidOperationException("An error occurred while trying to add file to default queue.");
 
             var defaultDownloadQueue = AppService
                 .DownloadQueueService
@@ -296,7 +296,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add file to default queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add file to default queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -341,7 +341,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             return downloadFile;
 
         await DialogBoxManager.ShowInfoDialogAsync("File not found",
-            "An error occured while trying to add file. Please try again or contact support.",
+            "An error occurred while trying to add file. Please try again or contact support.",
             DialogButtons.Ok);
 
         return null;
@@ -397,7 +397,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to get url details. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to get url details. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
         finally

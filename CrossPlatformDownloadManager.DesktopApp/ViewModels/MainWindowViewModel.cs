@@ -399,12 +399,10 @@ public class MainWindowViewModel : ViewModelBase
             var vm = new CaptureUrlWindowViewModel(AppService);
             var window = new CaptureUrlWindow { DataContext = vm };
             window.Show(owner);
-
-            // await LoadCategoriesAsync();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add a new link. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add a new link. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -459,7 +457,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to stop a download file. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to stop a download file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -496,7 +494,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to stop all download files. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to stop all download files. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -542,7 +540,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to delete completed download files. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to delete completed download files. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -560,7 +558,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open settings window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to open settings window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -579,7 +577,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to share. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to share. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -606,7 +604,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to start/stop a download queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to start/stop a download queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -643,7 +641,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to show download queue details. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to show download queue details. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -661,7 +659,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add new download queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add new download queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -681,7 +679,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while exit the app. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while exit the app. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -715,7 +713,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to start all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to start all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -735,7 +733,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to stop all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to stop all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -760,7 +758,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -785,7 +783,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to resume all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to resume all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -825,7 +823,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -855,7 +853,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to pause all downloads. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -889,7 +887,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while saving columns settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -907,7 +905,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open about us window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to open about us window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -921,7 +919,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to select all rows. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to select all rows. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -950,7 +948,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open the file. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to open the file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -983,7 +981,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to open the folder. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to open the folder. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1014,7 +1012,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to rename the file. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to rename the file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1064,7 +1062,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to change the folder. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to change the folder. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1096,7 +1094,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to redownload the file. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to redownload the file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1131,7 +1129,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to refresh the download address. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to refresh the download address. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1240,7 +1238,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add to queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add to queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1288,7 +1286,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to remove from queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to remove from queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1316,7 +1314,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add to queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add to queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1588,7 +1586,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to export data. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to export data. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1675,7 +1673,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to import data. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to import data. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1726,7 +1724,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to export settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to export settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1761,7 +1759,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to import settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to import settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1881,6 +1879,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
         CalculateGlobalSpeedLimit();
+        FilterDownloadList();
     }
 
     private void CalculateGlobalSpeedLimit()
@@ -1955,7 +1954,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to change context flyout enable state. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to change context flyout enable state. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1999,7 +1998,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to hide context menu. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to hide context menu. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -2038,43 +2037,51 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to resume a download file. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to resume a download file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
-    private async Task RemoveDownloadFilesAsync(DataGrid? dataGrid, bool excludeFilesInRunningQueues)
+    public async Task RemoveDownloadFilesAsync(DataGrid? dataGrid, bool excludeFilesInRunningQueues)
     {
         try
         {
+            // Make sure data grid is not null and has selected items
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
+            // Convert data grid selected items to download files
             var downloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
                 .ToList();
 
+            // Check if we should exclude files in running queues
             if (excludeFilesInRunningQueues)
             {
+                // Get download queues
                 var downloadQueues = AppService
                     .DownloadQueueService
                     .DownloadQueues;
 
+                // Remove download files that are in running queues
                 downloadFiles = downloadFiles
                     .Where(df => df.DownloadQueueId == null || downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId)?.IsRunning != true)
                     .ToList();
             }
 
+            // Check if there are any download files
             if (downloadFiles.Count == 0)
                 return;
 
+            // Check if there are any existing download files in the system
             var existingDownloadFiles = downloadFiles
                 .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
 
+            // Ask user if they want to remove the files from the system
             var deleteFile = false;
             if (existingDownloadFiles.Count > 0)
             {
@@ -2082,37 +2089,39 @@ public class MainWindowViewModel : ViewModelBase
                     $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
                     DialogButtons.YesNo);
 
-                if (result == DialogResult.Yes)
-                    deleteFile = true;
+                deleteFile = result == DialogResult.Yes;
             }
 
+            // Get all download files that are currently downloading
+            var stopDownloadTasks = downloadFiles
+                .Where(df => df.IsDownloading)
+                .Select(df => AppService.DownloadFileService.StopDownloadFileAsync(df, ensureStopped: true))
+                .ToList();
+
+            // Wait for all download files to stop
+            if (stopDownloadTasks.Count > 0)
+                await Task.WhenAll(stopDownloadTasks);
+
+            // Remove download files
             var reloadData = downloadFiles.Count == 1;
             for (var i = downloadFiles.Count - 1; i >= 0; i--)
             {
-                if (downloadFiles[i].IsDownloading)
-                {
-                    await AppService
-                        .DownloadFileService
-                        .StopDownloadFileAsync(downloadFiles[i], ensureStopped: true);
-                }
-
                 await AppService
                     .DownloadFileService
                     .DeleteDownloadFileAsync(downloadFiles[i], deleteFile, reloadData);
             }
 
+            // Reload download files when count is greater than 1
             if (!reloadData)
             {
                 await AppService
                     .DownloadFileService
                     .LoadDownloadFilesAsync();
             }
-
-            dataGrid.SelectedItems.Clear();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to remove download files. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to remove download files. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -2514,7 +2523,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to save settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to save settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -2531,7 +2540,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while saving columns settings. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while saving columns settings. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -2542,42 +2551,54 @@ public class MainWindowViewModel : ViewModelBase
         LoadCategories();
     }
 
-    public void DataGridRowDoubleTapAction(DownloadFileViewModel? downloadFile)
+    public async Task DataGridRowDoubleTapActionAsync(DownloadFileViewModel? downloadFile)
     {
-        if (downloadFile == null || downloadFile.IsStopping)
-            return;
-
-        switch (downloadFile.Status)
+        try
         {
-            case DownloadFileStatus.None:
-            {
-                AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
-                break;
-            }
+            if (downloadFile == null || downloadFile.IsStopping)
+                return;
 
-            case DownloadFileStatus.Downloading:
-            case DownloadFileStatus.Paused:
+            switch (downloadFile.Status)
             {
-                AppService.DownloadFileService.ShowOrFocusDownloadWindow(downloadFile);
-                break;
-            }
-
-            default:
-            {
-                if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                case DownloadFileStatus.None:
+                {
+                    _ = AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
                     break;
+                }
 
-                var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                if (!File.Exists(filePath))
+                case DownloadFileStatus.Downloading:
+                case DownloadFileStatus.Paused:
+                {
+                    AppService.DownloadFileService.ShowOrFocusDownloadWindow(downloadFile);
                     break;
+                }
 
-                if (downloadFile.IsCompleted)
-                    PlatformSpecificManager.OpenFile(filePath);
-                else
-                    PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                default:
+                {
+                    if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                        break;
 
-                break;
+                    var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+                    if (!File.Exists(filePath))
+                        break;
+
+                    if (downloadFile.IsCompleted)
+                    {
+                        PlatformSpecificManager.OpenFile(filePath);
+                    }
+                    else
+                    {
+                        PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                    }
+
+                    break;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to handle double click event on data grid. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

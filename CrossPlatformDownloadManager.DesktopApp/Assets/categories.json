@@ -37,6 +37,10 @@
       {
         "extension": ".bz2",
         "alias": "BZ2 Archive"
+      },
+      {
+        "extension": ".iso",
+        "alias": "ISO Image File"
       }
     ]
   },
@@ -193,6 +197,22 @@
       {
         "extension": ".apk",
         "alias": "Android Application"
+      },
+      {
+        "extension": ".dmg",
+        "alias": "Apple Disk Image"
+      },
+      {
+        "extension": ".pkg",
+        "alias": "Package File"
+      },
+      {
+        "extension": ".deb",
+        "alias": "Debian Package"
+      },
+      {
+        "extension": ".rpm",
+        "alias": "Red Hat Package"
       }
     ]
   },

@@ -365,7 +365,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "And error occured while trying to save the category. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "And error occurred while trying to save the category. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -378,7 +378,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "And error occured while trying to cancel. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "And error occurred while trying to cancel. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

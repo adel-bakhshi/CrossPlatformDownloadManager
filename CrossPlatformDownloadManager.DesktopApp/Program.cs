@@ -35,7 +35,7 @@ sealed class Program
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while starting the application. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while starting the application. Error message: {ErrorMessage}", ex.Message);
             Environment.Exit(0);
         }
     }

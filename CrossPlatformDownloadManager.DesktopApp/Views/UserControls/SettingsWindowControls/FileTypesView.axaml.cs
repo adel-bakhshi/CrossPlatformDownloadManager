@@ -41,7 +41,7 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to load file extensions. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to load file extensions. Error message: {ErrorMessage}", ex.Message);
         }
     }
 }

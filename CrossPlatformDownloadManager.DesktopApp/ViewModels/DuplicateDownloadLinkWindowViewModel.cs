@@ -137,7 +137,7 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to save the duplicate download link option.");
+            Log.Error(ex, "An error occurred while trying to save the duplicate download link option.");
         }
     }
 
@@ -153,7 +153,7 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to close the window.");
+            Log.Error(ex, "An error occurred while trying to close the window.");
         }
     }
 

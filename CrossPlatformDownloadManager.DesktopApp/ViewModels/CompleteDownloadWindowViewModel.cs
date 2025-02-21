@@ -29,7 +29,11 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     public bool DontShowThisDialogAgain
     {
         get => _dontShowThisDialogAgain;
-        set => this.RaiseAndSetIfChanged(ref _dontShowThisDialogAgain, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _dontShowThisDialogAgain, value);
+            _ = SaveDontShowThisDialogAgainOptionAsync();
+        }
     }
 
     public DownloadFileViewModel DownloadFile
@@ -81,8 +85,8 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while trying to open the file. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to open the file.");
         }
     }
 
@@ -110,8 +114,8 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while trying to open the folder. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to open the folder.");
         }
     }
 
@@ -123,8 +127,22 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "An error occurred while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to close the window.");
+        }
+    }
+
+    private async Task SaveDontShowThisDialogAgainOptionAsync()
+    {
+        try
+        {
+            AppService.SettingsService.Settings.ShowCompleteDownloadDialog = !DontShowThisDialogAgain;
+            await AppService.SettingsService.SaveSettingsAsync(AppService.SettingsService.Settings);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to save the dont show this dialog again option. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 }

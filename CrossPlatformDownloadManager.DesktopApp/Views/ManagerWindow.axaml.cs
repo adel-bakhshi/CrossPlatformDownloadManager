@@ -109,7 +109,7 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to open main window.");
+            Log.Error(ex, "An error occurred while trying to open main window.");
         }
     }
 
@@ -128,7 +128,7 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to save manager point.");
+            Log.Error(ex, "An error occurred while trying to save manager point.");
         }
     }
 

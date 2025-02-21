@@ -14,7 +14,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
     #region Private Fields
 
     private readonly DispatcherTimer _urlTextBoxChangedTimer;
-    private readonly DispatcherTimer _focusWindowTimer;
+    private readonly DispatcherTimer _removeTopmostTimer;
 
     #endregion
 
@@ -22,17 +22,17 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
     {
         InitializeComponent();
 
-        _urlTextBoxChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _urlTextBoxChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _urlTextBoxChangedTimer.Tick += UrlTextBoxChangedTimerOnTick;
 
-        _focusWindowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _focusWindowTimer.Tick += FocusWindowTimerOnTick;
+        _removeTopmostTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _removeTopmostTimer.Tick += RemoveTopmostTimerOnTick;
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
-        _focusWindowTimer.Start();
+        _removeTopmostTimer.Start();
     }
 
     #region Helpers
@@ -57,19 +57,14 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to get url details. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to get url details. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
-    private void FocusWindowTimerOnTick(object? sender, EventArgs e)
+    private void RemoveTopmostTimerOnTick(object? sender, EventArgs e)
     {
-        if (!IsFocused)
-        {
-            Focus();
-            return;
-        }
-
-        _focusWindowTimer.Stop();
+        Dispatcher.UIThread.Post(() => Topmost = false);
+        _removeTopmostTimer.Stop();
     }
 
     #endregion

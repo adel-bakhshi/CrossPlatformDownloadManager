@@ -73,7 +73,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -110,7 +110,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to close the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -158,7 +158,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
         {
             fileExtension = Path.GetExtension(filePath);
             if (fileExtension.IsNullOrEmpty())
-                throw new InvalidOperationException("An error occured while trying to get file extension.");
+                throw new InvalidOperationException("An error occurred while trying to get file extension.");
 
             newFilePath += fileExtension;
         }

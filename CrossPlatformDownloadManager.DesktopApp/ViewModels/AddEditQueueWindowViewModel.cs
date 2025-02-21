@@ -118,7 +118,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         try
         {
             if (owner == null || OptionsViewModel == null || FilesViewModel == null)
-                throw new InvalidOperationException("An error occured while trying to save queue.");
+                throw new InvalidOperationException("An error occurred while trying to save queue.");
 
             if (DownloadQueue.IsRunning)
             {
@@ -356,7 +356,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to save queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to save queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -366,7 +366,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to cancel.");
+                throw new InvalidOperationException("An error occurred while trying to cancel.");
 
             if (DownloadQueue.Id == 0)
                 return;
@@ -401,7 +401,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to delete queue. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to delete queue. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -411,13 +411,13 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         try
         {
             if (owner == null)
-                throw new InvalidOperationException("An error occured while trying to cancel.");
+                throw new InvalidOperationException("An error occurred while trying to cancel.");
 
             owner.Close(false);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to cancel. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to cancel. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

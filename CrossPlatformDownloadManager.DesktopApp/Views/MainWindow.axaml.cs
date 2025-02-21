@@ -76,7 +76,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 ViewModel.SelectedFilesTotalSize = "0 KB";
 
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to update total size of download files. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to update total size of download files. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -111,7 +111,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to open manager window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to open manager window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -128,7 +128,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during opening context menu. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred during opening context menu. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -160,7 +160,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured during closing window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred during closing window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -175,7 +175,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured during opening context menu. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred during opening context menu. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -190,11 +190,44 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         e.Row.DoubleTapped -= DownloadFilesDataGridRowOnDoubleTapped;
     }
 
-    private void DownloadFilesDataGridRowOnDoubleTapped(object? sender, TappedEventArgs e)
+    private async void DownloadFilesDataGridRowOnDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (ViewModel == null || sender is not DataGridRow { DataContext: DownloadFileViewModel downloadFile })
-            return;
+        try
+        {
+            if (ViewModel == null || sender is not DataGridRow { DataContext: DownloadFileViewModel downloadFile })
+                return;
 
-        ViewModel.DataGridRowDoubleTapAction(downloadFile);
+            await ViewModel.DataGridRowDoubleTapActionAsync(downloadFile);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred during handling double tap. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async void DownloadFilesDataGridOnKeyDown(object? sender, KeyEventArgs e)
+    {
+        try
+        {
+            if (ViewModel == null)
+                return;
+
+            // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+            switch (e.Key)
+            {
+                // Delete selected download files from datagrid
+                case Key.Delete:
+                {
+                    await ViewModel.RemoveDownloadFilesAsync(DownloadFilesDataGrid, excludeFilesInRunningQueues: false);
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred during handling key down. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 }

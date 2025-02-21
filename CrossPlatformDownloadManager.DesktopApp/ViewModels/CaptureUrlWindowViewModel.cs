@@ -120,7 +120,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while saving captured url. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while saving captured url. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -133,7 +133,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while closing the window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while closing the window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

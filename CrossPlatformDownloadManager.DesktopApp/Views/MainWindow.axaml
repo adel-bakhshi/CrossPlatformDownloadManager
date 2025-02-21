@@ -982,7 +982,8 @@
                               ContextFlyout="{StaticResource DownloadQueuesDataGridContextMenu}"
                               SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
                               LoadingRow="DownloadFilesDataGridOnLoadingRow"
-                              UnloadingRow="DownloadFilesDataGridOnUnloadingRow">
+                              UnloadingRow="DownloadFilesDataGridOnUnloadingRow"
+                              KeyDown="DownloadFilesDataGridOnKeyDown">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">

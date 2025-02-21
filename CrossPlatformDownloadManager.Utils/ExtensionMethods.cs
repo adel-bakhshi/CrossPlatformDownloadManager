@@ -221,15 +221,7 @@ public static class ExtensionMethods
         if (time == TimeSpan.Zero)
             return "00 : 00";
 
-        var seconds = time.Value.TotalSeconds;
-
-        var hours = seconds / 3600;
-        seconds %= 3600;
-
-        var minutes = seconds / 60;
-        seconds %= 60;
-
-        return hours > 1 ? $"{hours:00} : {minutes:00} : {seconds:00}" : $"{minutes:00} : {seconds:00}";
+        return (time.Value.Hours > 1 ? $"{time.Value.Hours:00} : " : "") + $"{time.Value.Minutes:00} : {time.Value.Seconds:00}";
     }
 
     public static T? DeepCopy<T>(this T? obj, JsonSerializerSettings? serializerSettings = null)

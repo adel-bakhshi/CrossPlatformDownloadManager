@@ -157,7 +157,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occured while trying to save the file type. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to save the file type. Error message: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -170,7 +170,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "And error occured while trying to close the window. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "And error occurred while trying to close the window. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

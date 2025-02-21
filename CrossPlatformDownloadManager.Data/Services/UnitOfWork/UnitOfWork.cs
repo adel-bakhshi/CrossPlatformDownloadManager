@@ -59,7 +59,6 @@ public class UnitOfWork : IUnitOfWork
             if (_dbContext == null)
                 return;
 
-            // await _dbContext.Database.EnsureCreatedAsync();
             var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
             if (migrations.Any())
                 await _dbContext.Database.MigrateAsync();
@@ -169,6 +168,11 @@ public class UnitOfWork : IUnitOfWork
 
             fileExtensions = extensions
                 .Where(fe => !extensionsInDb.Contains(fe.Extension.ToLower()))
+                .Select(fe =>
+                {
+                    fe.CategoryId = categoryId;
+                    return fe;
+                })
                 .ToList();
         }
 

@@ -257,7 +257,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "An error occured while trying to power off the computer. Error message: {ErrorMessage}", ex.Message);
+                    Log.Error(ex, "An error occurred while trying to power off the computer. Error message: {ErrorMessage}", ex.Message);
                     await DialogBoxManager.ShowErrorDialogAsync(ex);
                 }
             });
@@ -276,7 +276,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "An error occured while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                    Log.Error(ex, "An error occurred while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
                     await DialogBoxManager.ShowErrorDialogAsync(ex);
                 }
             });

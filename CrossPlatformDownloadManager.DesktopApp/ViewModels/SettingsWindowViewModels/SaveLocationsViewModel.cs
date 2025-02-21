@@ -98,7 +98,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to add new category. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while trying to add new category. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -127,7 +127,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to edit category.");
+            Log.Error(ex, "An error occurred while trying to edit category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -175,7 +175,7 @@ public class SaveLocationsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while trying to delete category.");
+            Log.Error(ex, "An error occurred while trying to delete category.");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

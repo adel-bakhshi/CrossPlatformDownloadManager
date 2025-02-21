@@ -103,7 +103,7 @@ public class ManagerWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "An error occured while exit the app. Error message: {ErrorMessage}", ex.Message);
+            Log.Error(ex, "An error occurred while exit the app. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

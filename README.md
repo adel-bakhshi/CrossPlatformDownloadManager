@@ -1,8 +1,8 @@
 <div align="center">
-   <a href="https://github.com/Rayiumir/Ranger" target="_blank">
-      <img src="./Deploy/cdm-logo.svg" width="300" alt="Ranger Logo">
+   <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager" target="_blank">
+      <img src="./ScreenShots/banner.png" width="100%" alt="CDM Banner">
    </a>
-   <h4> Cross Platform Download Manager (CDM) </h4>
+   <h4> Cross platform Download Manager (CDM) </h4>
 </div>
 
 ---
@@ -28,7 +28,6 @@ _"A fast, free, and open-source download manager for Windows, macOS, and Linux."
 ## 📸 Screenshots
 
 Below are some screenshots showcasing the key features of CDM:
-
 
 <table class="table">
   <thead>

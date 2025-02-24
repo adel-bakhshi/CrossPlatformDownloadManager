@@ -398,7 +398,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to get url details. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            SelectedCategory = null;
         }
         finally
         {

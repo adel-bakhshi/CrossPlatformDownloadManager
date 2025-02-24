@@ -90,7 +90,18 @@ public class DownloadStatusViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenContainingFolderAndSelectFile(DownloadFile.SaveLocation);
+            string? filePath = null;
+            if (!DownloadFile.FileName.IsNullOrEmpty())
+                filePath = Path.Combine(DownloadFile.SaveLocation, DownloadFile.FileName!);
+
+            if (!filePath.IsNullOrEmpty() && File.Exists(filePath))
+            {
+                PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+            }
+            else
+            {
+                PlatformSpecificManager.OpenFolder(DownloadFile.SaveLocation);
+            }
         }
         catch (Exception ex)
         {

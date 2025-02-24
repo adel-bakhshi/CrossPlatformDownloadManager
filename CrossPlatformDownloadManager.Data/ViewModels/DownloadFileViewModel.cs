@@ -294,7 +294,8 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     public async Task StartDownloadFileAsync(DownloadService? downloadService,
         DownloadConfiguration downloadConfiguration,
-        IUnitOfWork? unitOfWork)
+        IUnitOfWork? unitOfWork,
+        IWebProxy? proxy)
     {
         if (downloadService == null || unitOfWork == null)
             return;
@@ -330,7 +331,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
         // Check resume capability
         CanResumeDownload = null;
-        _ = CheckResumeCapabilityAsync();
+        _ = CheckResumeCapabilityAsync(proxy);
 
         var fileName = Path.Combine(downloadPath!, FileName!);
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
@@ -645,7 +646,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         DownloadPackage = downloadPackage?.ConvertToJson();
     }
 
-    private async Task CheckResumeCapabilityAsync()
+    private async Task CheckResumeCapabilityAsync(IWebProxy? proxy)
     {
         try
         {
@@ -655,7 +656,14 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 return;
             }
 
-            using var client = new HttpClient();
+            using var handler = new HttpClientHandler();
+            if (proxy != null)
+            {
+                handler.Proxy = proxy;
+                handler.UseProxy = true;
+            }
+
+            using var client = new HttpClient(handler);
             client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
 
             // Send HEAD request

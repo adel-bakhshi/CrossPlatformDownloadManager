@@ -305,39 +305,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             ParallelDownload = true
         };
 
-        switch (_settingsService.Settings.ProxyMode)
-        {
-            case ProxyMode.DisableProxy:
-                break;
-
-            case ProxyMode.UseSystemProxySettings:
-            {
-                var systemProxy = WebRequest.DefaultWebProxy;
-                if (systemProxy == null)
-                    break;
-
-                configuration.RequestConfiguration.Proxy = systemProxy;
-                break;
-            }
-
-            case ProxyMode.UseCustomProxy:
-            {
-                var activeProxy = _settingsService.Settings.Proxies.FirstOrDefault(p => p.IsActive);
-                if (activeProxy == null)
-                    break;
-
-                configuration.RequestConfiguration.Proxy = new WebProxy
-                {
-                    Address = new Uri(activeProxy.GetProxyUri()),
-                    Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password),
-                };
-
-                break;
-            }
-
-            default:
-                throw new InvalidOperationException("Invalid proxy mode.");
-        }
+        var proxy = _settingsService.GetProxy();
+        if (proxy != null)
+            configuration.RequestConfiguration.Proxy = proxy;
 
         var service = new DownloadService(configuration);
         var downloadFileTask = new DownloadFileTaskViewModel
@@ -352,7 +322,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
         downloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
-        await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork);
+        await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork, proxy);
     }
 
     public async Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false, bool playSound = true)
@@ -524,7 +494,15 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         result.Url = url!;
 
         // Create an instance of HttpClient
-        using var httpClient = new HttpClient();
+        using var handler = new HttpClientHandler();
+        var proxy = _settingsService.GetProxy();
+        if (proxy != null)
+        {
+            handler.Proxy = proxy;
+            handler.UseProxy = true;
+        }
+
+        using var httpClient = new HttpClient(handler);
         // Send a HEAD request to get the headers only
         using var request = new HttpRequestMessage(HttpMethod.Head, url);
         using var response = await httpClient.SendAsync(request);

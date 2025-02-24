@@ -940,7 +940,10 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open file",
+                    "The specified file could not be found. It is possible that the file has been deleted or relocated.",
+                    DialogButtons.Ok);
+
                 return;
             }
 
@@ -962,22 +965,55 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            var filePathList = dataGrid
+            var groupDownloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
-                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
-                .Where(File.Exists)
-                .Distinct()
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && Directory.Exists(df.SaveLocation!))
+                .GroupBy(df => df.SaveLocation!)
                 .ToList();
 
-            if (filePathList.Count == 0)
+            if (groupDownloadFiles.Count == 0)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open folder", "No folders found.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder",
+                    "The specified folder(s) could not be found. It is possible that the folder(s) have been deleted or relocated.",
+                    DialogButtons.Ok);
+
                 return;
             }
 
-            filePathList.ForEach(PlatformSpecificManager.OpenContainingFolderAndSelectFile);
+            var openedFolders = new List<string>();
+            foreach (var group in groupDownloadFiles)
+            {
+                var directoryPath = group.Key;
+                foreach (var downloadFile in group)
+                {
+                    if (downloadFile.FileName.IsNullOrEmpty())
+                    {
+                        if (openedFolders.Contains(directoryPath))
+                            continue;
+                        
+                        PlatformSpecificManager.OpenFolder(directoryPath);
+                        openedFolders.Add(directoryPath);
+                    }
+                    else
+                    {
+                        if (openedFolders.Contains(directoryPath))
+                            continue;
+                        
+                        var filePath = Path.Combine(directoryPath, downloadFile.FileName!);
+                        if (File.Exists(filePath))
+                        {
+                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        }
+                        else
+                        {
+                            PlatformSpecificManager.OpenFolder(directoryPath);
+                        }
+                        
+                        openedFolders.Add(directoryPath);
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -2579,16 +2615,29 @@ public class MainWindowViewModel : ViewModelBase
                         break;
 
                     var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                    if (!File.Exists(filePath))
-                        break;
-
-                    if (downloadFile.IsCompleted)
+                    if (!File.Exists(filePath) && !Directory.Exists(downloadFile.SaveLocation))
                     {
-                        PlatformSpecificManager.OpenFile(filePath);
+                        await DialogBoxManager.ShowInfoDialogAsync("Unable to Locate File or Folder",
+                            "We were unable to locate the file or folder you attempted to open. It is possible that the file or folder has been deleted.",
+                            DialogButtons.Ok);
+
+                        break;
+                    }
+
+                    if (File.Exists(filePath))
+                    {
+                        if (downloadFile.IsCompleted)
+                        {
+                            PlatformSpecificManager.OpenFile(filePath);
+                        }
+                        else
+                        {
+                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        }
                     }
                     else
                     {
-                        PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        PlatformSpecificManager.OpenFolder(downloadFile.SaveLocation!);
                     }
 
                     break;

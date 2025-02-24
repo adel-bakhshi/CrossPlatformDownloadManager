@@ -7,6 +7,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
@@ -36,7 +37,14 @@ sealed class Program
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while starting the application. Error message: {ErrorMessage}", ex.Message);
-            Environment.Exit(0);
+            try
+            {
+                _ = DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+            catch
+            {
+                // Ignore exceptions
+            }
         }
     }
 

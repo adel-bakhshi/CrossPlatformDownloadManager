@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -284,45 +283,52 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task StartDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true)
     {
-        var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
-        if (downloadFile == null || downloadFile.IsCompleted || downloadFile.IsDownloading || downloadFile.IsPaused || downloadFile.IsStopping)
+        try
         {
-            if (downloadFile is { IsPaused: true, IsStopping: false })
-                ResumeDownloadFile(downloadFile);
+            var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
+            if (downloadFile == null || downloadFile.IsCompleted || downloadFile.IsDownloading || downloadFile.IsPaused || downloadFile.IsStopping)
+            {
+                if (downloadFile is { IsPaused: true, IsStopping: false })
+                    ResumeDownloadFile(downloadFile);
 
-            return;
+                return;
+            }
+
+            // Check disk size before starting download
+            var hasEnoughSpace = await CheckDiskSpaceAsync(downloadFile);
+            if (!hasEnoughSpace)
+                return;
+
+            var configuration = new DownloadConfiguration
+            {
+                ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
+                MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
+                ParallelDownload = true
+            };
+
+            var proxy = _settingsService.GetProxy();
+            if (proxy != null)
+                configuration.RequestConfiguration.Proxy = proxy;
+
+            var service = new DownloadService(configuration);
+            var downloadFileTask = new DownloadFileTaskViewModel
+            {
+                Key = downloadFile.Id,
+                Configuration = configuration,
+                Service = service
+            };
+
+            downloadFileTask.CreateDownloadWindow(downloadFile, showWindow);
+            _downloadFileTasks.Add(downloadFileTask);
+
+            downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
+            downloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
+            await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork, proxy);
         }
-
-        // Check disk size before starting download
-        var hasEnoughSpace = await CheckDiskSpaceAsync(downloadFile);
-        if (!hasEnoughSpace)
-            return;
-
-        var configuration = new DownloadConfiguration
+        catch (Exception ex)
         {
-            ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
-            MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
-            ParallelDownload = true
-        };
-
-        var proxy = _settingsService.GetProxy();
-        if (proxy != null)
-            configuration.RequestConfiguration.Proxy = proxy;
-
-        var service = new DownloadService(configuration);
-        var downloadFileTask = new DownloadFileTaskViewModel
-        {
-            Key = downloadFile.Id,
-            Configuration = configuration,
-            Service = service
-        };
-
-        downloadFileTask.CreateDownloadWindow(downloadFile, showWindow);
-        _downloadFileTasks.Add(downloadFileTask);
-
-        downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
-        downloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
-        await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork, proxy);
+            Log.Error(ex, "An error occurred while downloading a file. Error message: {ErrorMessage}", ex.Message);
+        }
     }
 
     public async Task StopDownloadFileAsync(DownloadFileViewModel? viewModel, bool ensureStopped = false, bool playSound = true)

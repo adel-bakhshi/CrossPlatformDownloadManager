@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Downloader-master\src\Downloader\Downloader.csproj" />
       <ProjectReference Include="..\CrossPlatformDownloadManager.Utils\CrossPlatformDownloadManager.Utils.csproj" />
+      <ProjectReference Include="..\Downloader\Downloader.csproj" />
     </ItemGroup>
 
     <ItemGroup>

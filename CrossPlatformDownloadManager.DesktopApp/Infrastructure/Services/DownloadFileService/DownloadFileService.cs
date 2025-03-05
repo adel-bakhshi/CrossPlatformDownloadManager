@@ -143,9 +143,29 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (!isValid)
             return null;
 
-        var category = _categoryService
-            .Categories
-            .FirstOrDefault(c => c.Id == viewModel.CategoryId);
+        CategoryViewModel? category;
+        string saveLocation;
+        // If categories are disabled, we will consider the General category as the main category so that there are no problems during validation
+        if (_settingsService.Settings.DisableCategories)
+        {
+            category = _categoryService
+                .Categories
+                .FirstOrDefault(c => c.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase));
+
+            saveLocation = _settingsService.Settings.GlobalSaveLocation ?? string.Empty;
+        }
+        // Otherwise, the category appropriate to the file will be selected
+        else
+        {
+            category = _categoryService
+                .Categories
+                .FirstOrDefault(c => c.Id == viewModel.CategoryId);
+
+            saveLocation = category?.CategorySaveDirectory?.SaveDirectory ?? string.Empty;
+        }
+
+        if (category == null || saveLocation.IsNullOrEmpty())
+            throw new InvalidOperationException("Unable to find the file category or storage location. Please try again.");
 
         var downloadFile = new DownloadFile
         {
@@ -158,8 +178,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             LastTryDate = null,
             DateAdded = DateTime.Now,
             DownloadQueuePriority = viewModel.DownloadQueuePriority,
-            CategoryId = category!.Id,
-            SaveLocation = category.CategorySaveDirectory!.SaveDirectory,
+            CategoryId = category.Id,
+            SaveLocation = saveLocation,
             DownloadProgress = viewModel.DownloadProgress is > 0 ? viewModel.DownloadProgress.Value : 0,
             DownloadPackage = viewModel.DownloadPackage
         };

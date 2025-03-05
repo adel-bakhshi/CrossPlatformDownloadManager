@@ -6,13 +6,13 @@ rm -rf ./staging_folder/
 
 # .NET publish
 # self-contained is recommended, so final users won't need to install .NET
-dotnet publish "../CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" \
+dotnet publish "../../CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" \
   --verbosity quiet \
   --nologo \
   --configuration Release \
   --self-contained true \
   --runtime linux-x64 \
-  --output "../CrossPlatformDownloadManager.DebianConfig/out/linux-x64"
+  --output "../Deploy/deb/out/linux-x64"
 
 # Create directories
 mkdir -p staging_folder/DEBIAN
@@ -33,6 +33,9 @@ mkdir -p staging_folder/usr/share/pixmaps
 # Debian control file
 cp ./control ./staging_folder/DEBIAN
 
+# Debian copyright file
+cp ./copyright ./staging_folder/DEBIAN
+
 # Starter script
 cp ./starter-script.sh ./staging_folder/usr/bin/cross-platform-download-manager
 chmod +x ./staging_folder/usr/bin/cross-platform-download-manager # set executable permissions to starter script
@@ -43,7 +46,7 @@ chmod -R a+rwX ./staging_folder/usr/lib/cross-platform-download-manager/ # set r
 chmod +x ./staging_folder/usr/lib/cross-platform-download-manager/CrossPlatformDownloadManager.DesktopApp # set executable permissions to main executable
 
 # Desktop shortcut
-cp ./desktop-file.desktop ./staging_folder/usr/share/applications/cross-platform-download-manager.desktop
+cp ./app.desktop ./staging_folder/usr/share/applications/cross-platform-download-manager.desktop
 
 # Desktop icon
 # A 1024px x 1024px PNG, like VS Code uses for its icon
@@ -60,5 +63,12 @@ cp ./icons/icon-512.png ./staging_folder/usr/share/icons/hicolor/512x512/apps/cr
 cp ./icons/icon-1024.png ./staging_folder/usr/share/icons/hicolor/1024x1024/apps/cross-platform-download-manager.png
 cp ./icons/cdm-logo.svg ./staging_folder/usr/share/icons/hicolor/scalable/apps/cross-platform-download-manager.svg
 
+# Ensure Deploy/bin directory exists
+mkdir -p ../bin
+
 # Make .deb file
-dpkg-deb --root-owner-group --build ./staging_folder/ ../Deploy/bin/Cross-platform.Download.Manager.linux-amd64.deb
+dpkg-deb --root-owner-group --build ./staging_folder/ ../bin/Cross-platform.Download.Manager.linux-amd64.deb
+
+# Clean-up
+rm -rf ./out/
+rm -rf ./staging_folder/

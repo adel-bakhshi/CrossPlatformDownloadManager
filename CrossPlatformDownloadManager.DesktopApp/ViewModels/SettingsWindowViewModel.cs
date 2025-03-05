@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -140,20 +141,39 @@ public class SettingsWindowViewModel : ViewModelBase
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
 
-            var categoryWithNoSaveDirectory = SaveLocationsViewModel
-                .Categories
-                .FirstOrDefault(c => c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
-
-            if (categoryWithNoSaveDirectory != null)
+            // Validate save locations settings
+            if (SaveLocationsViewModel.DisableCategories)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
-                    $"Please specify a save directory for the category '{categoryWithNoSaveDirectory.Title}'.",
-                    DialogButtons.Ok);
-                
-                return;
+                // Check that the global save location is valid
+                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() || !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
+                {
+                    await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
+                        "Please specify a save directory for your files.",
+                        DialogButtons.Ok);
+
+                    return;
+                }
+            }
+            else
+            {
+                // Check that all categories have a valid save location
+                var categoryWithNoSaveDirectory = SaveLocationsViewModel
+                    .Categories
+                    .FirstOrDefault(c => c.CategorySaveDirectory == null
+                                         || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty()
+                                         || !Directory.Exists(c.CategorySaveDirectory.SaveDirectory));
+
+                if (categoryWithNoSaveDirectory != null)
+                {
+                    await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
+                        $"Please specify a save directory for the category '{categoryWithNoSaveDirectory.Title}'.",
+                        DialogButtons.Ok);
+
+                    return;
+                }
             }
 
-            // Validate settings before save
+            // Validate selected duplicate download link action
             if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
@@ -163,6 +183,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Validate selected maximum connections count
             if (DownloadsViewModel.SelectedMaximumConnectionsCount == 0)
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Invalid or Unspecified File Divisions",
@@ -172,6 +193,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Validate selected speed unit
             if (DownloadsViewModel.SelectedSpeedUnit.IsNullOrEmpty())
             {
                 var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
@@ -204,6 +226,9 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Save categories settings
+            AppService.SettingsService.Settings.DisableCategories = SaveLocationsViewModel.DisableCategories;
+            AppService.SettingsService.Settings.GlobalSaveLocation = SaveLocationsViewModel.GlobalSaveDirectory;
+            
             var primaryKeys = SaveLocationsViewModel
                 .Categories
                 .Select(c => c.Id)
@@ -232,6 +257,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 saveCategoryDirectories = true;
             }
 
+            // Save all category directories
             if (saveCategoryDirectories)
                 await AppService.CategoryService.LoadCategoriesAsync();
 
@@ -288,6 +314,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseQueueFinishedSound = NotificationsViewModel.QueueFinished;
             AppService.SettingsService.Settings.UseSystemNotifications = NotificationsViewModel.UseSystemNotifications;
 
+            // Save settings
             await AppService.SettingsService.SaveSettingsAsync(AppService.SettingsService.Settings);
             owner.Close();
         }

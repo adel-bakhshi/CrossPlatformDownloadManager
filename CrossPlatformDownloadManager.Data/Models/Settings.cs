@@ -23,6 +23,13 @@ public class Settings : DbModelBase
     [Required]
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
+    
+    [JsonProperty("disableCategories")]
+    public bool DisableCategories { get; set; }
+    
+    [MaxLength(500)]
+    [JsonProperty("globalSaveLocation")]
+    public string? GlobalSaveLocation { get; set; }
 
     [Required]
     [JsonProperty("showStartDownloadDialog")]
@@ -105,6 +112,8 @@ public class Settings : DbModelBase
         DarkMode = settings.DarkMode;
         UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+        DisableCategories = settings.DisableCategories;
+        GlobalSaveLocation = settings.GlobalSaveLocation;
         ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
         ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;
         DuplicateDownloadLinkAction = settings.DuplicateDownloadLinkAction;

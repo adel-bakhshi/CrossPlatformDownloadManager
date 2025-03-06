@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Cross platform Download Manager (CDM)
+Comment=Cross platform Download Manager (CDM) is a powerful download manager application
+Icon=cross-platform-download-manager
+Exec=cross-platform-download-manager
+StartupWMClass=cross-platform-download-manager
+Terminal=false
+Type=Application
+Categories=Network;Utility;
+GenericName=Cross platform Download Manager (CDM)
+Keywords=download;download-manager;downloader;cdm;cross-platform-download-manager;

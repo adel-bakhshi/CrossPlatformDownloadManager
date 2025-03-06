@@ -43,3 +43,10 @@ mv ./Deploy/rpm/cross-platform-download-manager-0.3.0.tar.gz ~/rpmbuild/SOURCES/
 echo "Building rpm package..."
 rpmbuild -ba ~/rpmbuild/SPECS/cross-platform-download-manager.spec
 
+# Create output directory
+echo "Creating output directory..."
+mkdir -p ./Deploy/bin/
+
+# Move the RPM package to the output directory
+echo "Moving RPM package to the output directory..."
+mv ~/rpmbuild/RPMS/x86_64/cross-platform-download-manager-0.3.0-1.x86_64.rpm ./Deploy/bin/Cross-platform.Download.Manager.linux-x86_64.rpm

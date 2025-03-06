@@ -2,6 +2,7 @@ name: Build and Release CDM
 
 on:
   push:
+    branches: ["master"]
     tags:
       - "v*"
 
@@ -54,22 +55,19 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Install Dependencies
-        run: sudo apt-get install -y zip rpm
-
-      - name: Install Pupnet Deploy
-        run: dotnet tool install -g KuiperZone.PupNet
+        run: sudo apt-get install -y zip rpm rpm-build rpmdevtools
 
       - name: Restore Dependencies
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: pupnet -k deb -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.deb"
+        run: chmod +x ./Deploy/deb/process.sh && ./Deploy/deb/process.sh
 
       - name: Build Linux RPM File
-        run: pupnet -k rpm -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.rpm"
+        run: chmod +x ./Deploy/rpm/process.sh && ./Deploy/rpm/process.sh
 
       - name: Build Linux ZIP Portable
-        run: pupnet -k zip -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.zip"
+        run: chmod +x ./Deploy/tarball/process.sh && ./Deploy/tarball/process.sh
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

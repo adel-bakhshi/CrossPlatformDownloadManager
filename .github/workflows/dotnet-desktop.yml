@@ -55,7 +55,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Install Dependencies
-        run: sudo apt-get install -y zip rpm rpm-build rpmdevtools
+        run: sudo apt-get install -y zip rpm
 
       - name: Restore Dependencies
         run: dotnet restore

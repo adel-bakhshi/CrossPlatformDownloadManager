@@ -145,7 +145,8 @@ public class SettingsWindowViewModel : ViewModelBase
             if (SaveLocationsViewModel.DisableCategories)
             {
                 // Check that the global save location is valid
-                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() || !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
+                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() ||
+                    !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
                         "Please specify a save directory for your files.",
@@ -159,9 +160,8 @@ public class SettingsWindowViewModel : ViewModelBase
                 // Check that all categories have a valid save location
                 var categoryWithNoSaveDirectory = SaveLocationsViewModel
                     .Categories
-                    .FirstOrDefault(c => c.CategorySaveDirectory == null
-                                         || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty()
-                                         || !Directory.Exists(c.CategorySaveDirectory.SaveDirectory));
+                    .FirstOrDefault(c =>
+                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
 
                 if (categoryWithNoSaveDirectory != null)
                 {
@@ -211,7 +211,8 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
             AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
-            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop =
+                GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
 
             // Register app for startup
             if (GeneralsViewModel.StartOnSystemStartup)
@@ -228,7 +229,7 @@ public class SettingsWindowViewModel : ViewModelBase
             // Save categories settings
             AppService.SettingsService.Settings.DisableCategories = SaveLocationsViewModel.DisableCategories;
             AppService.SettingsService.Settings.GlobalSaveLocation = SaveLocationsViewModel.GlobalSaveDirectory;
-            
+
             var primaryKeys = SaveLocationsViewModel
                 .Categories
                 .Select(c => c.Id)
@@ -248,7 +249,8 @@ public class SettingsWindowViewModel : ViewModelBase
                     .Categories
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false ||
+                    saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
                 saveDirectory.SaveDirectory = category.CategorySaveDirectory!.SaveDirectory;
@@ -263,15 +265,22 @@ public class SettingsWindowViewModel : ViewModelBase
 
             // Save downloads settings
             AppService.SettingsService.Settings.ShowStartDownloadDialog = DownloadsViewModel.ShowStartDownloadDialog;
-            AppService.SettingsService.Settings.ShowCompleteDownloadDialog = DownloadsViewModel.ShowCompleteDownloadDialog;
+            AppService.SettingsService.Settings.ShowCompleteDownloadDialog =
+                DownloadsViewModel.ShowCompleteDownloadDialog;
 
-            var duplicateAction = Constants.GetDuplicateActionFromMessage(DownloadsViewModel.SelectedDuplicateDownloadLinkAction ?? string.Empty);
+            var duplicateAction =
+                Constants.GetDuplicateActionFromMessage(DownloadsViewModel.SelectedDuplicateDownloadLinkAction ??
+                                                        string.Empty);
             AppService.SettingsService.Settings.DuplicateDownloadLinkAction = duplicateAction;
 
-            AppService.SettingsService.Settings.MaximumConnectionsCount = DownloadsViewModel.SelectedMaximumConnectionsCount;
+            AppService.SettingsService.Settings.MaximumConnectionsCount =
+                DownloadsViewModel.SelectedMaximumConnectionsCount;
             AppService.SettingsService.Settings.IsSpeedLimiterEnabled = DownloadsViewModel.IsSpeedLimiterEnabled;
-            AppService.SettingsService.Settings.LimitSpeed = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
-            AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SelectedSpeedUnit : null;
+            AppService.SettingsService.Settings.LimitSpeed =
+                DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
+            AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled
+                ? DownloadsViewModel.SelectedSpeedUnit
+                : null;
 
             // Save proxy settings
             switch (ProxyViewModel)

@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.FileExplorerManager;
 
+[SupportedOSPlatform("macos")]
 public class MacFileExplorerManager : IFileExplorerManager
 {
     public void OpenFolder(string folderPath)

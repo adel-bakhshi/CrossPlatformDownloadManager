@@ -64,7 +64,7 @@ jobs:
         run: chmod +x ./Deploy/deb/process.sh && ./Deploy/deb/process.sh
 
       - name: Build Linux RPM File
-        run: chmod +x ./Deploy/rpm/process.sh && ./Deploy/rpm/process.sh
+        run: chmod +x ./Deploy/rpm/process-on-deb.sh && ./Deploy/rpm/process-on-deb.sh
 
       - name: Build Linux ZIP Portable
         run: chmod +x ./Deploy/tarball/process.sh && ./Deploy/tarball/process.sh

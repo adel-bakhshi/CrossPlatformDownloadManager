@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>adel.bakhshi.cdm</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>AGPL-3.0-or-later</project_license>
+    <name>Cross Platform Download Manager (CDM)</name>
+    <summary>A powerful cross-platform download manager</summary>
+    <description>
+        <p>Cross Platform Download Manager (CDM) is a powerful and feature-rich download manager application.</p>
+    </description>
+    <launchable type="desktop-id">cross-platform-download-manager.desktop</launchable>
+    <icon type="stock">cross-platform-download-manager</icon>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/production/Assets/Screenshots/banner.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/production/Assets/Screenshots/1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/production/Assets/Screenshots/2.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/production/Assets/Screenshots/3.png</image>
+        </screenshot>
+    </screenshots>
+    <developer_name>Adel Bakhshi</developer_name>
+    <content_rating type="oars-1.1" />
+    <url type="homepage">https://github.com/adel-bakhshi/CrossPlatformDownloadManager</url>
+    <url type="bugtracker">https://github.com/adel-bakhshi/CrossPlatformDownloadManager/issues</url>
+    <url type="vcs-browser">https://github.com/adel-bakhshi/CrossPlatformDownloadManager</url>
+    <url type="changelog">https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases</url>
+    <categories>
+        <category>Network</category>
+        <category>Utility</category>
+    </categories>
+    <keywords>
+        <keyword>download</keyword>
+        <keyword>download-manager</keyword>
+        <keyword>downloader</keyword>
+        <keyword>cdm</keyword>
+        <keyword>cross-platform-download-manager</keyword>
+    </keywords>
+    <releases></releases>
+</component>

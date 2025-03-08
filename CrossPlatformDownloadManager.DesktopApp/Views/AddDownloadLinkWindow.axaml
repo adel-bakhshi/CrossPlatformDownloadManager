@@ -146,7 +146,8 @@
                                       TextChanged="UrlTextBoxOnTextChanged" />
 
                     <!-- Category -->
-                    <Grid ColumnDefinitions="*, Auto">
+                    <Grid ColumnDefinitions="*, Auto"
+                          IsVisible="{Binding !CategoriesAreDisabled}">
                         <!-- Category ComboBox -->
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"

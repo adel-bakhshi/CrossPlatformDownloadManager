@@ -33,6 +33,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     private bool _rememberMyChoice;
     private bool _startDownloadQueue;
     private bool _defaultDownloadQueueIsExist;
+    private bool _categoriesAreDisabled;
 
     #endregion
 
@@ -96,6 +97,12 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         get => _defaultDownloadQueueIsExist;
         set => this.RaiseAndSetIfChanged(ref _defaultDownloadQueueIsExist, value);
+    }
+
+    public bool CategoriesAreDisabled
+    {
+        get => _categoriesAreDisabled;
+        set => this.RaiseAndSetIfChanged(ref _categoriesAreDisabled, value);
     }
 
     #endregion
@@ -366,6 +373,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     private void LoadCategories()
     {
+        // Check if categories are disabled or not
+        CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
+
         // Store selected category id
         var selectedCategoryId = SelectedCategory?.Id;
         // Get all categories
@@ -416,5 +426,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         base.OnCategoryServiceCategoriesChanged();
         LoadCategories();
+    }
+
+    protected override void OnSettingsServiceDataChanged()
+    {
+        base.OnSettingsServiceDataChanged();
+
+        // Check if categories are disabled or not
+        CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
     }
 }

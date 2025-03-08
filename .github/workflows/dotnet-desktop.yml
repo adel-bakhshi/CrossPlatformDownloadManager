@@ -55,19 +55,26 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Install Dependencies
-        run: sudo apt-get install -y zip rpm
+        run: |
+          sudo apt update
+          sudo apt-get install -y zip rpm zstd
+          wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x ./appimagetool-x86_64.AppImage
 
       - name: Restore Dependencies
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: chmod +x ./Deploy/deb/process.sh && ./Deploy/deb/process.sh
+        run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
 
       - name: Build Linux RPM File
-        run: chmod +x ./Deploy/rpm/process-on-deb.sh && ./Deploy/rpm/process-on-deb.sh
+        run: chmod +x ./Deploy/linux/rpm/process-on-deb.sh && ./Deploy/linux/rpm/process-on-deb.sh
+
+      - name: Build AppImage File
+        run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
 
       - name: Build Linux ZIP Portable
-        run: chmod +x ./Deploy/tarball/process.sh && ./Deploy/tarball/process.sh
+        run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

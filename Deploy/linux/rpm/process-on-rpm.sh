@@ -2,8 +2,8 @@
 
 # Clean-up
 echo "Cleaning up..."
-rm -rf ./Deploy/rpm/out/
-rm -rf ./Deploy/rpm/tmp/
+rm -rf ./Deploy/linux/rpm/out/
+rm -rf ./Deploy/linux/rpm/tmp/
 rm -rf ~/rpmbuild/
 
 # .NET publish
@@ -15,7 +15,7 @@ dotnet publish "./CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadM
   --configuration Release \
   --self-contained true \
   --runtime linux-x64 \
-  --output "./Deploy/rpm/out/cross-platform-download-manager-0.3.0"
+  --output "./Deploy/linux/rpm/out/cross-platform-download-manager-0.3.0"
 
 # Install dependencies
 echo "Installing dependencies"
@@ -24,20 +24,20 @@ sudo apt install rpm-build rpmdevtools
 # Create directories
 echo "Creating reqiured directories..."
 rpmdev-setuptree
-mkdir -p ./Deploy/rpm/tmp/assets/
+mkdir -p ./Deploy/linux/rpm/tmp/assets/
 
 # Copy spec file
 echo "Copying spec file..."
-cp ./Deploy/rpm/app.spec ~/rpmbuild/SPECS/cross-platform-download-manager.spec
+cp ./Deploy/linux/rpm/app.spec ~/rpmbuild/SPECS/cross-platform-download-manager.spec
 
 # Create tar.gz file
 echo "Creating tarball files..."
-cp -f -a ./Deploy/rpm/icons/. ./Deploy/rpm/tmp/assets/ # Copy icons
-cp ./Deploy/rpm/app.desktop ./Deploy/rpm/tmp/assets/cross-platform-download-manager.desktop # Copy desktop file
-cp ./Deploy/rpm/starter-script.sh ./Deploy/rpm/tmp/assets/cross-platform-download-manager # Copy starter script
-mv ./Deploy/rpm/tmp/assets ./Deploy/rpm/out/cross-platform-download-manager-0.3.0/
-tar -czvf ./Deploy/rpm/cross-platform-download-manager-0.3.0.tar.gz -C ./Deploy/rpm/out/ .
-mv ./Deploy/rpm/cross-platform-download-manager-0.3.0.tar.gz ~/rpmbuild/SOURCES/
+cp -f -a ./Deploy/linux/basics/icons/. ./Deploy/linux/rpm/tmp/assets/ # Copy icons
+cp ./Deploy/linux/basics/app.desktop ./Deploy/linux/rpm/tmp/assets/cross-platform-download-manager.desktop # Copy desktop file
+cp ./Deploy/linux/basics/starter-script.sh ./Deploy/linux/rpm/tmp/assets/cross-platform-download-manager # Copy starter script
+mv ./Deploy/linux/rpm/tmp/assets ./Deploy/linux/rpm/out/cross-platform-download-manager-0.3.0/
+tar -czvf ./Deploy/linux/rpm/cross-platform-download-manager-0.3.0.tar.gz -C ./Deploy/linux/rpm/out/ .
+mv ./Deploy/linux/rpm/cross-platform-download-manager-0.3.0.tar.gz ~/rpmbuild/SOURCES/
 
 # Build the RPM package
 echo "Building rpm package..."
@@ -49,4 +49,4 @@ mkdir -p ./Deploy/bin/
 
 # Move the RPM package to the output directory
 echo "Moving RPM package to the output directory..."
-mv ~/rpmbuild/RPMS/x86_64/cross-platform-download-manager-0.3.0-1.x86_64.rpm ./Deploy/bin/Cross-platform.Download.Manager.linux-x86_64.rpm
+mv ~/rpmbuild/RPMS/x86_64/*.rpm ./Deploy/bin/Cross-platform.Download.Manager.linux-x86_64.rpm

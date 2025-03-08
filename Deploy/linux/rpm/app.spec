@@ -9,6 +9,10 @@ License: AGPLv3
 Source0: %{name}-%{version}.tar.gz
 BuildArch: x86_64
 Requires: lib64lttng-ust0
+Requires: krb5-libs
+Requires: libicu
+Requires: openssl-libs
+Requires: zlib
 
 %description
 CDM is a user-friendly tool for efficient file downloading across platforms, offering queue management and reliable performance. Released under AGPL.

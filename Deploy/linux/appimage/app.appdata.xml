@@ -8,8 +8,8 @@
     <description>
         <p>Cross Platform Download Manager (CDM) is a powerful and feature-rich download manager application.</p>
     </description>
-    <launchable type="desktop-id">cross-platform-download-manager.desktop</launchable>
-    <icon type="stock">cross-platform-download-manager</icon>
+    <launchable type="desktop-id">adel.bakhshi.cdm.desktop</launchable>
+    <icon type="stock">adel.bakhshi.cdm</icon>
     <screenshots>
         <screenshot type="default">
             <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/production/Assets/Screenshots/banner.png</image>
@@ -29,9 +29,7 @@
     <url type="homepage">https://github.com/adel-bakhshi/CrossPlatformDownloadManager</url>
     <url type="bugtracker">https://github.com/adel-bakhshi/CrossPlatformDownloadManager/issues</url>
     <url type="vcs-browser">https://github.com/adel-bakhshi/CrossPlatformDownloadManager</url>
-    <url type="changelog">https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases</url>
     <categories>
-        <category>Network</category>
         <category>Utility</category>
     </categories>
     <keywords>

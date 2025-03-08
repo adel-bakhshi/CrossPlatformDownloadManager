@@ -57,7 +57,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt-get install -y zip rpm zstd
+          sudo apt-get install -y zip rpm zstd fuse libfuse2
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
 

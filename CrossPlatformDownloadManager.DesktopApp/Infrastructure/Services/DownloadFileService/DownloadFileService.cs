@@ -27,6 +27,7 @@ using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
+using Emik;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
@@ -455,7 +456,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             {
                 var filePath = Path.Combine(saveLocation, fileName);
                 if (File.Exists(filePath))
-                    File.Delete(filePath);
+                    await Rubbish.MoveAsync(filePath);
             }
         }
 
@@ -500,7 +501,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (File.Exists(filePath))
-                File.Delete(filePath);
+                await Rubbish.MoveAsync(filePath);
         }
 
         await UpdateDownloadFileAsync(downloadFile);

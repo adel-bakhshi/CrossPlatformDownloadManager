@@ -97,6 +97,19 @@ public static class Constants
         }
     }
 
+    // Application data directory
+    public static string ApplicationDataDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CDM");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            return directory;
+        }
+    }
+
     #endregion
 
     public static List<string> GetDuplicateActionsMessages()

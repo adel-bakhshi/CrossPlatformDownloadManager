@@ -52,7 +52,7 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp()
     {
         const string fileName = "logs.txt";
-        var logFilePath = Path.Combine(Constants.MainDirectory, fileName);
+        var logFilePath = Path.Combine(Constants.ApplicationDataDirectory, fileName);
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()

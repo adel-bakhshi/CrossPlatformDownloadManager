@@ -19,6 +19,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AvaloniaResource Remove="Bass\bass.dll" />
+      <AvaloniaResource Remove="Bass\libbass.dylib" />
+      <AvaloniaResource Remove="Bass\libbass.so" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="AutoMapper" Version="14.0.0" />
         <PackageReference Include="Avalonia" Version="11.2.5" />
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.5" />
@@ -29,6 +35,7 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.5" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5" />
         <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.5" />
+        <PackageReference Include="Emik.Rubbish" Version="1.1.0" />
         <PackageReference Include="ManagedBass" Version="3.1.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
           <PrivateAssets>all</PrivateAssets>
@@ -78,7 +85,24 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\Bass\" />
       <Folder Include="Assets\Songs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Bass\bass.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <Link>bass.dll</Link>
+      </Content>
+      <Content Include="Bass\libbass.dylib">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <Link>libbass.dylib</Link>
+      </Content>
+      <Content Include="Bass\libbass.so">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <Link>libbass.so</Link>
+      </Content>
     </ItemGroup>
 </Project>

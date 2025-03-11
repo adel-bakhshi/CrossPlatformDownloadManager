@@ -25,7 +25,6 @@ public class SettingsViewModel : PropertyChangedBase
     private string? _limitUnit;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
-    private string _customProxySettings = string.Empty;
     private bool _useDownloadCompleteSound;
     private bool _useDownloadStoppedSound;
     private bool _useDownloadFailedSound;
@@ -144,12 +143,6 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _proxyType;
         set => SetField(ref _proxyType, value);
-    }
-
-    public string CustomProxySettings
-    {
-        get => _customProxySettings;
-        set => SetField(ref _customProxySettings, value);
     }
 
     public bool UseDownloadCompleteSound

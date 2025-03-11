@@ -971,7 +971,7 @@ public class MainWindowViewModel : ViewModelBase
                     {
                         if (openedFolders.Contains(directoryPath))
                             continue;
-                        
+
                         PlatformSpecificManager.OpenFolder(directoryPath);
                         openedFolders.Add(directoryPath);
                     }
@@ -979,7 +979,7 @@ public class MainWindowViewModel : ViewModelBase
                     {
                         if (openedFolders.Contains(directoryPath))
                             continue;
-                        
+
                         var filePath = Path.Combine(directoryPath, downloadFile.FileName!);
                         if (File.Exists(filePath))
                         {
@@ -989,7 +989,7 @@ public class MainWindowViewModel : ViewModelBase
                         {
                             PlatformSpecificManager.OpenFolder(directoryPath);
                         }
-                        
+
                         openedFolders.Add(directoryPath);
                     }
                 }
@@ -1789,17 +1789,21 @@ public class MainWindowViewModel : ViewModelBase
 
     private void UpdateActiveDownloadQueuesTimerOnTick(object? sender, EventArgs e)
     {
+        // Get running queues
         var downloadQueues = AppService
             .DownloadQueueService
             .DownloadQueues
             .Where(dq => dq.IsRunning)
             .ToObservableCollection();
 
+        // Check for any changes
         bool isChanged;
+        // Check if count is different
         if (ActiveDownloadQueues.Count != downloadQueues.Count)
         {
             isChanged = true;
         }
+        // Or check if any items are different
         else
         {
             isChanged = downloadQueues
@@ -1807,15 +1811,20 @@ public class MainWindowViewModel : ViewModelBase
                 .Any();
         }
 
-        if (isChanged)
-            ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        // Check if changed
+        if (!isChanged)
+            return;
+
+        // Update active download queues
+        ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        this.RaisePropertyChanged(nameof(ActiveDownloadQueues));
     }
 
     private void LoadCategories()
     {
         if (CategoriesTreeViewModel != null)
             CategoriesTreeViewModel.SelectedItemChanged -= CategoriesTreeViewModelOnSelectedItemChanged;
-        
+
         CategoriesTreeViewModel = new CategoriesTreeViewModel(AppService);
         CategoriesTreeViewModel.SelectedItemChanged += CategoriesTreeViewModelOnSelectedItemChanged;
     }
@@ -2191,6 +2200,7 @@ public class MainWindowViewModel : ViewModelBase
         settings.StartOnSystemStartup = exportSettings.StartOnSystemStartup;
         settings.UseBrowserExtension = exportSettings.UseBrowserExtension;
         settings.DarkMode = exportSettings.DarkMode;
+        settings.UseManager = exportSettings.UseManager;
         settings.AlwaysKeepManagerOnTop = exportSettings.AlwaysKeepManagerOnTop;
         settings.ShowStartDownloadDialog = exportSettings.ShowStartDownloadDialog;
         settings.ShowCompleteDownloadDialog = exportSettings.ShowCompleteDownloadDialog;
@@ -2210,6 +2220,7 @@ public class MainWindowViewModel : ViewModelBase
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
         settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
         settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>() ?? settings.DataGridColumnsSettings;
+        settings.ApplicationFont = exportSettings.ApplicationFont;
 
         await AppService.SettingsService.SaveSettingsAsync(settings);
 

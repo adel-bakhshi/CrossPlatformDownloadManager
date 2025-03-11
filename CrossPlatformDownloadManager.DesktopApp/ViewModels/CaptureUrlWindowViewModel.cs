@@ -165,6 +165,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
             return;
         }
 
+        // Check duplicate download link
         DuplicateDownloadLinkAction? duplicateAction = null;
         if (urlDetails.IsUrlDuplicate)
         {
@@ -181,14 +182,17 @@ public class CaptureUrlWindowViewModel : ViewModelBase
             }
         }
 
+        // Create new download file
         var downloadFile = new DownloadFileViewModel
         {
             Url = urlDetails.Url,
             FileName = urlDetails.FileName,
             CategoryId = urlDetails.Category?.Id,
-            Size = urlDetails.FileSize
+            Size = urlDetails.FileSize,
+            IsSizeUnknown = urlDetails.IsFileSizeUnknown
         };
 
+        // Add download file
         await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile,
             isUrlDuplicate: urlDetails.IsUrlDuplicate,
             duplicateAction: duplicateAction,

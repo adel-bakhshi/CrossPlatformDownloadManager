@@ -1817,7 +1817,8 @@ public class MainWindowViewModel : ViewModelBase
 
         // Update active download queues
         ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
-        this.RaisePropertyChanged(nameof(ActiveDownloadQueues));
+        this.RaisePropertyChanged(nameof(ActiveDownloadQueueExists));
+        this.RaisePropertyChanged(nameof(ActiveDownloadQueuesToolTipText));
     }
 
     private void LoadCategories()
@@ -2338,6 +2339,7 @@ public class MainWindowViewModel : ViewModelBase
             // Make sure download file has file name
             // If file name is null or empty, we must get url details and use of it
             var fileName = exportDownloadFile.FileName;
+            var isFileSizeUnknown = false;
             if (fileName.IsNullOrEmpty())
             {
                 var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url, CancellationToken.None);
@@ -2347,6 +2349,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 fileName = urlDetails.FileName;
                 exportDownloadFile.Size = urlDetails.FileSize;
+                isFileSizeUnknown = urlDetails.IsFileSizeUnknown;
             }
 
             CategoryViewModel? category = null;
@@ -2460,6 +2463,7 @@ public class MainWindowViewModel : ViewModelBase
                 FileName = fileName,
                 DownloadQueueId = downloadQueueId,
                 Size = exportDownloadFile.Size,
+                IsSizeUnknown = isFileSizeUnknown,
                 Description = exportDownloadFile.Description,
                 Status = exportDownloadFile.Status,
                 DownloadQueuePriority = downloadQueuePriority,
@@ -2471,7 +2475,8 @@ public class MainWindowViewModel : ViewModelBase
             // Save download file
             downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile);
             // Add required data to result
-            var viewModel = new ExportAddedDownloadFileDataViewModel(oldFileName: exportDownloadFile.FileName,
+            var viewModel = new ExportAddedDownloadFileDataViewModel(
+                oldFileName: exportDownloadFile.FileName,
                 newFileName: downloadFile?.FileName ?? string.Empty,
                 saveLocation: category.CategorySaveDirectory?.SaveDirectory ?? string.Empty,
                 newDownloadFileId: downloadFile?.Id ?? 0);

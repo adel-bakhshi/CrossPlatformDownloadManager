@@ -38,6 +38,9 @@ public class CategoriesTreeViewModel : ViewModelBase
         get => _selectedCategoriesTreeItemView;
         set
         {
+            if (SelectedCategoriesTreeItemViewModel != null && SelectedCategoriesTreeItemView?.Equals(value) != true)
+                SelectedCategoriesTreeItemViewModel.SelectedCategory = null;
+            
             this.RaiseAndSetIfChanged(ref _selectedCategoriesTreeItemView, value);
             this.RaisePropertyChanged(nameof(SelectedCategoriesTreeItemViewModel));
             RaiseSelectedItemChanged();

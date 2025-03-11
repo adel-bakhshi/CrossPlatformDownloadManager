@@ -6,31 +6,45 @@ namespace CrossPlatformDownloadManager.Data.Models;
 
 public class DownloadFile : DbModelBase
 {
-    [Required] [MaxLength(500)] public string Url { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(500)]
+    public string Url { get; set; } = string.Empty;
 
-    [Required] [MaxLength(300)] public string FileName { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(300)]
+    public string FileName { get; set; } = string.Empty;
 
     public int? DownloadQueueId { get; set; }
 
-    [ForeignKey(nameof(DownloadQueueId))] public DownloadQueue? DownloadQueue { get; set; }
+    [ForeignKey(nameof(DownloadQueueId))]
+    public DownloadQueue? DownloadQueue { get; set; }
 
-    [Required] public double Size { get; set; }
+    [Required]
+    public double Size { get; set; }
 
-    [MaxLength(500)] public string? Description { get; set; }
+    [Required]
+    public bool IsSizeUnknown { get; set; }
+
+    [MaxLength(500)]
+    public string? Description { get; set; }
 
     public DownloadFileStatus? Status { get; set; }
 
     public DateTime? LastTryDate { get; set; }
 
-    [Required] public DateTime DateAdded { get; set; }
+    [Required]
+    public DateTime DateAdded { get; set; }
 
     public int? DownloadQueuePriority { get; set; }
 
-    [Required] public int? CategoryId { get; set; }
+    [Required]
+    public int? CategoryId { get; set; }
 
-    [ForeignKey(nameof(CategoryId))] public Category? Category { get; set; }
+    [ForeignKey(nameof(CategoryId))]
+    public Category? Category { get; set; }
 
-    [Required] public float DownloadProgress { get; set; }
+    [Required]
+    public float DownloadProgress { get; set; }
 
     public TimeSpan? ElapsedTime { get; set; }
 
@@ -38,19 +52,23 @@ public class DownloadFile : DbModelBase
 
     public float? TransferRate { get; set; }
 
-    [Required] [MaxLength(500)] public string SaveLocation { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(500)]
+    public string SaveLocation { get; set; } = string.Empty;
 
-    [MaxLength(5000)] public string? DownloadPackage { get; set; }
+    [MaxLength(5000)]
+    public string? DownloadPackage { get; set; }
 
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not DownloadFile downloadFile)
             return;
-        
+
         Url = downloadFile.Url;
         FileName = downloadFile.FileName;
         DownloadQueueId = downloadFile.DownloadQueueId;
         Size = downloadFile.Size;
+        IsSizeUnknown = downloadFile.IsSizeUnknown;
         Description = downloadFile.Description;
         Status = downloadFile.Status;
         LastTryDate = downloadFile.LastTryDate;

@@ -44,7 +44,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     public DownloadFileViewModel DownloadFile
     {
         get => _downloadFile;
-        set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadFile, value);
+            this.RaisePropertyChanged(nameof(IsFileSizeVisible));
+        }
     }
 
     public ObservableCollection<CategoryViewModel> Categories
@@ -106,6 +110,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         get => _categoriesAreDisabled;
         set => this.RaiseAndSetIfChanged(ref _categoriesAreDisabled, value);
     }
+
+    public bool IsFileSizeVisible => DownloadFile.IsSizeUnknown || DownloadFile.Size > 0;
 
     #endregion
 
@@ -311,17 +317,21 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     private async Task<DownloadFileViewModel?> AddDownloadFileAsync()
     {
+        // Make sure url details is not null and url has value
         if (_urlDetails == null || !_urlDetails.Url.Equals(DownloadFile.Url))
             return null;
 
+        // Validate url details
         var validateUrlDetailsResult = AppService.DownloadFileService.ValidateUrlDetails(_urlDetails);
         if (!validateUrlDetailsResult.IsValid)
             return null;
 
+        // Validate download file
         var validateDownloadFile = await AppService.DownloadFileService.ValidateDownloadFileAsync(DownloadFile);
         if (!validateDownloadFile)
             return null;
 
+        // Check for duplicate download file
         DuplicateDownloadLinkAction? duplicateAction = null;
         if (_urlDetails.IsUrlDuplicate)
         {
@@ -338,6 +348,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             }
         }
 
+        // Add new download file
         var downloadFile = await AppService
             .DownloadFileService
             .AddDownloadFileAsync(DownloadFile,
@@ -345,9 +356,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 duplicateAction: duplicateAction,
                 isFileNameDuplicate: _urlDetails.IsFileNameDuplicate);
 
+        // Make sure download file is created
         if (downloadFile != null)
             return downloadFile;
 
+        // Otherwise, show error message
         await DialogBoxManager.ShowInfoDialogAsync("File not found",
             "An error occurred while trying to add file. Please try again or contact support.",
             DialogButtons.Ok);
@@ -402,9 +415,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             DownloadFile.Url = _urlDetails.Url;
             DownloadFile.FileName = _urlDetails.FileName;
             DownloadFile.Size = _urlDetails.FileSize;
+            DownloadFile.IsSizeUnknown = _urlDetails.IsFileSizeUnknown;
             DownloadFile.CategoryId = _urlDetails.Category?.Id;
 
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == _urlDetails.Category?.Id);
+
+            // Notify IsFileSizeVisible changed
+            this.RaisePropertyChanged(nameof(IsFileSizeVisible));
         }
         catch (Exception ex)
         {

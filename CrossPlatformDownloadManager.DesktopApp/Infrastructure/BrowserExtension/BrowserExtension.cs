@@ -203,6 +203,7 @@ public class BrowserExtension : IBrowserExtension
             return result;
         }
 
+        // Check for duplicate download file
         DuplicateDownloadLinkAction? duplicateAction = null;
         if (urlDetails.IsUrlDuplicate)
         {
@@ -219,15 +220,18 @@ public class BrowserExtension : IBrowserExtension
             }
         }
 
+        // Create a new download file
         var downloadFile = new DownloadFileViewModel
         {
             Url = urlDetails.Url,
             FileName = urlDetails.FileName,
             CategoryId = urlDetails.Category?.Id,
-            Size = urlDetails.FileSize
+            Size = urlDetails.FileSize,
+            IsSizeUnknown = urlDetails.IsFileSizeUnknown
         };
 
-        await _appService
+        // Add download file
+        var addResult = await _appService
             .DownloadFileService
             .AddDownloadFileAsync(downloadFile,
                 isUrlDuplicate: urlDetails.IsUrlDuplicate,
@@ -235,7 +239,8 @@ public class BrowserExtension : IBrowserExtension
                 isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
                 startDownloading: true);
 
-        result.IsSuccessful = true;
+        // Check download file added or not
+        result.IsSuccessful = addResult != null;
         return result;
     }
 

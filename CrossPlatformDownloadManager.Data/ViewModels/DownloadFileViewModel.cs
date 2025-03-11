@@ -45,6 +45,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private int? _downloadQueueId;
     private string? _downloadQueueName;
     private double? _size;
+    private bool _isSizeUnknown;
     private string? _description;
     private DownloadFileStatus? _status;
     private DateTime? _lastTryDate;
@@ -52,7 +53,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private int? _downloadQueuePriority;
     private int? _categoryId;
     private float? _downloadProgress;
-    private string? _downloadedSizeAsString;
+    private double? _downloadedSize;
     private TimeSpan? _elapsedTime;
     private TimeSpan? _timeLeft;
     private float? _transferRate;
@@ -114,7 +115,20 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string SizeAsString => Size.ToFileSize();
+    public string SizeAsString => IsSizeUnknown ? "Unknown" : Size.ToFileSize();
+
+    public bool IsSizeUnknown
+    {
+        get => _isSizeUnknown;
+        set
+        {
+            SetField(ref _isSizeUnknown, value);
+            OnPropertyChanged(nameof(SizeAsString));
+            OnPropertyChanged(nameof(DownloadProgressAsString));
+            OnPropertyChanged(nameof(CeilingDownloadProgressAsString));
+            OnPropertyChanged(nameof(TimeLeftAsString));
+        }
+    }
 
     public string? Description
     {
@@ -196,14 +210,20 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string DownloadProgressAsString => DownloadProgress == null ? "00.00%" : $"{DownloadProgress ?? 0:00.00}%";
-    public string CeilingDownloadProgressAsString => DownloadProgress == null ? "00.00%" : $"{Math.Ceiling(DownloadProgress ?? 0):00}%";
+    public string DownloadProgressAsString => IsSizeUnknown ? "Unknown" : DownloadProgress == null ? "00.00%" : $"{DownloadProgress ?? 0:00.00}%";
+    public string CeilingDownloadProgressAsString => IsSizeUnknown ? "Unknown" : DownloadProgress == null ? "00.00%" : $"{Math.Ceiling(DownloadProgress ?? 0):00}%";
 
-    public string? DownloadedSizeAsString
+    public double? DownloadedSize
     {
-        get => _downloadedSizeAsString;
-        set => SetField(ref _downloadedSizeAsString, value);
+        get => _downloadedSize;
+        set
+        {
+            SetField(ref _downloadedSize, value);
+            OnPropertyChanged(nameof(DownloadedSizeAsString));
+        }
     }
+
+    public string DownloadedSizeAsString => DownloadedSize.ToFileSize();
 
     public TimeSpan? ElapsedTime
     {
@@ -231,7 +251,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string TimeLeftAsString => TimeLeft.GetShortTime();
+    public string TimeLeftAsString => IsSizeUnknown ? "Unknown" : TimeLeft.GetShortTime();
 
     public float? TransferRate
     {
@@ -495,7 +515,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         DownloadProgress = (float)e.ProgressPercentage;
         TransferRate = (float)e.BytesPerSecondSpeed;
-        DownloadedSizeAsString = e.ReceivedBytesSize.ToFileSize();
+        DownloadedSize = e.ReceivedBytesSize;
 
         // Save required data to calculate time left
         _receivedBytesSize = e.ReceivedBytesSize;

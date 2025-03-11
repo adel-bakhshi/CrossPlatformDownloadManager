@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Avalonia;
+using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -47,7 +48,6 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     #region Events
 
     public event EventHandler? DataChanged;
-    public event EventHandler? ActiveProxyChanged;
 
     #endregion
 
@@ -116,6 +116,9 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 viewModel.ProxyMode = ProxyMode.DisableProxy;
                 Settings = viewModel;
             }
+            
+            // Set application font
+            SetApplicationFont();
 
             DataChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -165,6 +168,9 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         {
             HideManager();
         }
+
+        // Set application font
+        SetApplicationFont();
     }
 
     public async Task<int> AddProxySettingsAsync(ProxySettings? proxySettings)
@@ -342,35 +348,35 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         switch (Settings.ProxyMode)
         {
             case ProxyMode.DisableProxy:
-                {
-                    proxy = null;
-                    break;
-                }
+            {
+                proxy = null;
+                break;
+            }
 
             case ProxyMode.UseSystemProxySettings:
-                {
-                    var systemProxy = WebRequest.DefaultWebProxy;
-                    if (systemProxy == null)
-                        break;
-
-                    proxy = systemProxy;
+            {
+                var systemProxy = WebRequest.DefaultWebProxy;
+                if (systemProxy == null)
                     break;
-                }
+
+                proxy = systemProxy;
+                break;
+            }
 
             case ProxyMode.UseCustomProxy:
-                {
-                    var activeProxy = Settings.Proxies.FirstOrDefault(p => p.IsActive);
-                    if (activeProxy == null)
-                        break;
-
-                    proxy = new WebProxy
-                    {
-                        Address = new Uri(activeProxy.GetProxyUri()),
-                        Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password)
-                    };
-
+            {
+                var activeProxy = Settings.Proxies.FirstOrDefault(p => p.IsActive);
+                if (activeProxy == null)
                     break;
-                }
+
+                proxy = new WebProxy
+                {
+                    Address = new Uri(activeProxy.GetProxyUri()),
+                    Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password)
+                };
+
+                break;
+            }
 
             default:
                 throw new InvalidOperationException("Invalid proxy mode.");
@@ -388,6 +394,16 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             return;
 
         PlatformSpecificManager.RegisterStartup();
+    }
+
+    private void SetApplicationFont()
+    {
+        var font = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
+        if (Application.Current?.TryFindResource(font!, out var resource) != true || resource == null)
+            return;
+        
+        if (Application.Current.TryFindResource("PrimaryFont", out var primaryFont) && primaryFont?.Equals(resource) != true)
+            Application.Current.Resources["PrimaryFont"] = resource;
     }
 
     #endregion

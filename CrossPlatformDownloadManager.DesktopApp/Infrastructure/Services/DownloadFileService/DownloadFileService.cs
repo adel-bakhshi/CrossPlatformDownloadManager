@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Avalonia;
@@ -500,7 +501,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         return downloadSpeed.ToFileSize();
     }
 
-    public async Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url)
+    public async Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken)
     {
         var result = new UrlDetailsResultViewModel();
 
@@ -524,7 +525,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         using var httpClient = new HttpClient(handler);
         // Send a HEAD request to get the headers only
         using var request = new HttpRequestMessage(HttpMethod.Head, url);
-        using var response = await httpClient.SendAsync(request);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         // Set file flag to true

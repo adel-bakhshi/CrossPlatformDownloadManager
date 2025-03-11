@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossPlatformDownloadManage
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossPlatformDownloadManager.Utils", "CrossPlatformDownloadManager.Utils\CrossPlatformDownloadManager.Utils.csproj", "{5CB14278-691B-401F-901C-F79266804A43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Downloader", "Downloader\Downloader.csproj", "{2820D534-47FB-4D62-B66F-B41CF76F6429}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{5CB14278-691B-401F-901C-F79266804A43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CB14278-691B-401F-901C-F79266804A43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CB14278-691B-401F-901C-F79266804A43}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2820D534-47FB-4D62-B66F-B41CF76F6429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2820D534-47FB-4D62-B66F-B41CF76F6429}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2820D534-47FB-4D62-B66F-B41CF76F6429}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2820D534-47FB-4D62-B66F-B41CF76F6429}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

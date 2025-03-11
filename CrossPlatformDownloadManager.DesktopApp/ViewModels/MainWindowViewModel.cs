@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -19,7 +20,9 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.MainWindow;
 using CrossPlatformDownloadManager.DesktopApp.Views;
+using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.MainWindow;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -35,13 +38,11 @@ public class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
     private readonly DispatcherTimer _saveColumnsSettingsTimer;
 
-    private MainWindow? _mainWindow;
+    private Views.MainWindow? _mainWindow;
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
 
     // Properties
-    private ObservableCollection<CategoryHeaderViewModel> _categoryHeaders = [];
-    private CategoryHeaderViewModel? _selectedCategoryHeader;
-    private CategoryViewModel? _selectedCategory;
+    private CategoriesTreeViewModel? _categoriesTreeViewModel;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
     private bool _selectAllDownloadFiles;
     private string _downloadSpeed = "0 KB";
@@ -61,34 +62,13 @@ public class MainWindowViewModel : ViewModelBase
 
     #region Properties
 
-    public ObservableCollection<CategoryHeaderViewModel> CategoryHeaders
+    public CategoriesTreeViewModel? CategoriesTreeViewModel
     {
-        get => _categoryHeaders;
-        set => this.RaiseAndSetIfChanged(ref _categoryHeaders, value);
+        get => _categoriesTreeViewModel;
+        set => this.RaiseAndSetIfChanged(ref _categoriesTreeViewModel, value);
     }
 
-    public CategoryHeaderViewModel? SelectedCategoryHeader
-    {
-        get => _selectedCategoryHeader;
-        set
-        {
-            if (_selectedCategoryHeader != null && value != _selectedCategoryHeader)
-                SelectedCategory = null;
-
-            this.RaiseAndSetIfChanged(ref _selectedCategoryHeader, value);
-            FilterDownloadList();
-        }
-    }
-
-    public CategoryViewModel? SelectedCategory
-    {
-        get => _selectedCategory;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedCategory, value);
-            FilterDownloadList();
-        }
-    }
+    public CategoriesTreeView CategoriesTreeView => new CategoriesTreeView { DataContext = CategoriesTreeViewModel };
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
@@ -1833,10 +1813,16 @@ public class MainWindowViewModel : ViewModelBase
 
     private void LoadCategories()
     {
-        var selectedCategoryHeaderId = SelectedCategoryHeader?.Id;
+        if (CategoriesTreeViewModel != null)
+            CategoriesTreeViewModel.SelectedItemChanged -= CategoriesTreeViewModelOnSelectedItemChanged;
+        
+        CategoriesTreeViewModel = new CategoriesTreeViewModel(AppService);
+        CategoriesTreeViewModel.SelectedItemChanged += CategoriesTreeViewModelOnSelectedItemChanged;
+    }
 
-        CategoryHeaders.UpdateCollection(AppService.CategoryService.CategoryHeaders, ch => ch.Id);
-        SelectedCategoryHeader = CategoryHeaders.FirstOrDefault(ch => ch.Id == selectedCategoryHeaderId) ?? CategoryHeaders.FirstOrDefault();
+    private void CategoriesTreeViewModelOnSelectedItemChanged(object? sender, EventArgs e)
+    {
+        FilterDownloadList();
     }
 
     private void FilterDownloadList()
@@ -1853,9 +1839,9 @@ public class MainWindowViewModel : ViewModelBase
                 .DownloadFiles
                 .ToList();
 
-            if (SelectedCategoryHeader != null)
+            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel != null)
             {
-                downloadFiles = SelectedCategoryHeader.Title switch
+                downloadFiles = CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.Title switch
                 {
                     Constants.UnfinishedCategoryHeaderTitle => downloadFiles
                         .Where(df => !df.IsCompleted)
@@ -1869,10 +1855,10 @@ public class MainWindowViewModel : ViewModelBase
                 };
             }
 
-            if (SelectedCategory != null)
+            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel?.SelectedCategory != null)
             {
                 downloadFiles = downloadFiles
-                    .Where(df => df.CategoryId == SelectedCategory.Id)
+                    .Where(df => df.CategoryId == CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.SelectedCategory.Id)
                     .ToList();
             }
 
@@ -1889,11 +1875,18 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch
         {
-            var downloadFiles = AppService
-                .DownloadFileService
-                .DownloadFiles;
+            try
+            {
+                var downloadFiles = AppService
+                    .DownloadFileService
+                    .DownloadFiles;
 
-            DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
+                DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
+            }
+            catch
+            {
+                DownloadFiles = [];
+            }
         }
         finally
         {
@@ -1947,7 +1940,7 @@ public class MainWindowViewModel : ViewModelBase
         return $"Active queues: {text}";
     }
 
-    public async Task ChangeContextFlyoutEnableStateAsync(MainWindow? mainWindow)
+    public async Task ChangeContextFlyoutEnableStateAsync(Views.MainWindow? mainWindow)
     {
         try
         {
@@ -2336,7 +2329,7 @@ public class MainWindowViewModel : ViewModelBase
             var fileName = exportDownloadFile.FileName;
             if (fileName.IsNullOrEmpty())
             {
-                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url);
+                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url, CancellationToken.None);
                 var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
                 if (!urlDetailsValidation.IsValid)
                     continue;

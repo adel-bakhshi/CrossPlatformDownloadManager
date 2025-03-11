@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -145,7 +146,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
     private async Task AddNewDownloadFileAndStartItAsync()
     {
         // Get url details
-        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadAddress);
+        var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadAddress, CancellationToken.None);
         // Validate url details
         var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
         if (!validateResult.IsValid)

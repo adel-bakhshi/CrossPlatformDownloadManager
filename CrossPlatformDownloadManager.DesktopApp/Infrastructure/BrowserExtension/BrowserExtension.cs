@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.ViewModels;
@@ -192,7 +193,7 @@ public class BrowserExtension : IBrowserExtension
         var result = new ResponseViewModel();
 
         // Get url details
-        var urlDetails = await _appService.DownloadFileService.GetUrlDetailsAsync(url);
+        var urlDetails = await _appService.DownloadFileService.GetUrlDetailsAsync(url, CancellationToken.None);
         // Validate url details
         var validateUrlDetails = _appService.DownloadFileService.ValidateUrlDetails(urlDetails);
         if (!validateUrlDetails.IsValid)

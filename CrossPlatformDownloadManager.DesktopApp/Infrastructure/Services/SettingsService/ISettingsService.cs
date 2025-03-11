@@ -17,7 +17,6 @@ public interface ISettingsService
     #region Events
 
     event EventHandler? DataChanged;
-    event EventHandler? ActiveProxyChanged;
 
     #endregion
 

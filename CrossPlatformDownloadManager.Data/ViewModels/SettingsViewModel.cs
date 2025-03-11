@@ -37,6 +37,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private bool _hasApplicationBeenRunYet;
+    private string? _applicationFont;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -215,6 +216,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _hasApplicationBeenRunYet;
         set => SetField(ref _hasApplicationBeenRunYet, value);
+    }
+
+    public string? ApplicationFont
+    {
+        get => _applicationFont;
+        set => SetField(ref _applicationFont, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

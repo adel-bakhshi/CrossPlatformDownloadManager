@@ -110,6 +110,12 @@ public static class Constants
         }
     }
 
+    public static List<string> AvailableFonts =>
+    [
+        "Asap",
+        "Ubuntu"
+    ];
+
     #endregion
 
     public static List<string> GetDuplicateActionsMessages()

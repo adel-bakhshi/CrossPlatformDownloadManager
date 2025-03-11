@@ -19,5 +19,6 @@
   "useQueueStartedSound": false,
   "useQueueStoppedSound": false,
   "useQueueFinishedSound": false,
-  "useSystemNotifications": false
+  "useSystemNotifications": false,
+  "applicationFont": "Asap"
 }

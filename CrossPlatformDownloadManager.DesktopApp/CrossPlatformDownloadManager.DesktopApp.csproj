@@ -85,6 +85,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Assets\Fonts\Aspa\" />
+      <Folder Include="Assets\Fonts\Ubuntu\" />
       <Folder Include="Assets\Songs\" />
     </ItemGroup>
 

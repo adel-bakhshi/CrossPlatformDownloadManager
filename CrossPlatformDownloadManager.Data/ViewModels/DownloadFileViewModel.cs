@@ -13,7 +13,6 @@ using Downloader;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 using Serilog;
-using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -492,7 +491,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CanResumeDownload = null;
     }
 
-    private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
+    private void DownloadServiceOnDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
     {
         DownloadProgress = (float)e.ProgressPercentage;
         TransferRate = (float)e.BytesPerSecondSpeed;
@@ -547,7 +546,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         TimeLeft = timeLeft;
     }
 
-    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
+    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
     {
         if (_chunkProgresses == null || _chunkProgresses.Count == 0)
             return;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -61,7 +62,7 @@ public interface IDownloadFileService
 
     string GetDownloadSpeed();
 
-    Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url);
+    Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken);
 
     ValidateUrlDetailsViewModel ValidateUrlDetails(UrlDetailsResultViewModel viewModel);
 

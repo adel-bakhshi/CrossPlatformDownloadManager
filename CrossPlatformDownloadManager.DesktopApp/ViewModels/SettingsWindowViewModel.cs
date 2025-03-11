@@ -12,6 +12,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
@@ -51,38 +52,69 @@ public class SettingsWindowViewModel : ViewModelBase
     public GeneralsViewModel? GeneralsViewModel
     {
         get => _generalsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
+            this.RaisePropertyChanged(nameof(GeneralsView));
+        }
     }
 
     public FileTypesViewModel? FileTypesViewModel
     {
         get => _fileTypesViewModel;
-        set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
+            this.RaisePropertyChanged(nameof(FileTypesView));
+        }
     }
 
     public SaveLocationsViewModel? SaveLocationsViewModel
     {
         get => _saveLocationsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
+            this.RaisePropertyChanged(nameof(SaveLocationsView));
+        }
     }
 
     public DownloadsViewModel? DownloadsViewModel
     {
         get => _downloadsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
+            this.RaisePropertyChanged(nameof(DownloadsView));
+        }
     }
 
     public ProxyViewModel? ProxyViewModel
     {
         get => _proxyViewModel;
-        set => this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
+            this.RaisePropertyChanged(nameof(ProxyView));
+        }
     }
 
     public NotificationsViewModel? NotificationsViewModel
     {
         get => _notificationsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _notificationsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _notificationsViewModel, value);
+            this.RaisePropertyChanged(nameof(NotificationsView));
+        }
     }
+
+    public GeneralsView GeneralsView => new() { DataContext = GeneralsViewModel };
+    public FileTypesView FileTypesView => new() { DataContext = FileTypesViewModel };
+    public SaveLocationsView SaveLocationsView => new() { DataContext = SaveLocationsViewModel };
+    public DownloadsView DownloadsView => new() { DataContext = DownloadsViewModel };
+    public ProxyView ProxyView => new() { DataContext = ProxyViewModel };
+    public NotificationsView NotificationsView => new() { DataContext = NotificationsViewModel };
 
     #endregion
 
@@ -139,6 +171,16 @@ public class SettingsWindowViewModel : ViewModelBase
                 NotificationsViewModel == null)
             {
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
+            }
+            
+            // Validate font
+            if (GeneralsViewModel.SelectedFont.IsNullOrEmpty())
+            {
+                await DialogBoxManager.ShowInfoDialogAsync("Font Not Specified",
+                    "Please choose a valid font and try again.",
+                    DialogButtons.Ok);
+                
+                return;
             }
 
             // Validate save locations settings
@@ -211,8 +253,8 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
             AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
-            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop =
-                GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.ApplicationFont = GeneralsViewModel.SelectedFont;
 
             // Register app for startup
             if (GeneralsViewModel.StartOnSystemStartup)
@@ -265,22 +307,15 @@ public class SettingsWindowViewModel : ViewModelBase
 
             // Save downloads settings
             AppService.SettingsService.Settings.ShowStartDownloadDialog = DownloadsViewModel.ShowStartDownloadDialog;
-            AppService.SettingsService.Settings.ShowCompleteDownloadDialog =
-                DownloadsViewModel.ShowCompleteDownloadDialog;
+            AppService.SettingsService.Settings.ShowCompleteDownloadDialog = DownloadsViewModel.ShowCompleteDownloadDialog;
 
-            var duplicateAction =
-                Constants.GetDuplicateActionFromMessage(DownloadsViewModel.SelectedDuplicateDownloadLinkAction ??
-                                                        string.Empty);
+            var duplicateAction = Constants.GetDuplicateActionFromMessage(DownloadsViewModel.SelectedDuplicateDownloadLinkAction ?? string.Empty);
             AppService.SettingsService.Settings.DuplicateDownloadLinkAction = duplicateAction;
 
-            AppService.SettingsService.Settings.MaximumConnectionsCount =
-                DownloadsViewModel.SelectedMaximumConnectionsCount;
+            AppService.SettingsService.Settings.MaximumConnectionsCount = DownloadsViewModel.SelectedMaximumConnectionsCount;
             AppService.SettingsService.Settings.IsSpeedLimiterEnabled = DownloadsViewModel.IsSpeedLimiterEnabled;
-            AppService.SettingsService.Settings.LimitSpeed =
-                DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
-            AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled
-                ? DownloadsViewModel.SelectedSpeedUnit
-                : null;
+            AppService.SettingsService.Settings.LimitSpeed = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
+            AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SelectedSpeedUnit : null;
 
             // Save proxy settings
             switch (ProxyViewModel)

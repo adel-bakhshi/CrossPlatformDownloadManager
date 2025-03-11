@@ -9,7 +9,7 @@
                                 IconColor="Orange"
                                 IconSize="24"
                                 FontSize="24"
-                                FontFamily="Asap"
+                                FontFamily="{DynamicResource PrimaryFont}"
                                 Foreground="DodgerBlue" />
     </Design.PreviewWith>
 

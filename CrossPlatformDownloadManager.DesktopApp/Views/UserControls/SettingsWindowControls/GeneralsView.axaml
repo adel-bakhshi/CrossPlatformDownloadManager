@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -142,6 +143,44 @@
                               Width="40"
                               IsChecked="{Binding AlwaysKeepManagerOnTop}"
                               IsEnabled="{Binding UseManager}" />
+            </Grid>
+        </Border>
+
+        <!-- Font -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <!-- Title -->
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Font"
+                           FontWeight="Bold" />
+
+                <!-- Fonts -->
+                <cc:CustomComboBox Grid.Column="1"
+                                   PlaceholderText="Font"
+                                   Background="{DynamicResource PrimaryColor}"
+                                   ToggleIconColor="{DynamicResource TertiaryColor}"
+                                   OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                   IconData="{DynamicResource FontSvgIcon}"
+                                   IconColor="{DynamicResource IconColor}"
+                                   IconSize="{DynamicResource SmallIconSize}"
+                                   BorderThickness="0"
+                                   SelectedItem="{Binding SelectedFont}"
+                                   ItemsSource="{Binding Fonts}"
+                                   MaxDropDownHeight="300"
+                                   Width="170"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch">
+                    <cc:CustomComboBox.ItemTemplate>
+                        <DataTemplate DataType="x:String">
+                            <TextBlock Text="{Binding}" />
+                        </DataTemplate>
+                    </cc:CustomComboBox.ItemTemplate>
+                </cc:CustomComboBox>
             </Grid>
         </Border>
     </StackPanel>

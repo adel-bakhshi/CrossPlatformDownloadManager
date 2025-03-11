@@ -1,5 +1,8 @@
+using System.Collections.ObjectModel;
+using System.Linq;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
@@ -13,6 +16,8 @@ public class GeneralsViewModel : ViewModelBase
     private bool _darkMode;
     private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
+    private ObservableCollection<string> _fonts = [];
+    private string? _selectedFont;
 
     #endregion
 
@@ -47,6 +52,18 @@ public class GeneralsViewModel : ViewModelBase
         get => _alwaysKeepManagerOnTop;
         set => this.RaiseAndSetIfChanged(ref _alwaysKeepManagerOnTop, value);
     }
+    
+    public ObservableCollection<string> Fonts
+    {
+        get => _fonts;
+        set => this.RaiseAndSetIfChanged(ref _fonts, value);
+    }
+    
+    public string? SelectedFont
+    {
+        get => _selectedFont;
+        set => this.RaiseAndSetIfChanged(ref _selectedFont, value);
+    }
 
     #endregion
 
@@ -65,6 +82,10 @@ public class GeneralsViewModel : ViewModelBase
         DarkMode = settings.DarkMode;
         UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+        
+        // Load fonts
+        Fonts = Constants.AvailableFonts.ToObservableCollection();
+        SelectedFont = Constants.AvailableFonts.Find(f => f.Equals(settings.ApplicationFont)) ?? Fonts.FirstOrDefault();
     }
 
     #endregion

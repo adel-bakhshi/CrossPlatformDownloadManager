@@ -17,6 +17,9 @@ Requires: zlib
 %description
 CDM is a user-friendly tool for efficient file downloading across platforms, offering queue management and reliable performance. Released under AGPL.
 
+For the latest changelog, visit:
+https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases
+
 %prep
 %setup -q
 
@@ -76,5 +79,3 @@ chmod +x %{buildroot}/usr/lib/cross-platform-download-manager/CrossPlatformDownl
 /usr/share/icons/*
 
 %changelog
-* Wed Mar 05 2025 Your Name <your.email@example.com> - 1.0-1
-- Initial RPM package

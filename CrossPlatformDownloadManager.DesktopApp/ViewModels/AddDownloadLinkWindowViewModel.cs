@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -23,6 +24,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     #region Private Fields
 
     private UrlDetailsResultViewModel? _urlDetails;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     private DownloadFileViewModel _downloadFile = new();
     private ObservableCollection<CategoryViewModel> _categories = [];
@@ -125,6 +127,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public AddDownloadLinkWindowViewModel(IAppService appService) : base(appService)
     {
+        _cancellationTokenSource = new CancellationTokenSource();
+
         LoadCategories();
         LoadDownloadQueues();
 
@@ -136,10 +140,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
-    private static async Task CancelAsync(Window? owner)
+    private async Task CancelAsync(Window? owner)
     {
         try
         {
+            await _cancellationTokenSource.CancelAsync();
             owner?.Close();
         }
         catch (Exception ex)
@@ -199,11 +204,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool?>(owner);
-            if (result != true)
-                return;
-
-            LoadDownloadQueues();
+            await window.ShowDialog<bool?>(owner);
         }
         catch (Exception ex)
         {
@@ -396,7 +397,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             IsLoadingUrl = true;
 
             // Get url details
-            _urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url);
+            _urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url, _cancellationTokenSource.Token);
 
             DownloadFile.Url = _urlDetails.Url;
             DownloadFile.FileName = _urlDetails.FileName;

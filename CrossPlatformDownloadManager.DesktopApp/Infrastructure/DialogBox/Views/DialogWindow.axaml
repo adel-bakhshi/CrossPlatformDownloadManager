@@ -24,6 +24,7 @@
         SystemDecorations="None"
         CanResize="False"
         ShowInTaskbar="False"
+        Topmost="True"
         PointerPressed="WindowOnPointerPressed">
 
     <!-- Resources -->

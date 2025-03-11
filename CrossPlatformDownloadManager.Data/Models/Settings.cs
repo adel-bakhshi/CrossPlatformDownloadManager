@@ -19,14 +19,13 @@ public class Settings : DbModelBase
     [Required]
     [JsonProperty("useManager")]
     public bool UseManager { get; set; }
-    
+
     [Required]
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
-    
-    [JsonProperty("disableCategories")]
-    public bool DisableCategories { get; set; }
-    
+
+    [JsonProperty("disableCategories")] public bool DisableCategories { get; set; }
+
     [MaxLength(500)]
     [JsonProperty("globalSaveLocation")]
     public string? GlobalSaveLocation { get; set; }
@@ -96,8 +95,13 @@ public class Settings : DbModelBase
     [MaxLength(5000)]
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
-    
+
     public bool HasApplicationBeenRunYet { get; set; }
+
+    [MaxLength(50)]
+    [Required]
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
 
     // ReSharper disable once CollectionNeverUpdated.Global
     public ICollection<ProxySettings> Proxies { get; } = [];
@@ -134,5 +138,6 @@ public class Settings : DbModelBase
         ShowCategoriesPanel = settings.ShowCategoriesPanel;
         DataGridColumnsSettings = settings.DataGridColumnsSettings;
         HasApplicationBeenRunYet = settings.HasApplicationBeenRunYet;
+        ApplicationFont = settings.ApplicationFont;
     }
 }

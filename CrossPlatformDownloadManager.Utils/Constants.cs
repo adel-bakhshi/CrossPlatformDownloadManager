@@ -21,6 +21,9 @@ public static class Constants
     public const long MegaByte = KiloByte * 1024;
     public const long GigaByte = MegaByte * 1024;
     public const long TeraByte = GigaByte * 1024;
+    
+    // Maximum memory buffer bytes
+    public const long MaximumMemoryBufferBytes = 4 * MegaByte;
 
     // Turn off computer modes
     public static readonly List<string> TurnOffComputerModes = Enum
@@ -123,6 +126,9 @@ public static class Constants
         }
     }
 
+    /// <summary>
+    /// Available fonts in the program
+    /// </summary>
     public static List<string> AvailableFonts =>
     [
         "Asap",

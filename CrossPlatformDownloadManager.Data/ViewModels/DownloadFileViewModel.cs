@@ -857,6 +857,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         try
         {
+            // When the file size is unknown and the server does not specify the file size, do not compare the backup to the original value
+            if (IsSizeUnknown)
+                return downloadPackage;
+            
             // Get backup file path and validate it
             var filePath = GetBackupFilePath();
             if (!File.Exists(filePath) || !Path.GetExtension(filePath).Equals(".backup"))
@@ -874,9 +878,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             if (downloadPackage.SaveProgress >= package.SaveProgress)
                 return downloadPackage;
 
-            // Update save progress
-            downloadPackage.SaveProgress = package.SaveProgress;
-
             // Update chunks data
             foreach (var chunk in package.Chunks)
             {
@@ -886,8 +887,11 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                     continue;
 
                 // Update position
-                originalChunk.Position = chunk.Position;
+                originalChunk.Position = Math.Max(chunk.Position - Constants.MaximumMemoryBufferBytes, 0);
             }
+            
+            // Update save progress
+            downloadPackage.SaveProgress = downloadPackage.Chunks.Sum(c => c.Position) / (double)downloadPackage.TotalFileSize * 100;
 
             return downloadPackage;
         }
@@ -900,6 +904,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     private void StartBackup()
     {
+        // Do not back up when the file size is unknown and the server does not specify the file size
+        if (IsSizeUnknown)
+            return;
+        
         _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
         _backupTimer.Tick += BackupTimerOnTick;
         _backupTimer.Start();

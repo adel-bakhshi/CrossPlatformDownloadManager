@@ -324,10 +324,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     {
         try
         {
+            // Find download file
             var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
-            if (downloadFile == null || downloadFile.IsCompleted || downloadFile.IsDownloading ||
-                downloadFile.IsPaused || downloadFile.IsStopping)
+            // Make sure download file is in a valid state
+            if (downloadFile == null || downloadFile.IsCompleted || downloadFile.IsDownloading || downloadFile.IsPaused || downloadFile.IsStopping)
             {
+                // If the download file is paused, resume it
                 if (downloadFile is { IsPaused: true, IsStopping: false })
                     ResumeDownloadFile(downloadFile);
 
@@ -339,18 +341,23 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             if (!hasEnoughSpace)
                 return;
 
+            // Create download configurations
             var configuration = new DownloadConfiguration
             {
                 ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
                 MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
-                ParallelDownload = true
+                ParallelDownload = true,
+                MaximumMemoryBufferBytes = Constants.MaximumMemoryBufferBytes
             };
 
+            // Get proxy and if possible, use it
             var proxy = _settingsService.GetProxy();
             if (proxy != null)
                 configuration.RequestConfiguration.Proxy = proxy;
 
+            // Create download service with configuration
             var service = new DownloadService(configuration);
+            // Create download file task
             var downloadFileTask = new DownloadFileTaskViewModel
             {
                 Key = downloadFile.Id,
@@ -358,11 +365,15 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 Service = service
             };
 
+            // Create download window
             downloadFileTask.CreateDownloadWindow(downloadFile, showWindow);
+            // Add download file task to tasks
             _downloadFileTasks.Add(downloadFileTask);
 
+            // Bind events
             downloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
             downloadFile.DownloadStopped += DownloadFileOnDownloadStopped;
+            // Start download
             await downloadFile.StartDownloadFileAsync(service, configuration, _unitOfWork, proxy);
         }
         catch (Exception ex)

@@ -5,6 +5,7 @@ echo "Cleaning up..."
 rm -rf ./Deploy/linux/rpm/out/
 rm -rf ./Deploy/linux/rpm/tmp/
 rm -rf ~/rpmbuild/
+rm -rf ./Deploy/bin/*.rpm
 
 # .NET publish
 # self-contained is recommended, so final users won't need to install .NET

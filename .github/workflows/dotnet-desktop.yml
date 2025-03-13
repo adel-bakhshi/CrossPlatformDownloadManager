@@ -61,17 +61,29 @@ jobs:
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
 
+      - name: Install Pupnet Deploy
+        run: dotnet tool install -g KuiperZone.PupNet
+
       - name: Restore Dependencies
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
+        run: pupnet -k deb -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.deb"
 
       - name: Build Linux RPM File
-        run: chmod +x ./Deploy/linux/rpm/process-on-deb.sh && ./Deploy/linux/rpm/process-on-deb.sh
+        run: pupnet -k rpm -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.rpm"
 
       - name: Build AppImage File
-        run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
+        run: pupnet -k appimage -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.AppImage"
+
+      # - name: Build Linux DEB File
+      #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
+
+      # - name: Build Linux RPM File
+      #   run: chmod +x ./Deploy/linux/rpm/process-on-deb.sh && ./Deploy/linux/rpm/process-on-deb.sh
+
+      # - name: Build AppImage File
+      #   run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
 
       - name: Build Linux ZIP Portable
         run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh

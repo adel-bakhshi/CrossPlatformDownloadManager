@@ -110,6 +110,19 @@ public static class Constants
         }
     }
 
+    // Backup directory
+    public static string BackupDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(ApplicationDataDirectory, "Backups");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            return directory;
+        }
+    }
+
     public static List<string> AvailableFonts =>
     [
         "Asap",

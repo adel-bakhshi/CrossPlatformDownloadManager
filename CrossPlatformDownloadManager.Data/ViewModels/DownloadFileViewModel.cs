@@ -12,7 +12,9 @@ using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Downloader;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
+using Newtonsoft.Json;
 using Serilog;
+using Constants = CrossPlatformDownloadManager.Utils.Constants;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -37,6 +39,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private List<ChunkProgressViewModel>? _chunkProgresses;
 
     private DownloadService? _downloadService;
+    private CancellationTokenSource? _resumeCapabilityCancellationTokenSource;
+
+    // Backup timer
+    private DispatcherTimer? _backupTimer;
 
     private int _id;
     private string? _url;
@@ -348,21 +354,53 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CalculateElapsedTime();
         UpdateChunksData();
 
+        // Start backup timer
+        StartBackup();
+
+        // Cancellation token source for times when the user stops the download but the operation is still in progress to check whether the server supports the resumption feature
+        _resumeCapabilityCancellationTokenSource = new CancellationTokenSource();
+
         // Check resume capability
         CanResumeDownload = null;
         _ = CheckResumeCapabilityAsync(proxy);
 
+        // Get file name
         var fileName = Path.Combine(downloadPath!, FileName!);
+        // Get download package
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
+        // If download package is null, it should be checked whether the backup file exists or not
+        if (downloadPackage == null)
+        {
+            var filePath = GetBackupFilePath();
+            // If a backup file exists, its value must be converted to the correct format and included in the download package
+            if (File.Exists(filePath))
+            {
+                // Get json content from file
+                var json = await File.ReadAllTextAsync(filePath);
+                // Convert json to download package
+                var package = json.ConvertFromJson<DownloadPackage?>();
+                // Make sure package has value
+                if (package != null)
+                {
+                    // Change download package value
+                    package.Storage = null;
+                    downloadPackage = package;
+                }
+            }
+        }
+
         if (downloadPackage == null)
         {
             await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName);
         }
         else
         {
+            // Compare download package with existing backup
+            downloadPackage = await CompareBackupAsync(downloadPackage);
             // Load previous chunks data
             LoadChunksData(downloadPackage.Chunks);
 
+            // Update download url if user changed it
             var urls = downloadPackage.Urls.ToList();
             var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
             if (currentUrl.IsNullOrEmpty())
@@ -377,17 +415,30 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public void StopDownloadFile(DownloadService? downloadService)
+    public async Task StopDownloadFileAsync(DownloadService? downloadService)
     {
+        // Make sure download service has value
         if (downloadService == null)
             return;
 
+        // Reset download service
         _downloadService = downloadService;
-
+        // Reset download options
         ResetDownload();
-
+        // Change download status to stopping
         Status = DownloadFileStatus.Stopping;
+
+        // If resume capability cancellation token source is not null
+        if (_resumeCapabilityCancellationTokenSource != null)
+        {
+            // Make sure resume capability cancelled
+            await _resumeCapabilityCancellationTokenSource.CancelAsync();
+            _resumeCapabilityCancellationTokenSource = null;
+        }
+
+        // Cancel download
         _ = downloadService.CancelTaskAsync();
+        // Raise download stopped event
         DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
@@ -425,6 +476,13 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
+    public void RemoveBackup()
+    {
+        var filePath = GetBackupFilePath();
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
+
     #region Helpers
 
     private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
@@ -459,6 +517,9 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         {
             Status = DownloadFileStatus.Completed;
             isSuccess = true;
+
+            // Remove backup
+            RemoveBackup();
         }
 
         // Create an object of DownloadFileEventArgs
@@ -497,6 +558,14 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             _updateChunksDataTimer.Stop();
             _updateChunksDataTimer.Tick -= UpdateChunksDataTimerOnTick;
             _updateChunksDataTimer = null;
+        }
+
+        // Clear backup timer
+        if (_backupTimer != null)
+        {
+            _backupTimer.Stop();
+            _backupTimer.Tick -= BackupTimerOnTick;
+            _backupTimer = null;
         }
 
         // Reset elapsed time of starting download
@@ -669,12 +738,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         try
         {
+            // Check url
             if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
             {
                 CanResumeDownload = false;
                 return;
             }
 
+            // Make sure cancellation token source is not null
+            if (_resumeCapabilityCancellationTokenSource == null)
+                throw new InvalidOperationException("Cancellation token source is invalid.");
+
+            // Use handler to handle http request
             using var handler = new HttpClientHandler();
             if (proxy != null)
             {
@@ -682,11 +757,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 handler.UseProxy = true;
             }
 
+            // Prepare for sending request
             using var client = new HttpClient(handler);
             client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
 
             // Send HEAD request
-            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, Url));
+            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, Url), _resumeCapabilityCancellationTokenSource.Token);
             response.EnsureSuccessStatusCode();
 
             // Check for Accept-Ranges header
@@ -775,6 +851,93 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 break;
             }
         }
+    }
+
+    private async Task<DownloadPackage> CompareBackupAsync(DownloadPackage downloadPackage)
+    {
+        try
+        {
+            // Get backup file path and validate it
+            var filePath = GetBackupFilePath();
+            if (!File.Exists(filePath) || !Path.GetExtension(filePath).Equals(".backup"))
+                return downloadPackage;
+
+            // Get json content from file
+            var json = await File.ReadAllTextAsync(filePath);
+            // Convert json to download package
+            var package = json.ConvertFromJson<DownloadPackage?>();
+            // Make sure package has value
+            if (package == null)
+                return downloadPackage;
+
+            // Compare save progresses
+            if (downloadPackage.SaveProgress >= package.SaveProgress)
+                return downloadPackage;
+
+            // Update save progress
+            downloadPackage.SaveProgress = package.SaveProgress;
+
+            // Update chunks data
+            foreach (var chunk in package.Chunks)
+            {
+                // Find original chunk
+                var originalChunk = downloadPackage.Chunks.FirstOrDefault(c => c.Id.Equals(chunk.Id));
+                if (originalChunk == null)
+                    continue;
+
+                // Update position
+                originalChunk.Position = chunk.Position;
+            }
+
+            return downloadPackage;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to read backup file. Error message: {ErrorMessage}", ex.Message);
+            return downloadPackage;
+        }
+    }
+
+    private void StartBackup()
+    {
+        _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _backupTimer.Tick += BackupTimerOnTick;
+        _backupTimer.Start();
+    }
+
+    private async void BackupTimerOnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Make sure download service is not null
+            if (_downloadService == null)
+                return;
+
+            // Initialize json serializer settings
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.None
+            };
+
+            // Convert download package to json
+            var json = _downloadService.Package.ConvertToJson(settings);
+
+            // Define backup file path
+            var filePath = GetBackupFilePath();
+            // Write data to back up file
+            await File.WriteAllTextAsync(filePath, json);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error An error occurred while trying to backup download data. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    private string GetBackupFilePath()
+    {
+        var filePath = Path.Combine(Constants.BackupDirectory, $"{Id}.backup");
+        return filePath;
     }
 
     #endregion

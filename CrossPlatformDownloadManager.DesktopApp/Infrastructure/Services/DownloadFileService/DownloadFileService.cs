@@ -384,7 +384,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             return;
 
         downloadFile.PlayStopSound = playSound;
-        downloadFile.StopDownloadFile(service);
+        await downloadFile.StopDownloadFileAsync(service);
 
         // Wait for the download to stop
         if (ensureStopped)
@@ -435,20 +435,24 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         configuration.MaximumBytesPerSecond = speed;
     }
 
-    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile,
-        bool reloadData = true)
+    public async Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile, bool reloadData = true)
     {
+        // Find download file
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
+        // Find original download file in database
         var downloadFileInDb = await _unitOfWork
             .DownloadFileRepository
             .GetAsync(where: df => df.Id == downloadFile.Id);
 
+        // Stop download file if downloading or paused
         if (downloadFile.IsDownloading || downloadFile.IsPaused)
             await StopDownloadFileAsync(downloadFile, ensureStopped: true);
 
+        // If the download file does not exist in the database but does exist in the application,
+        // only the file in the application needs to be deleted and there is no need to delete the file in the database as well
         var shouldReturn = false;
         if (downloadFileInDb == null)
         {
@@ -458,6 +462,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             shouldReturn = true;
         }
 
+        // Remove download file from storage
         if (alsoDeleteFile)
         {
             var saveLocation = downloadFileInDb?.SaveLocation ?? downloadFile.SaveLocation ?? string.Empty;
@@ -471,12 +476,17 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             }
         }
 
+        // Remove backup file
+        downloadFile.RemoveBackup();
+        // Check if the download file needs to be deleted from the database
         if (shouldReturn)
             return;
 
+        // Remove download file from database
         await _unitOfWork.DownloadFileRepository.DeleteAsync(downloadFileInDb);
         await _unitOfWork.SaveAsync();
 
+        // Update downloads list when necessary
         if (reloadData)
             await LoadDownloadFilesAsync();
     }

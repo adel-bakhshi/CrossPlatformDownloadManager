@@ -1,3 +1,21 @@
+- Version 0.4.0; 2025-03-14
+
+* New Features:
+  - Added backup functionality for ongoing downloads.
+  - Implemented a memory caching mechanism to store downloaded data in RAM before writing to the hard disk, reducing disk load.
+  - Enabled downloading files without a Content-Length header.
+  - Added the ability to disable categories.
+  - Introduced a font customization option for the application.
+* Bug Fixes:
+  - Fixed the issue where the program accepted all file types. Now, only predefined file types can be downloaded.
+  - Resolved export/import bugs.
+  - Fixed the issue where active queues were not displayed in the status bar.
+  - Addressed crashes and execution issues on Linux.
+  - Fixed the issue where deleting files would remove them completely; now, deleted files are moved to the trash.
+  - Various minor bug fixes.
+* Technical Updates:
+  - Changed the storage location of additional program files. Before using this version, please back up your data.
+
 - Version 0.3.0; 2025-02-21
 
 * Performance Improvements:

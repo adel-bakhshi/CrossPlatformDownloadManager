@@ -224,7 +224,7 @@ We're committed to making CDM better with every update. Here are some ideas we'r
 
 ### **For CDM:**
 
-- **Testing and Publishing for Linux and Mac:** Expand platform support by thoroughly testing and publishing the program for Linux and Mac operating systems, ensuring a seamless experience across all major platforms.
+- **Testing and Publishing for Mac:** Expand platform support by thoroughly testing and publishing the program for Mac operating systems, ensuring a seamless experience across all major platforms.
 - **Light Theme:** Add a light theme for users who prefer brighter interfaces.
 - **Custom Themes:** Allow users to create and apply different themes to personalize their experience.
 - **System Notifications:** Implement native system notifications for download completions and errors.

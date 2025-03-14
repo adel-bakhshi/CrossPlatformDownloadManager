@@ -908,7 +908,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         if (IsSizeUnknown)
             return;
         
-        _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
         _backupTimer.Tick += BackupTimerOnTick;
         _backupTimer.Start();
     }

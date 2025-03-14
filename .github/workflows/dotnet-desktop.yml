@@ -2,7 +2,6 @@ name: Build and Release CDM
 
 on:
   push:
-    branches: ["master"]
     tags:
       - "v*"
 

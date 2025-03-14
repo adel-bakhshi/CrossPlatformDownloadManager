@@ -14,3 +14,9 @@ public class ResponseViewModel
 
     #endregion
 }
+
+public class ResponseViewModel<T> : ResponseViewModel where T : new()
+{
+    [JsonProperty("data")]
+    public T? Data { get; set; }
+}

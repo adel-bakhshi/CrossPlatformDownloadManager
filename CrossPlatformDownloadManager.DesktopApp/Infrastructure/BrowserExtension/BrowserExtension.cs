@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -30,6 +32,7 @@ public class BrowserExtension : IBrowserExtension
 
         // Initialize HttpListener
         _httpListener = new HttpListener();
+        _httpListener.Prefixes.Add(Constants.GetFileTypesUrl);
         _httpListener.Prefixes.Add(Constants.AddDownloadFileUrl);
     }
 
@@ -93,65 +96,13 @@ public class BrowserExtension : IBrowserExtension
                 return;
             }
 
-            // Make sure this is a POST request
-            if (!context.Request.HttpMethod.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            var requestedUrl = context.Request.Url?.AbsoluteUri;
+            response = requestedUrl switch
             {
-                response.Message = "We encountered an issue while processing your request. Please try again. If the problem persists, report it to be investigated.";
-                await SendResponseAsync(context, response);
-                return;
-            }
-
-            using var reader = new StreamReader(context.Request.InputStream);
-            var json = await reader.ReadToEndAsync();
-            if (json.IsNullOrEmpty())
-            {
-                response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
-                await SendResponseAsync(context, response);
-                return;
-            }
-
-            var requestViewModel = json.ConvertFromJson<RequestViewModel?>();
-            if (requestViewModel == null)
-            {
-                response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
-                await SendResponseAsync(context, response);
-                return;
-            }
-
-            var urlIsValid = requestViewModel.Url.CheckUrlValidation();
-            if (!urlIsValid)
-            {
-                response.Message = "CDM can't accept this URL.";
-                await SendResponseAsync(context, response);
-                return;
-            }
-
-            // Change URL to correct format
-            requestViewModel.Url = requestViewModel.Url!.Replace('\\', '/').Trim();
-
-            // Check for user option for showing start download dialog
-            var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
-            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
-            if (showStartDownloadDialog)
-            {
-                ShowStartDownloadDialog(requestViewModel.Url);
-            }
-            // Otherwise, add link to database and start it
-            else
-            {
-                var addResult = await AddNewDownloadFileAndStartItAsync(requestViewModel.Url);
-                if (!addResult.IsSuccessful)
-                {
-                    response.Message = addResult.Message;
-                    await SendResponseAsync(context, response);
-                    return;
-                }
-            }
-
-            response.IsSuccessful = true;
-            response.Message = "Link added to CDM.";
-
-            Log.Information($"Captured URL: {requestViewModel.Url}");
+                Constants.GetFileTypesUrl => GetFileTypes(context),
+                Constants.AddDownloadFileUrl => await AddDownloadFileUrlAsync(context),
+                _ => response
+            };
         }
         catch (Exception ex)
         {
@@ -160,6 +111,127 @@ public class BrowserExtension : IBrowserExtension
         }
 
         await SendResponseAsync(context, response);
+    }
+
+    private ResponseViewModel<List<string>> GetFileTypes(HttpListenerContext context)
+    {
+        var response = new ResponseViewModel<List<string>>
+        {
+            IsSuccessful = false,
+            Message = string.Empty,
+            Data = []
+        };
+
+        // Make sure this is a GET request
+        var validateResult = ValidateRequestMethod(context, "GET");
+        if (!validateResult.IsSuccessful)
+        {
+            response.IsSuccessful = validateResult.IsSuccessful;
+            response.Message = validateResult.Message;
+            return response;
+        }
+
+        var fileExtensions = _appService
+            .CategoryService
+            .Categories
+            .SelectMany(c => c.FileExtensions)
+            .Select(fe => fe.Extension)
+            .ToList();
+
+        response.IsSuccessful = true;
+        response.Data = fileExtensions;
+        return response;
+    }
+
+    private async Task<ResponseViewModel> AddDownloadFileUrlAsync(HttpListenerContext context)
+    {
+        var response = new ResponseViewModel
+        {
+            IsSuccessful = false,
+            Message = string.Empty
+        };
+
+        // Make sure this is a POST request
+        var validateResult = ValidateRequestMethod(context, "POST");
+        if (!validateResult.IsSuccessful)
+        {
+            response.IsSuccessful = validateResult.IsSuccessful;
+            response.Message = validateResult.Message;
+            return response;
+        }
+
+        using var reader = new StreamReader(context.Request.InputStream);
+        var json = await reader.ReadToEndAsync();
+        if (json.IsNullOrEmpty())
+        {
+            response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            return response;
+        }
+
+        var requestViewModel = json.ConvertFromJson<RequestViewModel?>();
+        if (requestViewModel == null)
+        {
+            response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            return response;
+        }
+
+        var urlIsValid = requestViewModel.Url.CheckUrlValidation();
+        if (!urlIsValid)
+        {
+            response.Message = "CDM can't accept this URL.";
+            return response;
+        }
+
+        // Change URL to correct format
+        requestViewModel.Url = requestViewModel.Url!.Replace('\\', '/').Trim();
+
+        // Check for user option for showing start download dialog
+        var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
+        // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
+        if (showStartDownloadDialog)
+        {
+            ShowStartDownloadDialog(requestViewModel.Url);
+        }
+        // Otherwise, add link to database and start it
+        else
+        {
+            var addResult = await AddNewDownloadFileAndStartItAsync(requestViewModel.Url);
+            if (!addResult.IsSuccessful)
+            {
+                response.Message = addResult.Message;
+                return response;
+            }
+        }
+
+        // Log captured URL
+        Log.Information($"Captured URL: {requestViewModel.Url}");
+
+        response.IsSuccessful = true;
+        response.Message = "Link added to CDM.";
+        return response;
+    }
+
+    private static ResponseViewModel ValidateRequestMethod(HttpListenerContext context, string? httpMethod)
+    {
+        var response = new ResponseViewModel
+        {
+            IsSuccessful = false,
+            Message = string.Empty
+        };
+
+        // Trim method
+        httpMethod = httpMethod?.Trim();
+        // Validate request method
+        if (!context.Request.HttpMethod.Equals(httpMethod, StringComparison.OrdinalIgnoreCase))
+        {
+            response.Message = "We encountered an issue while processing your request. Please try again. If the problem persists, report it to be investigated.";
+        }
+        else
+        {
+            response.IsSuccessful = true;
+        }
+
+        return response;
     }
 
     private static async Task SendResponseAsync(HttpListenerContext context, ResponseViewModel response)

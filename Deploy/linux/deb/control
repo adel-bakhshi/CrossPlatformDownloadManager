@@ -1,5 +1,5 @@
 Package: cross-platform-download-manager
-Version: 0.3.0
+Version: 0.4.0
 Section: utils
 Priority: optional
 Architecture: amd64
@@ -8,5 +8,5 @@ Depends: libx11-6, libice6, libsm6, libfontconfig1, ca-certificates, tzdata, lib
 Maintainer: Adel Bakhshi <adelbakhshi78@yahoo.com>
 Homepage: https://github.com/adel-bakhshi/CrossPlatformDownloadManager
 Description: Cross-platform download manager with resume support
- CDM is a user-friendly tool for efficient file downloading across platforms,
- offering queue management and reliable performance. Released under AGPL.
+CDM is a user-friendly tool for efficient file downloading across platforms,
+offering queue management and reliable performance. Released under AGPL.

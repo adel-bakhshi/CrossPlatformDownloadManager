@@ -16,7 +16,7 @@ dotnet publish "./CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadM
   --configuration Release \
   --self-contained true \
   --runtime linux-x64 \
-  --output "./Deploy/linux/rpm/out/cross-platform-download-manager-0.3.0"
+  --output "./Deploy/linux/rpm/out/cross-platform-download-manager-0.4.0"
 
 # Create directories
 echo "Creating reqiured directories..."
@@ -32,9 +32,9 @@ echo "Creating tarball files..."
 cp -f -a ./Deploy/linux/basics/icons/. ./Deploy/linux/rpm/tmp/assets/ # Copy icons
 cp ./Deploy/linux/basics/app.desktop ./Deploy/linux/rpm/tmp/assets/cross-platform-download-manager.desktop # Copy desktop file
 cp ./Deploy/linux/basics/starter-script.sh ./Deploy/linux/rpm/tmp/assets/cross-platform-download-manager # Copy starter script
-mv ./Deploy/linux/rpm/tmp/assets ./Deploy/linux/rpm/out/cross-platform-download-manager-0.3.0/
-tar -czvf ./Deploy/linux/rpm/cross-platform-download-manager-0.3.0.tar.gz -C ./Deploy/linux/rpm/out/ .
-mv ./Deploy/linux/rpm/cross-platform-download-manager-0.3.0.tar.gz ~/rpmbuild/SOURCES/
+mv ./Deploy/linux/rpm/tmp/assets ./Deploy/linux/rpm/out/cross-platform-download-manager-0.4.0/
+tar -czvf ./Deploy/linux/rpm/cross-platform-download-manager-0.4.0.tar.gz -C ./Deploy/linux/rpm/out/ .
+mv ./Deploy/linux/rpm/cross-platform-download-manager-0.4.0.tar.gz ~/rpmbuild/SOURCES/
 
 # Build the RPM package
 echo "Building rpm package..."

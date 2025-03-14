@@ -15,7 +15,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Category", b =>
                 {
@@ -150,6 +150,9 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSizeUnknown")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastTryDate")
                         .HasColumnType("TEXT");
@@ -303,6 +306,11 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                     b.Property<bool>("AlwaysKeepManagerOnTop")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApplicationFont")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("DarkMode")
                         .HasColumnType("INTEGER");
 
@@ -310,8 +318,15 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasMaxLength(5000)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("DisableCategories")
+                        .HasColumnType("INTEGER");
+
                     b.Property<byte>("DuplicateDownloadLinkAction")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("GlobalSaveLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("HasApplicationBeenRunYet")
                         .HasColumnType("INTEGER");

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -23,6 +24,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     #region Private Fields
 
     private UrlDetailsResultViewModel? _urlDetails;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     private DownloadFileViewModel _downloadFile = new();
     private ObservableCollection<CategoryViewModel> _categories = [];
@@ -33,6 +35,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     private bool _rememberMyChoice;
     private bool _startDownloadQueue;
     private bool _defaultDownloadQueueIsExist;
+    private bool _categoriesAreDisabled;
 
     #endregion
 
@@ -41,7 +44,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     public DownloadFileViewModel DownloadFile
     {
         get => _downloadFile;
-        set => this.RaiseAndSetIfChanged(ref _downloadFile, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadFile, value);
+            this.RaisePropertyChanged(nameof(IsFileSizeVisible));
+        }
     }
 
     public ObservableCollection<CategoryViewModel> Categories
@@ -98,6 +105,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _defaultDownloadQueueIsExist, value);
     }
 
+    public bool CategoriesAreDisabled
+    {
+        get => _categoriesAreDisabled;
+        set => this.RaiseAndSetIfChanged(ref _categoriesAreDisabled, value);
+    }
+
+    public bool IsFileSizeVisible => DownloadFile.IsSizeUnknown || DownloadFile.Size > 0;
+
     #endregion
 
     #region Commands
@@ -118,6 +133,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     public AddDownloadLinkWindowViewModel(IAppService appService) : base(appService)
     {
+        _cancellationTokenSource = new CancellationTokenSource();
+
         LoadCategories();
         LoadDownloadQueues();
 
@@ -129,10 +146,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
-    private static async Task CancelAsync(Window? owner)
+    private async Task CancelAsync(Window? owner)
     {
         try
         {
+            await _cancellationTokenSource.CancelAsync();
             owner?.Close();
         }
         catch (Exception ex)
@@ -192,11 +210,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
             var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
-            var result = await window.ShowDialog<bool?>(owner);
-            if (result != true)
-                return;
-
-            LoadDownloadQueues();
+            await window.ShowDialog<bool?>(owner);
         }
         catch (Exception ex)
         {
@@ -303,17 +317,21 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     private async Task<DownloadFileViewModel?> AddDownloadFileAsync()
     {
+        // Make sure url details is not null and url has value
         if (_urlDetails == null || !_urlDetails.Url.Equals(DownloadFile.Url))
             return null;
 
+        // Validate url details
         var validateUrlDetailsResult = AppService.DownloadFileService.ValidateUrlDetails(_urlDetails);
         if (!validateUrlDetailsResult.IsValid)
             return null;
 
+        // Validate download file
         var validateDownloadFile = await AppService.DownloadFileService.ValidateDownloadFileAsync(DownloadFile);
         if (!validateDownloadFile)
             return null;
 
+        // Check for duplicate download file
         DuplicateDownloadLinkAction? duplicateAction = null;
         if (_urlDetails.IsUrlDuplicate)
         {
@@ -330,6 +348,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             }
         }
 
+        // Add new download file
         var downloadFile = await AppService
             .DownloadFileService
             .AddDownloadFileAsync(DownloadFile,
@@ -337,9 +356,11 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 duplicateAction: duplicateAction,
                 isFileNameDuplicate: _urlDetails.IsFileNameDuplicate);
 
+        // Make sure download file is created
         if (downloadFile != null)
             return downloadFile;
 
+        // Otherwise, show error message
         await DialogBoxManager.ShowInfoDialogAsync("File not found",
             "An error occurred while trying to add file. Please try again or contact support.",
             DialogButtons.Ok);
@@ -366,6 +387,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     private void LoadCategories()
     {
+        // Check if categories are disabled or not
+        CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
+
         // Store selected category id
         var selectedCategoryId = SelectedCategory?.Id;
         // Get all categories
@@ -386,19 +410,23 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             IsLoadingUrl = true;
 
             // Get url details
-            _urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url);
+            _urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(DownloadFile.Url, _cancellationTokenSource.Token);
 
             DownloadFile.Url = _urlDetails.Url;
             DownloadFile.FileName = _urlDetails.FileName;
             DownloadFile.Size = _urlDetails.FileSize;
+            DownloadFile.IsSizeUnknown = _urlDetails.IsFileSizeUnknown;
             DownloadFile.CategoryId = _urlDetails.Category?.Id;
 
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == _urlDetails.Category?.Id);
+
+            // Notify IsFileSizeVisible changed
+            this.RaisePropertyChanged(nameof(IsFileSizeVisible));
         }
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to get url details. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            SelectedCategory = null;
         }
         finally
         {
@@ -416,5 +444,13 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         base.OnCategoryServiceCategoriesChanged();
         LoadCategories();
+    }
+
+    protected override void OnSettingsServiceDataChanged()
+    {
+        base.OnSettingsServiceDataChanged();
+
+        // Check if categories are disabled or not
+        CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
     }
 }

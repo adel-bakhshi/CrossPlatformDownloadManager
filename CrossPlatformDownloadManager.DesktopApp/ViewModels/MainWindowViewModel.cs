@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -19,7 +20,9 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.MainWindow;
 using CrossPlatformDownloadManager.DesktopApp.Views;
+using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.MainWindow;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -35,13 +38,11 @@ public class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
     private readonly DispatcherTimer _saveColumnsSettingsTimer;
 
-    private MainWindow? _mainWindow;
+    private Views.MainWindow? _mainWindow;
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
 
     // Properties
-    private ObservableCollection<CategoryHeaderViewModel> _categoryHeaders = [];
-    private CategoryHeaderViewModel? _selectedCategoryHeader;
-    private CategoryViewModel? _selectedCategory;
+    private CategoriesTreeViewModel? _categoriesTreeViewModel;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
     private bool _selectAllDownloadFiles;
     private string _downloadSpeed = "0 KB";
@@ -61,34 +62,13 @@ public class MainWindowViewModel : ViewModelBase
 
     #region Properties
 
-    public ObservableCollection<CategoryHeaderViewModel> CategoryHeaders
+    public CategoriesTreeViewModel? CategoriesTreeViewModel
     {
-        get => _categoryHeaders;
-        set => this.RaiseAndSetIfChanged(ref _categoryHeaders, value);
+        get => _categoriesTreeViewModel;
+        set => this.RaiseAndSetIfChanged(ref _categoriesTreeViewModel, value);
     }
 
-    public CategoryHeaderViewModel? SelectedCategoryHeader
-    {
-        get => _selectedCategoryHeader;
-        set
-        {
-            if (_selectedCategoryHeader != null && value != _selectedCategoryHeader)
-                SelectedCategory = null;
-
-            this.RaiseAndSetIfChanged(ref _selectedCategoryHeader, value);
-            FilterDownloadList();
-        }
-    }
-
-    public CategoryViewModel? SelectedCategory
-    {
-        get => _selectedCategory;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedCategory, value);
-            FilterDownloadList();
-        }
-    }
+    public CategoriesTreeView CategoriesTreeView => new CategoriesTreeView { DataContext = CategoriesTreeViewModel };
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
@@ -940,7 +920,10 @@ public class MainWindowViewModel : ViewModelBase
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (!File.Exists(filePath))
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open file", "File not found.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open file",
+                    "The specified file could not be found. It is possible that the file has been deleted or relocated.",
+                    DialogButtons.Ok);
+
                 return;
             }
 
@@ -962,22 +945,55 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
                 return;
 
-            var filePathList = dataGrid
+            var groupDownloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
-                .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
-                .Where(File.Exists)
-                .Distinct()
+                .Where(df => !df.SaveLocation.IsNullOrEmpty() && Directory.Exists(df.SaveLocation!))
+                .GroupBy(df => df.SaveLocation!)
                 .ToList();
 
-            if (filePathList.Count == 0)
+            if (groupDownloadFiles.Count == 0)
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Open folder", "No folders found.", DialogButtons.Ok);
+                await DialogBoxManager.ShowInfoDialogAsync("Open folder",
+                    "The specified folder(s) could not be found. It is possible that the folder(s) have been deleted or relocated.",
+                    DialogButtons.Ok);
+
                 return;
             }
 
-            filePathList.ForEach(PlatformSpecificManager.OpenContainingFolderAndSelectFile);
+            var openedFolders = new List<string>();
+            foreach (var group in groupDownloadFiles)
+            {
+                var directoryPath = group.Key;
+                foreach (var downloadFile in group)
+                {
+                    if (downloadFile.FileName.IsNullOrEmpty())
+                    {
+                        if (openedFolders.Contains(directoryPath))
+                            continue;
+
+                        PlatformSpecificManager.OpenFolder(directoryPath);
+                        openedFolders.Add(directoryPath);
+                    }
+                    else
+                    {
+                        if (openedFolders.Contains(directoryPath))
+                            continue;
+
+                        var filePath = Path.Combine(directoryPath, downloadFile.FileName!);
+                        if (File.Exists(filePath))
+                        {
+                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        }
+                        else
+                        {
+                            PlatformSpecificManager.OpenFolder(directoryPath);
+                        }
+
+                        openedFolders.Add(directoryPath);
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -1773,17 +1789,21 @@ public class MainWindowViewModel : ViewModelBase
 
     private void UpdateActiveDownloadQueuesTimerOnTick(object? sender, EventArgs e)
     {
+        // Get running queues
         var downloadQueues = AppService
             .DownloadQueueService
             .DownloadQueues
             .Where(dq => dq.IsRunning)
             .ToObservableCollection();
 
+        // Check for any changes
         bool isChanged;
+        // Check if count is different
         if (ActiveDownloadQueues.Count != downloadQueues.Count)
         {
             isChanged = true;
         }
+        // Or check if any items are different
         else
         {
             isChanged = downloadQueues
@@ -1791,16 +1811,28 @@ public class MainWindowViewModel : ViewModelBase
                 .Any();
         }
 
-        if (isChanged)
-            ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        // Check if changed
+        if (!isChanged)
+            return;
+
+        // Update active download queues
+        ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        this.RaisePropertyChanged(nameof(ActiveDownloadQueueExists));
+        this.RaisePropertyChanged(nameof(ActiveDownloadQueuesToolTipText));
     }
 
     private void LoadCategories()
     {
-        var selectedCategoryHeaderId = SelectedCategoryHeader?.Id;
+        if (CategoriesTreeViewModel != null)
+            CategoriesTreeViewModel.SelectedItemChanged -= CategoriesTreeViewModelOnSelectedItemChanged;
 
-        CategoryHeaders.UpdateCollection(AppService.CategoryService.CategoryHeaders, ch => ch.Id);
-        SelectedCategoryHeader = CategoryHeaders.FirstOrDefault(ch => ch.Id == selectedCategoryHeaderId) ?? CategoryHeaders.FirstOrDefault();
+        CategoriesTreeViewModel = new CategoriesTreeViewModel(AppService);
+        CategoriesTreeViewModel.SelectedItemChanged += CategoriesTreeViewModelOnSelectedItemChanged;
+    }
+
+    private void CategoriesTreeViewModelOnSelectedItemChanged(object? sender, EventArgs e)
+    {
+        FilterDownloadList();
     }
 
     private void FilterDownloadList()
@@ -1817,9 +1849,9 @@ public class MainWindowViewModel : ViewModelBase
                 .DownloadFiles
                 .ToList();
 
-            if (SelectedCategoryHeader != null)
+            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel != null)
             {
-                downloadFiles = SelectedCategoryHeader.Title switch
+                downloadFiles = CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.Title switch
                 {
                     Constants.UnfinishedCategoryHeaderTitle => downloadFiles
                         .Where(df => !df.IsCompleted)
@@ -1833,10 +1865,10 @@ public class MainWindowViewModel : ViewModelBase
                 };
             }
 
-            if (SelectedCategory != null)
+            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel?.SelectedCategory != null)
             {
                 downloadFiles = downloadFiles
-                    .Where(df => df.CategoryId == SelectedCategory.Id)
+                    .Where(df => df.CategoryId == CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.SelectedCategory.Id)
                     .ToList();
             }
 
@@ -1853,11 +1885,18 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch
         {
-            var downloadFiles = AppService
-                .DownloadFileService
-                .DownloadFiles;
+            try
+            {
+                var downloadFiles = AppService
+                    .DownloadFileService
+                    .DownloadFiles;
 
-            DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
+                DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
+            }
+            catch
+            {
+                DownloadFiles = [];
+            }
         }
         finally
         {
@@ -1911,7 +1950,7 @@ public class MainWindowViewModel : ViewModelBase
         return $"Active queues: {text}";
     }
 
-    public async Task ChangeContextFlyoutEnableStateAsync(MainWindow? mainWindow)
+    public async Task ChangeContextFlyoutEnableStateAsync(Views.MainWindow? mainWindow)
     {
         try
         {
@@ -2162,6 +2201,7 @@ public class MainWindowViewModel : ViewModelBase
         settings.StartOnSystemStartup = exportSettings.StartOnSystemStartup;
         settings.UseBrowserExtension = exportSettings.UseBrowserExtension;
         settings.DarkMode = exportSettings.DarkMode;
+        settings.UseManager = exportSettings.UseManager;
         settings.AlwaysKeepManagerOnTop = exportSettings.AlwaysKeepManagerOnTop;
         settings.ShowStartDownloadDialog = exportSettings.ShowStartDownloadDialog;
         settings.ShowCompleteDownloadDialog = exportSettings.ShowCompleteDownloadDialog;
@@ -2181,6 +2221,7 @@ public class MainWindowViewModel : ViewModelBase
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
         settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
         settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>() ?? settings.DataGridColumnsSettings;
+        settings.ApplicationFont = exportSettings.ApplicationFont;
 
         await AppService.SettingsService.SaveSettingsAsync(settings);
 
@@ -2298,15 +2339,17 @@ public class MainWindowViewModel : ViewModelBase
             // Make sure download file has file name
             // If file name is null or empty, we must get url details and use of it
             var fileName = exportDownloadFile.FileName;
+            var isFileSizeUnknown = false;
             if (fileName.IsNullOrEmpty())
             {
-                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url);
+                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url, CancellationToken.None);
                 var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
                 if (!urlDetailsValidation.IsValid)
                     continue;
 
                 fileName = urlDetails.FileName;
                 exportDownloadFile.Size = urlDetails.FileSize;
+                isFileSizeUnknown = urlDetails.IsFileSizeUnknown;
             }
 
             CategoryViewModel? category = null;
@@ -2420,6 +2463,7 @@ public class MainWindowViewModel : ViewModelBase
                 FileName = fileName,
                 DownloadQueueId = downloadQueueId,
                 Size = exportDownloadFile.Size,
+                IsSizeUnknown = isFileSizeUnknown,
                 Description = exportDownloadFile.Description,
                 Status = exportDownloadFile.Status,
                 DownloadQueuePriority = downloadQueuePriority,
@@ -2431,7 +2475,8 @@ public class MainWindowViewModel : ViewModelBase
             // Save download file
             downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(downloadFile);
             // Add required data to result
-            var viewModel = new ExportAddedDownloadFileDataViewModel(oldFileName: exportDownloadFile.FileName,
+            var viewModel = new ExportAddedDownloadFileDataViewModel(
+                oldFileName: exportDownloadFile.FileName,
                 newFileName: downloadFile?.FileName ?? string.Empty,
                 saveLocation: category.CategorySaveDirectory?.SaveDirectory ?? string.Empty,
                 newDownloadFileId: downloadFile?.Id ?? 0);
@@ -2579,16 +2624,29 @@ public class MainWindowViewModel : ViewModelBase
                         break;
 
                     var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                    if (!File.Exists(filePath))
-                        break;
-
-                    if (downloadFile.IsCompleted)
+                    if (!File.Exists(filePath) && !Directory.Exists(downloadFile.SaveLocation))
                     {
-                        PlatformSpecificManager.OpenFile(filePath);
+                        await DialogBoxManager.ShowInfoDialogAsync("Unable to Locate File or Folder",
+                            "We were unable to locate the file or folder you attempted to open. It is possible that the file or folder has been deleted.",
+                            DialogButtons.Ok);
+
+                        break;
+                    }
+
+                    if (File.Exists(filePath))
+                    {
+                        if (downloadFile.IsCompleted)
+                        {
+                            PlatformSpecificManager.OpenFile(filePath);
+                        }
+                        else
+                        {
+                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        }
                     }
                     else
                     {
-                        PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                        PlatformSpecificManager.OpenFolder(downloadFile.SaveLocation!);
                     }
 
                     break;

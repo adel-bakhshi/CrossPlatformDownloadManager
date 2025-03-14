@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -16,7 +17,6 @@ public interface ISettingsService
     #region Events
 
     event EventHandler? DataChanged;
-    event EventHandler? ActiveProxyChanged;
 
     #endregion
 
@@ -33,7 +33,7 @@ public interface ISettingsService
     Task UpdateProxySettingsAsync(ProxySettingsViewModel? viewModel);
 
     Task DeleteProxySettingsAsync(ProxySettings? proxySettings);
-    
+
     Task DeleteProxySettingsAsync(ProxySettingsViewModel? viewModel);
 
     Task DisableProxyAsync();
@@ -43,6 +43,8 @@ public interface ISettingsService
     Task UseCustomProxyAsync(ProxySettingsViewModel? viewModel);
 
     void ShowManager();
-    
+
     void HideManager();
+
+    IWebProxy? GetProxy();
 }

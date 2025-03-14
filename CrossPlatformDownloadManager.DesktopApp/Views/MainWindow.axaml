@@ -853,16 +853,10 @@
                 Padding="20, 0">
             <Grid ColumnDefinitions="Auto, *">
                 <!-- Category tree view -->
-                <Border Grid.Column="0"
-                        CornerRadius="{DynamicResource DefaultCornerRadius}"
-                        Background="{DynamicResource SecondaryColor}"
-                        Padding="20"
-                        Width="250"
-                        IsVisible="{Binding ShowCategoriesPanel}">
-                    <ListBox ItemsSource="{Binding CategoryHeaders}"
-                             SelectedItem="{Binding SelectedCategoryHeader}"
-                             Classes="categoryList" />
-                </Border>
+                <ContentControl Grid.Column="0"
+                                Width="250"
+                                IsVisible="{Binding ShowCategoriesPanel}"
+                                Content="{Binding CategoriesTreeView}" />
 
                 <!-- Actions buttons and Download list -->
                 <Grid Grid.Column="1"
@@ -1229,7 +1223,7 @@
                     <TextBlock Text="{Binding SelectedFilesTotalSize}"
                                Foreground="{DynamicResource TertiaryColor}" />
                 </StackPanel>
-                
+
                 <!-- Global speed limit -->
                 <StackPanel Orientation="Horizontal"
                             Spacing="5"

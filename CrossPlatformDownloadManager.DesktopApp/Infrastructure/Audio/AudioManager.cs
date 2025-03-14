@@ -13,46 +13,11 @@ public static class AudioManager
 {
     public static void Initialize()
     {
-        var assetsUri = new Uri("avares://CrossPlatformDownloadManager.DesktopApp/Assets/Bass");
-        var dependencies = AssetLoader.GetAssets(assetsUri, null).ToList();
-        if (dependencies.Count == 0)
-            throw new InvalidOperationException("Bass libraries not found.");
-
-        Uri? dependencyUri;
-        if (OperatingSystem.IsWindows())
-        {
-            dependencyUri = dependencies.Find(d => d.LocalPath.Replace('\\', '/').EndsWith("/bass.dll"));
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            dependencyUri = dependencies.Find(d => d.LocalPath.Replace('\\', '/').EndsWith("/libbass.dylib"));
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            dependencyUri = dependencies.Find(d => d.LocalPath.Replace('\\', '/').EndsWith("/libbass.so"));
-        }
-        else
-        {
-            throw new InvalidOperationException("Unsupported platform.");
-        }
-
-        if (dependencyUri == null)
-            throw new DllNotFoundException("Bass library not found.");
-
-        var dllName = Path.GetFileName(dependencyUri.LocalPath);
-        var dllPath = Path.Combine(Constants.MainDirectory, dllName);
-        if (!File.Exists(dllPath))
-        {
-            using var stream = AssetLoader.Open(dependencyUri);
-            using var fileStream = File.Create(dllPath);
-            stream.CopyTo(fileStream);
-        }
-
-        var songsDirectory = Path.Combine(Constants.MainDirectory, "Songs");
+        var songsDirectory = Path.Combine(Constants.ApplicationDataDirectory, "Songs");
         if (!Directory.Exists(songsDirectory))
             Directory.CreateDirectory(songsDirectory);
 
-        assetsUri = new Uri("avares://CrossPlatformDownloadManager.DesktopApp/Assets/Songs");
+        var assetsUri = new Uri("avares://CrossPlatformDownloadManager.DesktopApp/Assets/Songs");
         var songFiles = AssetLoader.GetAssets(assetsUri, null).ToList();
         if (songFiles.Count == 0)
             throw new InvalidOperationException("Song files not found.");
@@ -84,7 +49,7 @@ public static class AudioManager
     public static async Task PlayAsync(AppNotificationType notificationType)
     {
         string filePath;
-        var songsDirectory = Path.Combine(Constants.MainDirectory, "Songs");
+        var songsDirectory = Path.Combine(Constants.ApplicationDataDirectory, "Songs");
         if (!Directory.Exists(songsDirectory))
             throw new InvalidOperationException("Songs directory not found.");
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,6 +12,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
@@ -50,38 +52,69 @@ public class SettingsWindowViewModel : ViewModelBase
     public GeneralsViewModel? GeneralsViewModel
     {
         get => _generalsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _generalsViewModel, value);
+            this.RaisePropertyChanged(nameof(GeneralsView));
+        }
     }
 
     public FileTypesViewModel? FileTypesViewModel
     {
         get => _fileTypesViewModel;
-        set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
+            this.RaisePropertyChanged(nameof(FileTypesView));
+        }
     }
 
     public SaveLocationsViewModel? SaveLocationsViewModel
     {
         get => _saveLocationsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _saveLocationsViewModel, value);
+            this.RaisePropertyChanged(nameof(SaveLocationsView));
+        }
     }
 
     public DownloadsViewModel? DownloadsViewModel
     {
         get => _downloadsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _downloadsViewModel, value);
+            this.RaisePropertyChanged(nameof(DownloadsView));
+        }
     }
 
     public ProxyViewModel? ProxyViewModel
     {
         get => _proxyViewModel;
-        set => this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _proxyViewModel, value);
+            this.RaisePropertyChanged(nameof(ProxyView));
+        }
     }
 
     public NotificationsViewModel? NotificationsViewModel
     {
         get => _notificationsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _notificationsViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _notificationsViewModel, value);
+            this.RaisePropertyChanged(nameof(NotificationsView));
+        }
     }
+
+    public GeneralsView GeneralsView => new() { DataContext = GeneralsViewModel };
+    public FileTypesView FileTypesView => new() { DataContext = FileTypesViewModel };
+    public SaveLocationsView SaveLocationsView => new() { DataContext = SaveLocationsViewModel };
+    public DownloadsView DownloadsView => new() { DataContext = DownloadsViewModel };
+    public ProxyView ProxyView => new() { DataContext = ProxyViewModel };
+    public NotificationsView NotificationsView => new() { DataContext = NotificationsViewModel };
 
     #endregion
 
@@ -139,21 +172,50 @@ public class SettingsWindowViewModel : ViewModelBase
             {
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
-
-            var categoryWithNoSaveDirectory = SaveLocationsViewModel
-                .Categories
-                .FirstOrDefault(c => c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
-
-            if (categoryWithNoSaveDirectory != null)
+            
+            // Validate font
+            if (GeneralsViewModel.SelectedFont.IsNullOrEmpty())
             {
-                await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
-                    $"Please specify a save directory for the category '{categoryWithNoSaveDirectory.Title}'.",
+                await DialogBoxManager.ShowInfoDialogAsync("Font Not Specified",
+                    "Please choose a valid font and try again.",
                     DialogButtons.Ok);
                 
                 return;
             }
 
-            // Validate settings before save
+            // Validate save locations settings
+            if (SaveLocationsViewModel.DisableCategories)
+            {
+                // Check that the global save location is valid
+                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() ||
+                    !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
+                {
+                    await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
+                        "Please specify a save directory for your files.",
+                        DialogButtons.Ok);
+
+                    return;
+                }
+            }
+            else
+            {
+                // Check that all categories have a valid save location
+                var categoryWithNoSaveDirectory = SaveLocationsViewModel
+                    .Categories
+                    .FirstOrDefault(c =>
+                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
+
+                if (categoryWithNoSaveDirectory != null)
+                {
+                    await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
+                        $"Please specify a save directory for the category '{categoryWithNoSaveDirectory.Title}'.",
+                        DialogButtons.Ok);
+
+                    return;
+                }
+            }
+
+            // Validate selected duplicate download link action
             if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
@@ -163,6 +225,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Validate selected maximum connections count
             if (DownloadsViewModel.SelectedMaximumConnectionsCount == 0)
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Invalid or Unspecified File Divisions",
@@ -172,6 +235,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Validate selected speed unit
             if (DownloadsViewModel.SelectedSpeedUnit.IsNullOrEmpty())
             {
                 var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
@@ -190,6 +254,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
             AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.ApplicationFont = GeneralsViewModel.SelectedFont;
 
             // Register app for startup
             if (GeneralsViewModel.StartOnSystemStartup)
@@ -204,6 +269,9 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Save categories settings
+            AppService.SettingsService.Settings.DisableCategories = SaveLocationsViewModel.DisableCategories;
+            AppService.SettingsService.Settings.GlobalSaveLocation = SaveLocationsViewModel.GlobalSaveDirectory;
+
             var primaryKeys = SaveLocationsViewModel
                 .Categories
                 .Select(c => c.Id)
@@ -223,7 +291,8 @@ public class SettingsWindowViewModel : ViewModelBase
                     .Categories
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false ||
+                    saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
                 saveDirectory.SaveDirectory = category.CategorySaveDirectory!.SaveDirectory;
@@ -232,6 +301,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 saveCategoryDirectories = true;
             }
 
+            // Save all category directories
             if (saveCategoryDirectories)
                 await AppService.CategoryService.LoadCategoriesAsync();
 
@@ -288,6 +358,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseQueueFinishedSound = NotificationsViewModel.QueueFinished;
             AppService.SettingsService.Settings.UseSystemNotifications = NotificationsViewModel.UseSystemNotifications;
 
+            // Save settings
             await AppService.SettingsService.SaveSettingsAsync(AppService.SettingsService.Settings);
             owner.Close();
         }

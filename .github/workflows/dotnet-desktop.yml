@@ -1,0 +1,116 @@
+name: Build and Release CDM
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Install Pupnet Deploy
+        run: dotnet tool install -g KuiperZone.PupNet
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Windows EXE File
+        run: pupnet -k setup -r win-x64 -y -o "Cross-platform.Download.Manager.win-x64.exe"
+
+      - name: Build Windows ZIP Portable
+        run: pupnet -k zip -r win-x64 -y -o "Cross-platform.Download.Manager.win-x64.zip"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Packages
+          path: ./Deploy/bin/*
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y zip rpm zstd fuse libfuse2
+          wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x ./appimagetool-x86_64.AppImage
+
+      - name: Install Pupnet Deploy
+        run: dotnet tool install -g KuiperZone.PupNet
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Linux DEB File
+        run: pupnet -k deb -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.deb"
+
+      - name: Build Linux RPM File
+        run: pupnet -k rpm -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.rpm"
+
+      - name: Build AppImage File
+        run: pupnet -k appimage -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.AppImage"
+
+      # - name: Build Linux DEB File
+      #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
+
+      # - name: Build Linux RPM File
+      #   run: chmod +x ./Deploy/linux/rpm/process-on-deb.sh && ./Deploy/linux/rpm/process-on-deb.sh
+
+      # - name: Build AppImage File
+      #   run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
+
+      - name: Build Linux ZIP Portable
+        run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Packages
+          path: ./Deploy/bin/*
+
+  release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-Packages
+          path: artifacts/
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-Packages
+          path: artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          token: ${{ secrets.GITHUB_TOKEN }}

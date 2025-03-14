@@ -6,7 +6,6 @@
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
-        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
@@ -23,9 +22,6 @@
     <!-- Resources -->
     <Window.Resources>
         <ResourceDictionary>
-            <!-- IsGreaterThanZeroConverter -->
-            <converters:IsGreaterThanZeroConverter x:Key="IsGreaterThanZeroConverter" />
-
             <!-- Download later content -->
             <Flyout x:Key="DownloadLaterContentFlyout"
                     Placement="TopEdgeAlignedLeft"
@@ -146,7 +142,8 @@
                                       TextChanged="UrlTextBoxOnTextChanged" />
 
                     <!-- Category -->
-                    <Grid ColumnDefinitions="*, Auto">
+                    <Grid ColumnDefinitions="*, Auto"
+                          IsVisible="{Binding !CategoriesAreDisabled}">
                         <!-- Category ComboBox -->
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"
@@ -227,16 +224,18 @@
                                     Orientation="Vertical"
                                     Spacing="10"
                                     IsVisible="{Binding !IsLoadingUrl}">
+                            <!-- File type icon -->
                             <PathIcon Width="{DynamicResource LargeIconSize}"
                                       Height="{DynamicResource LargeIconSize}"
                                       Data="{Binding SelectedCategory.Icon, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
                                       Foreground="{DynamicResource IconColor}"
                                       HorizontalAlignment="Center" />
 
+                            <!-- File size -->
                             <TextBlock Text="{Binding DownloadFile.SizeAsString}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center"
-                                       IsVisible="{Binding DownloadFile.Size, Converter={StaticResource IsGreaterThanZeroConverter}}" />
+                                       IsVisible="{Binding IsFileSizeVisible}" />
                         </StackPanel>
 
                         <!-- Loading -->

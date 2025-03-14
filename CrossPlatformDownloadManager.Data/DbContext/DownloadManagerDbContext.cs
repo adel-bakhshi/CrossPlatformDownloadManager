@@ -27,7 +27,7 @@ public class DownloadManagerDbContext : Microsoft.EntityFrameworkCore.DbContext
 
     public DownloadManagerDbContext()
     {
-        _dbPath = Path.Combine(Constants.MainDirectory, "ApplicationData.db");
+        _dbPath = Path.Combine(Constants.ApplicationDataDirectory, "ApplicationData.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

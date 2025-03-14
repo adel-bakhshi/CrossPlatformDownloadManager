@@ -21,6 +21,9 @@ public static class Constants
     public const long MegaByte = KiloByte * 1024;
     public const long GigaByte = MegaByte * 1024;
     public const long TeraByte = GigaByte * 1024;
+    
+    // Maximum memory buffer bytes
+    public const long MaximumMemoryBufferBytes = 4 * MegaByte;
 
     // Turn off computer modes
     public static readonly List<string> TurnOffComputerModes = Enum
@@ -76,6 +79,7 @@ public static class Constants
     public const string DefaultDownloadQueueTitle = "Main Queue";
 
     // Listening urls
+    public const string GetFileTypesUrl = "http://localhost:5000/cdm/download/filetypes/";
     public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
 
     // Links
@@ -96,6 +100,41 @@ public static class Constants
             return directory!;
         }
     }
+
+    // Application data directory
+    public static string ApplicationDataDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CDM");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            return directory;
+        }
+    }
+
+    // Backup directory
+    public static string BackupDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(ApplicationDataDirectory, "Backups");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            return directory;
+        }
+    }
+
+    /// <summary>
+    /// Available fonts in the program
+    /// </summary>
+    public static List<string> AvailableFonts =>
+    [
+        "Asap",
+        "Ubuntu"
+    ];
 
     #endregion
 

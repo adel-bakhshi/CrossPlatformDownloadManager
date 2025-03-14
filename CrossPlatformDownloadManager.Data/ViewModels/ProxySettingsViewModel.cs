@@ -108,7 +108,7 @@ public class ProxySettingsViewModel : PropertyChangedBase
     {
         try
         {
-            var handler = new HttpClientHandler
+            using var handler = new HttpClientHandler
             {
                 Proxy = new WebProxy(proxyUri),
                 UseProxy = true

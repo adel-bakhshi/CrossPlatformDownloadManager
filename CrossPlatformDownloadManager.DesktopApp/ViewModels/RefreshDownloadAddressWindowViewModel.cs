@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -110,7 +111,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
             }
 
             // Get url details
-            var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(NewAddress);
+            var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(NewAddress, CancellationToken.None);
             if (urlDetails == null)
                 throw new InvalidOperationException("Failed to retrieve URL details.");
 

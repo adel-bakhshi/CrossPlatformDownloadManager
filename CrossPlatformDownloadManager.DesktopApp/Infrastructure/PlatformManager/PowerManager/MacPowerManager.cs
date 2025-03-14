@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.PowerManager;
 
+[SupportedOSPlatform("macos")]
 public class MacPowerManager : IPowerManager
 {
     public void Shutdown()

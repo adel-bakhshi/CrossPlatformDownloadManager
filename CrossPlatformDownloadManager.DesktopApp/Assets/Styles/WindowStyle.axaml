@@ -13,7 +13,7 @@
         <Setter Property="FontSize"
                 Value="{DynamicResource DefaultFontSize}" />
         <Setter Property="FontFamily"
-                Value="{DynamicResource Asap}" />
+                Value="{DynamicResource PrimaryFont}" />
         <Setter Property="Foreground"
                 Value="{DynamicResource TextColor}" />
         <Setter Property="Background"

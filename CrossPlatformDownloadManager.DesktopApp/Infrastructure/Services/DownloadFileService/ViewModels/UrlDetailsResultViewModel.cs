@@ -10,6 +10,7 @@ public class UrlDetailsResultViewModel
     public bool IsUrlValid { get; set; }
     public bool IsFile { get; set; }
     public string FileName { get; set; } = string.Empty;
+    public bool IsFileSizeUnknown { get; set; }
     public double FileSize { get; set; }
     public CategoryViewModel? Category { get; set; }
     public bool IsUrlDuplicate { get; set; }

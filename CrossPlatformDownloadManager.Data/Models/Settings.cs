@@ -19,10 +19,16 @@ public class Settings : DbModelBase
     [Required]
     [JsonProperty("useManager")]
     public bool UseManager { get; set; }
-    
+
     [Required]
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
+
+    [JsonProperty("disableCategories")] public bool DisableCategories { get; set; }
+
+    [MaxLength(500)]
+    [JsonProperty("globalSaveLocation")]
+    public string? GlobalSaveLocation { get; set; }
 
     [Required]
     [JsonProperty("showStartDownloadDialog")]
@@ -89,8 +95,13 @@ public class Settings : DbModelBase
     [MaxLength(5000)]
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
-    
+
     public bool HasApplicationBeenRunYet { get; set; }
+
+    [MaxLength(50)]
+    [Required]
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
 
     // ReSharper disable once CollectionNeverUpdated.Global
     public ICollection<ProxySettings> Proxies { get; } = [];
@@ -105,6 +116,8 @@ public class Settings : DbModelBase
         DarkMode = settings.DarkMode;
         UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+        DisableCategories = settings.DisableCategories;
+        GlobalSaveLocation = settings.GlobalSaveLocation;
         ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
         ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog;
         DuplicateDownloadLinkAction = settings.DuplicateDownloadLinkAction;
@@ -125,5 +138,6 @@ public class Settings : DbModelBase
         ShowCategoriesPanel = settings.ShowCategoriesPanel;
         DataGridColumnsSettings = settings.DataGridColumnsSettings;
         HasApplicationBeenRunYet = settings.HasApplicationBeenRunYet;
+        ApplicationFont = settings.ApplicationFont;
     }
 }

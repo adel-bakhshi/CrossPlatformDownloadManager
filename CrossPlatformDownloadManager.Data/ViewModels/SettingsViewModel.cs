@@ -14,6 +14,8 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _darkMode;
     private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
+    private bool _disableCategories;
+    private string? _globalSaveLocation;
     private bool _showStartDownloadDialog;
     private bool _showCompleteDownloadDialog;
     private DuplicateDownloadLinkAction _duplicateDownloadLinkAction;
@@ -23,7 +25,6 @@ public class SettingsViewModel : PropertyChangedBase
     private string? _limitUnit;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
-    private string _customProxySettings = string.Empty;
     private bool _useDownloadCompleteSound;
     private bool _useDownloadStoppedSound;
     private bool _useDownloadFailedSound;
@@ -35,6 +36,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private bool _hasApplicationBeenRunYet;
+    private string? _applicationFont;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -75,6 +77,18 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _alwaysKeepManagerOnTop;
         set => SetField(ref _alwaysKeepManagerOnTop, value);
+    }
+
+    public bool DisableCategories
+    {
+        get => _disableCategories;
+        set => SetField(ref _disableCategories, value);
+    }
+
+    public string? GlobalSaveLocation
+    {
+        get => _globalSaveLocation;
+        set => SetField(ref _globalSaveLocation, value);
     }
 
     public bool ShowStartDownloadDialog
@@ -129,12 +143,6 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _proxyType;
         set => SetField(ref _proxyType, value);
-    }
-
-    public string CustomProxySettings
-    {
-        get => _customProxySettings;
-        set => SetField(ref _customProxySettings, value);
     }
 
     public bool UseDownloadCompleteSound
@@ -201,6 +209,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _hasApplicationBeenRunYet;
         set => SetField(ref _hasApplicationBeenRunYet, value);
+    }
+
+    public string? ApplicationFont
+    {
+        get => _applicationFont;
+        set => SetField(ref _applicationFont, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -46,6 +48,8 @@ public partial class App : Application
                 Desktop.Exit += ApplicationOnExit;
             }
 
+            Dispatcher.UIThread.UnhandledException += UIThreadOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
             base.OnFrameworkInitializationCompleted();
             Log.Information("Application started");
         }
@@ -89,6 +93,32 @@ public partial class App : Application
         {
             Log.Error(ex, "An error occurred while finishing the application. Error message: {ErrorMessage}", ex.Message);
             Environment.Exit(0);
+        }
+    }
+
+    private static async void UIThreadOnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        try
+        {
+            Log.Error(e.Exception, "An unhandled error occurred in Dispatcher. Error message: {ErrorMessage}", e.Exception.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(e.Exception);
+        }
+        catch
+        {
+            // Ignore exceptions
+        }
+    }
+
+    private static async void TaskSchedulerOnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        try
+        {
+            Log.Error(e.Exception, "An unhandled error occurred in TaskScheduler. Error message: {ErrorMessage}", e.Exception.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(e.Exception);
+        }
+        catch
+        {
+            // Ignore exceptions
         }
     }
 

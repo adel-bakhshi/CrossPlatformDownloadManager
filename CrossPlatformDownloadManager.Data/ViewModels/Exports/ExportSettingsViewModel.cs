@@ -8,9 +8,17 @@ public class ExportSettingsViewModel
 {
     #region Properties
 
-    [JsonProperty("startOnSystemStartup")] public bool StartOnSystemStartup { get; set; }
-    [JsonProperty("useBrowserExtension")] public bool UseBrowserExtension { get; set; }
-    [JsonProperty("darkMode")] public bool DarkMode { get; set; }
+    [JsonProperty("startOnSystemStartup")]
+    public bool StartOnSystemStartup { get; set; }
+
+    [JsonProperty("useBrowserExtension")]
+    public bool UseBrowserExtension { get; set; }
+
+    [JsonProperty("darkMode")]
+    public bool DarkMode { get; set; }
+
+    [JsonProperty("useManager")]
+    public bool UseManager { get; set; }
 
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
@@ -30,10 +38,17 @@ public class ExportSettingsViewModel
     [JsonProperty("isSpeedLimiterEnabled")]
     public bool IsSpeedLimiterEnabled { get; set; }
 
-    [JsonProperty("limitSpeed")] public double? LimitSpeed { get; set; }
-    [JsonProperty("limitUnit")] public string? LimitUnit { get; set; }
-    [JsonProperty("proxyMode")] public ProxyMode ProxyMode { get; set; }
-    [JsonProperty("proxyType")] public ProxyType ProxyType { get; set; }
+    [JsonProperty("limitSpeed")]
+    public double? LimitSpeed { get; set; }
+
+    [JsonProperty("limitUnit")]
+    public string? LimitUnit { get; set; }
+
+    [JsonProperty("proxyMode")]
+    public ProxyMode ProxyMode { get; set; }
+
+    [JsonProperty("proxyType")]
+    public ProxyType ProxyType { get; set; }
 
     [JsonProperty("useDownloadCompleteSound")]
     public bool UseDownloadCompleteSound { get; set; }
@@ -44,8 +59,11 @@ public class ExportSettingsViewModel
     [JsonProperty("useDownloadFailedSound")]
     public bool UseDownloadFailedSound { get; set; }
 
-    [JsonProperty("useQueueStartedSound")] public bool UseQueueStartedSound { get; set; }
-    [JsonProperty("useQueueStoppedSound")] public bool UseQueueStoppedSound { get; set; }
+    [JsonProperty("useQueueStartedSound")]
+    public bool UseQueueStartedSound { get; set; }
+
+    [JsonProperty("useQueueStoppedSound")]
+    public bool UseQueueStoppedSound { get; set; }
 
     [JsonProperty("useQueueFinishedSound")]
     public bool UseQueueFinishedSound { get; set; }
@@ -53,12 +71,17 @@ public class ExportSettingsViewModel
     [JsonProperty("useSystemNotifications")]
     public bool UseSystemNotifications { get; set; }
 
-    [JsonProperty("showCategoriesPanel")] public bool ShowCategoriesPanel { get; set; }
+    [JsonProperty("showCategoriesPanel")]
+    public bool ShowCategoriesPanel { get; set; }
 
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
 
-    [JsonProperty("proxies")] public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
+
+    [JsonProperty("proxies")]
+    public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
 
     #endregion
 
@@ -82,6 +105,7 @@ public class ExportSettingsViewModel
             StartOnSystemStartup = settings.StartOnSystemStartup,
             UseBrowserExtension = settings.UseBrowserExtension,
             DarkMode = settings.DarkMode,
+            UseManager = settings.UseManager,
             AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop,
             ShowStartDownloadDialog = settings.ShowStartDownloadDialog,
             ShowCompleteDownloadDialog = settings.ShowCompleteDownloadDialog,
@@ -101,6 +125,7 @@ public class ExportSettingsViewModel
             UseSystemNotifications = settings.UseSystemNotifications,
             ShowCategoriesPanel = settings.ShowCategoriesPanel,
             DataGridColumnsSettings = settings.DataGridColumnsSettings.ConvertToJson(),
+            ApplicationFont = settings.ApplicationFont,
             Proxies = exportProxies
         };
     }

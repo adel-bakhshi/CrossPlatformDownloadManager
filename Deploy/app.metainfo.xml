@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-    <metadata_license>AGPL-3.0</metadata_license>
+    <metadata_license>CC0-1.0</metadata_license>
 
     <!-- Note the use of macros to automate most (but not all) content below -->
     <id>${APP_ID}</id>
@@ -8,6 +8,8 @@
     <summary>${APP_SHORT_SUMMARY}</summary>
     <developer_name>${PUBLISHER_NAME}</developer_name>
     <url type="homepage">${PUBLISHER_LINK_URL}</url>
+    <url type="bugtracker">https://github.com/adel-bakhshi/CrossPlatformDownloadManager/issues</url>
+    <url type="vcs-browser">https://github.com/adel-bakhshi/CrossPlatformDownloadManager</url>
     <project_license>${APP_LICENSE_ID}</project_license>
     <content_rating type="oars-1.1" />
 
@@ -31,23 +33,28 @@
         <category>${PRIME_CATEGORY}</category>
     </categories>
 
-    <!-- Uncomment to provide keywords
     <keywords>
-        <keyword translate="no">IDE</keyword>
-        <keyword>development</keyword>
-        <keyword>programming</keyword>
-        <keyword xml:lang="de">entwicklung</keyword>
-        <keyword xml:lang="de">programmierung</keyword>
+        <keyword>download</keyword>
+        <keyword>download-manager</keyword>
+        <keyword>downloader</keyword>
+        <keyword>cdm</keyword>
+        <keyword>cross-platform-download-manager</keyword>
     </keywords>
-    -->
 
-    <!-- Uncomment to provide screenshots
     <screenshots>
         <screenshot type="default">
-            <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/Screenshots/banner.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/Screenshots/1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/Screenshots/2.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/Screenshots/3.png</image>
         </screenshot>
     </screenshots>
-    -->
 
     <releases>
         <!-- See AppChangeFile in configuration -->

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.Versioning;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
 
@@ -28,33 +29,57 @@ public class LinuxStartupManager : IStartupManager
 
     public void Register()
     {
-        var desktopEntryPath = GetDesktopEntryPath();
-        var desktopEntryContent = $"""
-                                   [Desktop Entry]
-                                   Type=Application
-                                   Name={_appName}
-                                   Comment=Cross platform Download Manager (CDM)
-                                   Exec={_appExec}
-                                   Hidden=false
-                                   NoDisplay=false
-                                   X-GNOME-Autostart-enabled=true
-                                   """;
+        try
+        {
+            var desktopEntryPath = GetDesktopEntryPath();
+            var desktopEntryContent = $"""
+                                       [Desktop Entry]
+                                       Type=Application
+                                       Name={_appName}
+                                       Comment=Cross platform Download Manager (CDM)
+                                       Exec="{_appExec}"
+                                       Hidden=false
+                                       NoDisplay=false
+                                       X-GNOME-Autostart-enabled=true
+                                       Terminal=false
+                                       """;
 
-        File.WriteAllText(desktopEntryPath, desktopEntryContent);
+            File.WriteAllText(desktopEntryPath, desktopEntryContent);
+            Log.Information($"Autostart entry created: {desktopEntryPath}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to create autostart entry. Error message: {ErrorMessage}", ex.Message);
+        }
     }
 
     public void Delete()
     {
-        var desktopEntryPath = GetDesktopEntryPath();
-        if (File.Exists(desktopEntryPath))
+        try
+        {
+            var desktopEntryPath = GetDesktopEntryPath();
+            if (!File.Exists(desktopEntryPath))
+                return;
+
             File.Delete(desktopEntryPath);
+            Log.Information($"Autostart entry deleted: {desktopEntryPath}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to delete autostart entry. Error message: {ErrorMessage}", ex.Message);
+        }
     }
 
     #region Helpers
 
     private string GetDesktopEntryPath()
     {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "autostart", $"{_appName}.desktop");
+        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config",
+            "autostart");
+        if (!Directory.Exists(directory))
+            Directory.CreateDirectory(directory);
+
+        return Path.Combine(directory, $"{_appName}.desktop");
     }
 
     #endregion

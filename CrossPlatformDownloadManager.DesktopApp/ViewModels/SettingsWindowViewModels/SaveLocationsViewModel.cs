@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -20,6 +21,8 @@ public class SaveLocationsViewModel : ViewModelBase
 {
     #region Private Fields
 
+    private bool _disableCategories;
+    private string? _globalSaveDirectory = string.Empty;
     private ObservableCollection<CategoryViewModel> _categories = [];
     private CategoryViewModel? _selectedCategory;
     private FileTypesViewModel? _fileTypesViewModel;
@@ -27,6 +30,24 @@ public class SaveLocationsViewModel : ViewModelBase
     #endregion
 
     #region Properties
+
+    public bool DisableCategories
+    {
+        get => _disableCategories;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _disableCategories, value);
+            this.RaisePropertyChanged(nameof(IsFileTypesViewVisible));
+            if (!DisableCategories)
+                GlobalSaveDirectory = null;
+        }
+    }
+
+    public string? GlobalSaveDirectory
+    {
+        get => _globalSaveDirectory;
+        set => this.RaiseAndSetIfChanged(ref _globalSaveDirectory, value);
+    }
 
     public ObservableCollection<CategoryViewModel> Categories
     {
@@ -40,7 +61,7 @@ public class SaveLocationsViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedCategory, value);
-            this.RaisePropertyChanged(nameof(IsGeneralCategory));
+            this.RaisePropertyChanged(nameof(IsFileTypesViewVisible));
             LoadFileExtensions();
         }
     }
@@ -50,18 +71,34 @@ public class SaveLocationsViewModel : ViewModelBase
         get => _fileTypesViewModel;
         set => this.RaiseAndSetIfChanged(ref _fileTypesViewModel, value);
     }
-    
-    public bool IsGeneralCategory => SelectedCategory != null && SelectedCategory.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase);
+
+    public bool IsFileTypesViewVisible
+    {
+        get
+        {
+            if (SelectedCategory == null)
+                return false;
+
+            if (SelectedCategory.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return !DisableCategories;
+        }
+    }
 
     #endregion
 
     #region Commands
 
-    public ICommand AddNewCategoryCommand { get; set; }
+    public ICommand BrowseGlobalSaveLocationCommand { get; }
 
-    public ICommand EditCategoryCommand { get; set; }
+    public ICommand AddNewCategoryCommand { get; }
 
-    public ICommand DeleteCategoryCommand { get; set; }
+    public ICommand EditCategoryCommand { get; }
+
+    public ICommand DeleteCategoryCommand { get; }
+    
+    public ICommand BrowseSaveLocationCommand { get; }
 
     #endregion
 
@@ -69,11 +106,31 @@ public class SaveLocationsViewModel : ViewModelBase
     {
         FileTypesViewModel = new FileTypesViewModel(appService) { DependsOnCategory = true };
 
+        CheckDisableCategories();
         LoadCategories();
 
+        BrowseGlobalSaveLocationCommand = ReactiveCommand.CreateFromTask(BrowseGlobalSaveLocationAsync);
         AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
         EditCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(EditCategoryAsync);
         DeleteCategoryCommand = ReactiveCommand.CreateFromTask(DeleteCategoryAsync);
+        BrowseSaveLocationCommand = ReactiveCommand.CreateFromTask(BrowseSaveLocationAsync);
+    }
+
+    private async Task BrowseGlobalSaveLocationAsync()
+    {
+        try
+        {
+            var directoryPath = await OpenFolderPickerAsync();
+            if (directoryPath.IsNullOrEmpty())
+                return;
+
+            GlobalSaveDirectory = directoryPath;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to browse global save location. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 
     private async Task AddNewCategoryAsync(Window? owner)
@@ -180,6 +237,33 @@ public class SaveLocationsViewModel : ViewModelBase
         }
     }
 
+    private async Task BrowseSaveLocationAsync()
+    {
+        try
+        {
+            if (SelectedCategory?.CategorySaveDirectory == null)
+                return;
+            
+            var directoryPath = await OpenFolderPickerAsync();
+            if (directoryPath.IsNullOrEmpty())
+                return;
+
+            SelectedCategory.CategorySaveDirectory.SaveDirectory = directoryPath!;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to browse save location. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private void CheckDisableCategories()
+    {
+        var settings = AppService.SettingsService.Settings;
+        DisableCategories = settings.DisableCategories;
+        GlobalSaveDirectory = settings.GlobalSaveLocation;
+    }
+
     private void LoadCategories()
     {
         var selectedCategoryId = SelectedCategory?.Id;
@@ -202,9 +286,31 @@ public class SaveLocationsViewModel : ViewModelBase
         FileTypesViewModel.CategoryId = SelectedCategory.Id;
     }
 
+    protected override void OnSettingsServiceDataChanged()
+    {
+        base.OnSettingsServiceDataChanged();
+        CheckDisableCategories();
+    }
+
     protected override void OnCategoryServiceCategoriesChanged()
     {
         base.OnCategoryServiceCategoriesChanged();
         LoadCategories();
+    }
+
+    private static async Task<string?> OpenFolderPickerAsync()
+    {
+        var storageProvider = App.Desktop?.MainWindow?.StorageProvider;
+        if (storageProvider == null)
+            throw new InvalidOperationException("Failed to access to storage. Storage provider is null or undefined.");
+
+        var options = new FolderPickerOpenOptions
+        {
+            Title = "Select Directory",
+            AllowMultiple = false
+        };
+
+        var directories = await storageProvider.OpenFolderPickerAsync(options);
+        return directories.Any() ? directories[0].Path.LocalPath : null;
     }
 }

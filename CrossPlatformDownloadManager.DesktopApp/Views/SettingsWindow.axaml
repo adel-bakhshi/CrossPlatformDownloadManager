@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
@@ -18,7 +17,7 @@
         MaxWidth="800"
         MaxHeight="600"
         CanResize="False">
-    
+
     <!-- Resources -->
     <Window.Resources>
         <!-- Converters -->
@@ -37,34 +36,28 @@
         <!-- Main content -->
         <Grid Grid.Row="1">
             <!-- Generals view -->
-            <uc:GeneralsView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).GeneralsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding GeneralsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals', FallbackValue=False, TargetNullValue=False}" />
 
             <!-- FileTypes view -->
-            <uc:FileTypesView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).FileTypesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding FileTypesView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types', FallbackValue=False, TargetNullValue=False}" />
 
             <!-- SaveLocations view -->
-            <uc:SaveLocationsView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SaveLocationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding SaveLocationsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations', FallbackValue=False, TargetNullValue=False}" />
 
             <!-- Downloads view -->
-            <uc:DownloadsView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).DownloadsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding DownloadsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads', FallbackValue=False, TargetNullValue=False}" />
 
             <!-- Proxy view -->
-            <uc:ProxyView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).ProxyViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding ProxyView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy', FallbackValue=False, TargetNullValue=False}" />
 
             <!-- Notifications view -->
-            <uc:NotificationsView
-                IsVisible="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications', FallbackValue=False, TargetNullValue=False}"
-                DataContext="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).NotificationsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+            <ContentControl Content="{Binding NotificationsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications', FallbackValue=False, TargetNullValue=False}" />
         </Grid>
 
         <!-- Action buttons -->

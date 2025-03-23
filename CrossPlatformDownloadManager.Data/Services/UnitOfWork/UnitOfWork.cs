@@ -62,6 +62,8 @@ public class UnitOfWork : IUnitOfWork
             var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
             if (migrations.Any())
                 await _dbContext.Database.MigrateAsync();
+            
+            Log.Information("Database created successfully.");
         }
         catch (Exception ex)
         {
@@ -115,6 +117,8 @@ public class UnitOfWork : IUnitOfWork
             await CreateFileTypesAsync(categoryInDb.Id, fileExtensions);
             await CreateSaveDirectoryAsync(categoryInDb);
         }
+        
+        Log.Information("Categories created successfully.");
     }
 
     public async Task<IDbContextTransaction?> BeginTransactionAsync()

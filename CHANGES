@@ -1,3 +1,11 @@
+- Version 0.5.0; 2025-03-23
+
+* New Features:
+  - Added Light Theme to the application.
+* Bug Fixes:
+  - Fixed the issue of proxies not being displayed in the settings.
+  - Various minor bug fixes.
+
 - Version 0.4.0; 2025-03-14
 
 * New Features:

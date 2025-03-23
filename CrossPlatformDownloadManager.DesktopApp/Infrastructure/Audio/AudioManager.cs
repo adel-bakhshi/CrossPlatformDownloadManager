@@ -6,6 +6,7 @@ using Avalonia.Platform;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.Utils;
 using ManagedBass;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio;
 
@@ -13,15 +14,18 @@ public static class AudioManager
 {
     public static void Initialize()
     {
+        // Create songs directory
         var songsDirectory = Path.Combine(Constants.ApplicationDataDirectory, "Songs");
         if (!Directory.Exists(songsDirectory))
             Directory.CreateDirectory(songsDirectory);
 
+        // Get songs files from assets
         var assetsUri = new Uri("avares://CrossPlatformDownloadManager.DesktopApp/Assets/Songs");
         var songFiles = AssetLoader.GetAssets(assetsUri, null).ToList();
         if (songFiles.Count == 0)
             throw new InvalidOperationException("Song files not found.");
 
+        // Copy songs file to songs directory
         foreach (var songFile in songFiles)
         {
             var songName = Path.GetFileName(songFile.LocalPath);
@@ -33,6 +37,9 @@ public static class AudioManager
             using var fileStream = File.Create(songPath);
             stream.CopyTo(fileStream);
         }
+        
+        // Log information
+        Log.Information("Audio manager initialize successfully.");
     }
 
     public static async Task PlayAsync(string filePath)

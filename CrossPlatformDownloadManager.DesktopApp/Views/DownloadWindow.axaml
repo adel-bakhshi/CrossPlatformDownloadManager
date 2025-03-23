@@ -61,7 +61,7 @@
             <!-- Download progress bar -->
             <ProgressBar Grid.Row="2"
                          Classes="customProgressBar"
-                         Foreground="{DynamicResource ProgressBarGradientBrush}"
+                         Foreground="{DynamicResource PrimaryGradientBrush}"
                          Value="{Binding DownloadFile.DownloadProgress, FallbackValue=0, TargetNullValue=0}"
                          Margin="0, 0, 0, 10" />
 

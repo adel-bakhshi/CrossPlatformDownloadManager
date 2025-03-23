@@ -50,27 +50,27 @@
 
                 <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
+                            Value="{DynamicResource CategoryItemOnHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
+                            Value="{DynamicResource CategoryItemOnHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
+                            Value="{DynamicResource CategoryItemOnHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
+                            Value="{DynamicResource CategoryItemOnHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemHoverColor}" />
+                            Value="{DynamicResource CategoryItemOnHoverColor}" />
                 </Style>
             </Style>
         </Style>

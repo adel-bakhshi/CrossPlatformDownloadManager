@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Avalonia" Version="11.2.5" />
-      <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta1" />
+      <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta2" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="SharpZipLib" Version="1.4.2" />
     </ItemGroup>

@@ -60,7 +60,7 @@ public class FileTypesViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _categoryId, value);
-            LoadFileExtensions();
+            _ = LoadFileExtensionsAsync();
         }
     }
 
@@ -70,7 +70,7 @@ public class FileTypesViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _dependsOnCategory, value);
-            LoadFileExtensions();
+            _ = LoadFileExtensionsAsync();
         }
     }
 
@@ -90,7 +90,7 @@ public class FileTypesViewModel : ViewModelBase
     {
         _dbFileExtensions = [];
 
-        LoadFileExtensions();
+        _ = LoadFileExtensionsAsync();
 
         AddNewFileTypeCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewFileTypeAsync);
         EditFileTypeCommand = ReactiveCommand.CreateFromTask<Window?>(EditFileTypeAsync);
@@ -111,7 +111,7 @@ public class FileTypesViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            LoadFileExtensions();
+            await LoadFileExtensionsAsync();
         }
         catch (Exception ex)
         {
@@ -138,7 +138,7 @@ public class FileTypesViewModel : ViewModelBase
             if (result != true)
                 return;
 
-            LoadFileExtensions();
+            await LoadFileExtensionsAsync();
         }
         catch (Exception ex)
         {
@@ -172,7 +172,7 @@ public class FileTypesViewModel : ViewModelBase
                 return;
 
             await AppService.CategoryService.DeleteFileExtensionAsync(category, fileExtension);
-            LoadFileExtensions();
+            await LoadFileExtensionsAsync();
         }
         catch (Exception ex)
         {
@@ -181,35 +181,43 @@ public class FileTypesViewModel : ViewModelBase
         }
     }
 
-    public void LoadFileExtensions()
+    public async Task LoadFileExtensionsAsync()
     {
-        _dbFileExtensions.Clear();
-
-        List<CategoryFileExtensionViewModel> fileExtensions;
-        if (DependsOnCategory)
+        try
         {
-            fileExtensions = AppService
-                .CategoryService
-                .Categories
-                .SelectMany(c => c.FileExtensions)
-                .Where(fe => fe.CategoryId == CategoryId)
-                .OrderBy(fe => fe.Category!.Id)
-                .ThenBy(fe => fe.Extension)
-                .ToList();
-        }
-        else
-        {
-            fileExtensions = AppService
-                .CategoryService
-                .Categories
-                .SelectMany(c => c.FileExtensions)
-                .OrderBy(fe => fe.CategoryId)
-                .ThenBy(fe => fe.Extension)
-                .ToList();
-        }
+            _dbFileExtensions.Clear();
 
-        _dbFileExtensions.AddRange(fileExtensions);
-        FilterFileExtensions();
+            List<CategoryFileExtensionViewModel> fileExtensions;
+            if (DependsOnCategory)
+            {
+                fileExtensions = AppService
+                    .CategoryService
+                    .Categories
+                    .SelectMany(c => c.FileExtensions)
+                    .Where(fe => fe.CategoryId == CategoryId)
+                    .OrderBy(fe => fe.Category!.Id)
+                    .ThenBy(fe => fe.Extension)
+                    .ToList();
+            }
+            else
+            {
+                fileExtensions = AppService
+                    .CategoryService
+                    .Categories
+                    .SelectMany(c => c.FileExtensions)
+                    .OrderBy(fe => fe.CategoryId)
+                    .ThenBy(fe => fe.Extension)
+                    .ToList();
+            }
+
+            _dbFileExtensions.AddRange(fileExtensions);
+            FilterFileExtensions();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to load file extensions. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 
     #region Helpers

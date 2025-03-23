@@ -43,7 +43,7 @@
                                LineHeight="{DynamicResource LargeLineHeight}"
                                FontWeight="Bold"
                                FontStyle="Italic"
-                               Foreground="{DynamicResource ProgressBarGradientBrush}" />
+                               Foreground="{DynamicResource PrimaryGradientBrush}" />
 
                     <!-- Full name -->
                     <TextBlock Text="Cross platform Download Manager"

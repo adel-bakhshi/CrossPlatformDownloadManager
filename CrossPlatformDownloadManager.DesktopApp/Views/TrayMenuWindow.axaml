@@ -36,7 +36,7 @@
             <Setter Property="Background"
                     Value="{DynamicResource TransparentColor}" />
             <Setter Property="Foreground"
-                    Value="{DynamicResource TextColor}" />
+                    Value="{DynamicResource ButtonTextColor}" />
             <Setter Property="CornerRadius"
                     Value="0" />
             <Setter Property="BorderThickness"

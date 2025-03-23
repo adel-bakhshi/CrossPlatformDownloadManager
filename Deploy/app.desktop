@@ -9,5 +9,5 @@ NoDisplay=${DESKTOP_NODISPLAY}
 X-AppImage-Integrate=${DESKTOP_INTEGRATE}
 Terminal=${DESKTOP_TERMINAL}
 Categories=${PRIME_CATEGORY};
-MimeType=
-Keywords=
+MimeType=application/cdm;
+Keywords=download;downloader;manager;cdm;cross-platform;internet;

@@ -14,48 +14,34 @@ public class CategoriesTreeViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private ObservableCollection<CategoriesTreeItemViewModel> _categoriesTreeItemViewModels = [];
+    private ObservableCollection<CategoriesTreeItemView> _categoriesTreeItemViews = [];
     private CategoriesTreeItemView? _selectedCategoriesTreeItemView;
 
     #endregion
 
     #region Properties
 
-    public ObservableCollection<CategoriesTreeItemViewModel> CategoriesTreeItemViewModels
+    public ObservableCollection<CategoriesTreeItemView> CategoriesTreeItemViews
     {
-        get => _categoriesTreeItemViewModels;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _categoriesTreeItemViewModels, value);
-            this.RaisePropertyChanged(nameof(CategoriesTreeItemViews));
-        }
+        get => _categoriesTreeItemViews;
+        set => this.RaiseAndSetIfChanged(ref _categoriesTreeItemViews, value);
     }
-
-    public CategoriesTreeItemViewModel? SelectedCategoriesTreeItemViewModel => SelectedCategoriesTreeItemView?.DataContext as CategoriesTreeItemViewModel;
 
     public CategoriesTreeItemView? SelectedCategoriesTreeItemView
     {
         get => _selectedCategoriesTreeItemView;
         set
         {
-            if (SelectedCategoriesTreeItemViewModel != null && SelectedCategoriesTreeItemView?.Equals(value) != true)
+            // Clear previous selected category
+            if (SelectedCategoriesTreeItemViewModel != null)
                 SelectedCategoriesTreeItemViewModel.SelectedCategory = null;
             
             this.RaiseAndSetIfChanged(ref _selectedCategoriesTreeItemView, value);
-            this.RaisePropertyChanged(nameof(SelectedCategoriesTreeItemViewModel));
             RaiseSelectedItemChanged();
         }
     }
 
-    public ObservableCollection<CategoriesTreeItemView> CategoriesTreeItemViews
-    {
-        get
-        {
-            return CategoriesTreeItemViewModels
-                .Select(vm => new CategoriesTreeItemView { DataContext = vm })
-                .ToObservableCollection();
-        }
-    }
+    public CategoriesTreeItemViewModel? SelectedCategoriesTreeItemViewModel => SelectedCategoriesTreeItemView?.DataContext as CategoriesTreeItemViewModel;
 
     #endregion
 
@@ -72,19 +58,25 @@ public class CategoriesTreeViewModel : ViewModelBase
 
     private void LoadCategories()
     {
-        var selectedCategoryHeaderId = SelectedCategoriesTreeItemViewModel?.Id;
+        // Find previous selected category header id
+        int? selectedCategoryHeaderId = null;
+        if (SelectedCategoriesTreeItemView is { DataContext: CategoriesTreeItemViewModel viewModel })
+            selectedCategoryHeaderId = viewModel.Id;
 
         RemoveChangedEvents();
 
-        CategoriesTreeItemViewModels = AppService
+        CategoriesTreeItemViews = AppService
             .CategoryService
             .CategoryHeaders
-            .Select(ch => new CategoriesTreeItemViewModel(AppService)
+            .Select(ch => new CategoriesTreeItemView
             {
-                Id = ch.Id,
-                Title = ch.Title,
-                Icon = ch.Icon,
-                Categories = ch.Categories
+                DataContext = new CategoriesTreeItemViewModel(AppService)
+                {
+                    Id = ch.Id,
+                    Title = ch.Title,
+                    Icon = ch.Icon,
+                    Categories = ch.Categories
+                }
             })
             .ToObservableCollection();
 
@@ -103,19 +95,29 @@ public class CategoriesTreeViewModel : ViewModelBase
 
     private void RemoveChangedEvents()
     {
-        if (CategoriesTreeItemViewModels.Count == 0)
+        if (CategoriesTreeItemViews.Count == 0)
             return;
 
-        foreach (var viewModel in CategoriesTreeItemViewModels)
+        var viewModels = CategoriesTreeItemViews
+            .Where(v => v.DataContext is CategoriesTreeItemViewModel)
+            .Select(v => (v.DataContext as CategoriesTreeItemViewModel)!)
+            .ToList();
+        
+        foreach (var viewModel in viewModels)
             viewModel.PropertyChanged -= CategoriesTreeItemViewModelOnPropertyChanged;
     }
 
     private void AddChangedEvents()
     {
-        if (CategoriesTreeItemViewModels.Count == 0)
+        if (CategoriesTreeItemViews.Count == 0)
             return;
 
-        foreach (var viewModel in CategoriesTreeItemViewModels)
+        var viewModels = CategoriesTreeItemViews
+            .Where(v => v.DataContext is CategoriesTreeItemViewModel)
+            .Select(v => (v.DataContext as CategoriesTreeItemViewModel)!)
+            .ToList();
+
+        foreach (var viewModel in viewModels)
             viewModel.PropertyChanged += CategoriesTreeItemViewModelOnPropertyChanged;
     }
 

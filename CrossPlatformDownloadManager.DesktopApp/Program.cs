@@ -9,6 +9,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
@@ -74,6 +75,9 @@ sealed class Program
 
                 // Add SettingsService to services
                 services.AddSingleton<ISettingsService, SettingsService>();
+
+                // Add AppThemeService to services
+                services.AddSingleton<IAppThemeService, AppThemeService>();
 
                 // Add CategoryService to services
                 services.AddSingleton<ICategoryService, CategoryService>();

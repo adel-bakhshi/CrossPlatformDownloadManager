@@ -1,9 +1,6 @@
-using System;
 using Avalonia;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
-using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
 
@@ -25,23 +22,5 @@ public partial class FileTypesView : MyUserControlBase<FileTypesViewModel>
     public FileTypesView()
     {
         InitializeComponent();
-    }
-
-    protected override async void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        try
-        {
-            base.OnPropertyChanged(change);
-
-            if (change.Property != IsVisibleProperty || !IsVisible || ViewModel == null)
-                return;
-
-            ViewModel.LoadFileExtensions();
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occurred while trying to load file extensions. Error message: {ErrorMessage}", ex.Message);
-        }
     }
 }

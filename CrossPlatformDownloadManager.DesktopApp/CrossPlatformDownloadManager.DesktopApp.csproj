@@ -8,7 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-        <AssemblyVersion>0.4.0</AssemblyVersion>
+        <AssemblyVersion>0.5.0</AssemblyVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,19 +37,19 @@
         <PackageReference Include="Avalonia.Themes.Simple" Version="11.2.5" />
         <PackageReference Include="Emik.Rubbish" Version="1.1.0" />
         <PackageReference Include="ManagedBass" Version="3.1.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.5.1" />
-        <PackageReference Include="Serilog" Version="4.2.1-dev-02340" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.2.5.2" />
+        <PackageReference Include="Serilog" Version="4.2.1-dev-02352" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
-        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0-dev-02301" />
         <PackageReference Include="SharpZipLib" Version="1.4.2" />
         <PackageReference Include="WindowsShortcutFactory" Version="1.2.0" />
     </ItemGroup>

@@ -9,6 +9,8 @@
     <Style Selector="ToolTip">
         <Setter Property="Background"
                 Value="{DynamicResource MenuBackgroundColor}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource TextColor}" />
         <Setter Property="BorderThickness"
                 Value="0" />
         <Setter Property="CornerRadius"

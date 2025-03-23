@@ -150,7 +150,7 @@
                                         Command="{Binding DeleteProxyCommand}"
                                         IsEnabled="{Binding SelectedAvailableProxy, Converter={x:Static ObjectConverters.IsNotNull}}">
                                     <PathIcon Data="{DynamicResource XMarkSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -163,7 +163,7 @@
                                         Width="{Binding $self.Bounds.Height}"
                                         VerticalAlignment="Center"
                                         Command="{Binding SaveProxyCommand}">
-                                    <PathIcon Foreground="{DynamicResource TextColor}"
+                                    <PathIcon Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -191,7 +191,7 @@
                                         VerticalAlignment="Center"
                                         Command="{Binding ClearProxyCommand}">
                                     <PathIcon Data="{DynamicResource EraserSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -469,7 +469,7 @@
                                                         <!-- Is active styles -->
                                                         <Style Selector="^.isActive">
                                                             <Setter Property="Foreground"
-                                                                    Value="{DynamicResource AvailableProxyOnActiveTypeColor}" />
+                                                                    Value="{DynamicResource SelectedAvailableProxyTypeColor}" />
                                                         </Style>
                                                     </Style>
                                                 </TextBlock.Styles>

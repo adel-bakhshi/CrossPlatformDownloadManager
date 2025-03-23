@@ -46,7 +46,34 @@ public class SettingsWindowViewModel : ViewModelBase
     public string? SelectedTabItem
     {
         get => _selectedTabItem;
-        set => this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
+            
+            switch (SelectedTabItem)
+            {
+                case "File Types":
+                {
+                    // Load file extensions when selected tab changed
+                    FileTypesViewModel?.LoadFileExtensionsAsync();
+                    break;
+                }
+                
+                case "Save Locations":
+                {
+                    // Load file extensions when selected tab changed
+                    SaveLocationsViewModel?.LoadFileExtensionsAsync();
+                    break;
+                }
+
+                case "Proxy":
+                {
+                    // Load available proxies when selected tab changed
+                    ProxyViewModel?.LoadAvailableProxiesAsync();
+                    break;
+                }
+            }
+        }
     }
 
     public GeneralsViewModel? GeneralsViewModel
@@ -256,27 +283,17 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
             AppService.SettingsService.Settings.ApplicationFont = GeneralsViewModel.SelectedFont;
 
-            // Register app for startup
-            if (GeneralsViewModel.StartOnSystemStartup)
-            {
-                var isRegistered = PlatformSpecificManager.IsStartupRegistered();
-                if (!isRegistered)
-                    PlatformSpecificManager.RegisterStartup();
-            }
-            else
-            {
-                PlatformSpecificManager.DeleteStartup();
-            }
-
             // Save categories settings
             AppService.SettingsService.Settings.DisableCategories = SaveLocationsViewModel.DisableCategories;
             AppService.SettingsService.Settings.GlobalSaveLocation = SaveLocationsViewModel.GlobalSaveDirectory;
 
+            // Get primary keys from save locations
             var primaryKeys = SaveLocationsViewModel
                 .Categories
                 .Select(c => c.Id)
                 .ToList();
 
+            // Find save locations
             var saveDirectories = AppService
                 .CategoryService
                 .Categories
@@ -284,17 +301,20 @@ public class SettingsWindowViewModel : ViewModelBase
                 .Where(csd => csd is { CategoryId: not null } && primaryKeys.Contains(csd.CategoryId.Value))
                 .ToList();
 
+            // Update save locations
             var saveCategoryDirectories = false;
             foreach (var saveDirectory in saveDirectories)
             {
+                // Find category and make sure it has a save directory
                 var category = SaveLocationsViewModel
                     .Categories
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false ||
-                    saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                // If category doesn't have a save directory or the save directory is the same, continue
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
+                // Update save directory
                 saveDirectory.SaveDirectory = category.CategorySaveDirectory!.SaveDirectory;
                 // Update category save directory
                 await AppService.CategoryService.UpdateSaveDirectoryAsync(category, saveDirectory, reloadData: false);
@@ -309,9 +329,11 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.ShowStartDownloadDialog = DownloadsViewModel.ShowStartDownloadDialog;
             AppService.SettingsService.Settings.ShowCompleteDownloadDialog = DownloadsViewModel.ShowCompleteDownloadDialog;
 
+            // Get selected duplicate download link action
             var duplicateAction = Constants.GetDuplicateActionFromMessage(DownloadsViewModel.SelectedDuplicateDownloadLinkAction ?? string.Empty);
             AppService.SettingsService.Settings.DuplicateDownloadLinkAction = duplicateAction;
 
+            // Update download options
             AppService.SettingsService.Settings.MaximumConnectionsCount = DownloadsViewModel.SelectedMaximumConnectionsCount;
             AppService.SettingsService.Settings.IsSpeedLimiterEnabled = DownloadsViewModel.IsSpeedLimiterEnabled;
             AppService.SettingsService.Settings.LimitSpeed = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;

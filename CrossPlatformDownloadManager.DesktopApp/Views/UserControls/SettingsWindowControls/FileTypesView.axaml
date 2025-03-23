@@ -60,7 +60,7 @@
                             Command="{Binding DeleteFileTypeCommand}"
                             IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <PathIcon Data="{DynamicResource XMarkSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}"
+                                  Foreground="{DynamicResource ButtonTextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"
                                   HorizontalAlignment="Center"
@@ -75,7 +75,7 @@
                             CommandParameter="{Binding $parent[Window]}"
                             IsEnabled="{Binding SelectedFileExtension, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <PathIcon Data="{DynamicResource PenSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}"
+                                  Foreground="{DynamicResource ButtonTextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"
                                   HorizontalAlignment="Center"
@@ -89,7 +89,7 @@
                             Command="{Binding AddNewFileTypeCommand}"
                             CommandParameter="{Binding $parent[Window]}">
                         <PathIcon Data="{DynamicResource PlusSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}"
+                                  Foreground="{DynamicResource ButtonTextColor}"
                                   Width="{DynamicResource SmallIconSize}"
                                   Height="{DynamicResource SmallIconSize}"
                                   HorizontalAlignment="Center"

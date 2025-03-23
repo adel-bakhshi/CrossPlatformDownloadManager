@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Avalonia.Media;
 using Avalonia.Platform;
 using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
@@ -376,6 +377,14 @@ public static class ExtensionMethods
 
         var uri = new Uri(url!);
         return uri.Host;
+    }
+    
+    public static Color? ConvertFromHex(this string? hexValue)
+    {
+        if (hexValue.IsNullOrEmpty())
+            return null;
+
+        return Color.TryParse(hexValue, out var color) ? color : null;
     }
 
     #region Helpers

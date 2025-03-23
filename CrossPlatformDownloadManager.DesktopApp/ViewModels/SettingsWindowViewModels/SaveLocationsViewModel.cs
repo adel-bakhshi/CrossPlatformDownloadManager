@@ -62,7 +62,7 @@ public class SaveLocationsViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _selectedCategory, value);
             this.RaisePropertyChanged(nameof(IsFileTypesViewVisible));
-            LoadFileExtensions();
+            _ = LoadFileExtensionsAsync();
         }
     }
 
@@ -275,15 +275,23 @@ public class SaveLocationsViewModel : ViewModelBase
 
         Categories.UpdateCollection(categories, c => c.Id);
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
-        LoadFileExtensions();
+        _ = LoadFileExtensionsAsync();
     }
 
-    public void LoadFileExtensions()
+    public async Task LoadFileExtensionsAsync()
     {
-        if (FileTypesViewModel == null || SelectedCategory == null)
-            return;
+        try
+        {
+            if (FileTypesViewModel == null || SelectedCategory == null)
+                return;
 
-        FileTypesViewModel.CategoryId = SelectedCategory.Id;
+            FileTypesViewModel.CategoryId = SelectedCategory.Id;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to load file extensions. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 
     protected override void OnSettingsServiceDataChanged()

@@ -24,7 +24,8 @@
                        TextAlignment="Center"
                        HorizontalAlignment="Center"
                        TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis" />
+                       TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource TextColor}" />
         </StackPanel>
     </Button>
 </UserControl>

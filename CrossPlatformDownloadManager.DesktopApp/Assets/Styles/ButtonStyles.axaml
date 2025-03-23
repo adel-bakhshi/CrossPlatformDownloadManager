@@ -16,7 +16,7 @@
         <Setter Property="Background"
                 Value="{DynamicResource SecondaryColor}" />
         <Setter Property="Foreground"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource ButtonTextColor}" />
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
 

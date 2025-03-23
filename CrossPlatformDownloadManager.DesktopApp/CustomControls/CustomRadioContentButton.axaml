@@ -32,7 +32,7 @@
 
         <Style Selector="^.isChecked">
             <Setter Property="Stroke"
-                    Value="{DynamicResource ProgressBarGradientBrush}" />
+                    Value="{DynamicResource PrimaryGradientBrush}" />
         </Style>
     </Style>
 
@@ -47,7 +47,7 @@
         <Setter Property="Height"
                 Value="8" />
         <Setter Property="Fill"
-                Value="{DynamicResource ProgressBarGradientBrush}" />
+                Value="{DynamicResource PrimaryGradientBrush}" />
         <Setter Property="Opacity"
                 Value="0" />
 

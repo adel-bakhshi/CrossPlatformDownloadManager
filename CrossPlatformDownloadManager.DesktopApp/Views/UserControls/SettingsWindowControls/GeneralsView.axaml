@@ -68,8 +68,7 @@
         <!-- Dark mode -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
-                Background="{DynamicResource SecondaryColor}"
-                IsVisible="False">
+                Background="{DynamicResource SecondaryColor}">
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Stretch"

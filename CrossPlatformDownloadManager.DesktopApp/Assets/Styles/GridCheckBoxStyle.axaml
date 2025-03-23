@@ -46,7 +46,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                       Data="{DynamicResource CheckSvgIcon}"
-                                      Foreground="{DynamicResource TextColor}"
+                                      Foreground="{DynamicResource ButtonTextColor}"
                                       FlowDirection="LeftToRight" />
                             <Rectangle Name="indeterminateMark"
                                        Width="10"
@@ -99,7 +99,7 @@
 
         <Style Selector="^:checked">
             <Setter Property="Background"
-                    Value="{DynamicResource ProgressBarGradientBrush}" />
+                    Value="{DynamicResource PrimaryGradientBrush}" />
         </Style>
 
         <Style Selector="^:indeterminate /template/ Rectangle#indeterminateMark">

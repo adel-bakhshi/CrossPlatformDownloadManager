@@ -1,23 +1,40 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Colors -->
+    <Color x:Key="TransparentColor">#00000000</Color>
     <Color x:Key="PrimaryColor">#131213</Color>
     <Color x:Key="SecondaryColor">#201E21</Color>
     <Color x:Key="TertiaryColor">#727272</Color>
-    <Color x:Key="TextColor">#FFF</Color>
-    <Color x:Key="CategoryItemHoverColor">#25E6C9</Color>
-    <Color x:Key="TransparentColor">#00000000</Color>
+    <Color x:Key="TextColor">#FFFFFF</Color>
+    <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+    <Color x:Key="CategoryItemOnHoverColor">#25E6C9</Color>
     <Color x:Key="MenuBackgroundColor">#1C1420</Color>
     <Color x:Key="MenuItemOnHoverBackgroundColor">#201824</Color>
-    <Color x:Key="LoadingColor">#980C0C</Color>
     <Color x:Key="IconColor">#3A58C2</Color>
-    <Color x:Key="DialogOkButtonColor">#303F9F</Color>
-    <Color x:Key="DialogYesButtonColor">#10BA18</Color>
-    <Color x:Key="DialogNoButtonColor">#F44336</Color>
-    <Color x:Key="DialogCancelButtonColor">#FF9800</Color>
-    <Color x:Key="AvailableProxyOnActiveTypeColor">#CCCCCC</Color>
+    <Color x:Key="SelectedAvailableProxyTypeColor">#CCCCCC</Color>
+    <Color x:Key="ToggleSwitchCircleColor">#FFFFFF</Color>
+    <Color x:Key="LoadingColor">#980C0C</Color>
+    <Color x:Key="DialogTextColor">#FFFFFF</Color>
+    <Color x:Key="DialogOkButtonBackgroundColor">#3549C5</Color>
+    <Color x:Key="DialogYesButtonBackgroundColor">#10BA18</Color>
+    <Color x:Key="DialogNoButtonBackgroundColor">#F44336</Color>
+    <Color x:Key="DialogCancelButtonBackgroundColor">#FF9800</Color>
+    <Color x:Key="ManagerTextColor">#FFFFFF</Color>
 
     <!-- Gradients -->
+    <LinearGradientBrush x:Key="PrimaryGradientBrush"
+                         StartPoint="0%, 50%"
+                         EndPoint="100%, 50%">
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Color="#007BFF"
+                          Offset="0" />
+            <GradientStop Color="#8000FF"
+                          Offset="0.5" />
+            <GradientStop Color="#FF007F"
+                          Offset="1" />
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
     <LinearGradientBrush x:Key="SuccessGradientBrush"
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
@@ -62,15 +79,13 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="ProgressBarGradientBrush"
-                         StartPoint="0%, 50%"
-                         EndPoint="100%, 50%">
+    <LinearGradientBrush x:Key="ChunkProgressGradientBrush"
+                         StartPoint="50%, 0%"
+                         EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#007BFF"
+            <GradientStop Color="#09A500"
                           Offset="0" />
-            <GradientStop Color="#8000FF"
-                          Offset="0.5" />
-            <GradientStop Color="#FF007F"
+            <GradientStop Color="#0ABA00"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
@@ -82,17 +97,6 @@
             <GradientStop Color="#14041C"
                           Offset="0" />
             <GradientStop Color="#372B2B"
-                          Offset="1" />
-        </LinearGradientBrush.GradientStops>
-    </LinearGradientBrush>
-
-    <LinearGradientBrush x:Key="ChunkProgressGradientBrush"
-                         StartPoint="50%, 0%"
-                         EndPoint="50%, 100%">
-        <LinearGradientBrush.GradientStops>
-            <GradientStop Color="#09A500"
-                          Offset="0" />
-            <GradientStop Color="#0ABA00"
                           Offset="1" />
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>

@@ -1,5 +1,6 @@
 using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
@@ -17,6 +18,7 @@ public interface IAppService
     IDownloadQueueService DownloadQueueService { get; }
     ISettingsService SettingsService { get; }
     ICategoryService CategoryService { get; }
+    IAppThemeService AppThemeService { get; }
 
     #endregion
 }

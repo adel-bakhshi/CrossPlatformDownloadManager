@@ -204,8 +204,8 @@
                                   Watermark="Queue title"
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   HorizontalAlignment="Stretch"
-                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
-                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnHoverBorderColor="{DynamicResource PrimaryGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource PrimaryGradientBrush}"
                                   OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{DynamicResource SecondaryColor}"
@@ -230,7 +230,7 @@
                     </Button.Styles>
 
                     <PathIcon Data="{DynamicResource CheckSvgIcon}"
-                              Foreground="{DynamicResource TextColor}"
+                              Foreground="{DynamicResource ButtonTextColor}"
                               Width="{DynamicResource SmallIconSize}"
                               Height="{DynamicResource SmallIconSize}"
                               HorizontalAlignment="Center"

@@ -1,4 +1,3 @@
-using Avalonia;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
@@ -9,15 +8,5 @@ public partial class SaveLocationsView : MyUserControlBase<SaveLocationsViewMode
     public SaveLocationsView()
     {
         InitializeComponent();
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-
-        if (change.Property != IsVisibleProperty || !IsVisible || ViewModel == null)
-            return;
-
-        ViewModel.LoadFileExtensions();
     }
 }

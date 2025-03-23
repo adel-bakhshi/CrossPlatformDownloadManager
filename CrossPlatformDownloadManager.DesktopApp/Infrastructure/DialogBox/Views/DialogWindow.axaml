@@ -32,42 +32,42 @@
         <ResourceDictionary>
             <!-- Dialog ok button on hover background color -->
             <SolidColorBrush x:Key="DialogOkButtonOnHoverColor"
-                             Color="{DynamicResource DialogOkButtonColor}"
+                             Color="{DynamicResource DialogOkButtonBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog ok button on pressed background color -->
             <SolidColorBrush x:Key="DialogOkButtonOnPressedColor"
-                             Color="{DynamicResource DialogOkButtonColor}"
+                             Color="{DynamicResource DialogOkButtonBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog yes button on hover background color -->
             <SolidColorBrush x:Key="DialogYesButtonOnHoverColor"
-                             Color="{DynamicResource DialogYesButtonColor}"
+                             Color="{DynamicResource DialogYesButtonBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog yes button on pressed background color -->
             <SolidColorBrush x:Key="DialogYesButtonOnPressedColor"
-                             Color="{DynamicResource DialogYesButtonColor}"
+                             Color="{DynamicResource DialogYesButtonBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog no button on hover background color -->
             <SolidColorBrush x:Key="DialogNoButtonOnHoverColor"
-                             Color="{DynamicResource DialogNoButtonColor}"
+                             Color="{DynamicResource DialogNoButtonBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog no button on pressed background color -->
             <SolidColorBrush x:Key="DialogNoButtonOnPressedColor"
-                             Color="{DynamicResource DialogNoButtonColor}"
+                             Color="{DynamicResource DialogNoButtonBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog cancel button on hover background color -->
             <SolidColorBrush x:Key="DialogCancelButtonOnHoverColor"
-                             Color="{DynamicResource DialogCancelButtonColor}"
+                             Color="{DynamicResource DialogCancelButtonBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog cancel button on pressed background color -->
             <SolidColorBrush x:Key="DialogCancelButtonOnPressedColor"
-                             Color="{DynamicResource DialogCancelButtonColor}"
+                             Color="{DynamicResource DialogCancelButtonBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Footer background color -->
@@ -131,7 +131,7 @@
             <Setter Property="Background"
                     Value="{DynamicResource TransparentColor}" />
             <Setter Property="Foreground"
-                    Value="{DynamicResource TextColor}" />
+                    Value="{DynamicResource ButtonTextColor}" />
             <Setter Property="CornerRadius"
                     Value="{DynamicResource DefaultCornerRadius}" />
 
@@ -170,7 +170,7 @@
             <!-- Ok dialog button style -->
             <Style Selector="^.okButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogOkButtonColor}" />
+                        Value="{DynamicResource DialogOkButtonBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -186,7 +186,7 @@
             <!-- Yes dialog button style -->
             <Style Selector="^.yesButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogYesButtonColor}" />
+                        Value="{DynamicResource DialogYesButtonBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -202,7 +202,7 @@
             <!-- No dialog button style -->
             <Style Selector="^.noButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogNoButtonColor}" />
+                        Value="{DynamicResource DialogNoButtonBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -218,7 +218,7 @@
             <!-- Cancel dialog button style -->
             <Style Selector="^.cancelButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogCancelButtonColor}" />
+                        Value="{DynamicResource DialogCancelButtonBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -241,7 +241,7 @@
             <Setter Property="BorderThickness"
                     Value="0" />
             <Setter Property="Background"
-                    Value="{DynamicResource TextColor}" />
+                    Value="{DynamicResource DialogTextColor}" />
             <Setter Property="Width"
                     Value="28" />
             <Setter Property="Height"
@@ -289,7 +289,8 @@
                        Text="{Binding DialogHeader}"
                        FontWeight="Bold"
                        TextWrapping="Wrap"
-                       Margin="20, 20, 20, 10" />
+                       Margin="20, 20, 20, 10"
+                       Foreground="{DynamicResource DialogTextColor}" />
 
             <!-- Dialog message -->
             <ScrollViewer Grid.Row="1"
@@ -297,7 +298,8 @@
                           VerticalScrollBarVisibility="Auto"
                           Margin="20, 0">
                 <TextBlock Text="{Binding DialogMessage}"
-                           TextWrapping="Wrap" />
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource DialogTextColor}" />
             </ScrollViewer>
 
             <!-- Dialog footer -->

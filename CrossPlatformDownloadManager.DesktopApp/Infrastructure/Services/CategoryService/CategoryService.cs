@@ -11,6 +11,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 
@@ -102,6 +103,8 @@ public class CategoryService : PropertyChangedBase, ICategoryService
 
         // Raise CategoriesChanged event
         CategoriesChanged?.Invoke(this, EventArgs.Empty);
+        // Log information
+        Log.Information("Categories loaded successfully.");
     }
 
     public async Task LoadCategoryHeadersAsync()

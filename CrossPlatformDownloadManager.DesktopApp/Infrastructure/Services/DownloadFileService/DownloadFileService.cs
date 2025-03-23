@@ -93,48 +93,54 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task LoadDownloadFilesAsync()
     {
+        // Get all download files from database
         var downloadFiles = await _unitOfWork
             .DownloadFileRepository
             .GetAllAsync(includeProperties: ["Category.FileExtensions", "DownloadQueue"]);
 
+        // Convert download files to view models
         var viewModels = _mapper.Map<List<DownloadFileViewModel>>(downloadFiles);
         var primaryKeys = viewModels.ConvertAll(df => df.Id);
 
+        // Find download files that removed
         var deletedDownloadFiles = DownloadFiles
             .Where(df => !primaryKeys.Contains(df.Id))
             .ToList();
 
+        // Remove download files from list
         foreach (var downloadFile in deletedDownloadFiles)
             await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: true, reloadData: false);
 
-        primaryKeys = DownloadFiles
-            .Select(df => df.Id)
-            .ToList();
-
-        var addedDownloadFiles = viewModels
-            .Where(df => !primaryKeys.Contains(df.Id))
-            .ToList();
-
+        // Find primary keys
+        primaryKeys = DownloadFiles.Select(df => df.Id).ToList();
+        // Find new download files
+        var addedDownloadFiles = viewModels.Where(df => !primaryKeys.Contains(df.Id)).ToList();
+        // Add new download files
         foreach (var downloadFile in addedDownloadFiles)
             DownloadFiles.Add(downloadFile);
 
-        var previousDownloadFiles = viewModels
-            .Except(addedDownloadFiles)
-            .ToList();
-
+        // Find old download files
+        var previousDownloadFiles = viewModels.Except(addedDownloadFiles).ToList();
+        // Update required data in old download files
         foreach (var downloadFile in previousDownloadFiles)
         {
+            // Make sure old download file exists
             var previousDownloadFile = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
             if (previousDownloadFile == null)
                 continue;
 
+            // Update data
             previousDownloadFile.DownloadQueueId = downloadFile.DownloadQueueId;
             previousDownloadFile.DownloadQueueName = downloadFile.DownloadQueueName;
             previousDownloadFile.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
         }
 
+        // Notify download files changed
         OnPropertyChanged(nameof(DownloadFiles));
+        // Raise changed event
         DataChanged?.Invoke(this, EventArgs.Empty);
+        // Log information
+        Log.Information("Download files loaded successfully.");
     }
 
     public async Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel,

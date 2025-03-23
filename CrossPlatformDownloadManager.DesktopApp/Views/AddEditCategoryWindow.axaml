@@ -38,8 +38,8 @@
                                   WatermarkForeground="{DynamicResource TertiaryColor}"
                                   Margin="0, 0, 0, 5"
                                   HorizontalAlignment="Stretch"
-                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
-                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnHoverBorderColor="{DynamicResource PrimaryGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource PrimaryGradientBrush}"
                                   OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{DynamicResource SecondaryColor}"
@@ -119,7 +119,7 @@
                                         IsEnabled="{Binding IsDeleteClearFileExtensionButtonEnabled}"
                                         Command="{Binding DeleteClearFileExtensionCommand}">
                                     <PathIcon Data="{DynamicResource XMarkSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -134,7 +134,7 @@
                                         IsEnabled="{Binding IsSaveFileExtensionButtonEnabled}"
                                         Command="{Binding SaveFileExtensionCommand}">
                                     <PathIcon Data="{DynamicResource CheckSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -214,7 +214,7 @@
                                         IsEnabled="{Binding SelectedSiteAddress, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                         Command="{Binding DeleteClearSiteAddressCommand}">
                                     <PathIcon Data="{DynamicResource XMarkSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"
@@ -229,7 +229,7 @@
                                         IsEnabled="{Binding SelectedSiteAddress, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                         Command="{Binding SaveSiteAddressCommand}">
                                     <PathIcon Data="{DynamicResource CheckSvgIcon}"
-                                              Foreground="{DynamicResource TextColor}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
                                               Width="{DynamicResource SmallIconSize}"
                                               Height="{DynamicResource SmallIconSize}"
                                               HorizontalAlignment="Center"

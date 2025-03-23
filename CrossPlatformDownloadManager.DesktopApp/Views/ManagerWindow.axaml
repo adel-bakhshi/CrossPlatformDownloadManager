@@ -35,7 +35,7 @@
 
     <!-- Main content -->
     <Border CornerRadius="{Binding $self.Bounds.Height, Converter={StaticResource PillCornerRadiusConverter}}"
-            Background="{DynamicResource ProgressBarGradientBrush}"
+            Background="{DynamicResource PrimaryGradientBrush}"
             BorderThickness="0"
             Padding="12, 0">
         <Grid ColumnDefinitions="Auto, *, Auto">
@@ -55,12 +55,12 @@
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
                 <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
-                          Foreground="{DynamicResource TextColor}"
+                          Foreground="{DynamicResource ManagerTextColor}"
                           Width="16"
                           Height="16"
                           VerticalAlignment="Center" />
                 <TextBlock Text="{Binding DownloadSpeed}"
-                           Foreground="{DynamicResource TextColor}"
+                           Foreground="{DynamicResource ManagerTextColor}"
                            VerticalAlignment="Center" />
             </StackPanel>
 
@@ -74,7 +74,7 @@
                     <PathIcon Width="16"
                               Height="16"
                               Data="{DynamicResource CircleXMarkSvgIcon}"
-                              Foreground="{DynamicResource TextColor}" />
+                              Foreground="{DynamicResource ManagerTextColor}" />
                 </Button>
             </StackPanel>
         </Grid>

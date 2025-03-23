@@ -74,30 +74,40 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
     public async Task LoadDownloadQueuesAsync(bool addDefaultDownloadQueue = false)
     {
+        // Add default download queue
         if (addDefaultDownloadQueue)
             await AddDefaultDownloadQueueAsync();
 
+        // Get all download queues from database
         var downloadQueues = await _unitOfWork
             .DownloadQueueRepository
             .GetAllAsync();
 
+        // Find deleted download queues
         var deletedDownloadQueues = DownloadQueues
             .Where(vm => !downloadQueues.Exists(dq => dq.Id == vm.Id))
             .ToList();
 
+        // Remove download queues from list
         foreach (var downloadQueue in deletedDownloadQueues)
             DownloadQueues.Remove(downloadQueue);
 
+        // Find added download queues
         var addedDownloadQueues = downloadQueues
             .Where(dq => DownloadQueues.All(vm => vm.Id != dq.Id))
             .Select(dq => _mapper.Map<DownloadQueueViewModel>(dq))
             .ToList();
 
+        // Add new download queues to list
         foreach (var downloadQueue in addedDownloadQueues)
             DownloadQueues.Add(downloadQueue);
 
+        // Notify download queues changed
         OnPropertyChanged(nameof(DownloadQueues));
+        // Raise changed event
         DataChanged?.Invoke(this, EventArgs.Empty);
+        // Log information
+        Log.Information("Download queues loaded successfully.");
     }
 
     public async Task<int> AddNewDownloadQueueAsync(DownloadQueue? downloadQueue, bool reloadData = true)

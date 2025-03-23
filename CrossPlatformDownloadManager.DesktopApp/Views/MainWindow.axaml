@@ -133,7 +133,8 @@
                 <!-- Title -->
                 <TextBlock Text="Your queues"
                            FontWeight="Bold"
-                           Margin="8, 0" />
+                           Margin="8, 0"
+                           Foreground="{DynamicResource TextColor}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
@@ -201,7 +202,8 @@
                                                TextTrimming="CharacterEllipsis"
                                                Margin="0, 0, 10, 0"
                                                HorizontalAlignment="Stretch"
-                                               VerticalAlignment="Center" />
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextColor}" />
 
                                     <!-- Action buttons -->
                                     <StackPanel Grid.Column="1"
@@ -332,7 +334,8 @@
                                            TextTrimming="CharacterEllipsis"
                                            Margin="0, 0, 10, 0"
                                            HorizontalAlignment="Stretch"
-                                           VerticalAlignment="Center" />
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextColor}" />
 
                                 <!-- Stop queue button -->
                                 <Button Grid.Column="1"
@@ -507,7 +510,8 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Grid.Column="0"
                                    Text="Add to queue"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextColor}" />
 
                         <PathIcon Grid.Column="1"
                                   Data="{DynamicResource ChevronDownSvgIcon}"
@@ -831,8 +835,8 @@
                                   IconSize="{DynamicResource SmallIconSize}"
                                   Padding="12, 10"
                                   VerticalAlignment="Center"
-                                  OnFocusBorderColor="{DynamicResource ProgressBarGradientBrush}"
-                                  OnHoverBorderColor="{DynamicResource ProgressBarGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource PrimaryGradientBrush}"
+                                  OnHoverBorderColor="{DynamicResource PrimaryGradientBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{DynamicResource SecondaryColor}"
                                   Text="{Binding SearchText, Mode=OneWayToSource}" />
@@ -977,7 +981,8 @@
                               SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
                               LoadingRow="DownloadFilesDataGridOnLoadingRow"
                               UnloadingRow="DownloadFilesDataGridOnUnloadingRow"
-                              KeyDown="DownloadFilesDataGridOnKeyDown">
+                              KeyDown="DownloadFilesDataGridOnKeyDown"
+                              KeyUp="DownloadFilesDataGridOnKeyUp">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">

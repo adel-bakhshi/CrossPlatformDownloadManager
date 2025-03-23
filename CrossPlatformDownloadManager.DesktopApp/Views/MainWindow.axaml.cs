@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -23,6 +24,8 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
     #region Private Fields
 
     private Flyout? _downloadFilesDataGridContextMenuFlyout;
+    private bool _isCtrlKeyPressed;
+    private bool _isAltKeyPressed;
 
     #endregion
 
@@ -213,13 +216,44 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             if (ViewModel == null)
                 return;
 
+            // Check ctrl key is pressed or not
+            if (!_isCtrlKeyPressed)
+                _isCtrlKeyPressed = e.Key is Key.LeftCtrl or Key.RightCtrl;
+
+            // Check alt key is pressed or not
+            if (!_isAltKeyPressed)
+                _isAltKeyPressed = e.Key is Key.LeftAlt or Key.RightAlt;
+
             // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
             switch (e.Key)
             {
-                // Delete selected download files from datagrid
+                // Delete selected download files from data grid
                 case Key.Delete:
                 {
                     await ViewModel.RemoveDownloadFilesAsync(DownloadFilesDataGrid, excludeFilesInRunningQueues: false);
+                    break;
+                }
+
+                case Key.C:
+                {
+                    if (!_isCtrlKeyPressed || !_isAltKeyPressed || Clipboard == null || DownloadFilesDataGrid.SelectedItems.Count == 0)
+                        break;
+
+                    var downloadFile = DownloadFilesDataGrid
+                        .SelectedItems
+                        .OfType<DownloadFileViewModel>()
+                        .FirstOrDefault();
+
+                    if (downloadFile is not { IsCompleted: true } || downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                        break;
+
+                    var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+                    if (!File.Exists(filePath))
+                        break;
+
+                    var dataObject = new DataObject();
+                    dataObject.Set(DataFormats.FileNames, new[] { filePath });
+                    await Clipboard.SetDataObjectAsync(dataObject);
                     break;
                 }
             }
@@ -227,6 +261,34 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred during handling key down. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private async void DownloadFilesDataGridOnKeyUp(object? sender, KeyEventArgs e)
+    {
+        try
+        {
+            switch (e.Key)
+            {
+                // Change ctrl key pressed state
+                case Key.LeftCtrl or Key.RightCtrl:
+                {
+                    _isCtrlKeyPressed = false;
+                    break;
+                }
+
+                // Change alt key pressed state
+                case Key.LeftAlt or Key.RightAlt:
+                {
+                    _isAltKeyPressed = false;
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred during handling key up. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

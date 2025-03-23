@@ -10,6 +10,7 @@ using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
@@ -63,13 +64,16 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     {
         try
         {
+            // Find settings in database
             var settingsList = await _unitOfWork
                 .SettingsRepository
                 .GetAllAsync(includeProperties: "Proxies");
 
+            // Create settings if not exists, otherwise use current settings
             Settings? settings;
             if (settingsList.Count == 0)
             {
+                // Get default settings json content
                 const string assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/settings.json";
                 var assetsUri = new Uri(assetName);
                 settings = assetsUri.OpenJsonAsset<Settings>();
@@ -80,6 +84,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 if (settings.StartOnSystemStartup)
                     RegisterStartup();
 
+                // Save settings
                 await _unitOfWork.SettingsRepository.AddAsync(settings);
                 await _unitOfWork.SaveAsync();
             }
@@ -88,6 +93,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 settings = settingsList.First();
             }
 
+            // Convert to view model
             var viewModel = _mapper.Map<SettingsViewModel>(settings);
             if (_isSettingsSets)
             {
@@ -106,21 +112,27 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                     .Where(vp => Settings.Proxies.FirstOrDefault(p => p.Id == vp.Id) == null)
                     .ToList();
 
+                // Add proxies to view model
                 foreach (var proxy in newProxies)
                     Settings.Proxies.Add(proxy);
             }
             else
             {
+                // Set settings sets flag to true
                 _isSettingsSets = true;
 
+                // The proxy must be disabled each time the program is run
                 viewModel.ProxyMode = ProxyMode.DisableProxy;
                 Settings = viewModel;
             }
-            
+
             // Set application font
             SetApplicationFont();
 
+            // Raise changed event
             DataChanged?.Invoke(this, EventArgs.Empty);
+            // Log information
+            Log.Information("Settings loaded successfully.");
         }
         catch (Exception ex)
         {
@@ -146,17 +158,11 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (reloadData)
             await LoadSettingsAsync();
 
-        // Register or delete the program from Startup.
+        // Register or delete the program from Startup
         if (Settings.StartOnSystemStartup)
-        {
-            if (!PlatformSpecificManager.IsStartupRegistered())
-                RegisterStartup();
-        }
+            RegisterStartup();
         else
-        {
-            if (PlatformSpecificManager.IsStartupRegistered())
-                PlatformSpecificManager.DeleteStartup();
-        }
+            DeleteStartup();
 
         // Show or hide the manager.
         if (Settings.UseManager)
@@ -169,6 +175,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             HideManager();
         }
 
+        // Change app theme
+        ChangeApplicationTheme();
         // Set application font
         SetApplicationFont();
     }
@@ -396,12 +404,31 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         PlatformSpecificManager.RegisterStartup();
     }
 
+    private static void DeleteStartup()
+    {
+        var isRegistered = PlatformSpecificManager.IsStartupRegistered();
+        if (!isRegistered)
+            return;
+
+        PlatformSpecificManager.DeleteStartup();
+    }
+
+    private static void ChangeApplicationTheme()
+    {
+        var serviceProvider = Application.Current?.GetServiceProvider();
+        var appThemeService = serviceProvider?.GetService<IAppThemeService>();
+        if (appThemeService == null)
+            throw new InvalidOperationException("Can't find app theme service.");
+
+        appThemeService.LoadThemeDataFromAssets();
+    }
+
     private void SetApplicationFont()
     {
         var font = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
         if (Application.Current?.TryFindResource(font!, out var resource) != true || resource == null)
             return;
-        
+
         if (Application.Current.TryFindResource("PrimaryFont", out var primaryFont) && primaryFont?.Equals(resource) != true)
             Application.Current.Resources["PrimaryFont"] = resource;
     }

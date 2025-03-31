@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -234,25 +235,19 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                     break;
                 }
 
+                // Copy selected download file
                 case Key.C:
                 {
+                    // Make sure ctrl key and alt key are pressed
                     if (!_isCtrlKeyPressed || !_isAltKeyPressed || Clipboard == null || DownloadFilesDataGrid.SelectedItems.Count == 0)
                         break;
 
-                    var downloadFile = DownloadFilesDataGrid
-                        .SelectedItems
-                        .OfType<DownloadFileViewModel>()
-                        .FirstOrDefault();
-
-                    if (downloadFile is not { IsCompleted: true } || downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                    // Get data object
+                    var dataObject = await GetFileDataObjectAsync();
+                    if (dataObject == null)
                         break;
 
-                    var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                    if (!File.Exists(filePath))
-                        break;
-
-                    var dataObject = new DataObject();
-                    dataObject.Set(DataFormats.FileNames, new[] { filePath });
+                    // Copy file to clipboard
                     await Clipboard.SetDataObjectAsync(dataObject);
                     break;
                 }
@@ -292,4 +287,64 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
+
+    private async void DownloadFilesDataGridOnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
+    {
+        try
+        {
+            // Make sure left mouse button is pressed and row is selected
+            if (!e.PointerPressedEventArgs.GetCurrentPoint(this).Properties.IsLeftButtonPressed || !e.Row.IsSelected)
+                return;
+
+            // Get data object
+            var dataObject = await GetFileDataObjectAsync();
+            if (dataObject == null)
+                return;
+
+            // Do drag drop
+            await DragDrop.DoDragDrop(e.PointerPressedEventArgs, dataObject, DragDropEffects.Move);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred during handling pointer pressed. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    #region Helpers
+
+    private async Task<DataObject?> GetFileDataObjectAsync()
+    {
+        // Get selected download file
+        var downloadFiles = DownloadFilesDataGrid
+            .SelectedItems
+            .OfType<DownloadFileViewModel>()
+            .Where(df => df.IsCompleted && !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+            .ToList();
+
+        // Make sure at least one download file is selected
+        if (downloadFiles.Count == 0)
+            return null;
+
+        // Convert download files to file path
+        var filePathList = downloadFiles.ConvertAll(df => Path.Combine(df.SaveLocation!, df.FileName!));
+        // Create a list of files
+        var files = new List<IStorageFile>();
+        foreach (var filePath in filePathList)
+        {
+            // Get file from storage
+            var file = await StorageProvider.TryGetFileFromPathAsync(filePath);
+            if (file == null)
+                continue;
+
+            files.Add(file);
+        }
+
+        // Create data object
+        var dataObject = new DataObject();
+        dataObject.Set(DataFormats.Files, files);
+        return dataObject;
+    }
+
+    #endregion
 }

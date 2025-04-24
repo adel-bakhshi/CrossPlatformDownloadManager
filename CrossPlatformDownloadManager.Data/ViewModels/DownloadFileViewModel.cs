@@ -13,9 +13,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 using MultipartDownloader.Core;
 using MultipartDownloader.Core.CustomEventArgs;
-using Newtonsoft.Json;
 using Serilog;
-using Constants = CrossPlatformDownloadManager.Utils.Constants;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -41,9 +39,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     private DownloadService? _downloadService;
     private CancellationTokenSource? _resumeCapabilityCancellationTokenSource;
-
-    // Backup timer
-    private DispatcherTimer? _backupTimer;
 
     private int _id;
     private string? _url;
@@ -355,9 +350,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CalculateElapsedTime();
         UpdateChunksData();
 
-        // Start backup timer
-        StartBackup();
-
         // Cancellation token source for times when the user stops the download but the operation is still in progress to check whether the server supports the resumption feature
         _resumeCapabilityCancellationTokenSource = new CancellationTokenSource();
 
@@ -369,22 +361,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         var fileName = Path.Combine(downloadPath!, FileName!);
         // Get download package
         var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
-        // If download package is null, it should be checked whether the backup file exists or not
-        if (downloadPackage == null)
-        {
-            var filePath = GetBackupFilePath();
-            // If a backup file exists, its value must be converted to the correct format and included in the download package
-            if (File.Exists(filePath))
-            {
-                // Get json content from file
-                var json = await File.ReadAllTextAsync(filePath);
-                // Convert json to download package
-                var package = json.ConvertFromJson<DownloadPackage?>();
-                // Make sure package has value
-                if (package != null)
-                    downloadPackage = package;
-            }
-        }
 
         if (downloadPackage == null)
         {
@@ -392,8 +368,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
         else
         {
-            // Compare download package with existing backup
-            downloadPackage = await CompareBackupAsync(downloadPackage);
             // Load previous chunks data
             LoadChunksData(downloadPackage.Chunks);
 
@@ -473,13 +447,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = Id });
     }
 
-    public void RemoveBackup()
-    {
-        var filePath = GetBackupFilePath();
-        if (File.Exists(filePath))
-            File.Delete(filePath);
-    }
-
     #region Helpers
 
     private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
@@ -514,9 +481,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         {
             Status = DownloadFileStatus.Completed;
             isSuccess = true;
-
-            // Remove backup
-            RemoveBackup();
         }
 
         // Create an object of DownloadFileEventArgs
@@ -555,14 +519,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             _updateChunksDataTimer.Stop();
             _updateChunksDataTimer.Tick -= UpdateChunksDataTimerOnTick;
             _updateChunksDataTimer = null;
-        }
-
-        // Clear backup timer
-        if (_backupTimer != null)
-        {
-            _backupTimer.Stop();
-            _backupTimer.Tick -= BackupTimerOnTick;
-            _backupTimer = null;
         }
 
         // Reset elapsed time of starting download
@@ -848,101 +804,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 break;
             }
         }
-    }
-
-    private async Task<DownloadPackage> CompareBackupAsync(DownloadPackage downloadPackage)
-    {
-        try
-        {
-            // When the file size is unknown and the server does not specify the file size, do not compare the backup to the original value
-            if (IsSizeUnknown)
-                return downloadPackage;
-            
-            // Get backup file path and validate it
-            var filePath = GetBackupFilePath();
-            if (!File.Exists(filePath) || !Path.GetExtension(filePath).Equals(".backup"))
-                return downloadPackage;
-
-            // Get json content from file
-            var json = await File.ReadAllTextAsync(filePath);
-            // Convert json to download package
-            var package = json.ConvertFromJson<DownloadPackage?>();
-            // Make sure package has value
-            if (package == null)
-                return downloadPackage;
-
-            // Compare save progresses
-            if (downloadPackage.SaveProgress >= package.SaveProgress)
-                return downloadPackage;
-
-            // Update chunks data
-            foreach (var chunk in package.Chunks)
-            {
-                // Find original chunk
-                var originalChunk = downloadPackage.Chunks.FirstOrDefault(c => c.Id.Equals(chunk.Id));
-                if (originalChunk == null)
-                    continue;
-
-                // Update position
-                originalChunk.Position = Math.Max(chunk.Position - Constants.MaximumMemoryBufferBytes, 0);
-            }
-            
-            // Update save progress
-            downloadPackage.SaveProgress = downloadPackage.Chunks.Sum(c => c.Position) / (double)downloadPackage.TotalFileSize * 100;
-
-            return downloadPackage;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while trying to read backup file. Error message: {ErrorMessage}", ex.Message);
-            return downloadPackage;
-        }
-    }
-
-    private void StartBackup()
-    {
-        // Do not back up when the file size is unknown and the server does not specify the file size
-        if (IsSizeUnknown)
-            return;
-        
-        _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
-        _backupTimer.Tick += BackupTimerOnTick;
-        _backupTimer.Start();
-    }
-
-    private async void BackupTimerOnTick(object? sender, EventArgs e)
-    {
-        try
-        {
-            // Make sure download service is not null
-            if (_downloadService == null)
-                return;
-
-            // Initialize json serializer settings
-            var settings = new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.None
-            };
-
-            // Convert download package to json
-            var json = _downloadService.Package.ConvertToJson(settings);
-
-            // Define backup file path
-            var filePath = GetBackupFilePath();
-            // Write data to back up file
-            await File.WriteAllTextAsync(filePath, json);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error An error occurred while trying to backup download data. Error message: {ErrorMessage}", ex.Message);
-        }
-    }
-
-    private string GetBackupFilePath()
-    {
-        var filePath = Path.Combine(Constants.BackupDirectory, $"{Id}.backup");
-        return filePath;
     }
 
     #endregion

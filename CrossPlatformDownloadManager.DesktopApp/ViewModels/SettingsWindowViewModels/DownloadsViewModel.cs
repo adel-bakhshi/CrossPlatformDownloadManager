@@ -111,7 +111,7 @@ public class DownloadsViewModel : ViewModelBase
     {
         DuplicateDownloadLinkActions = Constants.GetDuplicateActionsMessages().ToObservableCollection();
         SelectedDuplicateDownloadLinkAction = DuplicateDownloadLinkActions.FirstOrDefault();
-        MaximumConnectionsCount = Constants.MaximumConnectionsCounts.ToObservableCollection();
+        MaximumConnectionsCount = Constants.MaximumConnectionsCountList.ToObservableCollection();
         SelectedMaximumConnectionsCount = MaximumConnectionsCount.FirstOrDefault();
         SpeedUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         SelectedSpeedUnit = SpeedUnits.FirstOrDefault();

@@ -355,12 +355,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 ParallelDownload = true,
                 MaximumMemoryBufferBytes = Constants.MaximumMemoryBufferBytes,
                 ReserveStorageSpaceBeforeStartingDownload = true,
-                ChunkFilesOutputDirectory = string.Empty, // TODO: Set chunk files output directory
+                ChunkFilesOutputDirectory = Constants.TempDownloadDirectory,
                 MaxRestartWithoutClearTempFile = 5
             };
-
-            if (configuration.ChunkFilesOutputDirectory.IsStringNullOrEmpty())
-                throw new InvalidOperationException();
 
             // Get proxy and if possible, use it
             var proxy = _settingsService.GetProxy();
@@ -499,8 +496,6 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             }
         }
 
-        // Remove backup file
-        downloadFile.RemoveBackup();
         // Check if the download file needs to be deleted from the database
         if (shouldReturn)
             return;

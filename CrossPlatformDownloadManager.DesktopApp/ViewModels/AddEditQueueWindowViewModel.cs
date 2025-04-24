@@ -12,6 +12,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueueWindowViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -26,8 +27,8 @@ public class AddEditQueueWindowViewModel : ViewModelBase
     private ObservableCollection<string> _tabItems = [];
     private string? _selectedTabItem;
     private DownloadQueueViewModel _downloadQueue = new();
-    private OptionsViewModel? _optionsViewModel;
-    private FilesViewModel? _filesViewModel;
+    private OptionsView? _optionsView;
+    private FilesView? _filesView;
     private bool _isApplicationDefaultQueue;
 
     #endregion
@@ -62,17 +63,29 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         }
     }
 
-    public OptionsViewModel? OptionsViewModel
+    public OptionsView? OptionsView
     {
-        get => _optionsViewModel;
-        set => this.RaiseAndSetIfChanged(ref _optionsViewModel, value);
+        get => _optionsView;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _optionsView, value);
+            this.RaisePropertyChanged(nameof(OptionsViewModel));
+        }
     }
 
-    public FilesViewModel? FilesViewModel
+    public OptionsViewModel? OptionsViewModel => OptionsView?.DataContext as OptionsViewModel;
+
+    public FilesView? FilesView
     {
-        get => _filesViewModel;
-        set => this.RaiseAndSetIfChanged(ref _filesViewModel, value);
+        get => _filesView;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _filesView, value);
+            this.RaisePropertyChanged(nameof(FilesViewModel));
+        }
     }
+
+    public FilesViewModel? FilesViewModel => FilesView?.DataContext as FilesViewModel;
 
     public bool IsApplicationDefaultQueue
     {
@@ -105,12 +118,20 @@ public class AddEditQueueWindowViewModel : ViewModelBase
         TabItems = ["Options", "Files"];
         SelectedTabItem = TabItems.FirstOrDefault();
 
-        OptionsViewModel = new OptionsViewModel(appService, DownloadQueue, IsApplicationDefaultQueue);
-        FilesViewModel = new FilesViewModel(appService, DownloadQueue);
+        LoadViews();
 
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
         DeleteCommand = ReactiveCommand.CreateFromTask<Window?>(DeleteAsync);
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
+    }
+
+    private void LoadViews()
+    {
+        var optionsViewModel = new OptionsViewModel(AppService, DownloadQueue, IsApplicationDefaultQueue);
+        OptionsView = new OptionsView { DataContext = optionsViewModel };
+
+        var filesViewModel = new FilesViewModel(AppService, DownloadQueue);
+        FilesView = new FilesView { DataContext = filesViewModel };
     }
 
     private async Task SaveAsync(Window? owner)
@@ -129,12 +150,10 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                 if (result != DialogResult.Yes)
                     return;
 
-                await AppService
-                    .DownloadQueueService
-                    .StopDownloadQueueAsync(DownloadQueue);
+                await AppService.DownloadQueueService.StopDownloadQueueAsync(DownloadQueue);
             }
 
-            if (OptionsViewModel.DownloadQueueTitle.IsNullOrEmpty())
+            if (OptionsViewModel.DownloadQueueTitle.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter a title.", DialogButtons.Ok);
                 return;
@@ -207,7 +226,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     return;
                 }
 
-                if (OptionsViewModel.SelectedStartTimeOfDay.IsNullOrEmpty())
+                if (OptionsViewModel.SelectedStartTimeOfDay.IsStringNullOrEmpty())
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a start time of day for your queue.", DialogButtons.Ok);
                     return;
@@ -227,7 +246,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     return;
                 }
 
-                if (OptionsViewModel.SelectedStopTimeOfDay.IsNullOrEmpty())
+                if (OptionsViewModel.SelectedStopTimeOfDay.IsStringNullOrEmpty())
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a stop time of day for your queue.", DialogButtons.Ok);
                     return;
@@ -249,7 +268,7 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             TurnOffComputerMode? turnOffComputerMode = null;
             if (OptionsViewModel.TurnOffComputerWhenDone)
             {
-                if (OptionsViewModel.SelectedTurnOffComputerMode.IsNullOrEmpty())
+                if (OptionsViewModel.SelectedTurnOffComputerMode.IsStringNullOrEmpty())
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please select a turn off computer mode for your queue.", DialogButtons.Ok);
                     return;
@@ -265,7 +284,6 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             }
 
             DownloadQueue.Title = OptionsViewModel.DownloadQueueTitle.Trim();
-            DownloadQueue.IsDefault = OptionsViewModel.IsDownloadQueueDefault;
             DownloadQueue.StartOnApplicationStartup = OptionsViewModel.StartOnApplicationStartup;
             DownloadQueue.StartDownloadSchedule = startSchedule;
             DownloadQueue.StopDownloadSchedule = stopSchedule;
@@ -281,23 +299,40 @@ public class AddEditQueueWindowViewModel : ViewModelBase
             DownloadQueue.DownloadCountAtSameTime = FilesViewModel.DownloadCountAtSameTime;
             DownloadQueue.IncludePausedFiles = FilesViewModel.IncludePausedFiles;
 
-            // Get all download queues that are default
-            var defaultDownloadQueues = AppService
-                .DownloadQueueService
-                .DownloadQueues
-                .Where(dq => dq.IsDefault && dq.Id != DownloadQueue.Id)
-                .ToList();
-
-            if (defaultDownloadQueues.Count > 0)
+            switch (OptionsViewModel.IsDownloadQueueDefault)
             {
-                // Set all default download queues to not default
-                foreach (var defaultDownloadQueue in defaultDownloadQueues)
-                    defaultDownloadQueue.IsDefault = false;
+                case true:
+                {
+                    // Get all download queues that are default
+                    var defaultDownloadQueues = AppService
+                        .DownloadQueueService
+                        .DownloadQueues
+                        .Where(dq => dq.IsDefault && dq.Id != DownloadQueue.Id)
+                        .ToList();
 
-                // Update default download queues
-                await AppService
-                    .DownloadQueueService
-                    .UpdateDownloadQueuesAsync(defaultDownloadQueues);
+                    if (defaultDownloadQueues.Count > 0)
+                    {
+                        // Set all default download queues to not default
+                        foreach (var defaultDownloadQueue in defaultDownloadQueues)
+                            defaultDownloadQueue.IsDefault = false;
+
+                        // Update default download queues
+                        await AppService
+                            .DownloadQueueService
+                            .UpdateDownloadQueuesAsync(defaultDownloadQueues);
+                    }
+
+                    // Set current download queue as default download queue
+                    DownloadQueue.IsDefault = true;
+                    break;
+                }
+
+                // Unset default download queue flag from current download queue
+                case false when DownloadQueue.IsDefault:
+                {
+                    DownloadQueue.IsDefault = false;
+                    break;
+                }
             }
 
             var downloadQueue = AppService.Mapper.Map<DownloadQueue>(DownloadQueue);
@@ -324,16 +359,14 @@ public class AddEditQueueWindowViewModel : ViewModelBase
                     .Where(df => df.DownloadQueueId == DownloadQueue.Id)
                     .ToList();
 
-                if (oldDownloadFiles.Exists(df => (df.IsDownloading || df.IsPaused) && !df.IsStopping))
+                var downloadingFiles = oldDownloadFiles.Where(df => df.IsDownloading || df.IsPaused).ToList();
+                foreach (var downloadFile in downloadingFiles)
                 {
-                    foreach (var downloadFile in oldDownloadFiles.Where(df => (df.IsDownloading || df.IsPaused) && !df.IsStopping).ToList())
-                    {
-                        await AppService
-                            .DownloadFileService
-                            .StopDownloadFileAsync(downloadFile, ensureStopped: true, playSound: false);
+                    await AppService
+                        .DownloadFileService
+                        .StopDownloadFileAsync(downloadFile, ensureStopped: true, playSound: false);
 
-                        stoppedDownloadFiles.Add(downloadFile);
-                    }
+                    stoppedDownloadFiles.Add(downloadFile);
                 }
 
                 await AppService

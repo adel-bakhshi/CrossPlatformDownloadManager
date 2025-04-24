@@ -7,133 +7,135 @@
     </Design.PreviewWith>
 
     <Styles.Resources>
-        <ResourceDictionary>
-            <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
+        <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
 
-            <SolidColorBrush x:Key="MinimalDataGridOnHoverBackground"
-                             Color="{DynamicResource MenuBackgroundColor}"
-                             Opacity="0.7" />
+        <!-- Minimal DataGrid on hover row background -->
+        <SolidColorBrush x:Key="MinimalDataGridOnHoverRowBackground"
+                         Color="{DynamicResource MenuBackgroundColor}"
+                         Opacity="0.3" />
 
-            <SolidColorBrush x:Key="MinimalDataGridOnSelectedBackground"
-                             Color="{DynamicResource MenuBackgroundColor}"
-                             Opacity="0.9" />
+        <!-- Minimal DataGrid on selected row background -->
+        <SolidColorBrush x:Key="MinimalDataGridOnSelectedRowBackground"
+                         Color="{DynamicResource MenuBackgroundColor}"
+                         Opacity="0.5" />
 
-            <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnHoverBackground"
-                             Color="{DynamicResource PrimaryColor}"
-                             Opacity="0.7" />
+        <!-- Dark rows minimal DataGrid on hover row background -->
+        <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnHoverRowBackground"
+                         Color="{DynamicResource TertiaryColor}"
+                         Opacity="0.3" />
 
-            <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnSelectedBackground"
-                             Color="{DynamicResource PrimaryColor}"
-                             Opacity="0.9" />
+        <!-- Dark rows minimal DataGrid on selected row background -->
+        <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnSelectedRowBackground"
+                         Color="{DynamicResource TertiaryColor}"
+                         Opacity="0.5" />
 
-            <ControlTheme x:Key="{x:Type DataGrid}"
-                          TargetType="DataGrid">
-                <Setter Property="RowBackground"
-                        Value="{DynamicResource ThemeAccentBrush4}" />
-                <Setter Property="Background"
-                        Value="{DynamicResource ThemeBackgroundBrush}" />
-                <Setter Property="HeadersVisibility"
-                        Value="Column" />
-                <Setter Property="HorizontalScrollBarVisibility"
-                        Value="Auto" />
-                <Setter Property="VerticalScrollBarVisibility"
-                        Value="Auto" />
-                <Setter Property="SelectionMode"
-                        Value="Extended" />
-                <Setter Property="HorizontalGridLinesBrush"
-                        Value="{DynamicResource ThemeBorderHighColor}" />
-                <Setter Property="VerticalGridLinesBrush"
-                        Value="{DynamicResource ThemeBorderHighColor}" />
-                <Setter Property="BorderBrush"
-                        Value="{DynamicResource ThemeBorderLowColor}" />
-                <Setter Property="BorderThickness"
-                        Value="{DynamicResource ThemeBorderThickness}" />
+        <ControlTheme x:Key="{x:Type DataGrid}"
+                      TargetType="DataGrid">
+            <Setter Property="RowBackground"
+                    Value="{DynamicResource ThemeAccentBrush4}" />
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeBackgroundBrush}" />
+            <Setter Property="HeadersVisibility"
+                    Value="Column" />
+            <Setter Property="HorizontalScrollBarVisibility"
+                    Value="Auto" />
+            <Setter Property="VerticalScrollBarVisibility"
+                    Value="Auto" />
+            <Setter Property="SelectionMode"
+                    Value="Extended" />
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="{DynamicResource ThemeBorderHighColor}" />
+            <Setter Property="VerticalGridLinesBrush"
+                    Value="{DynamicResource ThemeBorderHighColor}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource ThemeBorderLowColor}" />
+            <Setter Property="BorderThickness"
+                    Value="{DynamicResource ThemeBorderThickness}" />
 
-                <Setter Property="DropLocationIndicatorTemplate">
-                    <Template>
-                        <Rectangle Width="2"
-                                   Fill="{DynamicResource ThemeBorderHighColor}" />
-                    </Template>
-                </Setter>
+            <Setter Property="DropLocationIndicatorTemplate">
+                <Template>
+                    <Rectangle Width="2"
+                               Fill="{DynamicResource ThemeBorderHighColor}" />
+                </Template>
+            </Setter>
 
-                <Setter Property="Template">
-                    <ControlTemplate>
-                        <Border x:Name="DataGridBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="{TemplateBinding CornerRadius}">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  RowDefinitions="Auto,*,Auto,Auto"
-                                  ClipToBounds="True">
-                                <DataGridColumnHeader Grid.Row="0"
-                                                      Grid.Column="0"
-                                                      Name="PART_TopLeftCornerHeader"
-                                                      Width="22" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border x:Name="DataGridBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              RowDefinitions="Auto,*,Auto,Auto"
+                              ClipToBounds="True">
+                            <DataGridColumnHeader Grid.Row="0"
+                                                  Grid.Column="0"
+                                                  Name="PART_TopLeftCornerHeader"
+                                                  Width="22" />
 
-                                <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter"
-                                                                Grid.Row="0"
-                                                                Grid.Column="1" />
+                            <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter"
+                                                            Grid.Row="0"
+                                                            Grid.Column="1" />
 
-                                <DataGridColumnHeader Name="PART_TopRightCornerHeader"
-                                                      Grid.Row="0"
-                                                      Grid.Column="2" />
+                            <DataGridColumnHeader Name="PART_TopRightCornerHeader"
+                                                  Grid.Row="0"
+                                                  Grid.Column="2" />
 
-                                <Rectangle Name="PART_ColumnHeadersAndRowsSeparator"
-                                           Grid.Row="0"
-                                           Grid.Column="0"
-                                           Grid.ColumnSpan="3"
-                                           Height="1"
-                                           VerticalAlignment="Bottom"
-                                           Fill="{DynamicResource ThemeControlMidHighBrush}"
-                                           StrokeThickness="1" />
+                            <Rectangle Name="PART_ColumnHeadersAndRowsSeparator"
+                                       Grid.Row="0"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="3"
+                                       Height="1"
+                                       VerticalAlignment="Bottom"
+                                       Fill="{DynamicResource ThemeControlMidHighBrush}"
+                                       StrokeThickness="1" />
 
-                                <DataGridRowsPresenter Name="PART_RowsPresenter"
-                                                       Grid.Column="0"
-                                                       Grid.Row="1"
-                                                       Grid.ColumnSpan="2"
-                                                       ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
-                                    <DataGridRowsPresenter.GestureRecognizers>
-                                        <ScrollGestureRecognizer CanHorizontallyScroll="True"
-                                                                 CanVerticallyScroll="True"
-                                                                 IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_RowsPresenter}" />
-                                    </DataGridRowsPresenter.GestureRecognizers>
-                                </DataGridRowsPresenter>
+                            <DataGridRowsPresenter Name="PART_RowsPresenter"
+                                                   Grid.Column="0"
+                                                   Grid.Row="1"
+                                                   Grid.ColumnSpan="2"
+                                                   ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                                <DataGridRowsPresenter.GestureRecognizers>
+                                    <ScrollGestureRecognizer CanHorizontallyScroll="True"
+                                                             CanVerticallyScroll="True"
+                                                             IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_RowsPresenter}" />
+                                </DataGridRowsPresenter.GestureRecognizers>
+                            </DataGridRowsPresenter>
 
-                                <Rectangle Name="PART_BottomRightCorner"
-                                           Grid.Row="2"
-                                           Grid.Column="2"
-                                           Fill="{DynamicResource TransparentColor}" />
+                            <Rectangle Name="PART_BottomRightCorner"
+                                       Grid.Row="2"
+                                       Grid.Column="2"
+                                       Fill="{DynamicResource TransparentColor}" />
 
-                                <Rectangle Name="BottomLeftCorner"
-                                           Grid.Column="0"
-                                           Grid.Row="2"
-                                           Grid.ColumnSpan="2"
-                                           Fill="{DynamicResource TransparentColor}" />
+                            <Rectangle Name="BottomLeftCorner"
+                                       Grid.Column="0"
+                                       Grid.Row="2"
+                                       Grid.ColumnSpan="2"
+                                       Fill="{DynamicResource TransparentColor}" />
 
-                                <ScrollBar Name="PART_VerticalScrollbar"
-                                           Grid.Row="1"
-                                           Grid.Column="2"
-                                           Width="{DynamicResource ScrollBarThickness}"
-                                           Orientation="Vertical" />
+                            <ScrollBar Name="PART_VerticalScrollbar"
+                                       Grid.Row="1"
+                                       Grid.Column="2"
+                                       Width="{DynamicResource ScrollBarThickness}"
+                                       Orientation="Vertical" />
 
-                                <Grid Grid.Row="2"
-                                      Grid.Column="1"
-                                      ColumnDefinitions="Auto,*">
-                                    <Rectangle Name="PART_FrozenColumnScrollBarSpacer"
-                                               Grid.Column="0" />
+                            <Grid Grid.Row="2"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="Auto,*">
+                                <Rectangle Name="PART_FrozenColumnScrollBarSpacer"
+                                           Grid.Column="0" />
 
-                                    <ScrollBar Name="PART_HorizontalScrollbar"
-                                               Grid.Column="1"
-                                               Height="{DynamicResource ScrollBarThickness}"
-                                               Orientation="Horizontal" />
-                                </Grid>
+                                <ScrollBar Name="PART_HorizontalScrollbar"
+                                           Grid.Column="1"
+                                           Height="{DynamicResource ScrollBarThickness}"
+                                           Orientation="Horizontal" />
                             </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </Setter>
-            </ControlTheme>
-        </ResourceDictionary>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
     </Styles.Resources>
 
     <!-- Base styles for DataGrid -->
@@ -216,7 +218,9 @@
 
             <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
                 <Setter Property="IsVisible"
-                        Value="False" />
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="0" />
                 <Setter Property="Fill"
                         Value="{DynamicResource DataGridRowGradientBrush}" />
                 <Setter Property="RadiusX"
@@ -225,6 +229,16 @@
                         Value="8" />
                 <Setter Property="Margin"
                         Value="-10, -15" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <DoubleTransition Property="Opacity"
+                                              Duration="00:00:00.3" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
@@ -298,6 +312,16 @@
             <Style Selector="^ /template/ Border#RowBorder">
                 <Setter Property="Background"
                         Value="{DynamicResource TransparentColor}" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <BrushTransition Property="Background"
+                                             Duration="00:00:00.3" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
@@ -310,14 +334,24 @@
                         Value="{DynamicResource MenuBackgroundColor}" />
             </Style>
 
-            <Style Selector="^:pointerover /template/ Border#RowBorder">
+            <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnHoverBackground}" />
+                        Value="{DynamicResource MinimalDataGridOnHoverRowBackground}" />
             </Style>
 
-            <Style Selector="^:selected /template/ Border#RowBorder">
+            <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnSelectedBackground}" />
+                        Value="{DynamicResource MinimalDataGridOnHoverRowBackground}" />
+            </Style>
+
+            <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MinimalDataGridOnSelectedRowBackground}" />
+            </Style>
+
+            <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MinimalDataGridOnSelectedRowBackground}" />
             </Style>
 
             <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
@@ -337,6 +371,17 @@
                         Value="0" />
                 <Setter Property="CornerRadius"
                         Value="0" />
+            </Style>
+
+            <!-- Cell style -->
+            <Style Selector="^ DataGridCell">
+                <Setter Property="Margin"
+                        Value="0, 0, 10, 0" />
+
+                <Style Selector="^:nth-last-child(1)">
+                    <Setter Property="Margin"
+                            Value="0" />
+                </Style>
             </Style>
         </Style>
 
@@ -359,22 +404,22 @@
 
                 <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
                 </Style>
 
                 <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
                 </Style>
 
                 <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
                 </Style>
 
                 <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
                 </Style>
             </Style>
 
@@ -397,22 +442,22 @@
 
                     <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
                     </Style>
 
                     <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedBackground}" />
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
                     </Style>
 
                     <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
                     </Style>
 
                     <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverBackground}" />
+                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
                     </Style>
                 </Style>
             </Style>

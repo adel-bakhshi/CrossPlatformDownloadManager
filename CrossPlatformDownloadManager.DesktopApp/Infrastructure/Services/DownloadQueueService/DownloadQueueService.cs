@@ -14,7 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -692,7 +692,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     private async Task StartDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
         var daysOfWeek = downloadQueue.DaysOfWeek;
-        if (daysOfWeek.IsNullOrEmpty())
+        if (daysOfWeek.IsStringNullOrEmpty())
             return;
 
         var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();
@@ -764,7 +764,7 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     private async Task StopDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
         var daysOfWeek = downloadQueue.DaysOfWeek;
-        if (daysOfWeek.IsNullOrEmpty())
+        if (daysOfWeek.IsStringNullOrEmpty())
             return;
 
         var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();

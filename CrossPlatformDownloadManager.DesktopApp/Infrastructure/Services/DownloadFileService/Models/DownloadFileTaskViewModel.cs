@@ -9,12 +9,12 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using Downloader;
 using Microsoft.Extensions.DependencyInjection;
+using MultipartDownloader.Core;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 public class DownloadFileTaskViewModel : PropertyChangedBase
 {

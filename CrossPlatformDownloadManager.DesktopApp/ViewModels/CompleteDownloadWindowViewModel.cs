@@ -67,7 +67,7 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     {
         try
         {
-            if (DownloadFile.SaveLocation.IsNullOrEmpty() || DownloadFile.FileName.IsNullOrEmpty())
+            if (DownloadFile.SaveLocation.IsStringNullOrEmpty() || DownloadFile.FileName.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Open file", "File not found.", DialogButtons.Ok);
                 return;
@@ -94,9 +94,9 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
     {
         try
         {
-            if (DownloadFile.SaveLocation.IsNullOrEmpty()
+            if (DownloadFile.SaveLocation.IsStringNullOrEmpty()
                 || !Directory.Exists(DownloadFile.SaveLocation!)
-                || DownloadFile.FileName.IsNullOrEmpty())
+                || DownloadFile.FileName.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Open folder", "Folder not found.", DialogButtons.Ok);
                 return;

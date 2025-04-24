@@ -44,7 +44,7 @@ public static class AudioManager
 
     public static async Task PlayAsync(string filePath)
     {
-        if (filePath.IsNullOrEmpty() || !File.Exists(filePath))
+        if (filePath.IsStringNullOrEmpty() || !File.Exists(filePath))
             throw new FileNotFoundException("Audio file not found.");
 
         var player = new MediaPlayer();
@@ -108,7 +108,7 @@ public static class AudioManager
                 throw new ArgumentOutOfRangeException(nameof(notificationType), notificationType, null);
         }
 
-        if (filePath.IsNullOrEmpty() || !File.Exists(filePath))
+        if (filePath.IsStringNullOrEmpty() || !File.Exists(filePath))
             throw new InvalidOperationException("Audio file not found.");
 
         await PlayAsync(filePath);

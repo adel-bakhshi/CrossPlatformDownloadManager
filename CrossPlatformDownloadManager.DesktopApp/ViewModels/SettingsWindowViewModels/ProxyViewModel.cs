@@ -184,7 +184,7 @@ public class ProxyViewModel : ViewModelBase
             return;
 
         var name = toggleSwitch.Name;
-        if (name.IsNullOrEmpty())
+        if (name.IsStringNullOrEmpty())
             return;
 
         if (toggleSwitch.IsChecked != true)
@@ -201,7 +201,7 @@ public class ProxyViewModel : ViewModelBase
             _ => null
         };
 
-        if (proxyMode.IsNullOrEmpty())
+        if (proxyMode.IsStringNullOrEmpty())
             return;
 
         var proxies = new List<string>
@@ -257,7 +257,7 @@ public class ProxyViewModel : ViewModelBase
     {
         try
         {
-            if (ProxySettings.Type.IsNullOrEmpty())
+            if (ProxySettings.Type.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Attention",
                     "Make sure you select a proxy type and try again. Selected proxy type is not defined.",
@@ -266,7 +266,7 @@ public class ProxyViewModel : ViewModelBase
                 return;
             }
 
-            if (ProxySettings.Host.IsNullOrEmpty())
+            if (ProxySettings.Host.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter proxy host.", DialogButtons.Ok);
                 return;
@@ -274,7 +274,7 @@ public class ProxyViewModel : ViewModelBase
 
             ProxySettings.Host = ProxySettings.Host!.Trim();
 
-            if (ProxySettings.Port.IsNullOrEmpty())
+            if (ProxySettings.Port.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Attention", "Please enter proxy port.", DialogButtons.Ok);
                 return;
@@ -292,7 +292,7 @@ public class ProxyViewModel : ViewModelBase
             ProxySettings.Password = ProxySettings.Password?.Trim();
             ProxySettings.Name = ProxySettings.Name?.Trim();
 
-            if (ProxySettings.Name.IsNullOrEmpty())
+            if (ProxySettings.Name.IsStringNullOrEmpty())
                 ProxySettings.Name = $"{ProxySettings.Host}:{ProxySettings.Port}";
 
             // Edit proxy settings when id is not 0

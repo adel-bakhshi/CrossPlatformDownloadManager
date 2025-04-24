@@ -1,9 +1,11 @@
 using System;
 using Avalonia;
 using Avalonia.Styling;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.JsonConverters;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.Utils;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
@@ -13,7 +15,7 @@ public class AppThemeService : IAppThemeService
     #region Private Fields
 
     private readonly ISettingsService _settingsService;
-    private bool? _isLastThemeDarkMode;
+    private string? _lastThemeName;
 
     #endregion
 
@@ -25,9 +27,9 @@ public class AppThemeService : IAppThemeService
     public void LoadThemeDataFromAssets()
     {
         // Check last theme. If same, return
-        if (_isLastThemeDarkMode != null && _isLastThemeDarkMode == _settingsService.Settings.DarkMode)
+        if (!_lastThemeName.IsStringNullOrEmpty())
             return;
-        
+
         // Get and validate resources
         var resources = Application.Current?.Resources;
         if (resources == null)
@@ -36,8 +38,10 @@ public class AppThemeService : IAppThemeService
         // Get theme data from assets
         var assetPath = $"avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/{(_settingsService.Settings.DarkMode ? "dark-theme.json" : "light-theme.json")}";
         var assetUri = new Uri(assetPath);
+        // Json serializer settings
+        var settings = new JsonSerializerSettings { Converters = [new ThemeBrushJsonConverter()] };
         // Convert json to app theme
-        var appTheme = assetUri.OpenJsonAsset<AppThemeViewModel>();
+        var appTheme = assetUri.OpenJsonAsset<AppTheme>(settings);
         if (appTheme == null)
             throw new InvalidOperationException("Unable to load app theme.");
 
@@ -49,37 +53,37 @@ public class AppThemeService : IAppThemeService
         }
 
         // Load theme data
-        resources["PrimaryColor"] = appTheme.PrimaryColor!.GetColor();
-        resources["SecondaryColor"] = appTheme.SecondaryColor!.GetColor();
-        resources["TertiaryColor"] = appTheme.TertiaryColor!.GetColor();
-        resources["TextColor"] = appTheme.TextColor!.GetColor();
-        resources["ButtonTextColor"] = appTheme.ButtonTextColor!.GetColor();
-        resources["CategoryItemOnHoverColor"] = appTheme.CategoryItemOnHoverColor!.GetColor();
-        resources["MenuBackgroundColor"] = appTheme.MenuBackgroundColor!.GetColor();
-        resources["MenuItemOnHoverBackgroundColor"] = appTheme.MenuItemOnHoverBackgroundColor!.GetColor();
-        resources["IconColor"] = appTheme.IconColor!.GetColor();
-        resources["SelectedAvailableProxyTypeColor"] = appTheme.SelectedAvailableProxyTypeColor!.GetColor();
-        resources["ToggleSwitchCircleColor"] = appTheme.ToggleSwitchCircleColor!.GetColor();
-        resources["LoadingColor"] = appTheme.LoadingColor!.GetColor();
-        resources["DialogTextColor"] = appTheme.DialogTextColor!.GetColor();
-        resources["DialogOkButtonBackgroundColor"] = appTheme.DialogOkButtonBackgroundColor!.GetColor();
-        resources["DialogYesButtonBackgroundColor"] = appTheme.DialogYesButtonBackgroundColor!.GetColor();
-        resources["DialogNoButtonBackgroundColor"] = appTheme.DialogNoButtonBackgroundColor!.GetColor();
-        resources["DialogCancelButtonBackgroundColor"] = appTheme.DialogCancelButtonBackgroundColor!.GetColor();
-        resources["ManagerTextColor"] = appTheme.ManagerTextColor!.GetColor();
-        resources["PrimaryGradientBrush"] = appTheme.PrimaryGradientBrush!.CreateGradientBrush();
-        resources["SuccessGradientBrush"] = appTheme.SuccessGradientBrush!.CreateGradientBrush();
-        resources["InfoGradientBrush"] = appTheme.InfoGradientBrush!.CreateGradientBrush();
-        resources["DangerGradientBrush"] = appTheme.DangerGradientBrush!.CreateGradientBrush();
-        resources["WarningGradientBrush"] = appTheme.WarningGradientBrush!.CreateGradientBrush();
-        resources["ChunkProgressGradientBrush"] = appTheme.ChunkProgressGradientBrush!.CreateGradientBrush();
-        resources["DataGridRowGradientBrush"] = appTheme.DataGridRowGradientBrush!.CreateGradientBrush();
+        resources["PrimaryColor"] = appTheme.PrimaryColor!.GetBrush();
+        resources["SecondaryColor"] = appTheme.SecondaryColor!.GetBrush();
+        resources["TertiaryColor"] = appTheme.TertiaryColor!.GetBrush();
+        resources["TextColor"] = appTheme.TextColor!.GetBrush();
+        resources["ButtonTextColor"] = appTheme.ButtonTextColor!.GetBrush();
+        resources["CategoryItemOnHoverColor"] = appTheme.CategoryItemOnHoverColor!.GetBrush();
+        resources["MenuBackgroundColor"] = appTheme.MenuBackgroundColor!.GetBrush();
+        resources["MenuItemOnHoverBackgroundColor"] = appTheme.MenuItemOnHoverBackgroundColor!.GetBrush();
+        resources["IconColor"] = appTheme.IconColor!.GetBrush();
+        resources["SelectedAvailableProxyTypeColor"] = appTheme.SelectedAvailableProxyTypeColor!.GetBrush();
+        resources["ToggleSwitchCircleColor"] = appTheme.ToggleSwitchCircleColor!.GetBrush();
+        resources["LoadingColor"] = appTheme.LoadingColor!.GetBrush();
+        resources["DialogTextColor"] = appTheme.DialogTextColor!.GetBrush();
+        resources["DialogOkButtonBackgroundColor"] = appTheme.DialogOkButtonBackgroundColor!.GetBrush();
+        resources["DialogYesButtonBackgroundColor"] = appTheme.DialogYesButtonBackgroundColor!.GetBrush();
+        resources["DialogNoButtonBackgroundColor"] = appTheme.DialogNoButtonBackgroundColor!.GetBrush();
+        resources["DialogCancelButtonBackgroundColor"] = appTheme.DialogCancelButtonBackgroundColor!.GetBrush();
+        resources["ManagerTextColor"] = appTheme.ManagerTextColor!.GetBrush();
+        resources["PrimaryGradientBrush"] = appTheme.PrimaryGradientBrush!.GetBrush();
+        resources["SuccessGradientBrush"] = appTheme.SuccessGradientBrush!.GetBrush();
+        resources["InfoGradientBrush"] = appTheme.InfoGradientBrush!.GetBrush();
+        resources["DangerGradientBrush"] = appTheme.DangerGradientBrush!.GetBrush();
+        resources["WarningGradientBrush"] = appTheme.WarningGradientBrush!.GetBrush();
+        resources["ChunkProgressGradientBrush"] = appTheme.ChunkProgressGradientBrush!.GetBrush();
+        resources["DataGridRowGradientBrush"] = appTheme.DataGridRowGradientBrush!.GetBrush();
 
         if (Application.Current?.RequestedThemeVariant != null)
-            Application.Current.RequestedThemeVariant = _settingsService.Settings.DarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
-        
+            Application.Current.RequestedThemeVariant = appTheme.IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
+
         // Set last theme flag
-        _isLastThemeDarkMode = _settingsService.Settings.DarkMode;
+        _lastThemeName = appTheme.ThemeName;
         // Log information
         Log.Information($"App theme ({(_settingsService.Settings.DarkMode ? "Dark" : "Light")}) loaded successfully.");
     }

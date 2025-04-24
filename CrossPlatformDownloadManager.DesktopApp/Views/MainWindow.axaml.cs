@@ -319,7 +319,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         var downloadFiles = DownloadFilesDataGrid
             .SelectedItems
             .OfType<DownloadFileViewModel>()
-            .Where(df => df.IsCompleted && !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+            .Where(df => df.IsCompleted && !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
             .ToList();
 
         // Make sure at least one download file is selected

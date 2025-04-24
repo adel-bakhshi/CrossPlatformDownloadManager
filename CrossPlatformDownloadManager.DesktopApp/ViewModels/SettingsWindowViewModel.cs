@@ -201,7 +201,7 @@ public class SettingsWindowViewModel : ViewModelBase
             }
             
             // Validate font
-            if (GeneralsViewModel.SelectedFont.IsNullOrEmpty())
+            if (GeneralsViewModel.SelectedFont.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Font Not Specified",
                     "Please choose a valid font and try again.",
@@ -214,7 +214,7 @@ public class SettingsWindowViewModel : ViewModelBase
             if (SaveLocationsViewModel.DisableCategories)
             {
                 // Check that the global save location is valid
-                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() ||
+                if (SaveLocationsViewModel.GlobalSaveDirectory.IsStringNullOrEmpty() ||
                     !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
@@ -230,7 +230,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 var categoryWithNoSaveDirectory = SaveLocationsViewModel
                     .Categories
                     .FirstOrDefault(c =>
-                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
+                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsStringNullOrEmpty());
 
                 if (categoryWithNoSaveDirectory != null)
                 {
@@ -243,7 +243,7 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Validate selected duplicate download link action
-            if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
+            if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
                     "No action has been specified for handling duplicate links. Please define how duplicate links should be managed when added.",
@@ -263,7 +263,7 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Validate selected speed unit
-            if (DownloadsViewModel.SelectedSpeedUnit.IsNullOrEmpty())
+            if (DownloadsViewModel.SelectedSpeedUnit.IsStringNullOrEmpty())
             {
                 var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
                     "You haven’t specified the unit for the speed limiter. Would you like to use KB as the default unit?",
@@ -311,7 +311,7 @@ public class SettingsWindowViewModel : ViewModelBase
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
                 // If category doesn't have a save directory or the save directory is the same, continue
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
                 // Update save directory

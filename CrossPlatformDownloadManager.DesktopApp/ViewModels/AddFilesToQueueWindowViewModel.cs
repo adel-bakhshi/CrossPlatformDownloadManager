@@ -17,9 +17,14 @@ namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 public class AddFilesToQueueWindowViewModel : ViewModelBase
 {
-    #region Properties
+    #region Private Fields
 
     private int? _downloadQueueId;
+    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
+
+    #endregion
+
+    #region Properties
 
     public int? DownloadQueueId
     {
@@ -30,8 +35,6 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
             DownloadFiles = GetDownloadFiles();
         }
     }
-
-    private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
 
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
@@ -78,7 +81,7 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
         var downloadFiles = AppService
             .DownloadFileService
             .DownloadFiles
-            .Where(df => (df.DownloadQueueId ?? 0) != DownloadQueueId)
+            .Where(df => (df.DownloadQueueId ?? 0) != DownloadQueueId && !df.IsCompleted)
             .ToObservableCollection();
 
         return downloadFiles;

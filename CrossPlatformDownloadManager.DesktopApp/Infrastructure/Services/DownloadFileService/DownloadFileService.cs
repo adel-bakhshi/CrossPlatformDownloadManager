@@ -18,7 +18,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -26,9 +26,9 @@ using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using Downloader;
 using Emik;
 using Microsoft.Extensions.DependencyInjection;
+using MultipartDownloader.Core;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
@@ -165,7 +165,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             : category?.CategorySaveDirectory?.SaveDirectory ?? string.Empty;
 
         // Make sure category and save location are not empty
-        if (category == null || saveLocation.IsNullOrEmpty())
+        if (category == null || saveLocation.IsStringNullOrEmpty())
             throw new InvalidOperationException("Unable to find the file category or storage location. Please try again.");
 
         // Create an instance of DownloadFile
@@ -204,7 +204,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     // Get new file name with number at the end
                     var newFileName = GetNewFileName(downloadFile.Url, downloadFile.FileName, downloadFile.SaveLocation);
                     // Make sure file name is not empty
-                    if (newFileName.IsNullOrEmpty())
+                    if (newFileName.IsStringNullOrEmpty())
                         throw new InvalidOperationException("New file name for duplicate link is null or empty.");
 
                     // Change download file name
@@ -244,9 +244,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             // Find duplicate download file
             var duplicateDownloadFile = DownloadFiles
-                .FirstOrDefault(df => !df.FileName.IsNullOrEmpty()
+                .FirstOrDefault(df => !df.FileName.IsStringNullOrEmpty()
                                       && df.FileName!.Equals(downloadFile.FileName)
-                                      && !df.SaveLocation.IsNullOrEmpty()
+                                      && !df.SaveLocation.IsStringNullOrEmpty()
                                       && df.SaveLocation!.Equals(downloadFile.SaveLocation));
 
             // Find download file on system and if it exists, we have to choose another name for download file
@@ -255,7 +255,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             {
                 // Get new file name and make sure it's not empty
                 var newFileName = GetNewFileName(downloadFile.FileName, downloadFile.SaveLocation);
-                if (newFileName.IsNullOrEmpty())
+                if (newFileName.IsStringNullOrEmpty())
                     throw new InvalidOperationException("New file name for duplicate file is null or empty.");
 
                 // Change file name
@@ -276,7 +276,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (startDownloading)
             _ = StartDownloadFileAsync(result);
 
-        // Return new download file 
+        // Return new download file
         return result;
     }
 
@@ -353,8 +353,14 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 ChunkCount = _settingsService.Settings.MaximumConnectionsCount,
                 MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
                 ParallelDownload = true,
-                MaximumMemoryBufferBytes = Constants.MaximumMemoryBufferBytes
+                MaximumMemoryBufferBytes = Constants.MaximumMemoryBufferBytes,
+                ReserveStorageSpaceBeforeStartingDownload = true,
+                ChunkFilesOutputDirectory = string.Empty, // TODO: Set chunk files output directory
+                MaxRestartWithoutClearTempFile = 5
             };
+
+            if (configuration.ChunkFilesOutputDirectory.IsStringNullOrEmpty())
+                throw new InvalidOperationException();
 
             // Get proxy and if possible, use it
             var proxy = _settingsService.GetProxy();
@@ -485,7 +491,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             var saveLocation = downloadFileInDb?.SaveLocation ?? downloadFile.SaveLocation ?? string.Empty;
             var fileName = downloadFileInDb?.FileName ?? downloadFile.FileName ?? string.Empty;
 
-            if (!saveLocation.IsNullOrEmpty() && !fileName.IsNullOrEmpty())
+            if (!saveLocation.IsStringNullOrEmpty() && !fileName.IsStringNullOrEmpty())
             {
                 var filePath = Path.Combine(saveLocation, fileName);
                 if (File.Exists(filePath))
@@ -535,7 +541,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         downloadFile.TransferRate = null;
         downloadFile.DownloadPackage = null;
 
-        if (!downloadFile.SaveLocation.IsNullOrEmpty() && !downloadFile.FileName.IsNullOrEmpty())
+        if (!downloadFile.SaveLocation.IsStringNullOrEmpty() && !downloadFile.FileName.IsStringNullOrEmpty())
         {
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
             if (File.Exists(filePath))
@@ -615,7 +621,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('\"') ?? string.Empty;
 
         // Get file name from x-suggested-filename header if possible
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
         {
             fileName = response.Content.Headers.TryGetValues("x-suggested-filename", out var suggestedFileNames)
                 ? suggestedFileNames.FirstOrDefault()
@@ -623,7 +629,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // Fallback to using the URL to guess the file name if Content-Disposition is not present
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
             fileName = url!.GetFileName();
 
         // Set file name
@@ -662,7 +668,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Find category by domain
         var siteDomain = result.Url.GetDomainFromUrl();
-        if (!siteDomain.IsNullOrEmpty())
+        if (!siteDomain.IsStringNullOrEmpty())
         {
             result.Category = _categoryService
                 .Categories
@@ -687,11 +693,11 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // Find a download file with the same url and handle it
-        result.IsUrlDuplicate = DownloadFiles.FirstOrDefault(df => !df.Url.IsNullOrEmpty() && df.Url!.Equals(url)) != null;
+        result.IsUrlDuplicate = DownloadFiles.FirstOrDefault(df => !df.Url.IsStringNullOrEmpty() && df.Url!.Equals(url)) != null;
         result.IsFileNameDuplicate = DownloadFiles
-            .FirstOrDefault(df => !df.FileName.IsNullOrEmpty()
+            .FirstOrDefault(df => !df.FileName.IsStringNullOrEmpty()
                                   && df.FileName!.Equals(fileName)
-                                  && !df.SaveLocation.IsNullOrEmpty() &&
+                                  && !df.SaveLocation.IsStringNullOrEmpty() &&
                                   df.SaveLocation!.Equals(result.Category!.CategorySaveDirectory!.SaveDirectory)) != null;
 
         return result;
@@ -713,7 +719,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             title = "Link is not downloadable";
             message = "The link you selected does not return a downloadable file. This could be due to an incorrect link, restricted access, or unsupported content.";
         }
-        else if (viewModel.Category?.CategorySaveDirectory == null || viewModel.Category.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty())
+        else if (viewModel.Category?.CategorySaveDirectory == null || viewModel.Category.CategorySaveDirectory.SaveDirectory.IsStringNullOrEmpty())
         {
             isValid = false;
             title = "Category not found";
@@ -731,7 +737,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     public async Task<bool> ValidateDownloadFileAsync(DownloadFileViewModel viewModel)
     {
         // Check url validation
-        if (viewModel.Url.IsNullOrEmpty() || !viewModel.Url.CheckUrlValidation())
+        if (viewModel.Url.IsStringNullOrEmpty() || !viewModel.Url.CheckUrlValidation())
         {
             await DialogBoxManager.ShowDangerDialogAsync("Url", "Please provide a valid URL to continue.", DialogButtons.Ok);
             return false;
@@ -763,7 +769,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // Check file name
-        if (viewModel.FileName.IsNullOrEmpty())
+        if (viewModel.FileName.IsStringNullOrEmpty())
         {
             await DialogBoxManager.ShowDangerDialogAsync("File name",
                 "Please provide a name for the file, ensuring it includes the appropriate extension.",
@@ -834,7 +840,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             return fileName;
 
         var filePathList = downloadFiles
-            .Where(df => !df.FileName.IsNullOrEmpty() && !df.SaveLocation.IsNullOrEmpty())
+            .Where(df => !df.FileName.IsStringNullOrEmpty() && !df.SaveLocation.IsStringNullOrEmpty())
             .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
             .Distinct()
             .ToList();
@@ -862,8 +868,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     public string GetNewFileName(string fileName, string saveLocation)
     {
         var downloadFiles = DownloadFiles
-            .Where(df => !df.FileName.IsNullOrEmpty()
-                         && !df.SaveLocation.IsNullOrEmpty()
+            .Where(df => !df.FileName.IsStringNullOrEmpty()
+                         && !df.SaveLocation.IsStringNullOrEmpty()
                          && df.FileName!.Equals(fileName)
                          && df.SaveLocation!.Equals(saveLocation))
             .ToList();
@@ -1189,7 +1195,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private static async Task<bool> CheckDiskSpaceAsync(DownloadFileViewModel downloadFile)
     {
         // Make sure save location and file name are not empty
-        if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+        if (downloadFile.SaveLocation.IsStringNullOrEmpty() || downloadFile.FileName.IsStringNullOrEmpty())
         {
             await DialogBoxManager.ShowDangerDialogAsync("Storage not found",
                 "An error occurred while trying to determine the storage location for this file. This may be due to a system error or missing file information.",

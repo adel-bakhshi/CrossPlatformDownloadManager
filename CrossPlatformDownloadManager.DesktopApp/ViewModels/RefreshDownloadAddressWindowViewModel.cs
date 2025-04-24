@@ -66,7 +66,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
         try
         {
             NewAddress = NewAddress.Replace("\\", "/").Trim();
-            if (owner == null || NewAddress.IsNullOrEmpty() || !NewAddress.CheckUrlValidation())
+            if (owner == null || NewAddress.IsStringNullOrEmpty() || !NewAddress.CheckUrlValidation())
                 return;
 
             // Check if the new address is the same as the current address
@@ -149,7 +149,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                     // Save new file name
                     var newFileName = urlDetails.FileName;
                     // Rename existing file
-                    if (!downloadFile.SaveLocation.IsNullOrEmpty() && !downloadFile.FileName.IsNullOrEmpty())
+                    if (!downloadFile.SaveLocation.IsStringNullOrEmpty() && !downloadFile.FileName.IsStringNullOrEmpty())
                     {
                         // If the file exists, rename it
                         var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
@@ -216,7 +216,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            if (!NewAddress.IsNullOrEmpty() && NewAddress.CheckUrlValidation())
+            if (!NewAddress.IsStringNullOrEmpty() && NewAddress.CheckUrlValidation())
             {
                 NewAddress = NewAddress.Replace("\\", "/").Trim();
 
@@ -225,7 +225,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                     .DownloadFiles
                     .FirstOrDefault(df => df.Id == _downloadFile?.Id);
 
-                if (downloadFile != null && !downloadFile.Url.IsNullOrEmpty() && !downloadFile.Url!.Equals(NewAddress))
+                if (downloadFile != null && !downloadFile.Url.IsStringNullOrEmpty() && !downloadFile.Url!.Equals(NewAddress))
                 {
                     var result = await DialogBoxManager.ShowWarningDialogAsync(
                         "Refresh Download Address",

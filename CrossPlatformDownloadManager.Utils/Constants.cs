@@ -21,9 +21,10 @@ public static class Constants
     public const long MegaByte = KiloByte * 1024;
     public const long GigaByte = MegaByte * 1024;
     public const long TeraByte = GigaByte * 1024;
-    
+
     // Maximum memory buffer bytes
-    public const long MaximumMemoryBufferBytes = 4 * MegaByte;
+    // I'm not very sure about the use of this constant, so I'm setting it to 0 for now.
+    public const long MaximumMemoryBufferBytes = 4 * MegaByte * 0;
 
     // Turn off computer modes
     public static readonly List<string> TurnOffComputerModes = Enum
@@ -94,7 +95,7 @@ public static class Constants
         {
             var processPath = Environment.ProcessPath;
             var directory = Path.GetDirectoryName(processPath);
-            if (directory.IsNullOrEmpty())
+            if (directory.IsStringNullOrEmpty())
                 throw new InvalidOperationException("Main directory not found.");
 
             return directory!;

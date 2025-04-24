@@ -90,7 +90,7 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
             .DownloadFileService
             .GetNewFileName(_url, FileName, _saveLocation);
 
-        if (NewFileName.IsNullOrEmpty())
+        if (NewFileName.IsStringNullOrEmpty())
             NewFileName = FileName;
     }
 

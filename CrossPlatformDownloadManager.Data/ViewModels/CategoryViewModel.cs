@@ -56,7 +56,7 @@ public class CategoryViewModel : PropertyChangedBase
         }
     }
 
-    public List<string> AutoAddedLinksFromSitesList => AutoAddLinkFromSites.IsNullOrEmpty() ? [] : AutoAddLinkFromSites.ConvertFromJson<List<string>?>() ?? [];
+    public List<string> AutoAddedLinksFromSitesList => AutoAddLinkFromSites.IsStringNullOrEmpty() ? [] : AutoAddLinkFromSites.ConvertFromJson<List<string>?>() ?? [];
 
     public int? CategorySaveDirectoryId
     {

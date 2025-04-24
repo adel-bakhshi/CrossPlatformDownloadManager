@@ -293,7 +293,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         proxySettings.Username = proxySettings.Username?.Trim();
         proxySettings.Password = proxySettings.Password?.Trim();
 
-        if (proxySettings.Host.IsNullOrEmpty() || proxySettings.Port.IsNullOrEmpty())
+        if (proxySettings.Host.IsStringNullOrEmpty() || proxySettings.Port.IsStringNullOrEmpty())
             throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
 
         if (!int.TryParse(proxySettings.Port, out _))

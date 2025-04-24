@@ -72,7 +72,7 @@ public class DownloadStatusViewModel : ViewModelBase
     {
         try
         {
-            if (DownloadFile?.SaveLocation.IsNullOrEmpty() != false)
+            if (DownloadFile?.SaveLocation.IsStringNullOrEmpty() != false)
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Open folder",
                     "The folder you are trying to access is not available. It may have been removed or relocated.",
@@ -91,10 +91,10 @@ public class DownloadStatusViewModel : ViewModelBase
             }
 
             string? filePath = null;
-            if (!DownloadFile.FileName.IsNullOrEmpty())
+            if (!DownloadFile.FileName.IsStringNullOrEmpty())
                 filePath = Path.Combine(DownloadFile.SaveLocation, DownloadFile.FileName!);
 
-            if (!filePath.IsNullOrEmpty() && File.Exists(filePath))
+            if (!filePath.IsStringNullOrEmpty() && File.Exists(filePath))
             {
                 PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
             }

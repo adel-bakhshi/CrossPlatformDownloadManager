@@ -88,7 +88,7 @@ public class ExportSettingsViewModel
     public static ExportSettingsViewModel CreateExportFile(SettingsViewModel settings, List<ProxySettingsViewModel> proxies)
     {
         var exportProxies = proxies
-            .Where(p => !p.Name.IsNullOrEmpty() && !p.Type.IsNullOrEmpty() && !p.Host.IsNullOrEmpty() && !p.Port.IsNullOrEmpty())
+            .Where(p => !p.Name.IsStringNullOrEmpty() && !p.Type.IsStringNullOrEmpty() && !p.Host.IsStringNullOrEmpty() && !p.Port.IsStringNullOrEmpty())
             .Select(p => new ExportProxySettingsViewModel
             {
                 Name = p.Name!,

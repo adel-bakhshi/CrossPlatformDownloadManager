@@ -78,7 +78,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
                 return;
 
             // Validate download address
-            if (DownloadAddress.IsNullOrEmpty())
+            if (DownloadAddress.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Capture url",
                     "Please enter the download file address and save again.",
@@ -151,7 +151,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
         var validateResult = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
         if (!validateResult.IsValid)
         {
-            if (validateResult.Title.IsNullOrEmpty() || validateResult.Message.IsNullOrEmpty())
+            if (validateResult.Title.IsStringNullOrEmpty() || validateResult.Message.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Error downloading file",
                     "An error occurred while downloading the file.",

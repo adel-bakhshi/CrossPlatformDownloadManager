@@ -10,9 +10,8 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Views;
-using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 using Serilog;
@@ -370,11 +369,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     private void LoadDownloadQueues()
     {
-        var downloadQueues = AppService
-            .DownloadQueueService
-            .DownloadQueues;
-
-        DownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
         SelectedDownloadQueue = GetSelectedDownloadQueue();
     }
 
@@ -393,12 +388,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         // Store selected category id
         var selectedCategoryId = SelectedCategory?.Id;
         // Get all categories
-        var categories = AppService
-            .CategoryService
-            .Categories;
-
-        // Update collection
-        Categories.UpdateCollection(categories, c => c.Id);
+        Categories = AppService.CategoryService.Categories;
         // Re select previous category
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
     }

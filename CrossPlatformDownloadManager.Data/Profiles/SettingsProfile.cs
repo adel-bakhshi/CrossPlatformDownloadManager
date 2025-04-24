@@ -21,12 +21,12 @@ public class SettingsProfile : Profile
 
     private static PointViewModel? MapPoint(string? point)
     {
-        return point.IsNullOrEmpty() ? null : point.ConvertFromJson<PointViewModel?>();
+        return point.IsStringNullOrEmpty() ? null : point.ConvertFromJson<PointViewModel?>();
     }
 
     private MainDownloadFilesDataGridColumnsSettings MapDataGridColumnsSettings(string? columnsSettings)
     {
-        if (columnsSettings.IsNullOrEmpty())
+        if (columnsSettings.IsStringNullOrEmpty())
             return new MainDownloadFilesDataGridColumnsSettings();
 
         var settings = columnsSettings!.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>();

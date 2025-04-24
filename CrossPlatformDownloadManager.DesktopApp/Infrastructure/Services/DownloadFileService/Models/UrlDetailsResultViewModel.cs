@@ -1,6 +1,6 @@
 using CrossPlatformDownloadManager.Data.ViewModels;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.ViewModels;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 public class UrlDetailsResultViewModel
 {

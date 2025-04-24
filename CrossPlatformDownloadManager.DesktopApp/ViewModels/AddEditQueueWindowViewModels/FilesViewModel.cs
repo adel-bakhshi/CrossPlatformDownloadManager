@@ -79,14 +79,12 @@ public class FilesViewModel : ViewModelBase
 
     private void LoadDownloadFiles()
     {
-        var downloadFiles = AppService
+        DownloadFiles = AppService
             .DownloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId != null && df.DownloadQueueId == _downloadQueueId)
             .OrderBy(df => df.DownloadQueuePriority)
             .ToObservableCollection();
-
-        DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
     }
 
     private async void AddItemToDataGrid(Window? owner)
@@ -109,14 +107,10 @@ public class FilesViewModel : ViewModelBase
                 .ToList();
 
             var downloadFiles = DownloadFiles
-                .ToList();
-
-            downloadFiles = downloadFiles
                 .Where(df => !primaryKeys.Contains(df.Id))
                 .ToList();
 
             downloadFiles.AddRange(result);
-
             DownloadFiles = downloadFiles.ToObservableCollection();
         }
         catch (Exception ex)
@@ -154,12 +148,6 @@ public class FilesViewModel : ViewModelBase
     private void ChangePriorityToHigherLevel(DataGrid? dataGrid)
     {
         ChangeItemsPriority(dataGrid, true);
-    }
-
-    protected override void OnDownloadQueueServiceDataChanged()
-    {
-        base.OnDownloadQueueServiceDataChanged();
-        LoadDownloadFiles();
     }
 
     #region Helpers

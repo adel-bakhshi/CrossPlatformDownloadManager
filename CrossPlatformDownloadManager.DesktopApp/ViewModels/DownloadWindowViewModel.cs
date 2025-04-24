@@ -225,7 +225,7 @@ public class DownloadWindowViewModel : ViewModelBase
         // Check if the user wants to turn off the computer
         if (_turnOffComputerAfterDownloadFinished && DownloadFile.IsCompleted)
         {
-            if (_turnOffComputerMode.IsNullOrEmpty())
+            if (_turnOffComputerMode.IsStringNullOrEmpty())
                 return;
 
             Dispatcher.UIThread.InvokeAsync(async () =>
@@ -251,7 +251,7 @@ public class DownloadWindowViewModel : ViewModelBase
         if (_openFolderAfterDownloadFinished)
         {
             // Make sure file name and save location are not null
-            if (DownloadFile.FileName.IsNullOrEmpty() || DownloadFile.SaveLocation.IsNullOrEmpty())
+            if (DownloadFile.FileName.IsStringNullOrEmpty() || DownloadFile.SaveLocation.IsStringNullOrEmpty())
                 return;
 
             // Make sure the file exists
@@ -334,7 +334,7 @@ public class DownloadWindowViewModel : ViewModelBase
             {
                 var globalSpeedLimit = AppService.SettingsService.Settings.LimitSpeed ?? 0;
                 var globalSpeedLimitUnit = AppService.SettingsService.Settings.LimitUnit;
-                speed = (long)(globalSpeedLimitUnit.IsNullOrEmpty()
+                speed = (long)(globalSpeedLimitUnit.IsStringNullOrEmpty()
                     ? 0
                     : globalSpeedLimit * (globalSpeedLimitUnit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte));
 
@@ -345,7 +345,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 return;
             }
 
-            var unit = e.Unit.IsNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte;
+            var unit = e.Unit.IsStringNullOrEmpty() ? 0 : e.Unit!.Equals("KB", StringComparison.OrdinalIgnoreCase) ? Constants.KiloByte : Constants.MegaByte;
             speed = (long)(e.Speed == null ? 0 : e.Speed.Value * unit);
 
             AppService

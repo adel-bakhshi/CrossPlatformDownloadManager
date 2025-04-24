@@ -162,7 +162,7 @@ public class BrowserExtension : IBrowserExtension
 
         using var reader = new StreamReader(context.Request.InputStream);
         var json = await reader.ReadToEndAsync();
-        if (json.IsNullOrEmpty())
+        if (json.IsStringNullOrEmpty())
         {
             response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
             return response;

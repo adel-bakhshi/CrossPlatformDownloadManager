@@ -31,7 +31,7 @@ Below are some screenshots showcasing the key features of CDM:
     <tr>
       <th scope="col" width="1000px">Main Interface</th>
       <th scope="col" width="1000px">Download</th>
-       <th scope="col" width="1000px">Settings</th>
+      <th scope="col" width="1000px">Settings</th>
     </tr>
   </thead>
   <tbody>
@@ -42,7 +42,7 @@ Below are some screenshots showcasing the key features of CDM:
       <td>
         <img src="./Assets/Screenshots/2.png" width="100%" alt="Download">
       </td>
-       <td>
+      <td>
         <img src="./Assets/Screenshots/3.png" width="100%" alt="Settings">
       </td>
     </tr>
@@ -143,28 +143,28 @@ If you find **Cross Platform Download Manager (CDM)** useful and would like to s
     <tr>
       <th scope="col" width="1000px">Donate via Bitcoin</th>
       <th scope="col" width="1000px">Donate via Ethereum</th>
-       <th scope="col" width="1000px">Donate via Tether</th>
+      <th scope="col" width="1000px">Donate via Tether</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td align="center">
         <img src="./Assets/Currency/Bitcoin.jpeg" width="200px" alt="Donate via Bitcoin">
-         <br>
-         Bitcoin Address:
-         bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k
+        <br>
+        Bitcoin Address:
+        bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k
       </td>
       <td align="center">
         <img src="./Assets/Currency/Ethereum.jpeg" width="200px" alt="Donate via Tether">
-         <br>
-         Ethereum Address:
-         0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27
+        <br>
+        Ethereum Address:
+        0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27
       </td>
-       <td align="center">
+      <td align="center">
         <img src="./Assets/Currency/Tether.jpeg" width="200px" alt="Donate via Tether">
-          <br>
-          Tether Address:
-          TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu
+        <br>
+        Tether Address:
+        TC7CtsRLgX1aWrKL1eVKMwc9TCXyBkNheu
       </td>
     </tr>
   </tbody>
@@ -225,8 +225,6 @@ We're committed to making CDM better with every update. Here are some ideas we'r
 ### **For CDM:**
 
 - **Testing and Publishing for Mac:** Expand platform support by thoroughly testing and publishing the program for Mac operating systems, ensuring a seamless experience across all major platforms.
-- **Light Theme:** Add a light theme for users who prefer brighter interfaces.
-- **Custom Themes:** Allow users to create and apply different themes to personalize their experience.
 - **System Notifications:** Implement native system notifications for download completions and errors.
 - **Help Section:** Develop an in-app help section to assist users with common questions and troubleshooting.
 - **Multilingual Support:** Make the program available in multiple languages to reach a global audience.

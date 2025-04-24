@@ -6,11 +6,14 @@ using Avalonia.Media;
 using CrossPlatformDownloadManager.Utils;
 using Newtonsoft.Json;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.ViewModels;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models.ThemeBrush.GradientBrush;
 
-public class AppThemeGradientViewModel
+public class ThemeGradientBrush : IThemeBrush
 {
     #region Properties
+
+    [JsonProperty("brushMode")]
+    public ThemeBrushMode BrushMode => ThemeBrushMode.Gradient;
 
     [JsonProperty("startPoint")]
     public string? StartPoint { get; set; }
@@ -19,7 +22,7 @@ public class AppThemeGradientViewModel
     public string? EndPoint { get; set; }
 
     [JsonProperty("gradientStops")]
-    public List<AppThemeGradientStopViewModel> GradientStops { get; set; } = [];
+    public List<ThemeGradientStop> GradientStops { get; set; } = [];
 
     #endregion
 
@@ -31,7 +34,7 @@ public class AppThemeGradientViewModel
         return GradientStops.TrueForAll(gs => gs.Validate());
     }
 
-    public LinearGradientBrush CreateGradientBrush()
+    public object GetBrush()
     {
         var startPoint = StartPoint!
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -59,7 +62,7 @@ public class AppThemeGradientViewModel
 
     private static bool ValidatePoint(string? pointString)
     {
-        if (pointString.IsNullOrEmpty())
+        if (pointString.IsStringNullOrEmpty())
             return false;
 
         var points = pointString!.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();

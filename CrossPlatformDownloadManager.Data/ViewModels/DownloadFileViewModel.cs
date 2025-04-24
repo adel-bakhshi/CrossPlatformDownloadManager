@@ -9,9 +9,10 @@ using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using Downloader;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
+using MultipartDownloader.Core;
+using MultipartDownloader.Core.CustomEventArgs;
 using Newtonsoft.Json;
 using Serilog;
 using Constants = CrossPlatformDownloadManager.Utils.Constants;
@@ -333,18 +334,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         downloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
 
         var downloadPath = SaveLocation;
-        if (downloadPath.IsNullOrEmpty())
+        if (downloadPath.IsStringNullOrEmpty())
         {
             var saveDirectory = await unitOfWork
                 .CategorySaveDirectoryRepository
                 .GetAsync(where: sd => sd.CategoryId == null);
 
             downloadPath = saveDirectory?.SaveDirectory;
-            if (downloadPath.IsNullOrEmpty())
+            if (downloadPath.IsStringNullOrEmpty())
                 return;
         }
 
-        if (FileName.IsNullOrEmpty() || Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
+        if (FileName.IsStringNullOrEmpty() || Url.IsStringNullOrEmpty() || !Url.CheckUrlValidation())
             return;
 
         if (!Directory.Exists(downloadPath!))
@@ -381,11 +382,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 var package = json.ConvertFromJson<DownloadPackage?>();
                 // Make sure package has value
                 if (package != null)
-                {
-                    // Change download package value
-                    package.Storage = null;
                     downloadPackage = package;
-                }
             }
         }
 
@@ -403,7 +400,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             // Update download url if user changed it
             var urls = downloadPackage.Urls.ToList();
             var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
-            if (currentUrl.IsNullOrEmpty())
+            if (currentUrl.IsStringNullOrEmpty())
             {
                 urls.Clear();
                 urls.Add(Url!);
@@ -580,7 +577,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         CanResumeDownload = null;
     }
 
-    private void DownloadServiceOnDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
+    private void DownloadServiceOnDownloadProgressChanged(object? sender, MultipartDownloader.Core.CustomEventArgs.DownloadProgressChangedEventArgs e)
     {
         DownloadProgress = (float)e.ProgressPercentage;
         TransferRate = (float)e.BytesPerSecondSpeed;
@@ -635,7 +632,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         TimeLeft = timeLeft;
     }
 
-    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
+    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, MultipartDownloader.Core.CustomEventArgs.DownloadProgressChangedEventArgs e)
     {
         if (_chunkProgresses == null || _chunkProgresses.Count == 0)
             return;
@@ -739,7 +736,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         try
         {
             // Check url
-            if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
+            if (Url.IsStringNullOrEmpty() || !Url.CheckUrlValidation())
             {
                 CanResumeDownload = false;
                 return;

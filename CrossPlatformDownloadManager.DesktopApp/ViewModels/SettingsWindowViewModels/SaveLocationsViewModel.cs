@@ -121,7 +121,7 @@ public class SaveLocationsViewModel : ViewModelBase
         try
         {
             var directoryPath = await OpenFolderPickerAsync();
-            if (directoryPath.IsNullOrEmpty())
+            if (directoryPath.IsStringNullOrEmpty())
                 return;
 
             GlobalSaveDirectory = directoryPath;
@@ -245,7 +245,7 @@ public class SaveLocationsViewModel : ViewModelBase
                 return;
             
             var directoryPath = await OpenFolderPickerAsync();
-            if (directoryPath.IsNullOrEmpty())
+            if (directoryPath.IsStringNullOrEmpty())
                 return;
 
             SelectedCategory.CategorySaveDirectory.SaveDirectory = directoryPath!;
@@ -267,13 +267,12 @@ public class SaveLocationsViewModel : ViewModelBase
     private void LoadCategories()
     {
         var selectedCategoryId = SelectedCategory?.Id;
-        var categories = AppService
+        Categories = AppService
             .CategoryService
             .Categories
             .Select(c => c.DeepCopy(ignoreLoops: true)!)
             .ToObservableCollection();
 
-        Categories.UpdateCollection(categories, c => c.Id);
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
         _ = LoadFileExtensionsAsync();
     }

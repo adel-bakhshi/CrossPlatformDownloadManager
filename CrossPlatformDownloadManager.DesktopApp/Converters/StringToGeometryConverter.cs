@@ -13,7 +13,7 @@ public class StringToGeometryConverter : IValueConverter
         try
         {
             var path = value as string;
-            if (path.IsNullOrEmpty())
+            if (path.IsStringNullOrEmpty())
                 return null;
 
             return StreamGeometry.Parse(path!);

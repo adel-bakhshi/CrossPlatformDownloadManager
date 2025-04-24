@@ -32,7 +32,7 @@ public partial class DialogWindow : MyWindowBase<DialogWindowViewModel>
                 return;
 
             var content = button.Content?.ToString()?.ToLower();
-            if (content.IsNullOrEmpty())
+            if (content.IsStringNullOrEmpty())
                 return;
 
             var dialogResult = content switch

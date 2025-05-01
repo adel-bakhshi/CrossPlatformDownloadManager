@@ -84,12 +84,18 @@ public class ProxySettingsViewModel : PropertyChangedBase
 
     #endregion
 
+    /// <summary>
+    /// Checks whether the proxy is responsive.
+    /// </summary>
     public async Task CheckIsResponsiveAsync()
     {
         var proxyUri = GetProxyUri();
         IsResponsive = await CheckProxyAsync(proxyUri);
     }
 
+    /// <summary>
+    /// Gets the proxy URI.
+    /// </summary>
     public string GetProxyUri()
     {
         var type = Type?.ToLower();
@@ -104,15 +110,18 @@ public class ProxySettingsViewModel : PropertyChangedBase
 
     #region Helpers
 
+    /// <summary>
+    /// Checks the proxy and indicates whether it is responsive.
+    /// </summary>
+    /// <param name="proxyUri">The proxy URI for sending request with it.</param>
+    /// <returns>True if the proxy is responsive, otherwise false.</returns>
     private static async Task<bool> CheckProxyAsync(string proxyUri)
     {
         try
         {
-            using var handler = new HttpClientHandler
-            {
-                Proxy = new WebProxy(proxyUri),
-                UseProxy = true
-            };
+            using var handler = new HttpClientHandler();
+            handler.Proxy = new WebProxy(proxyUri);
+            handler.UseProxy = true;
 
             using var client = new HttpClient(handler);
             var response = await client.GetAsync("https://www.google.com");

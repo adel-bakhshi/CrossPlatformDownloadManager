@@ -1,6 +1,6 @@
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
-public class ValidateUrlDetailsViewModel
+public class ValidateUrlDetails
 {
     #region Properties
 

@@ -62,9 +62,9 @@ public interface IDownloadFileService
 
     string GetDownloadSpeed();
 
-    Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken);
+    Task<UrlDetailsResult> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken);
 
-    ValidateUrlDetailsViewModel ValidateUrlDetails(UrlDetailsResultViewModel viewModel);
+    ValidateUrlDetails ValidateUrlDetails(UrlDetailsResult viewModel);
 
     Task<bool> ValidateDownloadFileAsync(DownloadFileViewModel viewModel);
 

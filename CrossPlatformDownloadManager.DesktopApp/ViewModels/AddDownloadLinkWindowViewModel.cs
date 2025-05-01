@@ -22,7 +22,7 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private UrlDetailsResultViewModel? _urlDetails;
+    private UrlDetailsResult? _urlDetails;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     private DownloadFileViewModel _downloadFile = new();

@@ -43,7 +43,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private readonly ISettingsService _settingsService;
     private readonly ICategoryService _categoryService;
 
-    private readonly List<DownloadFileTaskViewModel> _downloadFileTasks;
+    private readonly List<DownloadFileTask> _downloadFileTasks;
     private bool _stopOperationIsRunning;
     private readonly List<int> _stopOperations;
     private readonly DispatcherTimer _downloadFinishedTimer;
@@ -367,7 +367,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             // Create download service with configuration
             var service = new DownloadService(configuration);
             // Create download file task
-            var downloadFileTask = new DownloadFileTaskViewModel
+            var downloadFileTask = new DownloadFileTask
             {
                 Key = downloadFile.Id,
                 Configuration = configuration,
@@ -556,9 +556,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         return downloadSpeed.ToFileSize();
     }
 
-    public async Task<UrlDetailsResultViewModel> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken)
+    public async Task<UrlDetailsResult> GetUrlDetailsAsync(string? url, CancellationToken cancellationToken)
     {
-        var result = new UrlDetailsResultViewModel();
+        var result = new UrlDetailsResult();
 
         // Make sure url is valid
         url = url?.Replace("\\", "/").Trim();
@@ -698,7 +698,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         return result;
     }
 
-    public ValidateUrlDetailsViewModel ValidateUrlDetails(UrlDetailsResultViewModel viewModel)
+    public ValidateUrlDetails ValidateUrlDetails(UrlDetailsResult viewModel)
     {
         var isValid = true;
         string title = string.Empty, message = string.Empty;
@@ -721,7 +721,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             message = "The download category could not be found. Please try again.\nIf you are still having problems, please contact support.";
         }
 
-        return new ValidateUrlDetailsViewModel
+        return new ValidateUrlDetails
         {
             IsValid = isValid,
             Title = title,
@@ -1108,7 +1108,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private async Task EnsureDownloadFileStoppedAsync(int downloadFileId)
     {
         // Find tasks from the list
-        DownloadFileTaskViewModel? downloadFileTask;
+        DownloadFileTask? downloadFileTask;
 
         // Check if the stop operation is finished
         while (true)

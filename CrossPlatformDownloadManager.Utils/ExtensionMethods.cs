@@ -137,8 +137,7 @@ public static class ExtensionMethods
         if (url.IsStringNullOrEmpty())
             return false;
 
-        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) &&
-               (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
     public static T? OpenJsonAsset<T>(this Uri? uri, JsonSerializerSettings? jsonSerializerSettings)

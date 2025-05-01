@@ -16,7 +16,7 @@ using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
-public class DownloadFileTaskViewModel : PropertyChangedBase
+public class DownloadFileTask : PropertyChangedBase
 {
     #region Private Fields
 

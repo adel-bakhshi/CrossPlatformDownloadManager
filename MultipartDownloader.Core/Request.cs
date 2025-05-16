@@ -206,9 +206,7 @@ public class Request
     public async Task<long> GetFileSize()
     {
         if (await IsSupportDownloadInRange().ConfigureAwait(false))
-        {
             return GetTotalSizeFromContentRange(_responseHeaders);
-        }
 
         return GetTotalSizeFromContentLength(_responseHeaders);
     }
@@ -256,8 +254,6 @@ public class Request
         {
             var match = _contentRangePattern.Match(contentRange);
             var size = match.Groups["size"].Value;
-            //var from = match.Groups["from"].Value;
-            //var to = match.Groups["to"].Value;
 
             return long.TryParse(size, out var totalSize) ? totalSize : -1L;
         }
@@ -272,11 +268,8 @@ public class Request
     /// <returns>The total size of the content.</returns>
     public static long GetTotalSizeFromContentLength(Dictionary<string, string> headers)
     {
-        if (headers.TryGetValue(HeaderContentLengthKey, out var contentLengthText) &&
-            long.TryParse(contentLengthText, out long contentLength))
-        {
+        if (headers.TryGetValue(HeaderContentLengthKey, out var contentLengthText) && long.TryParse(contentLengthText, out long contentLength))
             return contentLength;
-        }
 
         return -1L;
     }

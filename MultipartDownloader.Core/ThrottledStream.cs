@@ -129,9 +129,7 @@ internal class ThrottledStream : Stream
     private static async Task SleepAsync(int time)
     {
         if (time > 0)
-        {
             await Task.Delay(time).ConfigureAwait(false);
-        }
     }
 
     /// <inheritdoc />

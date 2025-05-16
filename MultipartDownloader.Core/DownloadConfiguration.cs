@@ -28,6 +28,7 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     private string _chunkFilesOutputDirectory = string.Empty; // Directory to store downloaded data for each chunk for merging at the end of the download
     private string _chunkFilesFinalPath = string.Empty; // Final directory to store downloaded data for each chunk
     private int _maximumRestartWithoutClearTempFile = int.MaxValue; // The maximum number of times to restart the download without clearing the temporary files.
+    private long _maximumBytesPerSecondForMerge = ThrottledStream.Infinite; // The maximum bytes per second speed for merging the final file.
 
     /// <summary>
     /// To bind view models to fire changes in MVVM pattern
@@ -244,10 +245,22 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     /// </summary>
     public string ChunkFilesFinalPath => _chunkFilesFinalPath;
 
+    /// <summary>
+    /// Gets or sets the maximum number of times to restart the download without clearing the temporary files.
+    /// </summary>
     public int MaxRestartWithoutClearTempFile
     {
         get => _maximumRestartWithoutClearTempFile;
         set => OnPropertyChanged(ref _maximumRestartWithoutClearTempFile, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum bytes per second speed for merging the final file.
+    /// </summary>
+    public long MaximumBytesPerSecondForMerge
+    {
+        get => _maximumBytesPerSecondForMerge;
+        set => OnPropertyChanged(ref _maximumBytesPerSecondForMerge, value);
     }
 
     /// <summary>

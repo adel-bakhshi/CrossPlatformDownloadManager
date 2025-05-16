@@ -84,6 +84,11 @@ public class DownloadService : AbstractDownloadService
         return Package.GetStorageStream();
     }
 
+    /// <summary>
+    /// Merges chunks into a single file.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous download operation.</returns>
+    /// <exception cref="InvalidOperationException">Throw an exception if the final file size does not match the expected size.</exception>
     private async Task MergeChunksAsync()
     {
         if (Package.Chunks.Length == 0)
@@ -130,16 +135,23 @@ public class DownloadService : AbstractDownloadService
         }
     }
 
+    /// <summary>
+    /// Merges the temp file that belongs to a chunk with the final file and change the progress of merge operation.
+    /// </summary>
+    /// <param name="finalStrem">The final file that all chunks merge to it.</param>
+    /// <param name="chunk">The chunk that should be merge with the final file.</param>
+    /// <returns>A task that represents the asynchronous download operation.</returns>
     private async Task MergeFileWithProgressAsync(Stream finalStrem, Chunk chunk)
     {
         // Open temp stream
         await using var tempStream = new FileStream(chunk.TempFilePath, FileMode.Open, FileAccess.Read);
+        await using var throttledStream = new ThrottledStream(tempStream, Options.MaximumBytesPerSecondForMerge);
         var buffer = new byte[8192]; // 8 kilobyte buffer
         var bytesRead = 0;
         long lastPosition = 0;
 
         // Read bytes from temp stream
-        while ((bytesRead = await tempStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
+        while ((bytesRead = await throttledStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
         {
             // Write bytes to final stream
             await finalStrem.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
@@ -159,6 +171,11 @@ public class DownloadService : AbstractDownloadService
             SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
     }
 
+    /// <summary>
+    /// Sends the merge progress changed signal with the given parameters.
+    /// </summary>
+    /// <param name="copiedBytesSize">The amount of file size that merged.</param>
+    /// <param name="totalBytesSize">The total file size that should be merge.</param>
     private void SendMergeProgressChangedSignal(double copiedBytesSize, double totalBytesSize)
     {
         // Calculate progress percentage

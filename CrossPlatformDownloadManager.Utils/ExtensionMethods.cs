@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Net;
 using Avalonia.Media;
 using Avalonia.Platform;
 using ICSharpCode.SharpZipLib.Zip;
@@ -159,6 +160,11 @@ public static class ExtensionMethods
         return uri.OpenJsonAsset<T>(null);
     }
 
+    /// <summary>
+    /// Gets the file name from an URL.
+    /// </summary>
+    /// <param name="url">The URL to get the file name from.</param>
+    /// <returns>Returns the file name if found, otherwise null.</returns>
     public static string? GetFileName(this string? url)
     {
         if (url.IsStringNullOrEmpty())
@@ -213,6 +219,42 @@ public static class ExtensionMethods
             fileName = fileName.Substring(0, fileName.IndexOf('?'));
 
         return fileName;
+    }
+    
+    /// <summary>
+    /// Gets the file name from the Content-Disposition header.
+    /// </summary>
+    /// <param name="contentDisposition">The Content-Disposition header value.</param>
+    /// <returns>Returns the file name if found, otherwise null.</returns>
+    public static string? GetFileNameFromContentDisposition(this string? contentDisposition)
+    {
+        // Possible values for Content-Disposition header:
+        // Content-Disposition: inline
+        // Content-Disposition: attachment
+        // Content-Disposition: attachment; filename="file name.jpg"
+        // Content-Disposition: attachment; filename*=UTF-8''file%20name.jpg
+        
+        // Check if Content-Disposition header value is null or empty
+        if (contentDisposition.IsStringNullOrEmpty())
+            return null;
+
+        // Find the file name section and make sure it has value
+        var fileNameSection = contentDisposition!.Split(';').FirstOrDefault(s => s.Trim().StartsWith("filename="))?.Trim();
+        if (fileNameSection.IsStringNullOrEmpty())
+            return null;
+        
+        // Get the file name from the section and make sure it has value
+        var fileName = fileNameSection!.Split('=').LastOrDefault()?.Trim('\"');
+        if (fileName.IsStringNullOrEmpty())
+            return null;
+        
+        // Check if the filename contains encoded characters
+        if (!fileName!.Contains("''"))
+            return fileName;
+        
+        var encodedFileName = fileName.Split("''").LastOrDefault()?.Trim();
+        // Decode the encoded filename
+        return encodedFileName.IsStringNullOrEmpty() ? null : WebUtility.UrlDecode(encodedFileName);
     }
 
     public static bool HasFileExtension(this string? fileName)

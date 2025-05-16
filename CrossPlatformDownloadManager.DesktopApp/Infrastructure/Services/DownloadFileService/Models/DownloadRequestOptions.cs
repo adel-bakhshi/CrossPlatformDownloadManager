@@ -1,4 +1,4 @@
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Utils;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 public class DownloadRequestOptions
 {

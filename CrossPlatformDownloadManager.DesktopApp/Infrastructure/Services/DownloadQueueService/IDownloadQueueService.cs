@@ -35,8 +35,19 @@ public interface IDownloadQueueService
     
     Task UpdateDownloadQueuesAsync(List<DownloadQueueViewModel>? viewModels, bool reloadData = true);
 
+    /// <summary>
+    /// Starts a download queue and continues downloading files from the queue.
+    /// </summary>
+    /// <param name="viewModel">The download queue to start.</param>
+    /// <returns>Returns a task that represents the asynchronous operation.</returns>
     Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel);
 
+    /// <summary>
+    /// Stops a download queue and stops downloading files from the queue.
+    /// </summary>
+    /// <param name="viewModel">The download queue to stop.</param>
+    /// <param name="playSound">Indicates whether the sound should be played when the download queue is stopped.</param>
+    /// <returns>Returns a task that represents the asynchronous operation.</returns>
     Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool playSound = true);
 
     Task AddDownloadFileToDownloadQueueAsync(DownloadQueueViewModel? downloadQueueViewModel, DownloadFileViewModel? downloadFileViewModel);

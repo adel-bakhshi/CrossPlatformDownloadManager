@@ -36,7 +36,7 @@ public partial class App : Application
             var serviceProvider = this.TryGetServiceProvider();
             var appViewModel = serviceProvider?.GetService<AppViewModel>();
             DataContext = appViewModel ?? throw new NullReferenceException(nameof(appViewModel));
-            
+
             var mainWindow = serviceProvider?.GetService<MainWindow>();
             if (mainWindow == null)
                 throw new NullReferenceException(nameof(mainWindow));
@@ -79,7 +79,7 @@ public partial class App : Application
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
-    
+
     private static void ApplicationOnStartup(object? sender, ControlledApplicationLifetimeStartupEventArgs e)
     {
         try
@@ -88,7 +88,7 @@ public partial class App : Application
             var runningInstanceExists = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1;
             if (!runningInstanceExists)
                 return;
-            
+
             // Exit the application
             Log.Information("Application is already running. Exiting...");
             Environment.Exit(0);
@@ -99,7 +99,7 @@ public partial class App : Application
             Environment.Exit(0);
         }
     }
-    
+
     private async void ApplicationOnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         try

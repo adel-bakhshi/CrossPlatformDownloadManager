@@ -6,9 +6,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
@@ -21,7 +26,7 @@ using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 using Constants = CrossPlatformDownloadManager.Utils.Constants;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Utils;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 /// <summary>
 /// Handle downloading file with specific configuration
@@ -84,6 +89,16 @@ public class FileDownloader
     /// </summary>
     private List<ChunkProgress>? _chunkProgresses;
 
+    /// <summary>
+    /// This variable is used to keep the tasks that should be run asynchronously after the download is completed.
+    /// </summary>
+    private readonly List<Func<DownloadFileViewModel?, Task>> _completedAsyncTasks = [];
+
+    /// <summary>
+    /// This variable is used to keep the tasks that should be run synchronously after the download is completed.
+    /// </summary>
+    private readonly List<Action<DownloadFileViewModel?>> _completedSyncTasks = [];
+
     #endregion
 
     #region Properties
@@ -102,30 +117,11 @@ public class FileDownloader
     /// Gets the DownloadService object that contains the information of the download service.
     /// </summary>
     public DownloadService DownloadService { get; }
-
-    #endregion
-
-    #region Events
-
+    
     /// <summary>
-    /// Event that is raised when the download is finished.
+    /// Gets a value that indicates the download window of the current download file.
     /// </summary>
-    public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
-
-    /// <summary>
-    /// Event that is raised when the download is paused.
-    /// </summary>
-    public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
-
-    /// <summary>
-    /// Event that is raised when the download is resumed.
-    /// </summary>
-    public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
-
-    /// <summary>
-    /// Event that is raised when the download is stopped.
-    /// </summary>
-    public event EventHandler<DownloadFileEventArgs>? DownloadStopped;
+    public DownloadWindow? DownloadWindow { get; private set; }
 
     #endregion
 
@@ -239,7 +235,7 @@ public class FileDownloader
         // Change download status to stopping
         DownloadFile.Status = DownloadFileStatus.Stopping;
         // Raise download stopped event
-        DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = DownloadFile.Id });
+        DownloadFile.RaiseDownloadStoppedEvent(new DownloadFileEventArgs(DownloadFile.Id));
         // Cancel download
         await DownloadService.CancelTaskAsync().ConfigureAwait(false);
     }
@@ -256,7 +252,7 @@ public class FileDownloader
         // Change the download status to downloading
         DownloadFile.Status = DownloadFileStatus.Downloading;
         // Invoke DownloadResumed event
-        DownloadResumed?.Invoke(this, new DownloadFileEventArgs { Id = DownloadFile.Id });
+        DownloadFile.RaiseDownloadResumedEvent(new DownloadFileEventArgs(DownloadFile.Id));
     }
 
     /// <summary>
@@ -275,7 +271,92 @@ public class FileDownloader
         // Save download package
         SaveDownloadPackage(DownloadService.Package);
         // Invoke DownloadPaused event
-        DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = DownloadFile.Id });
+        DownloadFile.RaiseDownloadPausedEvent(new DownloadFileEventArgs(DownloadFile.Id));
+    }
+    
+    /// <summary>
+    /// Creates a window for showing the progress of the download.
+    /// </summary>
+    /// <param name="showWindow">This parameter indicates whether the created window should be opened and showed to the user or not.</param>
+    public void CreateDownloadWindow(bool showWindow = true)
+    {
+        var viewModel = new DownloadWindowViewModel(_appService, DownloadFile);
+        DownloadWindow = new DownloadWindow { DataContext = viewModel };
+        DownloadWindow.Closing += DownloadWindowOnClosing;
+
+        if (showWindow)
+            Dispatcher.UIThread.Post(() => DownloadWindow.Show());
+    }
+
+    /// <summary>
+    /// Shows or focuses the download window.
+    /// </summary>
+    public void ShowOrFocusWindow()
+    {
+        if (DownloadWindow == null)
+            return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!DownloadWindow.IsVisible)
+                DownloadWindow.Show();
+            else
+                DownloadWindow.Focus();
+        });
+    }
+
+    /// <summary>
+    /// Adds an async task to the completed tasks list.
+    /// This task will be executed when the download is finished.
+    /// </summary>
+    /// <param name="completedTask">The task that is to be executed when the download is finished.</param>
+    public void AddAsyncCompletedTask(Func<DownloadFileViewModel?, Task> completedTask)
+    {
+        _completedAsyncTasks.Add(completedTask);
+    }
+
+    /// <summary>
+    /// Adds a sync task to the completed tasks list.
+    /// This task will be executed when the download is finished.
+    /// </summary>
+    /// <param name="completedTask">The task that is to be executed when the download is finished.</param>
+    public void AddSyncCompletedTask(Action<DownloadFileViewModel?> completedTask)
+    {
+        _completedSyncTasks.Add(completedTask);
+    }
+
+    /// <summary>
+    /// Gets the completed async tasks.
+    /// </summary>
+    /// <returns>Returns a list of completed async tasks.</returns>
+    public List<Func<DownloadFileViewModel?, Task>> GetCompletedAsyncTasks()
+    {
+        return _completedAsyncTasks;
+    }
+
+    /// <summary>
+    /// Gets the completed sync tasks.
+    /// </summary>
+    /// <returns>Returns a list of completed sync tasks.</returns>
+    public List<Action<DownloadFileViewModel?>> GetCompletedSyncTasks()
+    {
+        return _completedSyncTasks;
+    }
+
+    /// <summary>
+    /// Clears all tasks from the completed tasks list.
+    /// </summary>
+    public void ClearCompletedAsyncTasks()
+    {
+        _completedAsyncTasks.Clear();
+    }
+    
+    /// <summary>
+    /// Clears all tasks from the completed tasks list.
+    /// </summary>
+    public void ClearCompletedSyncTasks()
+    {
+        _completedSyncTasks.Clear();
     }
 
     #region Event handlers
@@ -320,16 +401,8 @@ public class FileDownloader
             DownloadFile.Status = e.Cancelled ? DownloadFileStatus.Stopped : DownloadFileStatus.Completed;
         }
 
-        // Create an object of DownloadFileEventArgs
-        var eventArgs = new DownloadFileEventArgs
-        {
-            Id = DownloadFile.Id,
-            IsSuccess = isSuccess,
-            Error = error
-        };
-
         // Raise download finished event
-        DownloadFinished?.Invoke(this, eventArgs);
+        DownloadFile.RaiseDownloadFinishedEvent(new DownloadFileEventArgs(DownloadFile.Id, isSuccess, error));
     }
 
     /// <summary>
@@ -392,6 +465,48 @@ public class FileDownloader
         CalculateTimeLeft();
         // Update chunks data
         UpdateChunksData();
+    }
+    
+    /// <summary>
+    /// Handles the Closing event of the <see cref="DownloadWindow"/> class.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="WindowClosingEventArgs"/> event arguments.</param>
+    private async void DownloadWindowOnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        try
+        {
+            // Check if download window is not null and has data context of type DownloadWindowViewModel
+            if (DownloadWindow is not { DataContext: DownloadWindowViewModel viewModel })
+                return;
+
+            // Check if download window can be closed
+            if (!viewModel.CanCloseWindow)
+            {
+                // Cancel the closing of the window
+                e.Cancel = true;
+                Dispatcher.UIThread.Post(() => DownloadWindow!.Hide());
+                return;
+            }
+
+            // Unsubscribe from Closing event
+            DownloadWindow.Closing -= DownloadWindowOnClosing;
+            // Stop update chunks data timer
+            DownloadWindow.StopUpdateChunksDataTimer();
+            // Remove event handlers
+            viewModel.RemoveEventHandlers();
+            // Stop download if it's not stopped yet
+            if (viewModel.DownloadFile.IsDownloading || viewModel.DownloadFile.IsPaused)
+                await viewModel.StopDownloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while closing download window. Error message: {ErrorMessage}", ex.Message);
+
+            await DialogBoxManager.ShowDangerDialogAsync("Error closing download window",
+                $"An error occurred while closing download window.\nError message: {ex.Message}",
+                DialogButtons.Ok);
+        }
     }
 
     #endregion

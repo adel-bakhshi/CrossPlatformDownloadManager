@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -2332,14 +2331,14 @@ public class MainWindowViewModel : ViewModelBase
             var isFileSizeUnknown = false;
             if (fileName.IsStringNullOrEmpty())
             {
-                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url, CancellationToken.None);
-                var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
-                if (!urlDetailsValidation.IsValid)
+                var downloadFileDetails = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(exportDownloadFile.Url);
+                var urlDetailsValidation = await AppService.DownloadFileService.ValidateDownloadFileAsync(downloadFileDetails, showMessage: false);
+                if (!urlDetailsValidation)
                     continue;
 
-                fileName = urlDetails.FileName;
-                exportDownloadFile.Size = urlDetails.FileSize;
-                isFileSizeUnknown = urlDetails.IsFileSizeUnknown;
+                fileName = downloadFileDetails.FileName;
+                exportDownloadFile.Size = downloadFileDetails.Size ?? 0;
+                isFileSizeUnknown = downloadFileDetails.IsSizeUnknown;
             }
 
             CategoryViewModel? category = null;
@@ -2369,14 +2368,14 @@ public class MainWindowViewModel : ViewModelBase
                     else
                     {
                         var saveLocation = generalCategory.CategorySaveDirectory.SaveDirectory;
-                        fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                        fileName = AppService.DownloadFileService.GetNewFileName(fileName ?? string.Empty, saveLocation);
                         category = generalCategory;
                     }
                 }
                 else
                 {
                     var saveLocation = fileExtension.Category.CategorySaveDirectory.SaveDirectory;
-                    fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                    fileName = AppService.DownloadFileService.GetNewFileName(fileName ?? string.Empty, saveLocation);
                     category = fileExtension.Category;
                 }
             }

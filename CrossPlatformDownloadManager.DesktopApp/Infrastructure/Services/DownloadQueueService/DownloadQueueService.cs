@@ -14,7 +14,6 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Audio.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -58,7 +57,10 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
     #endregion
 
-    public DownloadQueueService(IUnitOfWork unitOfWork, IMapper mapper, IDownloadFileService downloadFileService, ISettingsService settingsService)
+    public DownloadQueueService(IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IDownloadFileService downloadFileService,
+        ISettingsService settingsService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -195,105 +197,54 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
 
     public async Task StartDownloadQueueAsync(DownloadQueueViewModel? viewModel)
     {
+        // Try to find the download queue
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
         if (downloadQueue == null || downloadQueue.IsRunning)
             return;
 
+        // Start the download queue
         await ContinueDownloadQueueAsync(downloadQueue);
     }
 
     public async Task StopDownloadQueueAsync(DownloadQueueViewModel? viewModel, bool playSound = true)
     {
+        // Try to find the download queue
         var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.Id);
         if (downloadQueue == null)
             return;
 
+        // Set the IsRunning flag to false
         downloadQueue.IsRunning = false;
+        // Set the IsStartSoundPlayed flag to false
         downloadQueue.IsStartSoundPlayed = false;
-
+        // Get all download file belongs to the current download queue and currently downloading or paused
         var downloadFiles = _downloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId == downloadQueue.Id && (df.IsDownloading || df.IsPaused) && !df.IsStopping)
             .ToList();
 
-        downloadFiles.ForEach(df =>
-        {
-            _downloadFileService.DownloadFinishedSyncTasks.TryAdd(df.Id, []);
-            _downloadFileService.DownloadFinishedSyncTasks[df.Id].Add(downloadFile =>
-            {
-                try
-                {
-                    ArgumentNullException.ThrowIfNull(downloadFile);
+        // Reset the count of error for each download file when the download is completed.
+        foreach (var downloadFile in downloadFiles)
+            _downloadFileService.AddCompletedTask(downloadFile, ResetCountOfError);
 
-                    downloadFile.CountOfError = 0;
-                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true };
-                }
-                catch (Exception ex)
-                {
-                    return new DownloadFinishedTaskValue { UpdateDownloadFile = true, Exception = ex };
-                }
-            });
-        });
-
-        var tasks = downloadFiles.ConvertAll(downloadFile => _downloadFileService.StopDownloadFileAsync(downloadFile, playSound: false));
-        await Task.WhenAll(tasks);
+        var finishedTasks = downloadFiles.ConvertAll(df => _downloadFileService.StopDownloadFileAsync(df, ensureStopped: true, playSound: false));
+        await Task.WhenAll(finishedTasks);
 
         // Turn off computer
         if (downloadQueue.TurnOffComputerWhenDone)
         {
-            if (downloadQueue.TurnOffComputerMode == null)
-                return;
-
-            var turnOffComputerMode = downloadQueue.TurnOffComputerMode! switch
-            {
-                TurnOffComputerMode.Shutdown => "shut down",
-                TurnOffComputerMode.Sleep => "sleep",
-                TurnOffComputerMode.Hibernate => "hibernate",
-                _ => throw new InvalidOperationException("TurnOffComputerMode is not valid.")
-            };
-
-            _ = Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                try
-                {
-                    var serviceProvider = Application.Current?.GetServiceProvider();
-                    var appService = serviceProvider?.GetService<IAppService>();
-                    if (appService == null)
-                        throw new InvalidOperationException("AppService not found.");
-                    
-                    var vm = new PowerOffWindowViewModel(appService, turnOffComputerMode, TimeSpan.FromSeconds(30));
-                    var window = new PowerOffWindow { DataContext = vm };
-                    window.Show();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "An error occurred while trying to power off the computer. Error message: {ErrorMessage}", ex.Message);
-                    await DialogBoxManager.ShowErrorDialogAsync(ex);
-                }
-            });
-                
+            TurnOffComputer(downloadQueue);
             return;
         }
-        
+
         // Exit program
         if (downloadQueue.ExitProgramWhenDone)
         {
-            _ = Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                try
-                {
-                    App.Desktop?.Shutdown();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "An error occurred while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
-                    await DialogBoxManager.ShowErrorDialogAsync(ex);
-                }
-            });
-                
+            ExitProgram();
             return;
         }
 
+        // Play the queue stopped sound if possible
         if (playSound && _settingsService.Settings.UseQueueStoppedSound)
             _ = AudioManager.PlayAsync(AppNotificationType.QueueStopped);
     }
@@ -478,42 +429,27 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         _scheduleManagerTimer.Start();
     }
 
-    #region Helpers
+    #region Event handlers
 
-    private async Task AddDefaultDownloadQueueAsync()
-    {
-        var downloadQueueInDb = await _unitOfWork
-            .DownloadQueueRepository
-            .GetAsync(where: dq => dq.Title.ToLower() == Constants.DefaultDownloadQueueTitle.ToLower());
-
-        if (downloadQueueInDb != null)
-            return;
-
-        var downloadQueue = new DownloadQueue
-        {
-            Title = Constants.DefaultDownloadQueueTitle,
-            RetryOnDownloadingFailed = true,
-            RetryCount = 3,
-            ShowAlarmWhenDone = true,
-            DownloadCountAtSameTime = 2,
-            IncludePausedFiles = false,
-        };
-
-        await AddNewDownloadQueueAsync(downloadQueue, reloadData: false);
-    }
-
+    /// <summary>
+    /// Handles the <see cref="IDownloadFileService.DataChanged"/> event of the download service.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
     private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e)
     {
-        // Remove DownloadFile from DownloadQueueTasks list when DownloadFile does not exist anymore
+        // Get all primary keys of download files
         var primaryKeys = _downloadFileService
             .DownloadFiles
             .Select(df => df.Id)
             .ToList();
 
+        // Find download queues that has a download file that is not in the given list of primary keys
         var downloadQueues = DownloadQueues
             .Where(dq => dq.DownloadingFiles.Exists(df => !primaryKeys.Contains(df.Id)))
             .ToList();
 
+        // Remove download files from download queues that are not in the given list of primary keys
         foreach (var downloadQueue in downloadQueues)
         {
             var downloadFiles = downloadQueue
@@ -529,8 +465,109 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         }
     }
 
+    /// <summary>
+    /// Handles the <see cref="DownloadFileViewModel.DownloadPaused"/> event of the download file.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="DownloadFileEventArgs"/> instance containing the event data.</param>
+    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
+    {
+        // Try to find download file by id
+        var downloadFile = _downloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
+        // Try to find download queue by download queue id
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadFile?.DownloadQueueId);
+        // Check if the download queue supports paused files and currently is running
+        if (downloadQueue == null || downloadQueue.IncludePausedFiles || !downloadQueue.IsRunning)
+            return;
+
+        // If the download file is paused and the download queue is not supporting paused files,
+        // Ignore paused download files and continue the download queue with the other download files
+        _ = ContinueDownloadQueueAsync(downloadQueue);
+    }
+
+    /// <summary>
+    /// Handle the <see cref="DispatcherTimer.Tick"/> event and manage scheduled download queues.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    private void ScheduleManagerTimerOnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Stop timer until operation is finished
+            _scheduleManagerTimer.Stop();
+            // Get all download queues that are scheduled to start
+            var startScheduledQueues = DownloadQueues
+                .Where(dq => dq is { StartDownloadSchedule: not null, IsScheduleEnabled: false })
+                .ToList();
+
+            // Start download queue based on it's a daily schedule or just for date schedule
+            foreach (var downloadQueue in startScheduledQueues)
+                _ = downloadQueue.IsDaily ? StartDailyScheduleAsync(downloadQueue) : StartJustForDateScheduleAsync(downloadQueue);
+
+            // Get all download queues that are scheduled to stop
+            var stopScheduledQueues = DownloadQueues
+                .Where(dq => dq.StopDownloadSchedule != null && (dq.IsScheduleEnabled || dq.IsRunning))
+                .ToList();
+
+            // Stop download queue based on it's a daily schedule or just for date schedule
+            foreach (var downloadQueue in stopScheduledQueues)
+                _ = downloadQueue.IsDaily ? StopDailyScheduleAsync(downloadQueue) : StopJustForDateScheduleAsync(downloadQueue);
+
+            // Restart the timer to check for scheduled download queues again
+            _scheduleManagerTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            // Log the error
+            Log.Error(ex, "An error occurred while scheduling manager. Error message: {ErrorMessage}", ex.Message);
+            // Start the timer again if it's not enabled
+            if (!_scheduleManagerTimer.IsEnabled)
+                _scheduleManagerTimer.Start();
+        }
+    }
+
+    #endregion
+
+    #region Helpers
+
+    /// <summary>
+    /// Adds the default download queue (Main Queue) to the database.
+    /// </summary>
+    private async Task AddDefaultDownloadQueueAsync()
+    {
+        // Get the default download queue from the database
+        var downloadQueueInDb = await _unitOfWork
+            .DownloadQueueRepository
+            .GetAsync(where: dq => dq.Title.ToLower() == Constants.DefaultDownloadQueueTitle.ToLower());
+
+        // Check if the default download queue exists
+        if (downloadQueueInDb != null)
+            return;
+
+        // Create default download queue
+        var downloadQueue = new DownloadQueue
+        {
+            Title = Constants.DefaultDownloadQueueTitle,
+            RetryOnDownloadingFailed = true,
+            RetryCount = 3,
+            ShowAlarmWhenDone = true,
+            DownloadCountAtSameTime = 2,
+            IncludePausedFiles = false,
+        };
+
+        // Add default download queue to the database
+        await AddNewDownloadQueueAsync(downloadQueue, reloadData: false);
+    }
+
+    /// <summary>
+    /// Starts or continues the process of a download queue.
+    /// </summary>
+    /// <param name="viewModel">The download queue that should be started or continued.</param>
     private async Task ContinueDownloadQueueAsync(DownloadQueueViewModel viewModel)
     {
+        // Get download files that currently are not downloading or paused
+        // And satisfy the following conditions
         var downloadFiles = _downloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId == viewModel.Id
@@ -538,8 +575,10 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
                          && (!viewModel.RetryOnDownloadingFailed || df.CountOfError < viewModel.RetryCount))
             .ToList();
 
+        // Check if the download queue supports paused files
         if (viewModel.IncludePausedFiles)
         {
+            // Get download files that are paused
             var pausedDownloadFiles = _downloadFileService
                 .DownloadFiles
                 .Where(df => df.DownloadQueueId == viewModel.Id
@@ -547,16 +586,15 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
                              && (!viewModel.RetryOnDownloadingFailed || df.CountOfError < viewModel.RetryCount))
                 .ToList();
 
+            // Add them to the download files list
             downloadFiles = downloadFiles
                 .Union(pausedDownloadFiles)
                 .Distinct()
                 .ToList();
         }
 
-        downloadFiles = downloadFiles
-            .OrderBy(df => df.DownloadQueuePriority)
-            .ToList();
-
+        // Sort download files by download queue priority
+        downloadFiles = downloadFiles.OrderBy(df => df.DownloadQueuePriority).ToList();
         // All download files are finished
         if (downloadFiles.Count == 0 && viewModel.DownloadingFiles.Count == 0)
         {
@@ -566,35 +604,42 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             if (playFinishedSound || viewModel.ShowAlarmWhenDone)
                 _ = AudioManager.PlayAsync(AppNotificationType.QueueFinished);
 
+            // Stop download queue
             await StopDownloadQueueAsync(viewModel, playSound: !playFinishedSound);
             return;
         }
 
+        // Set the IsRunning flag to true
         if (!viewModel.IsRunning)
             viewModel.IsRunning = true;
 
-        var taskIndex = 0;
-        while (viewModel.DownloadingFiles.Count < viewModel.DownloadCountAtSameTime && taskIndex < downloadFiles.Count)
+        // Define the index variable
+        var index = 0;
+        // Start downloading files when the number of downloading files is less than the download count at the same time,
+        // And there is a download file in the download files list
+        while (viewModel.DownloadingFiles.Count < viewModel.DownloadCountAtSameTime && index < downloadFiles.Count)
         {
-            var downloadFile = downloadFiles[taskIndex];
-
-            _downloadFileService.DownloadFinishedAsyncTasks.TryAdd(downloadFile.Id, []);
-            _downloadFileService.DownloadFinishedAsyncTasks[downloadFile.Id].Add(DownloadFileFinishedTaskAsync);
-
+            // Get download file by index
+            var downloadFile = downloadFiles[index];
+            // Add completed tasks for the current download file
+            _downloadFileService.AddCompletedTask(downloadFile, DownloadFileFinishedTaskAsync);
+            // Subscribe to DownloadPaused event for managing paused files
             downloadFile.DownloadPaused += DownloadFileOnDownloadPaused;
-
+            // Start download file
             _ = _downloadFileService.StartDownloadFileAsync(downloadFile, showWindow: false);
-
+            // Add download file to the downloading files list of the download queue
             viewModel.DownloadingFiles.Add(downloadFile);
-            taskIndex++;
+            index++;
         }
 
+        // Stop download queue when there is no download file in the downloading files list
         if (viewModel.DownloadingFiles.Count == 0)
         {
             await StopDownloadQueueAsync(viewModel);
             return;
         }
 
+        // Play download queue started sound if possible
         if (!viewModel.IsStartSoundPlayed && _settingsService.Settings.UseQueueStartedSound)
         {
             _ = AudioManager.PlayAsync(AppNotificationType.QueueStarted);
@@ -602,142 +647,85 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         }
     }
 
-    private async Task<DownloadFinishedTaskValue?> DownloadFileFinishedTaskAsync(DownloadFileViewModel? viewModel)
+    /// <summary>
+    /// A task that runs when the downloading of a file is completed successfully or with an error.
+    /// </summary>
+    /// <param name="viewModel">The download file that the task is running for.</param>
+    private async Task DownloadFileFinishedTaskAsync(DownloadFileViewModel? viewModel)
     {
-        try
-        {
-            var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.TempDownloadQueueId);
-            var downloadFile = downloadQueue?.DownloadingFiles.Find(df => df.Id == viewModel?.Id);
-            if (downloadFile == null)
-                return null;
-
-            downloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
-
-            if ((downloadFile.IsError || downloadFile.IsStopped) && downloadQueue!.IsRunning)
-            {
-                var maxPriority = await _unitOfWork
-                    .DownloadFileRepository
-                    .GetMaxAsync(selector: df => df.DownloadQueuePriority, where: df => df.DownloadQueueId == downloadQueue.Id);
-
-                downloadFile.DownloadQueuePriority = maxPriority + 1;
-
-                if (downloadFile.IsError)
-                    downloadFile.CountOfError++;
-            }
-
-            if (downloadFile.IsCompleted || downloadFile.IsError || downloadFile.IsStopped)
-                downloadQueue!.DownloadingFiles.Remove(downloadFile);
-
-            await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
-
-            if (downloadQueue!.IsRunning)
-                _ = ContinueDownloadQueueAsync(downloadQueue);
-
-            return new DownloadFinishedTaskValue { UpdateDownloadFile = false };
-        }
-        catch (Exception ex)
-        {
-            return new DownloadFinishedTaskValue { Exception = ex };
-        }
-    }
-
-    private void DownloadFileOnDownloadPaused(object? sender, DownloadFileEventArgs e)
-    {
-        var downloadFile = _downloadFileService.DownloadFiles.FirstOrDefault(df => df.Id == e.Id);
-        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == downloadFile?.DownloadQueueId);
-        if (downloadQueue == null || downloadQueue.IncludePausedFiles || !downloadQueue.IsRunning)
+        // Try to find the download queue by TempDownloadQueueId
+        var downloadQueue = DownloadQueues.FirstOrDefault(dq => dq.Id == viewModel?.TempDownloadQueueId);
+        // Try to find the download file in the download queue
+        var downloadFile = downloadQueue?.DownloadingFiles.Find(df => df.Id == viewModel?.Id);
+        if (downloadFile == null)
             return;
 
-        _ = ContinueDownloadQueueAsync(downloadQueue);
+        // Unsubscribe from DownloadPaused event
+        downloadFile.DownloadPaused -= DownloadFileOnDownloadPaused;
+        // Check if an error occurred during the download or the download stopped by the user when the download queue is still running.
+        // In this situation we have to change the priority of the download file to the lowest priority (Change its position to the end of the queue).
+        if ((downloadFile.IsError || downloadFile.IsStopped) && downloadQueue!.IsRunning)
+        {
+            // Get the maximum priority for the current queue.
+            var maxPriority = _downloadFileService
+                .DownloadFiles
+                .Where(df => df.DownloadQueueId == downloadQueue.Id)
+                .Max(df => df.DownloadQueuePriority);
+
+            // Change the priority of the download file
+            downloadFile.DownloadQueuePriority = maxPriority + 1;
+            // Check if an error occurred during the download
+            // When error occurred we have to update the count of error for the download file
+            // So we can ignore this file when the download queue continues to run
+            if (downloadFile.IsError)
+                downloadFile.CountOfError++;
+        }
+
+        // Remove the download file from the downloading files collection
+        // So when the download queue continue to run, it can choose another file to download it
+        if (downloadFile.IsCompleted || downloadFile.IsError || downloadFile.IsStopped)
+            downloadQueue!.DownloadingFiles.Remove(downloadFile);
+
+        // Update the download file
+        await _downloadFileService.UpdateDownloadFileAsync(downloadFile);
+        // Check if the download queue still running
+        // If it's running, continue to download the next file(s)
+        if (downloadQueue!.IsRunning)
+            _ = ContinueDownloadQueueAsync(downloadQueue);
     }
 
-    private void ScheduleManagerTimerOnTick(object? sender, EventArgs e)
-    {
-        try
-        {
-            // Stop timer until operation is finished
-            _scheduleManagerTimer.Stop();
-
-            // Start scheduled queues
-            var startScheduledQueues = DownloadQueues
-                .Where(dq => dq is { StartDownloadSchedule: not null, IsScheduleEnabled: false })
-                .ToList();
-
-            foreach (var downloadQueue in startScheduledQueues)
-            {
-                _ = downloadQueue.IsDaily ? StartDailyScheduleAsync(downloadQueue) : StartJustForDateScheduleAsync(downloadQueue);
-            }
-
-            // Stop scheduled queues
-            var stopScheduledQueues = DownloadQueues
-                .Where(dq => dq.StopDownloadSchedule != null && (dq.IsScheduleEnabled || dq.IsRunning))
-                .ToList();
-
-            foreach (var downloadQueue in stopScheduledQueues)
-            {
-                _ = downloadQueue.IsDaily ? StopDailyScheduleAsync(downloadQueue) : StopJustForDateScheduleAsync(downloadQueue);
-            }
-
-            _scheduleManagerTimer.Start();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while scheduling manager. Error message: {ErrorMessage}", ex.Message);
-
-            if (!_scheduleManagerTimer.IsEnabled)
-                _scheduleManagerTimer.Start();
-        }
-    }
-
+    /// <summary>
+    /// Starts a download queue that scheduled to run daily.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled to run daily.</param>
     private async Task StartDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
-        var daysOfWeek = downloadQueue.DaysOfWeek;
-        if (daysOfWeek.IsStringNullOrEmpty())
+        // Check if the current day of week is acceptable for the download queue
+        if (!CheckTheDayIsAcceptable(downloadQueue))
             return;
 
-        var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();
-        if (daysOfWeekViewModel == null)
-            return;
-
-        var currentDayOfWeek = DateTime.Now.DayOfWeek;
-
-        bool dayOfWeekAcceptable;
-        switch (currentDayOfWeek)
-        {
-            case DayOfWeek.Saturday when daysOfWeekViewModel.Saturday:
-            case DayOfWeek.Sunday when daysOfWeekViewModel.Sunday:
-            case DayOfWeek.Monday when daysOfWeekViewModel.Monday:
-            case DayOfWeek.Tuesday when daysOfWeekViewModel.Tuesday:
-            case DayOfWeek.Wednesday when daysOfWeekViewModel.Wednesday:
-            case DayOfWeek.Thursday when daysOfWeekViewModel.Thursday:
-            case DayOfWeek.Friday when daysOfWeekViewModel.Friday:
-            {
-                dayOfWeekAcceptable = true;
-                break;
-            }
-
-            default:
-            {
-                dayOfWeekAcceptable = false;
-                break;
-            }
-        }
-
-        if (!dayOfWeekAcceptable)
-            return;
-
+        // Start the schedule
         await StartScheduleAsync(downloadQueue);
     }
 
+    /// <summary>
+    /// Starts a download queue that scheduled to run in a specific date.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled to run in a specific date.</param>
     private async Task StartJustForDateScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
         // Compare current date with just for date
         if (downloadQueue.JustForDate?.Date.Equals(DateTime.Now.Date) != true)
             return;
 
+        // Start the schedule
         await StartScheduleAsync(downloadQueue);
     }
 
+    /// <summary>
+    /// Starts the schedule.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled.</param>
     private async Task StartScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
         // Make sure start time is equal to current time
@@ -748,31 +736,92 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         if (startDownloadHour != DateTime.Now.Hour || startDownloadMinute != DateTime.Now.Minute)
             return;
 
+        // Get all download files that belong to the download queue
         var downloadFiles = _downloadFileService
             .DownloadFiles
             .Where(df => df.DownloadQueueId == downloadQueue.Id)
             .ToList();
 
+        // Check if download files collection is empty
         if (downloadFiles.Count == 0)
             return;
 
+        // Set the IsScheduleEnabled flag to true
         downloadQueue.IsScheduleEnabled = true;
         // Start download queue
         await StartDownloadQueueAsync(downloadQueue);
     }
 
+    /// <summary>
+    /// Stops a download queue that scheduled to run daily.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled to run daily.</param>
     private async Task StopDailyScheduleAsync(DownloadQueueViewModel downloadQueue)
     {
+        // Check if the current day of week is acceptable for the download queue
+        if (!CheckTheDayIsAcceptable(downloadQueue))
+            return;
+
+        // Stop the schedule
+        await StopScheduleAsync(downloadQueue);
+    }
+
+    /// <summary>
+    /// Stops a download queue that scheduled to run in a specific date.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled to run in a specific date.</param>
+    private async Task StopJustForDateScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Compare current date with just for date
+        if (downloadQueue.JustForDate?.Date.Equals(DateTime.Now.Date) != true)
+            return;
+
+        // Stop the schedule
+        await StopScheduleAsync(downloadQueue);
+    }
+
+    /// <summary>
+    /// Stops the schedule.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled.</param>
+    private async Task StopScheduleAsync(DownloadQueueViewModel downloadQueue)
+    {
+        // Make sure stop time is equal to current time
+        var stopDownloadHour = downloadQueue.StopDownloadSchedule!.Value.Hours;
+        var stopDownloadMinute = downloadQueue.StopDownloadSchedule!.Value.Minutes;
+
+        // Compare current time with stop time
+        if (DateTime.Now.Hour != stopDownloadHour || DateTime.Now.Minute != stopDownloadMinute)
+            return;
+
+        // Set the IsScheduleEnabled flag to false
+        downloadQueue.IsScheduleEnabled = false;
+        // Stop download queue
+        await StopDownloadQueueAsync(downloadQueue);
+    }
+
+    /// <summary>
+    /// Checks that the current day is an acceptable day for the schedule.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that scheduled to run daily.</param>
+    /// <returns>Returns true if the current day is an acceptable day for the schedule, otherwise returns false.</returns>
+    private static bool CheckTheDayIsAcceptable(DownloadQueueViewModel downloadQueue)
+    {
+        // Get days of week that sets for the download queue
         var daysOfWeek = downloadQueue.DaysOfWeek;
+        // Make sure the days of week is not empty
         if (daysOfWeek.IsStringNullOrEmpty())
-            return;
+            return false;
 
+        // Convert days of week from json to DaysOfWeekViewModel
         var daysOfWeekViewModel = daysOfWeek.ConvertFromJson<DaysOfWeekViewModel?>();
+        // Check if view model is not null
         if (daysOfWeekViewModel == null)
-            return;
+            return false;
 
+        // Get current day of week
         var currentDayOfWeek = DateTime.Now.DayOfWeek;
-
+        // Define a variable that indicates whether the current day of week is acceptable for the download queue or not
         bool dayOfWeekAcceptable;
         switch (currentDayOfWeek)
         {
@@ -795,34 +844,83 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             }
         }
 
-        if (!dayOfWeekAcceptable)
-            return;
-
-        await StopScheduleAsync(downloadQueue);
+        return dayOfWeekAcceptable;
     }
 
-    private async Task StopJustForDateScheduleAsync(DownloadQueueViewModel downloadQueue)
+    /// <summary>
+    /// Resets the count of error of the download file.
+    /// This method should run when the download file is completed.
+    /// </summary>
+    /// <param name="downloadFile">The download file that is completed.</param>
+    private static void ResetCountOfError(DownloadFileViewModel? downloadFile)
     {
-        // Compare current date with just for date
-        if (downloadQueue.JustForDate?.Date.Equals(DateTime.Now.Date) != true)
-            return;
-
-        await StopScheduleAsync(downloadQueue);
+        // Check if the download file is not null
+        ArgumentNullException.ThrowIfNull(downloadFile);
+        // Reset the count of error
+        downloadFile.CountOfError = 0;
     }
 
-    private async Task StopScheduleAsync(DownloadQueueViewModel downloadQueue)
+    /// <summary>
+    /// Shows the power off window and turn off the computer.
+    /// </summary>
+    /// <param name="downloadQueue">The download queue that stopped and should turn off the computer.</param>
+    /// <exception cref="InvalidOperationException">if the mode of the turn-off computer is not valid.</exception>
+    private static void TurnOffComputer(DownloadQueueViewModel downloadQueue)
     {
-        // Make sure stop time is equal to current time
-        var stopDownloadHour = downloadQueue.StopDownloadSchedule!.Value.Hours;
-        var stopDownloadMinute = downloadQueue.StopDownloadSchedule!.Value.Minutes;
-
-        // Compare current time with stop time
-        if (DateTime.Now.Hour != stopDownloadHour || DateTime.Now.Minute != stopDownloadMinute)
+        // Check if the mode of the turn-off computer is valid 
+        if (downloadQueue.TurnOffComputerMode == null)
             return;
 
-        downloadQueue.IsScheduleEnabled = false;
-        // Stop download queue
-        await StopDownloadQueueAsync(downloadQueue);
+        // Convert the turn-off computer mode to string
+        var turnOffComputerMode = downloadQueue.TurnOffComputerMode! switch
+        {
+            TurnOffComputerMode.Shutdown => "shut down",
+            TurnOffComputerMode.Sleep => "sleep",
+            TurnOffComputerMode.Hibernate => "hibernate",
+            _ => throw new InvalidOperationException("TurnOffComputerMode is not valid.")
+        };
+
+        _ = Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            try
+            {
+                // Try to find app service
+                var appService = Application.Current?.GetServiceProvider().GetService<IAppService>();
+                if (appService == null)
+                    throw new InvalidOperationException("AppService not found.");
+
+                // Create view model and pass required data to it
+                var viewModel = new PowerOffWindowViewModel(appService, turnOffComputerMode, TimeSpan.FromSeconds(30));
+                // Create window
+                var window = new PowerOffWindow { DataContext = viewModel };
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to power off the computer. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
+    }
+
+    /// <summary>
+    /// Exits the program when the download queue is stopped.
+    /// </summary>
+    private static void ExitProgram()
+    {
+        _ = Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            try
+            {
+                // Close the program
+                App.Desktop?.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to exit the app. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     #endregion

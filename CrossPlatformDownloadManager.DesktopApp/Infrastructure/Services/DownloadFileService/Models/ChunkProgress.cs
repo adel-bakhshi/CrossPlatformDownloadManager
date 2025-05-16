@@ -1,6 +1,6 @@
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Utils;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 /// <summary>
 /// Represents progress of the chunk.

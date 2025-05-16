@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using CrossPlatformDownloadManager.Utils;
+using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
 
@@ -271,8 +272,55 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     public bool PlayStopSound { get; set; } = true;
     public int? TempDownloadQueueId { get; set; }
+    public bool IsCompletelyStopped { get; set; }
+    public bool IsUrlDuplicate { get; set; }
+    public bool IsFileNameDuplicate { get; set; }
 
     #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Event that is raised when the download is finished.
+    /// </summary>
+    public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
+
+    /// <summary>
+    /// Event that is raised when the download is paused.
+    /// </summary>
+    public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
+
+    /// <summary>
+    /// Event that is raised when the download is resumed.
+    /// </summary>
+    public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
+
+    /// <summary>
+    /// Event that is raised when the download is stopped.
+    /// </summary>
+    public event EventHandler<DownloadFileEventArgs>? DownloadStopped;
+
+    #endregion
+
+    public void RaiseDownloadFinishedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadFinished?.Invoke(this, eventArgs);
+    }
+
+    public void RaiseDownloadPausedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadPaused?.Invoke(this, eventArgs);
+    }
+
+    public void RaiseDownloadResumedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadResumed?.Invoke(this, eventArgs);
+    }
+
+    public void RaiseDownloadStoppedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadStopped?.Invoke(this, eventArgs);
+    }
 
     #region Helpers
 

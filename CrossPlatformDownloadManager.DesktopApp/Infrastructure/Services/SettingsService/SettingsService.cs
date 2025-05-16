@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Avalonia;
@@ -348,49 +347,6 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     {
         _managerWindow?.Close();
         _managerWindow = null;
-    }
-
-    public IWebProxy? GetProxy()
-    {
-        IWebProxy? proxy = null;
-        switch (Settings.ProxyMode)
-        {
-            case ProxyMode.DisableProxy:
-            {
-                proxy = null;
-                break;
-            }
-
-            case ProxyMode.UseSystemProxySettings:
-            {
-                var systemProxy = WebRequest.DefaultWebProxy;
-                if (systemProxy == null)
-                    break;
-
-                proxy = systemProxy;
-                break;
-            }
-
-            case ProxyMode.UseCustomProxy:
-            {
-                var activeProxy = Settings.Proxies.FirstOrDefault(p => p.IsActive);
-                if (activeProxy == null)
-                    break;
-
-                proxy = new WebProxy
-                {
-                    Address = new Uri(activeProxy.GetProxyUri()),
-                    Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password)
-                };
-
-                break;
-            }
-
-            default:
-                throw new InvalidOperationException("Invalid proxy mode.");
-        }
-
-        return proxy;
     }
 
     #region Helpers

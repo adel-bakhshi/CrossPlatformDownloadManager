@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Utils;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
 /// <summary>
 /// Configure a request for downloading a file.
@@ -179,7 +179,7 @@ public class DownloadRequest : PropertyChangedBase
         catch (Exception ex)
         {
             // Log error
-            Log.Error("An error occured while trying to check download in range capability. Error message: {ErrorMessage},", ex.Message);
+            Log.Error("An error occurred while trying to check download in range capability. Error message: {ErrorMessage},", ex.Message);
         }
 
         return false;
@@ -235,6 +235,8 @@ public class DownloadRequest : PropertyChangedBase
         // Add proxy to the handler
         handler.Proxy = Proxy;
         handler.UseProxy = Proxy != null;
+        // Add timeout to the handler
+        handler.ConnectTimeout = TimeSpan.FromSeconds(30);
 
         // Redirect options
         handler.AllowAutoRedirect = Options.AllowAutoRedirect;
@@ -303,18 +305,15 @@ public class DownloadRequest : PropertyChangedBase
     /// <param name="response">The response received by HttpClient</param>
     private void EnsureRedirectUriIsTheSameAsTheOrigin(HttpResponseMessage? response)
     {
-        // Check if the response is null
-        if (response == null)
+        // Check if the response or request message is null
+        if (response?.RequestMessage == null)
             return;
 
         // Get the redirect URI from the response
-        var redirectUri = Url?.AbsoluteUri ?? string.Empty;
-        if (response.Headers.Location != null)
-            redirectUri = response.Headers.Location.AbsoluteUri;
-
-        // Check if the redirect URI is the same as the origin URI
-        if (!redirectUri.Equals(Url?.AbsoluteUri))
-            Url = new Uri(redirectUri);
+        var finalUrl = response.RequestMessage.RequestUri?.AbsoluteUri;
+        // If the base address has changed, update the URL property
+        if (!finalUrl.IsStringNullOrEmpty() && !finalUrl!.Equals(Url?.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            Url = new Uri(finalUrl);
     }
 
     #endregion

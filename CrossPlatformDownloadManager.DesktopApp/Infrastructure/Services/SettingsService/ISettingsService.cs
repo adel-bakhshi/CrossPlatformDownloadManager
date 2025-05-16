@@ -45,6 +45,4 @@ public interface ISettingsService
     void ShowManager();
 
     void HideManager();
-
-    IWebProxy? GetProxy();
 }

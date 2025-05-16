@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Styling;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.JsonConverters;
@@ -15,7 +16,7 @@ public class AppThemeService : IAppThemeService
     #region Private Fields
 
     private readonly ISettingsService _settingsService;
-    private string? _lastThemeName;
+    private string? _lastThemePath;
 
     #endregion
 
@@ -24,26 +25,95 @@ public class AppThemeService : IAppThemeService
         _settingsService = settingsService;
     }
 
-    public void LoadThemeDataFromAssets()
+    public void LoadThemeData()
     {
-        // Check last theme. If same, return
-        if (!_lastThemeName.IsStringNullOrEmpty())
+        // Get the theme file path and set default light theme file path if it's empty or theme file not found
+        var themeFilePath = _settingsService.Settings.ThemeFilePath;
+        if (themeFilePath.IsStringNullOrEmpty()
+            || (themeFilePath?.Contains("avares://", StringComparison.OrdinalIgnoreCase) == false && !File.Exists(themeFilePath)))
+        {
+            themeFilePath = Constants.LightThemeFilePath;
+        }
+
+        // Check if current theme is equal to last theme
+        if (themeFilePath!.Equals(_lastThemePath))
             return;
 
+        // Read JSON data
+        var jsonData = themeFilePath.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
+            ? LoadThemeDataFromAssets(themeFilePath)
+            : LoadThemeDataFromStorage(themeFilePath);
+
+        // Convert JSON data to AppTheme object
+        var appTheme = ConvertJsonToAppTheme(jsonData);
+        if (appTheme == null)
+            throw new InvalidCastException("App theme data is null or undefined.");
+
+        // Apply theme data
+        ApplyAppTheme(appTheme);
+        // Set the last theme path
+        _lastThemePath = themeFilePath;
+        // Log information
+        Log.Information($"{appTheme.ThemeName} theme loaded successfully.");
+    }
+
+    public bool ValidateAppTheme(string? json)
+    {
+        if (json.IsStringNullOrEmpty())
+            return false;
+        
+        var appTheme = ConvertJsonToAppTheme(json);
+        return appTheme != null && appTheme.Validate();
+    }
+
+    #region Helpers
+
+    /// <summary>
+    /// Loads theme data from Avalonia assets.
+    /// </summary>
+    /// <param name="themeFilePath">Theme file path based on Avalonia path system.</param>
+    /// <returns>Returns the theme data as JSON string.</returns>
+    private static string? LoadThemeDataFromAssets(string themeFilePath)
+    {
+        return themeFilePath.OpenTextAsset();
+    }
+
+    /// <summary>
+    /// Loads theme data from storage.
+    /// </summary>
+    /// <param name="themeFilePath">Theme file path.</param>
+    /// <returns>Returns the theme data as JSON string.</returns>
+    private static string? LoadThemeDataFromStorage(string themeFilePath)
+    {
+        return !File.Exists(themeFilePath) ? null : File.ReadAllText(themeFilePath);
+    }
+
+    /// <summary>
+    /// Converts JSON data to AppTheme object.
+    /// </summary>
+    /// <param name="jsonData">JSON data as string.</param>
+    /// <returns>Returns the AppTheme object.</returns>
+    private static AppTheme? ConvertJsonToAppTheme(string? jsonData)
+    {
+        if (jsonData.IsStringNullOrEmpty())
+            return null;
+
+        // Json serializer settings for converting IThemeBrush
+        var settings = new JsonSerializerSettings { Converters = [new ThemeBrushJsonConverter()] };
+        return jsonData.ConvertFromJson<AppTheme?>(settings);
+    }
+
+    /// <summary>
+    /// Applies the theme data to the application.
+    /// </summary>
+    /// <param name="appTheme">AppTheme object.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the theme data is corrupted or invalid.</exception>
+    private static void ApplyAppTheme(AppTheme appTheme)
+    {
         // Get and validate resources
         var resources = Application.Current?.Resources;
         if (resources == null)
             return;
-
-        // Get theme data from assets
-        var assetPath = $"avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/{(_settingsService.Settings.DarkMode ? "dark-theme.json" : "light-theme.json")}";
-        var assetUri = new Uri(assetPath);
-        // Json serializer settings
-        var settings = new JsonSerializerSettings { Converters = [new ThemeBrushJsonConverter()] };
-        // Convert json to app theme
-        var appTheme = assetUri.OpenJsonAsset<AppTheme>(settings);
-        if (appTheme == null)
-            throw new InvalidOperationException("Unable to load app theme.");
 
         // Validate app theme
         if (!appTheme.Validate())
@@ -79,12 +149,10 @@ public class AppThemeService : IAppThemeService
         resources["ChunkProgressGradientBrush"] = appTheme.ChunkProgressGradientBrush!.GetBrush();
         resources["DataGridRowGradientBrush"] = appTheme.DataGridRowGradientBrush!.GetBrush();
 
+        // Set application theme variant
         if (Application.Current?.RequestedThemeVariant != null)
             Application.Current.RequestedThemeVariant = appTheme.IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
-
-        // Set last theme flag
-        _lastThemeName = appTheme.ThemeName;
-        // Log information
-        Log.Information($"App theme ({(_settingsService.Settings.DarkMode ? "Dark" : "Light")}) loaded successfully.");
     }
+
+    #endregion
 }

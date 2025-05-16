@@ -9,7 +9,6 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
@@ -200,6 +199,16 @@ public class SettingsWindowViewModel : ViewModelBase
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
             
+            // Validate selected theme
+            if (GeneralsViewModel.SelectedTheme == null)
+            {
+                await DialogBoxManager.ShowInfoDialogAsync("Theme Not Specified",
+                    "Please choose a valid theme and try again.",
+                    DialogButtons.Ok);
+                
+                return;
+            }
+            
             // Validate font
             if (GeneralsViewModel.SelectedFont.IsStringNullOrEmpty())
             {
@@ -270,15 +279,19 @@ public class SettingsWindowViewModel : ViewModelBase
                     DialogButtons.YesNo);
 
                 if (result == DialogResult.Yes)
+                {
                     DownloadsViewModel.SelectedSpeedUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
                 else
+                {
                     return;
+                }
             }
 
             // Save general settings
             AppService.SettingsService.Settings.StartOnSystemStartup = GeneralsViewModel.StartOnSystemStartup;
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
-            AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
+            AppService.SettingsService.Settings.ThemeFilePath = GeneralsViewModel.SelectedTheme.ThemePath;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
             AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
             AppService.SettingsService.Settings.ApplicationFont = GeneralsViewModel.SelectedFont;

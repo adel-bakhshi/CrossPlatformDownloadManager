@@ -1,9 +1,10 @@
 {
   "startOnSystemStartup": true,
   "UseBrowserExtension": true,
-  "darkMode": false,
+  "themeFilePath": "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json",
   "useManager": true,
   "alwaysKeepManagerOnTop": true,
+  "applicationFont": "Asap",
   "showStartDownloadDialog": true,
   "showCompleteDownloadDialog": true,
   "duplicateDownloadLinkAction": 0,
@@ -19,6 +20,5 @@
   "useQueueStartedSound": false,
   "useQueueStoppedSound": false,
   "useQueueFinishedSound": false,
-  "useSystemNotifications": false,
-  "applicationFont": "Asap"
+  "useSystemNotifications": false
 }

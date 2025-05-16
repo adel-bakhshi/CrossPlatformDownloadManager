@@ -4,7 +4,7 @@ namespace CrossPlatformDownloadManager.Utils;
 
 public static class Constants
 {
-    #region Private Fields
+    #region Private fields
 
     // Duplicate download link actions
     private const string LetUserChooseAction = "Show the dialog and let me choose";
@@ -14,7 +14,7 @@ public static class Constants
 
     #endregion
 
-    #region Public Fields
+    #region Public fields
 
     /// <summary>
     /// The amount of bytes in a kilobyte.
@@ -43,36 +43,6 @@ public static class Constants
     public const long MaximumMemoryBufferBytes = 10 * MegaByte;
 
     /// <summary>
-    /// Gets turn off computer modes.
-    /// </summary>
-    public static List<string> TurnOffComputerModes
-    {
-        get
-        {
-            return Enum
-                .GetNames<TurnOffComputerMode>()
-                .Select(n =>
-                {
-                    if (n.Equals(Enum.GetName(TurnOffComputerMode.Shutdown)))
-                        n = "Shut down";
-
-                    return n;
-                })
-                .ToList();
-        }
-    }
-
-    /// <summary>
-    /// Gets speed limiter units.
-    /// </summary>
-    public static List<string> SpeedLimiterUnits => ["KB", "MB"];
-
-    /// <summary>
-    /// Gets times of day.
-    /// </summary>
-    public static List<string> TimesOfDay => ["AM", "PM"];
-
-    /// <summary>
     /// General category title.
     /// </summary>
     public const string GeneralCategoryTitle = "General";
@@ -99,7 +69,76 @@ public static class Constants
     public const string FinishedCategoryHeaderTitle = "Finished";
 
     /// <summary>
-    /// Gets maximum connections count
+    /// Default download queue title.
+    /// </summary>
+    public const string DefaultDownloadQueueTitle = "Main Queue";
+
+    /// <summary>
+    /// The application listening to this url for requests that coming from the browser extension and returns file types as response.
+    /// </summary>
+    public const string GetFileTypesUrl = "http://localhost:5000/cdm/download/filetypes/";
+
+    /// <summary>
+    /// The application listening to this url for requests that coming from the browser extension and add received url to the database.
+    /// </summary>
+    public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
+
+    /// <summary>
+    /// GitHub project url.
+    /// </summary>
+    public const string GithubProjectUrl = "https://github.com/adel-bakhshi/CrossPlatformDownloadManager";
+
+    /// <summary>
+    /// Telegram url.
+    /// </summary>
+    public const string TelegramUrl = "https://t.me/ADdy2142";
+
+    /// <summary>
+    /// My email.
+    /// </summary>
+    public const string Email = "adelbakhshi78@yahoo.com";
+
+    /// <summary>
+    /// The file path of the light theme data.
+    /// </summary>
+    public const string LightThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json";
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets a value that indicates the turn off computer modes.
+    /// </summary>
+    public static List<string> TurnOffComputerModes
+    {
+        get
+        {
+            return Enum
+                .GetNames<TurnOffComputerMode>()
+                .Select(n =>
+                {
+                    if (n.Equals(Enum.GetName(TurnOffComputerMode.Shutdown)))
+                        n = "Shut down";
+
+                    return n;
+                })
+                .ToList();
+        }
+    }
+
+    /// <summary>
+    /// Gets a value that indicates the speed limiter units.
+    /// </summary>
+    public static List<string> SpeedLimiterUnits => ["KB", "MB"];
+
+    /// <summary>
+    /// Gets a value that indicates the times of day.
+    /// </summary>
+    public static List<string> TimesOfDay => ["AM", "PM"];
+
+    /// <summary>
+    /// Gets a value that indicates the maximum connections count
     /// </summary>
     public static List<int> MaximumConnectionsCountList =>
     [
@@ -112,7 +151,7 @@ public static class Constants
     ];
 
     /// <summary>
-    /// Gets proxy types.
+    /// Gets a value that indicates the proxy types.
     /// </summary>
     public static List<string> ProxyTypes
     {
@@ -132,37 +171,7 @@ public static class Constants
     }
 
     /// <summary>
-    /// Default download queue title.
-    /// </summary>
-    public const string DefaultDownloadQueueTitle = "Main Queue";
-
-    /// <summary>
-    /// The application listening to this url for requests that coming from the browser extension and returns file types as response.
-    /// </summary>
-    public const string GetFileTypesUrl = "http://localhost:5000/cdm/download/filetypes/";
-
-    /// <summary>
-    /// The application listening to this url for requests that coming from the browser extension and add received url to the database.
-    /// </summary>
-    public const string AddDownloadFileUrl = "http://localhost:5000/cdm/download/add/";
-
-    /// <summary>
-    /// Github project url.
-    /// </summary>
-    public const string GithubProjectUrl = "https://github.com/adel-bakhshi/CrossPlatformDownloadManager";
-
-    /// <summary>
-    /// Telegram url.
-    /// </summary>
-    public const string TelegramUrl = "https://t.me/ADdy2142";
-
-    /// <summary>
-    /// My email.
-    /// </summary>
-    public const string Email = "adelbakhshi78@yahoo.com";
-
-    /// <summary>
-    /// Gets the main directory of the application.
+    /// Gets a value that indicates the main directory of the application.
     /// This directory is the directory that the application is running in.
     /// </summary>
     /// <exception cref="DirectoryNotFoundException">If directory not found.</exception>
@@ -175,12 +184,12 @@ public static class Constants
             if (directory.IsStringNullOrEmpty() || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException("Main directory not found.");
 
-            return directory!;
+            return directory;
         }
     }
 
     /// <summary>
-    /// Gets the application data directory.
+    /// Gets a value that indicates the application data directory.
     /// This directory is the directory that the application data stored in it.
     /// </summary>
     public static string ApplicationDataDirectory
@@ -196,7 +205,7 @@ public static class Constants
     }
 
     /// <summary>
-    /// Gets the temporary download directory.
+    /// Gets a value that indicates the temporary download directory.
     /// This directory is the directory that the temp download files stored in it.
     /// </summary>
     public static string TempDownloadDirectory
@@ -212,7 +221,22 @@ public static class Constants
     }
 
     /// <summary>
-    /// Available fonts in the program.
+    /// Gets a value that indicates the directory that themes stored in it.
+    /// </summary>
+    public static string ThemesDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(ApplicationDataDirectory, "Themes");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            return directory;
+        }
+    }
+
+    /// <summary>
+    /// Gets  a value that indicates the available fonts in the program.
     /// </summary>
     public static List<string> AvailableFonts =>
     [

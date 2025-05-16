@@ -2189,9 +2189,9 @@ public class MainWindowViewModel : ViewModelBase
         // Update settings with new values
         settings.StartOnSystemStartup = exportSettings.StartOnSystemStartup;
         settings.UseBrowserExtension = exportSettings.UseBrowserExtension;
-        settings.DarkMode = exportSettings.DarkMode;
         settings.UseManager = exportSettings.UseManager;
         settings.AlwaysKeepManagerOnTop = exportSettings.AlwaysKeepManagerOnTop;
+        settings.ApplicationFont = exportSettings.ApplicationFont;
         settings.ShowStartDownloadDialog = exportSettings.ShowStartDownloadDialog;
         settings.ShowCompleteDownloadDialog = exportSettings.ShowCompleteDownloadDialog;
         settings.DuplicateDownloadLinkAction = exportSettings.DuplicateDownloadLinkAction;
@@ -2210,7 +2210,6 @@ public class MainWindowViewModel : ViewModelBase
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
         settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
         settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>() ?? settings.DataGridColumnsSettings;
-        settings.ApplicationFont = exportSettings.ApplicationFont;
 
         await AppService.SettingsService.SaveSettingsAsync(settings);
 

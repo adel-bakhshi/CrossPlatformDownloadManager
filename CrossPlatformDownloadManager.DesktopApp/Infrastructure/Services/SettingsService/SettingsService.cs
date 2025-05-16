@@ -376,7 +376,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (appThemeService == null)
             throw new InvalidOperationException("Can't find app theme service.");
 
-        appThemeService.LoadThemeDataFromAssets();
+        appThemeService.LoadThemeData();
     }
 
     private void SetApplicationFont()

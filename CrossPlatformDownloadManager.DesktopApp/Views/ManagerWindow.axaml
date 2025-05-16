@@ -44,6 +44,7 @@
                        Text="CDM"
                        FontWeight="Bold"
                        VerticalAlignment="Center"
+                       Foreground="{DynamicResource ManagerTextColor}"
                        Width="32"
                        Cursor="Hand"
                        PointerPressed="CDMTextBlockOnPointerPressed" />

@@ -11,9 +11,10 @@ public class SettingsViewModel : PropertyChangedBase
     private int _id;
     private bool _startOnSystemStartup;
     private bool _useBrowserExtension;
-    private bool _darkMode;
+    private string? _themeFilePath;
     private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
+    private string? _applicationFont;
     private bool _disableCategories;
     private string? _globalSaveLocation;
     private bool _showStartDownloadDialog;
@@ -36,7 +37,6 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private bool _hasApplicationBeenRunYet;
-    private string? _applicationFont;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -61,10 +61,10 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _useBrowserExtension, value);
     }
 
-    public bool DarkMode
+    public string? ThemeFilePath
     {
-        get => _darkMode;
-        set => SetField(ref _darkMode, value);
+        get => _themeFilePath;
+        set => SetField(ref _themeFilePath, value);
     }
     
     public bool UseManager
@@ -77,6 +77,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _alwaysKeepManagerOnTop;
         set => SetField(ref _alwaysKeepManagerOnTop, value);
+    }
+
+    public string? ApplicationFont
+    {
+        get => _applicationFont;
+        set => SetField(ref _applicationFont, value);
     }
 
     public bool DisableCategories
@@ -209,12 +215,6 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _hasApplicationBeenRunYet;
         set => SetField(ref _hasApplicationBeenRunYet, value);
-    }
-
-    public string? ApplicationFont
-    {
-        get => _applicationFont;
-        set => SetField(ref _applicationFont, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models.ThemeBrush;
 using Newtonsoft.Json;
@@ -95,14 +94,8 @@ public class AppTheme
 
     public bool Validate()
     {
-        // Define exceptions properties
-        List<string> exceptions = [nameof(ThemeName), nameof(IsDarkTheme)];
-        // Get other properties
-        var properties = GetType()
-            .GetProperties()
-            .Where(pi => !exceptions.Contains(pi.Name))
-            .ToList();
-
+        // Get all properties that are of type IThemeBrush
+        var properties = GetType().GetProperties().Where(p => p.PropertyType == typeof(IThemeBrush)).ToList();
         // Validate properties
         foreach (var property in properties)
         {
@@ -112,9 +105,9 @@ public class AppTheme
                 case null:
                     return false;
 
-                case IThemeBrush viewModel:
+                case IThemeBrush themeBrush:
                 {
-                    if (!viewModel.Validate())
+                    if (!themeBrush.Validate())
                         return false;
 
                     break;

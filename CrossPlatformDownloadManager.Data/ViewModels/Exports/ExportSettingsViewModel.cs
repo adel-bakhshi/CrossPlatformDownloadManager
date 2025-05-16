@@ -14,14 +14,14 @@ public class ExportSettingsViewModel
     [JsonProperty("useBrowserExtension")]
     public bool UseBrowserExtension { get; set; }
 
-    [JsonProperty("darkMode")]
-    public bool DarkMode { get; set; }
-
     [JsonProperty("useManager")]
     public bool UseManager { get; set; }
 
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
+
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
 
     [JsonProperty("showStartDownloadDialog")]
     public bool ShowStartDownloadDialog { get; set; }
@@ -77,9 +77,6 @@ public class ExportSettingsViewModel
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
 
-    [JsonProperty("applicationFont")]
-    public string? ApplicationFont { get; set; }
-
     [JsonProperty("proxies")]
     public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
 
@@ -104,7 +101,7 @@ public class ExportSettingsViewModel
         {
             StartOnSystemStartup = settings.StartOnSystemStartup,
             UseBrowserExtension = settings.UseBrowserExtension,
-            DarkMode = settings.DarkMode,
+            ApplicationFont = settings.ApplicationFont,
             UseManager = settings.UseManager,
             AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop,
             ShowStartDownloadDialog = settings.ShowStartDownloadDialog,
@@ -125,7 +122,6 @@ public class ExportSettingsViewModel
             UseSystemNotifications = settings.UseSystemNotifications,
             ShowCategoriesPanel = settings.ShowCategoriesPanel,
             DataGridColumnsSettings = settings.DataGridColumnsSettings.ConvertToJson(),
-            ApplicationFont = settings.ApplicationFont,
             Proxies = exportProxies
         };
     }

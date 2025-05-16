@@ -141,23 +141,43 @@ public static class ExtensionMethods
         return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-    public static T? OpenJsonAsset<T>(this Uri? uri, JsonSerializerSettings? jsonSerializerSettings)
+    public static string? OpenTextAsset(this Uri? assetUri)
     {
-        if (uri == null)
-            return default;
+        if (assetUri == null)
+            return null;
 
-        using var stream = AssetLoader.Open(uri);
+        using var stream = AssetLoader.Open(assetUri);
         using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        reader.Close();
-        stream.Close();
-
-        return json.ConvertFromJson<T>(jsonSerializerSettings);
+        return reader.ReadToEnd();
     }
 
-    public static T? OpenJsonAsset<T>(this Uri? uri)
+    public static string? OpenTextAsset(this string? assetPath)
     {
-        return uri.OpenJsonAsset<T>(null);
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
+            return null;
+
+        var assetUri = new Uri(assetPath);
+        return assetUri.OpenTextAsset();
+    }
+
+    public static T? OpenJsonAsset<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        var json = assetUri.OpenTextAsset();
+        return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
+    }
+
+    public static T? OpenJsonAsset<T>(this string? assetPath, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
+            return default;
+
+        var assetUri = new Uri(assetPath);
+        return assetUri.OpenJsonAsset<T>();
+    }
+
+    public static T? OpenJsonAsset<T>(this Uri? assetUri)
+    {
+        return assetUri.OpenJsonAsset<T>(null);
     }
 
     /// <summary>
@@ -220,7 +240,7 @@ public static class ExtensionMethods
 
         return fileName;
     }
-    
+
     /// <summary>
     /// Gets the file name from the Content-Disposition header.
     /// </summary>
@@ -233,7 +253,7 @@ public static class ExtensionMethods
         // Content-Disposition: attachment
         // Content-Disposition: attachment; filename="file name.jpg"
         // Content-Disposition: attachment; filename*=UTF-8''file%20name.jpg
-        
+
         // Check if Content-Disposition header value is null or empty
         if (contentDisposition.IsStringNullOrEmpty())
             return null;
@@ -242,16 +262,16 @@ public static class ExtensionMethods
         var fileNameSection = contentDisposition!.Split(';').FirstOrDefault(s => s.Trim().StartsWith("filename="))?.Trim();
         if (fileNameSection.IsStringNullOrEmpty())
             return null;
-        
+
         // Get the file name from the section and make sure it has value
         var fileName = fileNameSection!.Split('=').LastOrDefault()?.Trim('\"');
         if (fileName.IsStringNullOrEmpty())
             return null;
-        
+
         // Check if the filename contains encoded characters
         if (!fileName!.Contains("''"))
             return fileName;
-        
+
         var encodedFileName = fileName.Split("''").LastOrDefault()?.Trim();
         // Decode the encoded filename
         return encodedFileName.IsStringNullOrEmpty() ? null : WebUtility.UrlDecode(encodedFileName);

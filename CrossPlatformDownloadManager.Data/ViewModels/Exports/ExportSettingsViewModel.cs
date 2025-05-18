@@ -44,6 +44,21 @@ public class ExportSettingsViewModel
     [JsonProperty("limitUnit")]
     public string? LimitUnit { get; set; }
 
+    [JsonProperty("isMergeSpeedLimitEnabled")]
+    public bool IsMergeSpeedLimitEnabled { get; set; }
+
+    [JsonProperty("mergeLimitSpeed")]
+    public double? MergeLimitSpeed { get; set; }
+
+    [JsonProperty("mergeLimitUnit")]
+    public string? MergeLimitUnit { get; set; }
+
+    [JsonProperty("maximumMemoryBufferBytes")]
+    public long MaximumMemoryBufferBytes { get; set; }
+
+    [JsonProperty("maximumMemoryBufferBytesUnit")]
+    public string MaximumMemoryBufferBytesUnit { get; set; } = string.Empty;
+
     [JsonProperty("proxyMode")]
     public ProxyMode ProxyMode { get; set; }
 
@@ -111,6 +126,11 @@ public class ExportSettingsViewModel
             IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled,
             LimitSpeed = settings.LimitSpeed,
             LimitUnit = settings.LimitUnit,
+            IsMergeSpeedLimitEnabled = settings.IsMergeSpeedLimitEnabled,
+            MergeLimitSpeed = settings.MergeLimitSpeed,
+            MergeLimitUnit = settings.MergeLimitUnit,
+            MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes,
+            MaximumMemoryBufferBytesUnit = settings.MaximumMemoryBufferBytesUnit,
             ProxyMode = settings.ProxyMode,
             ProxyType = settings.ProxyType,
             UseDownloadCompleteSound = settings.UseDownloadCompleteSound,

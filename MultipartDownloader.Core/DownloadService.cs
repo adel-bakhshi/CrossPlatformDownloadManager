@@ -111,6 +111,10 @@ public class DownloadService : AbstractDownloadService
         foreach (var chunk in sortedChunks)
             await MergeFileWithProgressAsync(finalStream, chunk).ConfigureAwait(false);
 
+        // Check if operation is canceled
+        if (GlobalCancellationTokenSource.IsCancellationRequested)
+            return;
+
         // Check final size
         if (finalStream.Length != Package.TotalFileSize)
             throw new InvalidOperationException($"Final file size mismatch! Expected: {Package.TotalFileSize} bytes, Actual: {finalStream.Length} bytes");
@@ -148,27 +152,32 @@ public class DownloadService : AbstractDownloadService
         await using var throttledStream = new ThrottledStream(tempStream, Options.MaximumBytesPerSecondForMerge);
         var buffer = new byte[8192]; // 8 kilobyte buffer
         var bytesRead = 0;
-        long lastPosition = 0;
+        DateTime? lastMergeProgressSignal = null;
 
         // Read bytes from temp stream
         while ((bytesRead = await throttledStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
         {
+            // Check if operation is canceled
+            if (GlobalCancellationTokenSource.IsCancellationRequested)
+                break;
+
             // Write bytes to final stream
             await finalStrem.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
             // Update position
             _mergePosition += bytesRead;
 
-            // Every time position progressed 1MB (1024 * 1024), raise merge position changed event
-            if (_mergePosition - lastPosition > 1024 * 1024)
+            // Raise MergeProgressChanged event every 100ms
+            var now = DateTime.Now;
+            if (lastMergeProgressSignal == null || now - lastMergeProgressSignal > TimeSpan.FromMilliseconds(100))
             {
+                // Raise MergeProgressChanged event
                 SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
-                lastPosition = _mergePosition;
+                lastMergeProgressSignal = now;
             }
         }
 
-        // Make sure raise event for last time
-        if (_mergePosition != lastPosition)
-            SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
+        // Raise MergeProgressChanged event for last time
+        SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
     }
 
     /// <summary>

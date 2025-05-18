@@ -3,6 +3,7 @@ using System;
 using CrossPlatformDownloadManager.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrossPlatformDownloadManager.Data.Migrations
 {
     [DbContext(typeof(DownloadManagerDbContext))]
-    partial class DownloadManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250516174037_RemoveRequiredFromMergeLimitSpeed")]
+    partial class RemoveRequiredFromMergeLimitSpeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -347,14 +350,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<int>("MaximumConnectionsCount")
                         .HasColumnType("INTEGER");
-
-                    b.Property<long>("MaximumMemoryBufferBytes")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("MaximumMemoryBufferBytesUnit")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
 
                     b.Property<double?>("MergeLimitSpeed")
                         .HasColumnType("REAL");

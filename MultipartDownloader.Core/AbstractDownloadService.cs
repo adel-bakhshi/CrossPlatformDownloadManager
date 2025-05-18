@@ -12,11 +12,6 @@ namespace MultipartDownloader.Core;
 public abstract class AbstractDownloadService : IDownloadService, IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// The limit of progress value change for reporting download progress
-    /// </summary>
-    private const long ProgressValueChangeLimit = 1024 * 1024; // 1 MB
-
-    /// <summary>
     /// Logger instance for logging messages.
     /// </summary>
     protected ILogger? Logger;
@@ -493,12 +488,13 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// Raises the <see cref="DownloadProgressChanged"/> event.
     /// </summary>
     /// <param name="e">The event args</param>
+    /// <param name="forceReport">Indicates whether to force the event to be raised.</param>
     private void OnDownloadProgressChanged(CustomEventArgs.DownloadProgressChangedEventArgs e, bool forceReport)
     {
         // Get current time
         var now = DateTime.Now;
         // Don't raise event when last progress report is less than 1 second ago and progress value change is less than 1MB and not force report
-        if (LastProgressReport != null && now - LastProgressReport < TimeSpan.FromSeconds(1) && e.ReceivedBytesSize - LastProgressValue < ProgressValueChangeLimit && !forceReport)
+        if (LastProgressReport != null && now - LastProgressReport < TimeSpan.FromMilliseconds(100) && !forceReport)
             return;
 
         // Update the last progress report time and value

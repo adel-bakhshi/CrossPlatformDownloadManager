@@ -2199,6 +2199,11 @@ public class MainWindowViewModel : ViewModelBase
         settings.IsSpeedLimiterEnabled = exportSettings.IsSpeedLimiterEnabled;
         settings.LimitSpeed = exportSettings.LimitSpeed;
         settings.LimitUnit = exportSettings.LimitUnit;
+        settings.IsMergeSpeedLimitEnabled = exportSettings.IsMergeSpeedLimitEnabled;
+        settings.MergeLimitSpeed = exportSettings.MergeLimitSpeed;
+        settings.MergeLimitUnit = exportSettings.MergeLimitUnit;
+        settings.MaximumMemoryBufferBytes = exportSettings.MaximumMemoryBufferBytes;
+        settings.MaximumMemoryBufferBytesUnit = exportSettings.MaximumMemoryBufferBytesUnit;
         settings.ProxyMode = exportSettings.ProxyMode;
         settings.ProxyType = exportSettings.ProxyType;
         settings.UseDownloadCompleteSound = exportSettings.UseDownloadCompleteSound;

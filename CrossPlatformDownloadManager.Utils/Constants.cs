@@ -37,12 +37,6 @@ public static class Constants
     public const long TeraByte = GigaByte * 1024;
 
     /// <summary>
-    /// Maximum memory buffer bytes that indicates how much data should be saved in memory before writing on disk.
-    /// </summary>
-    // TODO: Add this option to settings
-    public const long MaximumMemoryBufferBytes = 10 * MegaByte;
-
-    /// <summary>
     /// General category title.
     /// </summary>
     public const string GeneralCategoryTitle = "General";

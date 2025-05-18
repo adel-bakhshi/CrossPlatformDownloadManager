@@ -220,6 +220,149 @@
                                Text="{Binding SpeedLimitInfo}" />
                 </StackPanel>
             </Border>
+
+            <!-- Limit merge speed -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <StackPanel Orientation="Vertical"
+                            Spacing="5">
+                    <!-- Title and switch -->
+                    <Grid ColumnDefinitions="*, Auto"
+                          Margin="0, 0, 0, 5">
+                        <TextBlock Grid.Column="0"
+                                   Text="Limit merge speed"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   TextAlignment="Left"
+                                   FontWeight="Bold" />
+
+                        <ToggleSwitch Grid.Column="1"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}"
+                                      Margin="0"
+                                      Padding="0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right"
+                                      VerticalContentAlignment="Center"
+                                      Width="40"
+                                      IsChecked="{Binding IsMergeSpeedLimiterEnabled}" />
+                    </Grid>
+
+                    <!-- Speed and unit -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <!-- Speed  -->
+                        <cc:CustomNumericUpDown Grid.Column="0"
+                                                Watermark="Maximum merge speed"
+                                                WatermarkForeground="{DynamicResource TertiaryColor}"
+                                                Padding="12, 10"
+                                                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                                Background="{DynamicResource PrimaryColor}"
+                                                IconData="{DynamicResource BanSvgIcon}"
+                                                IconColor="{DynamicResource IconColor}"
+                                                IconSize="{DynamicResource SmallIconSize}"
+                                                BorderThickness="0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                IsEnabled="{Binding IsMergeSpeedLimiterEnabled}"
+                                                Value="{Binding MergeSpeedLimit}"
+                                                ShowButtonSpinner="False"
+                                                Increment="1"
+                                                Minimum="0"
+                                                ClipValueToMinMax="True"
+                                                Margin="0, 0, 10, 0" />
+
+                        <!-- Unit -->
+                        <cc:CustomComboBox Grid.Column="1"
+                                           PlaceholderText="Unit"
+                                           MinWidth="80"
+                                           Background="{DynamicResource PrimaryColor}"
+                                           ToggleIconColor="{DynamicResource TertiaryColor}"
+                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           ItemsSource="{Binding SpeedUnits}"
+                                           SelectedItem="{Binding SelectedMergeSpeedUnit}"
+                                           IsEnabled="{Binding IsMergeSpeedLimiterEnabled}"
+                                           MaxDropDownHeight="300"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+                    </Grid>
+
+                    <!-- Merge speed limit info -->
+                    <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                               FontStyle="Italic"
+                               Text="{Binding MergeSpeedLimitInfo}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Maximum memory buffer -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <StackPanel Orientation="Vertical"
+                            Spacing="5">
+                    <!-- Title -->
+                    <TextBlock Text="Maximum memory buffer"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Left"
+                               FontWeight="Bold" />
+
+                    <!-- Speed and unit -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <!-- Speed  -->
+                        <cc:CustomNumericUpDown Grid.Column="0"
+                                                Watermark="Maximum memory buffer"
+                                                WatermarkForeground="{DynamicResource TertiaryColor}"
+                                                Padding="12, 10"
+                                                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                                Background="{DynamicResource PrimaryColor}"
+                                                IconData="{DynamicResource BanSvgIcon}"
+                                                IconColor="{DynamicResource IconColor}"
+                                                IconSize="{DynamicResource SmallIconSize}"
+                                                BorderThickness="0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                Value="{Binding MaximumMemoryBufferBytes}"
+                                                ShowButtonSpinner="False"
+                                                Increment="1"
+                                                Minimum="0"
+                                                ClipValueToMinMax="True"
+                                                Margin="0, 0, 10, 0" />
+
+                        <!-- Unit -->
+                        <cc:CustomComboBox Grid.Column="1"
+                                           PlaceholderText="Unit"
+                                           MinWidth="80"
+                                           Background="{DynamicResource PrimaryColor}"
+                                           ToggleIconColor="{DynamicResource TertiaryColor}"
+                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           ItemsSource="{Binding SpeedUnits}"
+                                           SelectedItem="{Binding SelectedMaximumMemoryBufferBytesUnit}"
+                                           MaxDropDownHeight="300"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+                    </Grid>
+
+                    <!-- Maximum memory buffer info -->
+                    <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                               FontStyle="Italic"
+                               Text="The amount of data to be temporarily stored in RAM before being written to disk. Increasing this value may improve download speed but will use more system memory. (Default: 10 MB)"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

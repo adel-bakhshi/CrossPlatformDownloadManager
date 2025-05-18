@@ -42,19 +42,16 @@
                     ClipToBounds="True">
                 <Grid>
                     <!-- Download Status View -->
-                    <uc:DownloadStatusView
-                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Status', FallbackValue=False, TargetNullValue=False}"
-                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadStatusViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+                    <ContentControl Content="{Binding DownloadStatusView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Status', FallbackValue=False, TargetNullValue=False}" />
 
                     <!-- Download Speed Limiter View  -->
-                    <uc:DownloadSpeedLimiterView
-                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Speed Limiter', FallbackValue=False, TargetNullValue=False}"
-                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadSpeedLimiterViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+                    <ContentControl Content="{Binding DownloadSpeedLimiterView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Speed Limiter', FallbackValue=False, TargetNullValue=False}" />
 
                     <!-- Download Options View -->
-                    <uc:DownloadOptionsView
-                        IsVisible="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
-                        DataContext="{Binding $parent[Window].((vm:DownloadWindowViewModel)DataContext).DownloadOptionsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+                    <ContentControl Content="{Binding DownloadOptionsView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}" />
                 </Grid>
             </Border>
 
@@ -63,7 +60,16 @@
                          Classes="customProgressBar"
                          Foreground="{DynamicResource PrimaryGradientBrush}"
                          Value="{Binding DownloadFile.DownloadProgress, FallbackValue=0, TargetNullValue=0}"
-                         Margin="0, 0, 0, 10" />
+                         Margin="0, 0, 0, 10"
+                         IsVisible="{Binding !DownloadFile.IsMerging}" />
+
+            <!-- Merge progress bar -->
+            <ProgressBar Grid.Row="2"
+                         Classes="customProgressBar"
+                         Foreground="{DynamicResource PrimaryGradientBrush}"
+                         Value="{Binding DownloadFile.MergeProgress, FallbackValue=0, TargetNullValue=0}"
+                         Margin="0, 0, 0, 10"
+                         IsVisible="{Binding DownloadFile.IsMerging}" />
 
             <!-- Action buttons -->
             <Grid Grid.Row="3"
@@ -85,7 +91,7 @@
                     <Button Classes="button warning"
                             Classes.paused="{Binding IsPaused}"
                             Command="{Binding ResumePauseDownloadCommand}"
-                            IsEnabled="{Binding DownloadFile.CanResumeDownload}">
+                            IsEnabled="{Binding IsPauseResumeButtonEnabled}">
                         <Button.Styles>
                             <Style Selector="Button">
                                 <Setter Property="Content"

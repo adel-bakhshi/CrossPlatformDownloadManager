@@ -35,6 +35,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private ObservableCollection<ChunkDataViewModel> _chunksData = [];
     private int _countOfError;
     private bool? _canResumeDownload;
+    private double _mergeProgress;
 
     #endregion
 
@@ -125,10 +126,11 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     public bool IsCompleted => Status == DownloadFileStatus.Completed;
     public bool IsDownloading => Status == DownloadFileStatus.Downloading;
-    public bool IsStopping => Status == DownloadFileStatus.Stopping;
     public bool IsStopped => Status == DownloadFileStatus.Stopped;
     public bool IsPaused => Status == DownloadFileStatus.Paused;
     public bool IsError => Status == DownloadFileStatus.Error;
+    public bool IsStopping => Status == DownloadFileStatus.Stopping;
+    public bool IsMerging => Status == DownloadFileStatus.Merging;
 
     public DateTime? LastTryDate
     {
@@ -270,6 +272,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         set => SetField(ref _canResumeDownload, value);
     }
 
+    public double MergeProgress
+    {
+        get => _mergeProgress;
+        set => SetField(ref _mergeProgress, value);
+    }
+
     public bool PlayStopSound { get; set; } = true;
     public int? TempDownloadQueueId { get; set; }
     public bool IsCompletelyStopped { get; set; }
@@ -343,12 +351,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 break;
             }
 
-            case DownloadFileStatus.Stopping:
-            {
-                OnPropertyChanged(nameof(IsStopping));
-                break;
-            }
-
             case DownloadFileStatus.Stopped:
             {
                 OnPropertyChanged(nameof(IsStopped));
@@ -364,6 +366,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             case DownloadFileStatus.Error:
             {
                 OnPropertyChanged(nameof(IsError));
+                break;
+            }
+
+            case DownloadFileStatus.Stopping:
+            {
+                OnPropertyChanged(nameof(IsStopping));
+                break;
+            }
+
+            case DownloadFileStatus.Merging:
+            {
+                OnPropertyChanged(nameof(IsMerging));
                 break;
             }
         }

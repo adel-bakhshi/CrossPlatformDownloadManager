@@ -48,7 +48,7 @@ public class SettingsWindowViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
-            
+
             switch (SelectedTabItem)
             {
                 case "File Types":
@@ -57,7 +57,7 @@ public class SettingsWindowViewModel : ViewModelBase
                     FileTypesViewModel?.LoadFileExtensionsAsync();
                     break;
                 }
-                
+
                 case "Save Locations":
                 {
                     // Load file extensions when selected tab changed
@@ -198,24 +198,24 @@ public class SettingsWindowViewModel : ViewModelBase
             {
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
-            
+
             // Validate selected theme
             if (GeneralsViewModel.SelectedTheme == null)
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Theme Not Specified",
                     "Please choose a valid theme and try again.",
                     DialogButtons.Ok);
-                
+
                 return;
             }
-            
+
             // Validate font
             if (GeneralsViewModel.SelectedFont.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Font Not Specified",
                     "Please choose a valid font and try again.",
                     DialogButtons.Ok);
-                
+
                 return;
             }
 
@@ -275,12 +275,46 @@ public class SettingsWindowViewModel : ViewModelBase
             if (DownloadsViewModel.SelectedSpeedUnit.IsStringNullOrEmpty())
             {
                 var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
-                    "You haven’t specified the unit for the speed limiter. Would you like to use KB as the default unit?",
+                    "You haven’t specified the unit for the speed limiter. Would you like to use 'KB' as the default unit?",
                     DialogButtons.YesNo);
 
                 if (result == DialogResult.Yes)
                 {
                     DownloadsViewModel.SelectedSpeedUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Validate selected merge speed unit
+            if (DownloadsViewModel.SelectedMergeSpeedUnit.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Merge Speed Limiter Unit Not Specified",
+                    "You haven’t specified the unit for the merge speed limiter. Would you like to use 'KB' as the default unit?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    DownloadsViewModel.SelectedMergeSpeedUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Validate selected maximum memory buffer bytes unit
+            if (DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Maximum Memory Buffer Unit Not Specified",
+                    "You haven’t specified the unit for the maximum memory buffer. Would you like to use 'KB' as the default unit?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
                 }
                 else
                 {
@@ -324,7 +358,8 @@ public class SettingsWindowViewModel : ViewModelBase
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
                 // If category doesn't have a save directory or the save directory is the same, continue
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false ||
+                    saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
                 // Update save directory
@@ -351,6 +386,11 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.IsSpeedLimiterEnabled = DownloadsViewModel.IsSpeedLimiterEnabled;
             AppService.SettingsService.Settings.LimitSpeed = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
             AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SelectedSpeedUnit : null;
+            AppService.SettingsService.Settings.IsMergeSpeedLimitEnabled = DownloadsViewModel.IsMergeSpeedLimiterEnabled;
+            AppService.SettingsService.Settings.MergeLimitSpeed = DownloadsViewModel.IsMergeSpeedLimiterEnabled ? DownloadsViewModel.MergeSpeedLimit : null;
+            AppService.SettingsService.Settings.MergeLimitUnit = DownloadsViewModel.IsMergeSpeedLimiterEnabled ? DownloadsViewModel.SelectedMergeSpeedUnit : null;
+            AppService.SettingsService.Settings.MaximumMemoryBufferBytes = (long)(DownloadsViewModel.MaximumMemoryBufferBytes ?? 0);
+            AppService.SettingsService.Settings.MaximumMemoryBufferBytesUnit = DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit!;
 
             // Save proxy settings
             switch (ProxyViewModel)

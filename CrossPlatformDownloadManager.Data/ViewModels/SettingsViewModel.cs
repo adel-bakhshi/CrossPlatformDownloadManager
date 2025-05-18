@@ -24,6 +24,11 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _isSpeedLimiterEnabled;
     private double? _limitSpeed;
     private string? _limitUnit;
+    private bool _isMergeSpeedLimitEnabled;
+    private double? _mergeLimitSpeed;
+    private string? _mergeLimitUnit;
+    private long _maximumMemoryBufferBytes;
+    private string _maximumMemoryBufferBytesUnit = string.Empty;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
     private bool _useDownloadCompleteSound;
@@ -66,7 +71,7 @@ public class SettingsViewModel : PropertyChangedBase
         get => _themeFilePath;
         set => SetField(ref _themeFilePath, value);
     }
-    
+
     public bool UseManager
     {
         get => _useManager;
@@ -139,6 +144,36 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _limitUnit, value);
     }
 
+    public bool IsMergeSpeedLimitEnabled
+    {
+        get => _isMergeSpeedLimitEnabled;
+        set => SetField(ref _isMergeSpeedLimitEnabled, value);
+    }
+
+    public double? MergeLimitSpeed
+    {
+        get => _mergeLimitSpeed;
+        set => SetField(ref _mergeLimitSpeed, value);
+    }
+
+    public string? MergeLimitUnit
+    {
+        get => _mergeLimitUnit;
+        set => SetField(ref _mergeLimitUnit, value);
+    }
+
+    public long MaximumMemoryBufferBytes
+    {
+        get => _maximumMemoryBufferBytes;
+        set => SetField(ref _maximumMemoryBufferBytes, value);
+    }
+
+    public string MaximumMemoryBufferBytesUnit
+    {
+        get => _maximumMemoryBufferBytesUnit;
+        set => SetField(ref _maximumMemoryBufferBytesUnit, value);
+    }
+
     public ProxyMode ProxyMode
     {
         get => _proxyMode;
@@ -204,13 +239,13 @@ public class SettingsViewModel : PropertyChangedBase
         get => _showCategoriesPanel;
         set => SetField(ref _showCategoriesPanel, value);
     }
-    
+
     public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
     {
         get => _dataGridColumnsSettings;
         set => SetField(ref _dataGridColumnsSettings, value);
     }
-    
+
     public bool HasApplicationBeenRunYet
     {
         get => _hasApplicationBeenRunYet;

@@ -67,6 +67,26 @@ public class Settings : DbModelBase
     public string? LimitUnit { get; set; }
 
     [Required]
+    [JsonProperty("isMergeSpeedLimitEnabled")]
+    public bool IsMergeSpeedLimitEnabled { get; set; }
+
+    [JsonProperty("mergeLimitSpeed")]
+    public double? MergeLimitSpeed { get; set; }
+
+    [MaxLength(50)]
+    [JsonProperty("mergeLimitUnit")]
+    public string? MergeLimitUnit { get; set; }
+
+    [Required]
+    [JsonProperty("maximumMemoryBufferBytes")]
+    public long MaximumMemoryBufferBytes { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    [JsonProperty("maximumMemoryBufferBytesUnit")]
+    public string MaximumMemoryBufferBytesUnit { get; set; } = string.Empty;
+
+    [Required]
     [JsonProperty("proxyMode")]
     public ProxyMode ProxyMode { get; set; }
 
@@ -137,6 +157,11 @@ public class Settings : DbModelBase
         IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled;
         LimitSpeed = settings.LimitSpeed;
         LimitUnit = settings.LimitUnit;
+        IsMergeSpeedLimitEnabled = settings.IsMergeSpeedLimitEnabled;
+        MergeLimitSpeed = settings.MergeLimitSpeed;
+        MergeLimitUnit = settings.MergeLimitUnit;
+        MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes;
+        MaximumMemoryBufferBytesUnit = settings.MaximumMemoryBufferBytesUnit;
         ProxyMode = settings.ProxyMode;
         ProxyType = settings.ProxyType;
         UseDownloadCompleteSound = settings.UseDownloadCompleteSound;

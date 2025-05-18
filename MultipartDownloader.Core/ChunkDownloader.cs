@@ -201,6 +201,15 @@ internal class ChunkDownloader
                 }
             }
 
+            // Raise DownloadProgressChanged event for last time
+            OnDownloadProgressChanged(new CustomEventArgs.DownloadProgressChangedEventArgs(Chunk.Id)
+            {
+                TotalBytesToReceive = Chunk.Length,
+                ReceivedBytesSize = Chunk.Position,
+                ProgressedByteSize = readSize,
+                ReceivedBytes = []
+            });
+
             // Flush storage and update file position for last time
             if (_storage!.MemoryLength > 0)
                 Chunk.FilePosition = await FlushStorageAsync(dispose: false).ConfigureAwait(false);

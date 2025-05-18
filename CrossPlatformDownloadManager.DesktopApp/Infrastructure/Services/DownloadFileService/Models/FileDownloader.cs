@@ -22,6 +22,7 @@ using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.DependencyInjection;
 using MultipartDownloader.Core;
 using MultipartDownloader.Core.CustomEventArgs;
+using MultipartDownloader.Core.Enums;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 using Constants = CrossPlatformDownloadManager.Utils.Constants;
@@ -149,6 +150,9 @@ public class FileDownloader
         DownloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
         DownloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
         DownloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
+        DownloadService.MergeStarted += DownloadServiceOnMergeStarted;
+        DownloadService.MergeProgressChanged += DownloadServiceOnMergeProgressChanged;
+        DownloadService.ChunkDownloadRestarted += DownloadServiceOnChunkDownloadRestarted;
 
         // Get save location of the file
         var downloadPath = DownloadFile.SaveLocation;
@@ -453,6 +457,69 @@ public class FileDownloader
     }
 
     /// <summary>
+    /// Handles the MergeStarted event of the DownloadService.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The arguments of the event.</param>
+    private void DownloadServiceOnMergeStarted(object? sender, MergeStartedEventArgs e)
+    {
+        // Change the status of the download to merging
+        DownloadFile.Status = DownloadFileStatus.Merging;
+        // Stop the download timer
+        _downloaderTimer?.Stop();
+    }
+
+    /// <summary>
+    /// Handles the MergeProgressChanged event of the DownloadService.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The arguments of the event.</param>
+    private void DownloadServiceOnMergeProgressChanged(object? sender, MergeProgressChangedEventArgs e)
+    {
+        // Update the merge progress
+        DownloadFile.MergeProgress = e.Progress;
+    }
+
+    /// <summary>
+    /// Handles the ChunkDownloadRestarted event of the DownloadService.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The arguments of the event.</param>
+    private static async void DownloadServiceOnChunkDownloadRestarted(object? sender, ChunkDownloadRestartedEventArgs e)
+    {
+        try
+        {
+            switch (e.Reason)
+            {
+                case RestartReason.FileSizeIsNotMatchWithChunkLength:
+                {
+                    await DialogBoxManager.ShowWarningDialogAsync("Part Size Mismatch Detected",
+                        "A problem was detected while downloading a part of the file. the received size does not match the expected size. This part will be re-downloaded to maintain data integrity and ensure a complete file.",
+                        DialogButtons.Ok);
+                    
+                    break;
+                }
+                
+                case RestartReason.TempFileCorruption:
+                {
+                    await DialogBoxManager.ShowWarningDialogAsync("Corrupted Temporary File Detected",
+                        "The temporary file for a part of the download appears to be corrupted or unreadable. To ensure data integrity and a successful download, this part will be re-downloaded from the server.",
+                        DialogButtons.Ok);
+                    
+                    break;
+                }
+                
+                default:
+                    throw new InvalidOperationException("We detected that the chunk download was restarted, but we don't know why. Please report this issue to the developer.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
     /// Handles the Tick event of the <see cref="_downloaderTimer"/> timer.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
@@ -540,10 +607,11 @@ public class FileDownloader
             ChunkCount = _appService.SettingsService.Settings.MaximumConnectionsCount,
             MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
             ParallelDownload = true,
-            MaximumMemoryBufferBytes = Constants.MaximumMemoryBufferBytes,
+            MaximumMemoryBufferBytes = GetMaximumMemoryBufferBytes(),
             ReserveStorageSpaceBeforeStartingDownload = true,
             ChunkFilesOutputDirectory = Constants.TempDownloadDirectory,
-            MaxRestartWithoutClearTempFile = 5
+            MaxRestartWithoutClearTempFile = 5,
+            MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
 
         // If the proxy is not null, set the proxy in the request configuration
@@ -555,9 +623,9 @@ public class FileDownloader
     }
 
     /// <summary>
-    /// Calculate maximum bytes per second.
+    /// Calculate the maximum bytes per second for download operation.
     /// </summary>
-    /// <returns>Maximum bytes per second.</returns>
+    /// <returns>Maximum bytes per second for download operation.</returns>
     private long GetMaximumBytesPerSecond()
     {
         // Check if the speed limiter is enabled
@@ -573,6 +641,44 @@ public class FileDownloader
 
         // Return the limit speed multiplied by the limit unit
         return limitSpeed * limitUnit;
+    }
+
+    /// <summary>
+    /// Calculates the maximum bytes per second speed for merge operation.
+    /// </summary>
+    /// <returns>Maximum bytes per second speed for merge operation.</returns>
+    private long GetMaximumBytesPerSecondForMerge()
+    {
+        // Check if the speed limiter is enabled
+        if (!_appService.SettingsService.Settings.IsMergeSpeedLimitEnabled)
+            return 0;
+
+        // Get the limit speed from the settings
+        var limitSpeed = (long)(_appService.SettingsService.Settings.MergeLimitSpeed ?? 0);
+        // Get the limit unit from the settings
+        var limitUnit = _appService.SettingsService.Settings.MergeLimitUnit?.Equals("KB", StringComparison.OrdinalIgnoreCase) == true
+            ? Constants.KiloByte
+            : Constants.MegaByte;
+
+        // Return the limit speed multiplied by the limit unit
+        return limitSpeed * limitUnit;
+    }
+
+    /// <summary>
+    /// Calculates the maximum bytes that can be stored in memory before writing to the disk.
+    /// </summary>
+    /// <returns>Returns maximum bytes that can be stored in memory before writing to the disk.</returns>
+    private long GetMaximumMemoryBufferBytes()
+    {
+        // Get the limit speed from the settings
+        var maximumMemoryBufferBytes = _appService.SettingsService.Settings.MaximumMemoryBufferBytes;
+        // Get the limit unit from the settings
+        var unit = _appService.SettingsService.Settings.MaximumMemoryBufferBytesUnit.Equals("KB", StringComparison.OrdinalIgnoreCase)
+            ? Constants.KiloByte
+            : Constants.MegaByte;
+
+        // Return the limit speed multiplied by the limit unit
+        return maximumMemoryBufferBytes * unit;
     }
 
     /// <summary>
@@ -691,7 +797,7 @@ public class FileDownloader
         var remainSizeToReceive = (DownloadFile.Size ?? 0) - _receivedBytesSize;
         // Calculate remain seconds by average download speed
         var remainSeconds = (remainSizeToReceive / averageDownloadSpeed).Round(0);
-        if (!double.IsInfinity(remainSeconds))
+        if (!double.IsInfinity(remainSeconds) && !double.IsNaN(remainSeconds))
             timeLeft = TimeSpan.FromSeconds(remainSeconds);
 
         // Set time left of the download file

@@ -1,3 +1,19 @@
+- Version 0.6.0; 2025-05-24
+
+* Technical Updates:
+  - Core Download Logic Refactoring: The primary download management functionality has been extracted into a new library (MultipartDownloader.Core) for better modularity and maintainability.
+  - Database Schema Updates: Added new Entity Framework Core migrations to support additional settings properties.
+  - Dependency Updates: Upgraded various NuGet packages including Avalonia, Entity Framework Core, and Serilog to their latest versions.
+* New Features:
+  - New Download Settings: Added controls for merge speed limits, maximum memory buffer size, and temporary download file locations.
+  - Enhanced Theming Options: Replaced dark mode toggle with a flexible theme selection system supporting custom themes from files.
+* UI/UX Improvements:
+  - Updated DataGrid styling with smoother transitions.
+  - Added dedicated progress bar for file merging phase in download window.
+  - Implemented drag-and-drop functionality for completed files in main window.
+* Bug Fixes:
+  - Various minor bug fixes and stability improvements.
+
 - Version 0.5.0; 2025-03-23
 
 * New Features:

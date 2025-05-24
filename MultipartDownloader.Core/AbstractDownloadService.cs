@@ -91,11 +91,6 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     }
 
     /// <summary>
-    /// The last progress report time.
-    /// </summary>
-    protected DateTime? LastProgressReport { get; set; }
-
-    /// <summary>
     /// The last progress value.
     /// </summary>
     protected long LastProgressValue { get; set; }
@@ -477,32 +472,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
         Package.SaveProgress = totalProgressArg.ProgressPercentage;
         e.ActiveChunks = totalProgressArg.ActiveChunks;
         ChunkDownloadProgressChanged?.Invoke(this, e);
-
-        // Check if the download is complete or not for force report
-        var forceReport = e.ProgressPercentage >= 100;
-        // Raise DownloadProgressChanged if possible
-        OnDownloadProgressChanged(totalProgressArg, forceReport);
-    }
-
-    /// <summary>
-    /// Raises the <see cref="DownloadProgressChanged"/> event.
-    /// </summary>
-    /// <param name="e">The event args</param>
-    /// <param name="forceReport">Indicates whether to force the event to be raised.</param>
-    private void OnDownloadProgressChanged(CustomEventArgs.DownloadProgressChangedEventArgs e, bool forceReport)
-    {
-        // Get current time
-        var now = DateTime.Now;
-        // Don't raise event when last progress report is less than 1 second ago and progress value change is less than 1MB and not force report
-        if (LastProgressReport != null && now - LastProgressReport < TimeSpan.FromMilliseconds(100) && !forceReport)
-            return;
-
-        // Update the last progress report time and value
-        LastProgressReport = now;
-        LastProgressValue = e.ReceivedBytesSize;
-
-        // Raise the DownloadProgressChanged event
-        DownloadProgressChanged?.Invoke(this, e);
+        DownloadProgressChanged?.Invoke(this, totalProgressArg);
     }
 
     /// <summary>

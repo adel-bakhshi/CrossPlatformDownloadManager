@@ -1,9 +1,15 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 
@@ -28,6 +34,7 @@ public class DownloadsViewModel : ViewModelBase
     private string? _mergeSpeedLimitInfo;
     private double? _maximumMemoryBufferBytes;
     private string? _selectedMaximumMemoryBufferBytesUnit;
+    private string? _temporaryFileLocation;
 
     #endregion
 
@@ -159,6 +166,18 @@ public class DownloadsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedMaximumMemoryBufferBytesUnit, value);
     }
 
+    public string? TemporaryFileLocation
+    {
+        get => _temporaryFileLocation;
+        set => this.RaiseAndSetIfChanged(ref _temporaryFileLocation, value);
+    }
+
+    #endregion
+
+    #region Commands
+
+    public ICommand BrowseTemporaryFileLocationCommand { get; }
+
     #endregion
 
     /// <summary>
@@ -176,7 +195,45 @@ public class DownloadsViewModel : ViewModelBase
         SelectedMergeSpeedUnit = SpeedUnits.FirstOrDefault();
 
         LoadViewData();
+
+        BrowseTemporaryFileLocationCommand = ReactiveCommand.CreateFromTask(BrowseTemporaryFileLocationAsync);
     }
+
+    #region Command actions
+
+    /// <summary>
+    /// Browses the temporary file location.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The storage provider is not available.</exception>
+    private async Task BrowseTemporaryFileLocationAsync()
+    {
+        try
+        {
+            var storageProvider = App.Desktop?.MainWindow?.StorageProvider;
+            if (storageProvider == null)
+                throw new InvalidOperationException("The storage provider is not available.");
+
+            var options = new FolderPickerOpenOptions
+            {
+                Title = "Select temporary file location",
+                AllowMultiple = false,
+                SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(Constants.TempDownloadDirectory)
+            };
+            
+            var directories = await storageProvider.OpenFolderPickerAsync(options);
+            if (!directories.Any())
+                return;
+            
+            TemporaryFileLocation = directories[0].Path.LocalPath;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while browsing the temporary file location. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    #endregion
 
     #region Helpers
 
@@ -198,6 +255,12 @@ public class DownloadsViewModel : ViewModelBase
         SelectedMergeSpeedUnit = SpeedUnits.FirstOrDefault(su => su.Equals(settings.MergeLimitUnit)) ?? SpeedUnits.FirstOrDefault();
         MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes;
         SelectedMaximumMemoryBufferBytesUnit = SpeedUnits.FirstOrDefault(su => su.Equals(settings.MaximumMemoryBufferBytesUnit)) ?? SpeedUnits.FirstOrDefault();
+
+        var tempLocation = settings.TemporaryFileLocation;
+        if (tempLocation.IsStringNullOrEmpty())
+            tempLocation = Constants.TempDownloadDirectory;
+        
+        TemporaryFileLocation = tempLocation;
     }
 
     /// <summary>

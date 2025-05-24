@@ -4,6 +4,7 @@ using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
+using MultipartDownloader.Core;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
@@ -310,24 +311,73 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     #endregion
 
+    /// <summary>
+    /// Raises the <see cref="DownloadFinished"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
     public void RaiseDownloadFinishedEvent(DownloadFileEventArgs eventArgs)
     {
         DownloadFinished?.Invoke(this, eventArgs);
     }
 
+    /// <summary>
+    /// Raises the <see cref="DownloadPaused"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
     public void RaiseDownloadPausedEvent(DownloadFileEventArgs eventArgs)
     {
         DownloadPaused?.Invoke(this, eventArgs);
     }
 
+    /// <summary>
+    /// Raises the <see cref="DownloadResumed"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
     public void RaiseDownloadResumedEvent(DownloadFileEventArgs eventArgs)
     {
         DownloadResumed?.Invoke(this, eventArgs);
     }
 
+    /// <summary>
+    /// Raises the <see cref="DownloadStopped"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
     public void RaiseDownloadStoppedEvent(DownloadFileEventArgs eventArgs)
     {
         DownloadStopped?.Invoke(this, eventArgs);
+    }
+
+    /// <summary>
+    /// Gets the download package of the download file.
+    /// </summary>
+    /// <returns>Returns the download package of the download file.</returns>
+    public DownloadPackage? GetDownloadPackage()
+    {
+        return DownloadPackage.IsStringNullOrEmpty() ? null : DownloadPackage.ConvertFromJson<DownloadPackage?>();
+    }
+
+    /// <summary>
+    /// Resets the properties of the download file.
+    /// </summary>
+    public void Reset()
+    {
+        Status = DownloadFileStatus.None;
+        LastTryDate = null;
+        DownloadProgress = null;
+        DownloadedSize = null;
+        ElapsedTime = null;
+        TimeLeft = null;
+        TransferRate = null;
+        DownloadPackage = null;
+        ChunksData.Clear();
+        CountOfError = 0;
+        CanResumeDownload = null;
+        MergeProgress = 0;
+        PlayStopSound = true;
+        TempDownloadQueueId = null;
+        IsCompletelyStopped = false;
+        IsUrlDuplicate = false;
+        IsFileNameDuplicate = false;
     }
 
     #region Helpers

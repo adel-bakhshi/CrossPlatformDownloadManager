@@ -206,7 +206,7 @@
                         Value="8, 0, 0, 8" />
             </Style>
 
-            <Style Selector="^:nth-last-child(1)">
+            <Style Selector="^:nth-last-child(2)">
                 <Setter Property="CornerRadius"
                         Value="0, 8, 8, 0" />
             </Style>

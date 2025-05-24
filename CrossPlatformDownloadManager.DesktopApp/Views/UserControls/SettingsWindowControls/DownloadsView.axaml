@@ -312,7 +312,8 @@
                                VerticalAlignment="Center"
                                HorizontalAlignment="Stretch"
                                TextAlignment="Left"
-                               FontWeight="Bold" />
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 5" />
 
                     <!-- Speed and unit -->
                     <Grid ColumnDefinitions="*, Auto">
@@ -360,6 +361,59 @@
                     <TextBlock Foreground="{DynamicResource TertiaryColor}"
                                FontStyle="Italic"
                                Text="The amount of data to be temporarily stored in RAM before being written to disk. Increasing this value may improve download speed but will use more system memory. (Default: 10 MB)"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- Temporary file location -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryColor}">
+                <StackPanel Orientation="Vertical"
+                            Spacing="5">
+                    <!-- Title -->
+                    <TextBlock HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Temporary file location"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 5" />
+
+                    <!-- Global save location -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <!-- Save location -->
+                        <cc:CustomTextBox Grid.Column="0"
+                                          Background="{DynamicResource PrimaryColor}"
+                                          Watermark="Temporary file location"
+                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource FolderSvgIcon}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          Margin="0, 0, 10, 0"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
+                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          Text="{Binding TemporaryFileLocation, FallbackValue='', TargetNullValue=''}"
+                                          IsReadOnly="True" />
+
+                        <!-- Browse button -->
+                        <Button Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Classes="button success"
+                                Content="Browse"
+                                Command="{Binding BrowseTemporaryFileLocationCommand}" />
+                    </Grid>
+                    
+                    <!-- Maximum memory buffer info -->
+                    <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                               FontStyle="Italic"
+                               Text="Choose the folder where temporary download parts will be stored. These files are merged automatically into the final file after the download completes. Using a fast drive (like an SSD) for temporary storage may improve performance."
                                TextWrapping="Wrap" />
                 </StackPanel>
             </Border>

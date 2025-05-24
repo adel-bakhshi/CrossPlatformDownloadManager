@@ -270,6 +270,17 @@ public class SettingsWindowViewModel : ViewModelBase
 
                 return;
             }
+            
+            // If maximum connections count is greater than 8, show a message to user and ask him/her to confirm the count
+            if (DownloadsViewModel.SelectedMaximumConnectionsCount > 8)
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync(dialogHeader: "Too Many Connections Selected",
+                    dialogMessage: "You've selected more than 8 connections. Using a higher connection count may lead to unexpected issues such as server disconnections or corrupted downloads. Would you like to reset the connection count to the recommended default (8)?",
+                    dialogButtons: DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    DownloadsViewModel.SelectedMaximumConnectionsCount = 8;
+            }
 
             // Validate selected speed unit
             if (DownloadsViewModel.SelectedSpeedUnit.IsStringNullOrEmpty())
@@ -320,6 +331,19 @@ public class SettingsWindowViewModel : ViewModelBase
                 {
                     return;
                 }
+            }
+            
+            // Validate the temporary file location
+            if (DownloadsViewModel.TemporaryFileLocation.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync(dialogHeader: "Temporary Location Not Set",
+                    dialogMessage: "You haven't specified a location for storing temporary files. Would you like to use the default location instead?",
+                    dialogButtons: DialogButtons.YesNo);
+
+                if (result == DialogResult.No)
+                    return;
+                
+                DownloadsViewModel.TemporaryFileLocation = Constants.TempDownloadDirectory;
             }
 
             // Save general settings
@@ -391,6 +415,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.MergeLimitUnit = DownloadsViewModel.IsMergeSpeedLimiterEnabled ? DownloadsViewModel.SelectedMergeSpeedUnit : null;
             AppService.SettingsService.Settings.MaximumMemoryBufferBytes = (long)(DownloadsViewModel.MaximumMemoryBufferBytes ?? 0);
             AppService.SettingsService.Settings.MaximumMemoryBufferBytesUnit = DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit!;
+            AppService.SettingsService.Settings.TemporaryFileLocation = DownloadsViewModel.TemporaryFileLocation!;
 
             // Save proxy settings
             switch (ProxyViewModel)

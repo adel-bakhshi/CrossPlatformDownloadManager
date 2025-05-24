@@ -43,9 +43,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private readonly ICategoryService _categoryService;
     private readonly SemaphoreSlim _addCompletedBlocker;
     private readonly ConcurrentQueue<FileDownloader> _completedDownloads = [];
+    private readonly ObservableCollection<FileDownloader> _downloadingFiles = [];
     private CancellationTokenSource? _watcherCancellationSource;
     private ObservableCollection<DownloadFileViewModel> _downloadFiles = [];
-    private ObservableCollection<FileDownloader> _downloadingFiles = [];
 
     #endregion
 
@@ -54,13 +54,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     public ObservableCollection<DownloadFileViewModel> DownloadFiles
     {
         get => _downloadFiles;
-        private set => SetField(ref _downloadFiles, value); // TODO: Where the set is used???
-    }
-
-    public ObservableCollection<FileDownloader> DownloadingFiles
-    {
-        get => _downloadingFiles;
-        private set => SetField(ref _downloadingFiles, value);
+        private set => SetField(ref _downloadFiles, value);
     }
 
     #endregion
@@ -244,7 +238,6 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         await LoadDownloadFilesAsync();
     }
 
-    // TODO: Remove the temp files
     public async Task DeleteDownloadFileAsync(DownloadFileViewModel? viewModel, bool alsoDeleteFile, bool reloadData = true)
     {
         // Find download file
@@ -261,6 +254,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (downloadFile.IsDownloading || downloadFile.IsPaused)
             await StopDownloadFileAsync(downloadFile, ensureStopped: true);
 
+        // Remove temp files of download file
+        await RemoveTempFilesAsync(downloadFile);
         // If the download file does not exist in the database but does exist in the application,
         // only the file in the application needs to be deleted and there is no need to delete the file in the database as well
         var shouldReturn = false;
@@ -411,21 +406,18 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         fileDownloader.DownloadConfiguration.MaximumBytesPerSecond = speed;
     }
 
-    // TODO: Remove the temp files
     public async Task RedownloadDownloadFileAsync(DownloadFileViewModel? viewModel, bool showWindow = true)
     {
+        // Try to find the download file
         var downloadFile = DownloadFiles.FirstOrDefault(df => df.Id == viewModel?.Id);
         if (downloadFile == null)
             return;
 
-        downloadFile.Status = DownloadFileStatus.None;
-        downloadFile.LastTryDate = null;
-        downloadFile.DownloadProgress = 0;
-        downloadFile.ElapsedTime = null;
-        downloadFile.TimeLeft = null;
-        downloadFile.TransferRate = null;
-        downloadFile.DownloadPackage = null;
-
+        // Reset the properties of the download file
+        downloadFile.Reset();
+        // Remove temp files of download file
+        await RemoveTempFilesAsync(downloadFile);
+        // Remove download file from storage as well
         if (!downloadFile.SaveLocation.IsStringNullOrEmpty() && !downloadFile.FileName.IsStringNullOrEmpty())
         {
             var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
@@ -433,7 +425,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 await Rubbish.MoveAsync(filePath);
         }
 
+        // Update download file with the new data
         await UpdateDownloadFileAsync(downloadFile);
+        // Start downloading the file
         _ = StartDownloadFileAsync(downloadFile, showWindow);
     }
 
@@ -575,7 +569,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         {
             if (showMessage)
                 await DialogBoxManager.ShowDangerDialogAsync("Url", "Please provide a valid URL to continue.", DialogButtons.Ok);
-            
+
             return false;
         }
 
@@ -899,7 +893,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     private FileDownloader? GetOrCreateFileDownloader(DownloadFileViewModel downloadFile, bool canCreate = true)
     {
         // Try to find file downloader
-        var fileDownloader = DownloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
+        var fileDownloader = _downloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
         // If file downloader found, return it
         // If the permission for create is false, return null
         if (fileDownloader != null || !canCreate)
@@ -908,7 +902,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Create an instance of the FileDownloader class for managing download file
         fileDownloader = new FileDownloader(downloadFile);
         // Add file downloader to the list
-        DownloadingFiles.Add(fileDownloader);
+        _downloadingFiles.Add(fileDownloader);
 
         return fileDownloader;
     }
@@ -949,9 +943,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 // Remove DownloadStopped event from download file
                 downloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
 
-                // Reset properties
+                // Reset time left and transfer rate
                 downloadFile.TimeLeft = null;
                 downloadFile.TransferRate = null;
+                // Store the download queue id for next usage
+                // DownloadQueueId will be set to null but in the completed tasks (that is used below) we need it
+                // So we store it in TempDownloadQueueId and after using it, we set it to null
                 downloadFile.TempDownloadQueueId = downloadFile.DownloadQueueId;
 
                 // Check if download file is completed
@@ -971,14 +968,26 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     // Show complete download dialog when user want's this
                     if (_settingsService.Settings.ShowCompleteDownloadDialog)
                     {
-                        var serviceProvider = Application.Current?.GetServiceProvider();
-                        var appService = serviceProvider?.GetService<IAppService>();
-                        if (appService == null)
-                            throw new InvalidOperationException("Can't find app service.");
+                        // Run this code on UI thread
+                        await Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            try
+                            {
+                                var serviceProvider = Application.Current?.GetServiceProvider();
+                                var appService = serviceProvider?.GetService<IAppService>();
+                                if (appService == null)
+                                    throw new InvalidOperationException("Can't find app service.");
 
-                        var viewModel = new CompleteDownloadWindowViewModel(appService, downloadFile);
-                        var window = new CompleteDownloadWindow { DataContext = viewModel };
-                        window.Show();
+                                var viewModel = new CompleteDownloadWindowViewModel(appService, downloadFile);
+                                var window = new CompleteDownloadWindow { DataContext = viewModel };
+                                window.Show();
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, "An error occurred while showing the complete download dialog. Error message: {ErrorMessage}", ex.Message);
+                                await DialogBoxManager.ShowErrorDialogAsync(ex);
+                            }
+                        });
                     }
                 }
                 else if (downloadFile.IsError)
@@ -1047,16 +1056,16 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 // Update download file
                 await UpdateDownloadFileAsync(downloadFile);
                 // Close the download window
-                fileDownloader.DownloadWindow?.Close();
+                Dispatcher.UIThread.Post(() => fileDownloader.DownloadWindow?.Close());
 
                 // Set the completely stopped flag to true
                 // With this flag we can use EnsureDownloadFileStoppedAsync without any problem
                 downloadFile.IsCompletelyStopped = true;
 
                 // Remove file downloader from the downloading files list
-                var originalFileDownloader = DownloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
+                var originalFileDownloader = _downloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
                 if (originalFileDownloader != null)
-                    DownloadingFiles.Remove(originalFileDownloader);
+                    _downloadingFiles.Remove(originalFileDownloader);
             }
             catch (Exception ex)
             {
@@ -1077,7 +1086,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Check if the stop operation is finished
         while (!downloadFile.IsCompletelyStopped)
-            await Task.Delay(100);
+            await Task.Delay(50);
     }
 
     /// <summary>
@@ -1346,6 +1355,38 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Change file name
         downloadFile.FileName = newFileName;
+    }
+
+    /// <summary>
+    /// Removes the temporary files of the download file from the storage.
+    /// </summary>
+    /// <param name="downloadFile">The download file to remove the temporary files from.</param>
+    private async Task RemoveTempFilesAsync(DownloadFileViewModel downloadFile)
+    {
+        // Make sure the file name is not null or empty
+        if (downloadFile.FileName.IsStringNullOrEmpty())
+            throw new InvalidOperationException("The file name of the download file is undefined.");
+
+        // Get the directory path from the settings
+        var fileName = Path.GetFileNameWithoutExtension(downloadFile.FileName!);
+        var directoryPath = Path.Combine(_settingsService.Settings.TemporaryFileLocation, fileName);
+        // Remove temporary directory with all files in it
+        if (Directory.Exists(directoryPath))
+        {
+            var deleteResult = await Rubbish.MoveAsync(directoryPath);
+            if (!deleteResult)
+                throw new InvalidOperationException("Could not remove the temporary directory.");
+        }
+
+        // Get download package
+        var downloadPackage = downloadFile.GetDownloadPackage();
+        // Check if the download package is not null, get the temporary save path and remove the temporary directory with all files in it
+        if (downloadPackage != null && Directory.Exists(downloadPackage.TemporarySavePath))
+        {
+            var deleteResult = await Rubbish.MoveAsync(downloadPackage.TemporarySavePath);
+            if (!deleteResult)
+                throw new InvalidOperationException("Could not remove the temporary directory.");
+        }
     }
 
     #endregion

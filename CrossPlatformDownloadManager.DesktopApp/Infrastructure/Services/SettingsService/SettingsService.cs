@@ -83,6 +83,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 if (settings.StartOnSystemStartup)
                     RegisterStartup();
 
+                // Set the default temporary file location
+                settings.TemporaryFileLocation = Constants.TempDownloadDirectory;
                 // Save settings
                 await _unitOfWork.SettingsRepository.AddAsync(settings);
                 await _unitOfWork.SaveAsync();

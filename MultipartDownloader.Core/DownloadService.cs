@@ -13,6 +13,9 @@ public class DownloadService : AbstractDownloadService
 {
     #region Private fields
 
+    /// <summary>
+    /// Shows the current position of the merge operation.
+    /// </summary>
     private long _mergePosition;
 
     #endregion Private fields
@@ -30,7 +33,9 @@ public class DownloadService : AbstractDownloadService
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadService"/> class with default options.
     /// </summary>
-    public DownloadService(ILoggerFactory? loggerFactory = null) : this(null, loggerFactory) { }
+    public DownloadService(ILoggerFactory? loggerFactory = null) : this(null, loggerFactory)
+    {
+    }
 
     /// <summary>
     /// Starts the download operation.
@@ -152,7 +157,6 @@ public class DownloadService : AbstractDownloadService
         await using var throttledStream = new ThrottledStream(tempStream, Options.MaximumBytesPerSecondForMerge);
         var buffer = new byte[8192]; // 8 kilobyte buffer
         var bytesRead = 0;
-        DateTime? lastMergeProgressSignal = null;
 
         // Read bytes from temp stream
         while ((bytesRead = await throttledStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
@@ -166,18 +170,9 @@ public class DownloadService : AbstractDownloadService
             // Update position
             _mergePosition += bytesRead;
 
-            // Raise MergeProgressChanged event every 100ms
-            var now = DateTime.Now;
-            if (lastMergeProgressSignal == null || now - lastMergeProgressSignal > TimeSpan.FromMilliseconds(100))
-            {
-                // Raise MergeProgressChanged event
-                SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
-                lastMergeProgressSignal = now;
-            }
+            // Raise MergeProgressChanged event
+            SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
         }
-
-        // Raise MergeProgressChanged event for last time
-        SendMergeProgressChangedSignal(_mergePosition, Package.TotalFileSize);
     }
 
     /// <summary>
@@ -237,8 +232,12 @@ public class DownloadService : AbstractDownloadService
             throw DownloadException.CreateDownloadException(DownloadException.ChunkFilesDirectoryIsNotValid);
 
         var fileName = Path.GetFileNameWithoutExtension(Package.FileName) ?? Guid.NewGuid().ToString();
-        var finalPath = Path.Combine(Options.ChunkFilesOutputDirectory, fileName);
-        Options.SaveChunkFilesFinalPath(finalPath);
+        var temporaryPath = Path.Combine(Options.ChunkFilesOutputDirectory, fileName);
+        if (Directory.Exists(Package.TemporarySavePath) && Directory.GetFiles(Package.TemporarySavePath, $"{fileName}.*.tmp").Length > 0)
+            return;
+        
+        Package.TemporarySavePath = temporaryPath;
+        Package.CreateTemporarySavePath();
     }
 
     /// <summary>
@@ -409,7 +408,7 @@ public class DownloadService : AbstractDownloadService
         if (string.IsNullOrEmpty(chunk.TempFilePath))
         {
             var fileName = Path.GetFileNameWithoutExtension(Package.FileName) + $".part{int.Parse(chunk.Id) + 1}.tmp";
-            chunk.TempFilePath = Path.Combine(Options.ChunkFilesFinalPath, fileName);
+            chunk.TempFilePath = Path.Combine(Package.TemporarySavePath, fileName);
         }
 
         return new(chunk, Options, Logger);

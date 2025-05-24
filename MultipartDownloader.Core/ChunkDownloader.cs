@@ -201,15 +201,6 @@ internal class ChunkDownloader
                 }
             }
 
-            // Raise DownloadProgressChanged event for last time
-            OnDownloadProgressChanged(new CustomEventArgs.DownloadProgressChangedEventArgs(Chunk.Id)
-            {
-                TotalBytesToReceive = Chunk.Length,
-                ReceivedBytesSize = Chunk.Position,
-                ProgressedByteSize = readSize,
-                ReceivedBytes = []
-            });
-
             // Flush storage and update file position for last time
             if (_storage!.MemoryLength > 0)
                 Chunk.FilePosition = await FlushStorageAsync(dispose: false).ConfigureAwait(false);
@@ -241,6 +232,9 @@ internal class ChunkDownloader
 
     #region Helpers
 
+    /// <summary>
+    /// Syncs the position of the chunk with the position of the file.
+    /// </summary>
     private void SyncPositionWithStorage()
     {
         if (_storage == null)
@@ -271,16 +265,29 @@ internal class ChunkDownloader
         }
     }
 
+    /// <summary>
+    /// Raises the <see cref="DownloadProgressChanged"/> event.
+    /// </summary>
+    /// <param name="e">The arguments of the event.</param>
     private void OnDownloadProgressChanged(CustomEventArgs.DownloadProgressChangedEventArgs e)
     {
         DownloadProgressChanged?.Invoke(this, e);
     }
 
+    /// <summary>
+    /// Raises the <see cref="DownloadRestarted"/> event.
+    /// </summary>
+    /// <param name="reason">The reason that cause restart the download of the chunk.</param>
     private void OnDownloadRestarted(RestartReason reason)
     {
         DownloadRestarted?.Invoke(this, new ChunkDownloadRestartedEventArgs(Chunk.Id, reason));
     }
 
+    /// <summary>
+    /// Flushes the temp storage and writes all data that stored in the memory to the storage.
+    /// </summary>
+    /// <param name="dispose">Whether the storage should be dispose or not.</param>
+    /// <returns>Returns the position of the temp file after release memory and flush storage.</returns>
     private async Task<long> FlushStorageAsync(bool dispose)
     {
         if (_storage == null)

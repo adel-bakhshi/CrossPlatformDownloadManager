@@ -21,11 +21,6 @@ public interface IDownloadFileService
     /// </summary>
     ObservableCollection<DownloadFileViewModel> DownloadFiles { get; }
 
-    /// <summary>
-    /// Gets a value that indicates the download files that currently are downloading.
-    /// </summary>
-    ObservableCollection<FileDownloader> DownloadingFiles { get; }
-
     #endregion
 
     #region Events

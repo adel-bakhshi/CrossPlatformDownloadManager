@@ -58,6 +58,11 @@ public class DownloadPackage : IDisposable, IAsyncDisposable
     public bool IsSupportDownloadInRange { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets the temporary directory that the temp files of the chunks will be saved to.
+    /// </summary>
+    public string TemporarySavePath { get; set; } = string.Empty;
+
+    /// <summary>
     /// Clears the chunks and resets the package.
     /// </summary>
     public void Clear()
@@ -158,5 +163,15 @@ public class DownloadPackage : IDisposable, IAsyncDisposable
         var stream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         stream.Seek(0, SeekOrigin.Begin);
         return stream;
+    }
+
+    /// <summary>
+    /// Creates the temporary directory for saving the temp files of the chunks.
+    /// </summary>
+    public void CreateTemporarySavePath()
+    {
+        // Make sure the final directory exists
+        if (!Directory.Exists(TemporarySavePath))
+            Directory.CreateDirectory(TemporarySavePath);
     }
 }

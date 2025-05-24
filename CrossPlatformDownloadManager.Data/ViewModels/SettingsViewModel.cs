@@ -29,6 +29,7 @@ public class SettingsViewModel : PropertyChangedBase
     private string? _mergeLimitUnit;
     private long _maximumMemoryBufferBytes;
     private string _maximumMemoryBufferBytesUnit = string.Empty;
+    private string _temporaryFileLocation = string.Empty;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
     private bool _useDownloadCompleteSound;
@@ -172,6 +173,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _maximumMemoryBufferBytesUnit;
         set => SetField(ref _maximumMemoryBufferBytesUnit, value);
+    }
+
+    public string TemporaryFileLocation
+    {
+        get => _temporaryFileLocation;
+        set => SetField(ref _temporaryFileLocation, value);
     }
 
     public ProxyMode ProxyMode

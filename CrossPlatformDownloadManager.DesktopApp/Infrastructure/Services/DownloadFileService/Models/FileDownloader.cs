@@ -66,6 +66,11 @@ public class FileDownloader
     private DispatcherTimer? _downloaderTimer;
 
     /// <summary>
+    /// Indicates the ticks count of the downloader timer to calculate the elapsed timer and time left of the download.
+    /// </summary>
+    private int _downloaderTimerTicksCount = 1;
+
+    /// <summary>
     /// Indicate the elapsed time of the start download process.
     /// </summary>
     private TimeSpan? _elapsedTimeOfStartingDownload;
@@ -118,7 +123,7 @@ public class FileDownloader
     /// Gets the DownloadService object that contains the information of the download service.
     /// </summary>
     public DownloadService DownloadService { get; }
-    
+
     /// <summary>
     /// Gets a value that indicates the download window of the current download file.
     /// </summary>
@@ -200,8 +205,7 @@ public class FileDownloader
         // Get file name
         var fileName = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
         // Get download package
-        var downloadPackage = DownloadFile.DownloadPackage.ConvertFromJson<DownloadPackage>();
-
+        var downloadPackage = DownloadFile.GetDownloadPackage();
         // If download package is null we have to download file from the beginning
         if (downloadPackage == null)
         {
@@ -277,7 +281,7 @@ public class FileDownloader
         // Invoke DownloadPaused event
         DownloadFile.RaiseDownloadPausedEvent(new DownloadFileEventArgs(DownloadFile.Id));
     }
-    
+
     /// <summary>
     /// Creates a window for showing the progress of the download.
     /// </summary>
@@ -354,7 +358,7 @@ public class FileDownloader
     {
         _completedAsyncTasks.Clear();
     }
-    
+
     /// <summary>
     /// Clears all tasks from the completed tasks list.
     /// </summary>
@@ -390,6 +394,8 @@ public class FileDownloader
 
         // Save download package
         SaveDownloadPackage(DownloadService.Package);
+        // Update chunk progresses for the last time
+        UpdateChunksData();
         // Reset download options
         ResetDownload();
 
@@ -422,6 +428,9 @@ public class FileDownloader
         DownloadFile.TransferRate = (float)e.BytesPerSecondSpeed;
         // Update downloaded size
         DownloadFile.DownloadedSize = e.ReceivedBytesSize;
+        // Update total file size if it's not set or the size is changed
+        if (DownloadFile.Size == null || e.TotalBytesToReceive != (long)DownloadFile.Size.Value)
+            DownloadFile.Size = e.TotalBytesToReceive;
 
         // Save required data to calculate time left
         _receivedBytesSize = e.ReceivedBytesSize;
@@ -496,19 +505,19 @@ public class FileDownloader
                     await DialogBoxManager.ShowWarningDialogAsync("Part Size Mismatch Detected",
                         "A problem was detected while downloading a part of the file. the received size does not match the expected size. This part will be re-downloaded to maintain data integrity and ensure a complete file.",
                         DialogButtons.Ok);
-                    
+
                     break;
                 }
-                
+
                 case RestartReason.TempFileCorruption:
                 {
                     await DialogBoxManager.ShowWarningDialogAsync("Corrupted Temporary File Detected",
                         "The temporary file for a part of the download appears to be corrupted or unreadable. To ensure data integrity and a successful download, this part will be re-downloaded from the server.",
                         DialogButtons.Ok);
-                    
+
                     break;
                 }
-                
+
                 default:
                     throw new InvalidOperationException("We detected that the chunk download was restarted, but we don't know why. Please report this issue to the developer.");
             }
@@ -526,14 +535,26 @@ public class FileDownloader
     /// <param name="e">The arguments of the event</param>
     private void DownloaderTimerOnTick(object? sender, EventArgs e)
     {
-        // Calculate elapsed time from the start time of the download
-        CalculateElapsedTime();
-        // Calculate time left of the download process
-        CalculateTimeLeft();
+        // If timer ticks count is divisible by 4, it means 1 second passed, and we can calculate the elapsed time and time left
+        if (_downloaderTimerTicksCount % 4 == 0)
+        {
+            // Calculate elapsed time from the start time of the download
+            CalculateElapsedTime();
+            // Calculate time left of the download process
+            CalculateTimeLeft();
+            // Reset tick count
+            _downloaderTimerTicksCount = 1;
+        }
+        else
+        {
+            // Increase tick count
+            _downloaderTimerTicksCount++;
+        }
+
         // Update chunks data
         UpdateChunksData();
     }
-    
+
     /// <summary>
     /// Handles the Closing event of the <see cref="DownloadWindow"/> class.
     /// </summary>
@@ -609,7 +630,7 @@ public class FileDownloader
             ParallelDownload = true,
             MaximumMemoryBufferBytes = GetMaximumMemoryBufferBytes(),
             ReserveStorageSpaceBeforeStartingDownload = true,
-            ChunkFilesOutputDirectory = Constants.TempDownloadDirectory,
+            ChunkFilesOutputDirectory = GetTemporaryFileLocation(),
             MaxRestartWithoutClearTempFile = 5,
             MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
@@ -679,6 +700,19 @@ public class FileDownloader
 
         // Return the limit speed multiplied by the limit unit
         return maximumMemoryBufferBytes * unit;
+    }
+
+    /// <summary>
+    /// Gets the temporary file location for saving the temp download files.
+    /// </summary>
+    /// <returns></returns>
+    private string GetTemporaryFileLocation()
+    {
+        var location = _appService.SettingsService.Settings.TemporaryFileLocation;
+        if (location.IsStringNullOrEmpty())
+            location = Constants.TempDownloadDirectory;
+
+        return location;
     }
 
     /// <summary>
@@ -754,7 +788,7 @@ public class FileDownloader
     /// </summary>
     private void StartDownloaderTimer()
     {
-        _downloaderTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _downloaderTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.25) };
         _downloaderTimer.Tick += DownloaderTimerOnTick;
         _downloaderTimer.Start();
     }

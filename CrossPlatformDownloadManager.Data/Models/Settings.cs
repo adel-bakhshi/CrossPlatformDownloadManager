@@ -87,6 +87,10 @@ public class Settings : DbModelBase
     public string MaximumMemoryBufferBytesUnit { get; set; } = string.Empty;
 
     [Required]
+    [MaxLength(300)]
+    public string TemporaryFileLocation { get; set; } = string.Empty;
+
+    [Required]
     [JsonProperty("proxyMode")]
     public ProxyMode ProxyMode { get; set; }
 
@@ -162,6 +166,7 @@ public class Settings : DbModelBase
         MergeLimitUnit = settings.MergeLimitUnit;
         MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes;
         MaximumMemoryBufferBytesUnit = settings.MaximumMemoryBufferBytesUnit;
+        TemporaryFileLocation = settings.TemporaryFileLocation;
         ProxyMode = settings.ProxyMode;
         ProxyType = settings.ProxyType;
         UseDownloadCompleteSound = settings.UseDownloadCompleteSound;

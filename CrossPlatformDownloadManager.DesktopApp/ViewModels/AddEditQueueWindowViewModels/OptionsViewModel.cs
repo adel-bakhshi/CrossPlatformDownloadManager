@@ -266,7 +266,7 @@ public class OptionsViewModel : ViewModelBase
         if (TurnOffComputerWhenDone)
         {
             var turnOffComputerMode = Enum.GetName(typeof(TurnOffComputerMode), downloadQueue.TurnOffComputerMode!);
-            if (turnOffComputerMode.IsNullOrEmpty())
+            if (turnOffComputerMode.IsStringNullOrEmpty())
                 return;
 
             if (turnOffComputerMode!.Equals("Shutdown", StringComparison.OrdinalIgnoreCase))

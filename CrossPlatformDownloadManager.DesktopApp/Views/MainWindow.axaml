@@ -982,7 +982,8 @@
                               LoadingRow="DownloadFilesDataGridOnLoadingRow"
                               UnloadingRow="DownloadFilesDataGridOnUnloadingRow"
                               KeyDown="DownloadFilesDataGridOnKeyDown"
-                              KeyUp="DownloadFilesDataGridOnKeyUp">
+                              KeyUp="DownloadFilesDataGridOnKeyUp"
+                              CellPointerPressed="DownloadFilesDataGridOnCellPointerPressed">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">

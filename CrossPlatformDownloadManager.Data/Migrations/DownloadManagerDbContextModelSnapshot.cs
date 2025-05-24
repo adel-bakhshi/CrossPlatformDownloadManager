@@ -15,7 +15,7 @@ namespace CrossPlatformDownloadManager.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
 
             modelBuilder.Entity("CrossPlatformDownloadManager.Data.Models.Category", b =>
                 {
@@ -311,9 +311,6 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("DarkMode")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("DataGridColumnsSettings")
                         .HasMaxLength(5000)
                         .HasColumnType("TEXT");
@@ -329,6 +326,9 @@ namespace CrossPlatformDownloadManager.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("HasApplicationBeenRunYet")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsMergeSpeedLimitEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsSpeedLimiterEnabled")
@@ -347,6 +347,21 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<int>("MaximumConnectionsCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<long>("MaximumMemoryBufferBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("MaximumMemoryBufferBytesUnit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("MergeLimitSpeed")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MergeLimitUnit")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
 
                     b.Property<byte>("ProxyMode")
                         .HasColumnType("INTEGER");
@@ -367,6 +382,16 @@ namespace CrossPlatformDownloadManager.Data.Migrations
 
                     b.Property<bool>("StartOnSystemStartup")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("TemporaryFileLocation")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ThemeFilePath")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("UseBrowserExtension")
                         .HasColumnType("INTEGER");

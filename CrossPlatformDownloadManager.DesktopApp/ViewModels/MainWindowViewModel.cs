@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -344,11 +343,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void LoadDownloadQueues()
     {
-        var downloadQueues = AppService
-            .DownloadQueueService
-            .DownloadQueues;
-
-        DownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+        DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
     }
 
     private void SelectAllRows(DataGrid? dataGrid)
@@ -495,7 +490,7 @@ public class MainWindowViewModel : ViewModelBase
                 .ToList();
 
             var existingDownloadFiles = downloadFiles
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
@@ -598,7 +593,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
 
             var tag = button?.Tag?.ToString();
-            if (tag.IsNullOrEmpty() || !int.TryParse(tag, out var downloadQueueId))
+            if (tag.IsStringNullOrEmpty() || !int.TryParse(tag, out var downloadQueueId))
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Queue", "Queue not found", DialogButtons.Ok);
                 return;
@@ -911,8 +906,8 @@ public class MainWindowViewModel : ViewModelBase
             await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true, IsStopping: false } downloadFile
-                || downloadFile.SaveLocation.IsNullOrEmpty()
-                || downloadFile.FileName.IsNullOrEmpty())
+                || downloadFile.SaveLocation.IsStringNullOrEmpty()
+                || downloadFile.FileName.IsStringNullOrEmpty())
             {
                 return;
             }
@@ -948,7 +943,7 @@ public class MainWindowViewModel : ViewModelBase
             var groupDownloadFiles = dataGrid
                 .SelectedItems
                 .OfType<DownloadFileViewModel>()
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && Directory.Exists(df.SaveLocation!))
+                .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && Directory.Exists(df.SaveLocation!))
                 .GroupBy(df => df.SaveLocation!)
                 .ToList();
 
@@ -967,7 +962,7 @@ public class MainWindowViewModel : ViewModelBase
                 var directoryPath = group.Key;
                 foreach (var downloadFile in group)
                 {
-                    if (downloadFile.FileName.IsNullOrEmpty())
+                    if (downloadFile.FileName.IsStringNullOrEmpty())
                     {
                         if (openedFolders.Contains(directoryPath))
                             continue;
@@ -1009,8 +1004,8 @@ public class MainWindowViewModel : ViewModelBase
             await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
-                downloadFile.FileName.IsNullOrEmpty() ||
-                downloadFile.SaveLocation.IsNullOrEmpty())
+                downloadFile.FileName.IsStringNullOrEmpty() ||
+                downloadFile.SaveLocation.IsStringNullOrEmpty())
             {
                 return;
             }
@@ -1040,8 +1035,8 @@ public class MainWindowViewModel : ViewModelBase
             await HideContextMenuAsync();
 
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
-                downloadFile.FileName.IsNullOrEmpty() ||
-                downloadFile.SaveLocation.IsNullOrEmpty() ||
+                downloadFile.FileName.IsStringNullOrEmpty() ||
+                downloadFile.SaveLocation.IsStringNullOrEmpty() ||
                 _mainWindow == null)
             {
                 return;
@@ -1055,7 +1050,7 @@ public class MainWindowViewModel : ViewModelBase
             }
 
             var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
-            if (newSaveLocation.IsNullOrEmpty())
+            if (newSaveLocation.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found.", DialogButtons.Ok);
                 return;
@@ -1161,7 +1156,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             // Clear previous data stored in AddToQueueDownloadQueues
-            AddToQueueDownloadQueues.UpdateCollection([], dq => dq.Id);
+            AddToQueueDownloadQueues.Clear();
             if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
             {
                 await HideContextMenuAsync();
@@ -1200,13 +1195,13 @@ public class MainWindowViewModel : ViewModelBase
                     var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFiles[0].DownloadQueueId);
                     if (downloadQueue == null)
                     {
-                        AddToQueueDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+                        AddToQueueDownloadQueues = downloadQueues;
                     }
                     else
                     {
-                        AddToQueueDownloadQueues.UpdateCollection(downloadQueues
+                        AddToQueueDownloadQueues = downloadQueues
                             .Where(dq => dq.Id != downloadQueue.Id)
-                            .ToObservableCollection(), dq => dq.Id);
+                            .ToObservableCollection();
 
                         if (AddToQueueDownloadQueues.Count == 0)
                             AddToQueueFlyout?.Hide();
@@ -1228,9 +1223,9 @@ public class MainWindowViewModel : ViewModelBase
                         // If count of primary keys is equal to 1 then show all download queues except the one with primary key
                         case 1:
                         {
-                            AddToQueueDownloadQueues.UpdateCollection(downloadQueues
+                            AddToQueueDownloadQueues = downloadQueues
                                 .Where(dq => !primaryKeys.Contains(dq.Id))
-                                .ToObservableCollection(), dq => dq.Id);
+                                .ToObservableCollection();
 
                             if (AddToQueueDownloadQueues.Count == 0)
                                 AddToQueueFlyout?.Hide();
@@ -1241,7 +1236,7 @@ public class MainWindowViewModel : ViewModelBase
                         // If count of primary keys is 0 or more than 1 then show all download queues
                         default:
                         {
-                            AddToQueueDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
+                            AddToQueueDownloadQueues = downloadQueues;
                             break;
                         }
                     }
@@ -1405,7 +1400,7 @@ public class MainWindowViewModel : ViewModelBase
 
             // Get existing files
             var filePathList = downloadFiles
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
@@ -1723,11 +1718,11 @@ public class MainWindowViewModel : ViewModelBase
                 return;
 
             var filePath = savePickerResult.Path.LocalPath;
-            if (filePath.IsNullOrEmpty())
+            if (filePath.IsStringNullOrEmpty())
                 return;
 
             var directory = Path.GetDirectoryName(filePath);
-            if (directory.IsNullOrEmpty())
+            if (directory.IsStringNullOrEmpty())
                 return;
 
             if (!Directory.Exists(directory!))
@@ -1765,7 +1760,7 @@ public class MainWindowViewModel : ViewModelBase
             };
 
             var filePickerResult = await mainWindow.StorageProvider.OpenFilePickerAsync(filePickerOpenOptions);
-            if (!filePickerResult.Any() || filePickerResult[0].Path.LocalPath.IsNullOrEmpty())
+            if (!filePickerResult.Any() || filePickerResult[0].Path.LocalPath.IsStringNullOrEmpty())
                 return;
 
             var filePath = filePickerResult[0].Path.LocalPath;
@@ -1816,9 +1811,7 @@ public class MainWindowViewModel : ViewModelBase
             return;
 
         // Update active download queues
-        ActiveDownloadQueues.UpdateCollection(downloadQueues, dq => dq.Id);
-        this.RaisePropertyChanged(nameof(ActiveDownloadQueueExists));
-        this.RaisePropertyChanged(nameof(ActiveDownloadQueuesToolTipText));
+        ActiveDownloadQueues = downloadQueues;
     }
 
     private void LoadCategories()
@@ -1872,7 +1865,7 @@ public class MainWindowViewModel : ViewModelBase
                     .ToList();
             }
 
-            if (!SearchText.IsNullOrEmpty())
+            if (!SearchText.IsStringNullOrEmpty())
             {
                 downloadFiles = downloadFiles
                     .Where(df => df.Url?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false ||
@@ -1881,17 +1874,13 @@ public class MainWindowViewModel : ViewModelBase
                     .ToList();
             }
 
-            DownloadFiles.UpdateCollection(downloadFiles.ToObservableCollection(), df => df.Id);
+            DownloadFiles = downloadFiles.ToObservableCollection();
         }
         catch
         {
             try
             {
-                var downloadFiles = AppService
-                    .DownloadFileService
-                    .DownloadFiles;
-
-                DownloadFiles.UpdateCollection(downloadFiles, df => df.Id);
+                DownloadFiles = AppService.DownloadFileService.DownloadFiles;
             }
             catch
             {
@@ -1927,7 +1916,7 @@ public class MainWindowViewModel : ViewModelBase
         var limitSpeed = settings.LimitSpeed ?? 0;
         var limitUnit = settings.LimitUnit;
 
-        if (limitSpeed <= 0 || limitUnit.IsNullOrEmpty())
+        if (limitSpeed <= 0 || limitUnit.IsStringNullOrEmpty())
         {
             IsGlobalSpeedLimitVisible = false;
             return;
@@ -2115,7 +2104,7 @@ public class MainWindowViewModel : ViewModelBase
 
             // Check if there are any existing download files in the system
             var existingDownloadFiles = downloadFiles
-                .Where(df => !df.SaveLocation.IsNullOrEmpty() && !df.FileName.IsNullOrEmpty())
+                .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
@@ -2200,9 +2189,9 @@ public class MainWindowViewModel : ViewModelBase
         // Update settings with new values
         settings.StartOnSystemStartup = exportSettings.StartOnSystemStartup;
         settings.UseBrowserExtension = exportSettings.UseBrowserExtension;
-        settings.DarkMode = exportSettings.DarkMode;
         settings.UseManager = exportSettings.UseManager;
         settings.AlwaysKeepManagerOnTop = exportSettings.AlwaysKeepManagerOnTop;
+        settings.ApplicationFont = exportSettings.ApplicationFont;
         settings.ShowStartDownloadDialog = exportSettings.ShowStartDownloadDialog;
         settings.ShowCompleteDownloadDialog = exportSettings.ShowCompleteDownloadDialog;
         settings.DuplicateDownloadLinkAction = exportSettings.DuplicateDownloadLinkAction;
@@ -2210,6 +2199,11 @@ public class MainWindowViewModel : ViewModelBase
         settings.IsSpeedLimiterEnabled = exportSettings.IsSpeedLimiterEnabled;
         settings.LimitSpeed = exportSettings.LimitSpeed;
         settings.LimitUnit = exportSettings.LimitUnit;
+        settings.IsMergeSpeedLimitEnabled = exportSettings.IsMergeSpeedLimitEnabled;
+        settings.MergeLimitSpeed = exportSettings.MergeLimitSpeed;
+        settings.MergeLimitUnit = exportSettings.MergeLimitUnit;
+        settings.MaximumMemoryBufferBytes = exportSettings.MaximumMemoryBufferBytes;
+        settings.MaximumMemoryBufferBytesUnit = exportSettings.MaximumMemoryBufferBytesUnit;
         settings.ProxyMode = exportSettings.ProxyMode;
         settings.ProxyType = exportSettings.ProxyType;
         settings.UseDownloadCompleteSound = exportSettings.UseDownloadCompleteSound;
@@ -2221,7 +2215,6 @@ public class MainWindowViewModel : ViewModelBase
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
         settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
         settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>() ?? settings.DataGridColumnsSettings;
-        settings.ApplicationFont = exportSettings.ApplicationFont;
 
         await AppService.SettingsService.SaveSettingsAsync(settings);
 
@@ -2340,16 +2333,16 @@ public class MainWindowViewModel : ViewModelBase
             // If file name is null or empty, we must get url details and use of it
             var fileName = exportDownloadFile.FileName;
             var isFileSizeUnknown = false;
-            if (fileName.IsNullOrEmpty())
+            if (fileName.IsStringNullOrEmpty())
             {
-                var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(exportDownloadFile.Url, CancellationToken.None);
-                var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
-                if (!urlDetailsValidation.IsValid)
+                var downloadFileDetails = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(exportDownloadFile.Url);
+                var urlDetailsValidation = await AppService.DownloadFileService.ValidateDownloadFileAsync(downloadFileDetails, showMessage: false);
+                if (!urlDetailsValidation)
                     continue;
 
-                fileName = urlDetails.FileName;
-                exportDownloadFile.Size = urlDetails.FileSize;
-                isFileSizeUnknown = urlDetails.IsFileSizeUnknown;
+                fileName = downloadFileDetails.FileName;
+                exportDownloadFile.Size = downloadFileDetails.Size ?? 0;
+                isFileSizeUnknown = downloadFileDetails.IsSizeUnknown;
             }
 
             CategoryViewModel? category = null;
@@ -2369,30 +2362,30 @@ public class MainWindowViewModel : ViewModelBase
                 var fileExtension = fileExtensions.Find(fe => fe.Extension.Equals(extension));
 
                 // Check category and save location. If save location is null or empty, we must use general category for the file
-                if (fileExtension?.Category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
+                if (fileExtension?.Category?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false)
                 {
                     // If general category not found, set file name empty
-                    if (generalCategory?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false)
+                    if (generalCategory?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false)
                     {
                         fileName = string.Empty;
                     }
                     else
                     {
                         var saveLocation = generalCategory.CategorySaveDirectory.SaveDirectory;
-                        fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                        fileName = AppService.DownloadFileService.GetNewFileName(fileName ?? string.Empty, saveLocation);
                         category = generalCategory;
                     }
                 }
                 else
                 {
                     var saveLocation = fileExtension.Category.CategorySaveDirectory.SaveDirectory;
-                    fileName = AppService.DownloadFileService.GetNewFileName(fileName, saveLocation);
+                    fileName = AppService.DownloadFileService.GetNewFileName(fileName ?? string.Empty, saveLocation);
                     category = fileExtension.Category;
                 }
             }
 
             // Make sure file name has value
-            if (fileName.IsNullOrEmpty())
+            if (fileName.IsStringNullOrEmpty())
                 continue;
 
             // Find category if it is null
@@ -2490,7 +2483,7 @@ public class MainWindowViewModel : ViewModelBase
     private async Task ImportFilesAsync(string tempFolder, List<ExportAddedDownloadFileDataViewModel> addedDownloadFiles)
     {
         // Make sure temp folder has value and exist
-        if (tempFolder.IsNullOrEmpty() || !Directory.Exists(tempFolder))
+        if (tempFolder.IsStringNullOrEmpty() || !Directory.Exists(tempFolder))
             return;
 
         // Get all files exists in temp folder
@@ -2503,7 +2496,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             var oldFileName = Path.GetFileName(file);
             var data = addedDownloadFiles.Find(df => df.OldFileName.Equals(oldFileName));
-            if (data == null || data.NewFileName.IsNullOrEmpty() || data.SaveLocation.IsNullOrEmpty())
+            if (data == null || data.NewFileName.IsStringNullOrEmpty() || data.SaveLocation.IsStringNullOrEmpty())
                 continue;
 
             var filePath = Path.Combine(data.SaveLocation, data.NewFileName);
@@ -2620,7 +2613,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 default:
                 {
-                    if (downloadFile.SaveLocation.IsNullOrEmpty() || downloadFile.FileName.IsNullOrEmpty())
+                    if (downloadFile.SaveLocation.IsStringNullOrEmpty() || downloadFile.FileName.IsStringNullOrEmpty())
                         break;
 
                     var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);

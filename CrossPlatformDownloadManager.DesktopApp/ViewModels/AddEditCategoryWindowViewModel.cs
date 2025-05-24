@@ -142,9 +142,9 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     public bool IsSiteAddressesDataGridVisible => SiteAddresses.Count > 0;
 
     public bool IsDeleteClearFileExtensionButtonEnabled =>
-        CurrentFileExtension.Id > 0 || !CurrentFileExtension.Extension.IsNullOrEmpty() || !CurrentFileExtension.Alias.IsNullOrEmpty();
+        CurrentFileExtension.Id > 0 || !CurrentFileExtension.Extension.IsStringNullOrEmpty() || !CurrentFileExtension.Alias.IsStringNullOrEmpty();
 
-    public bool IsSaveFileExtensionButtonEnabled => !CurrentFileExtension.Extension.IsNullOrEmpty() && !CurrentFileExtension.Alias.IsNullOrEmpty();
+    public bool IsSaveFileExtensionButtonEnabled => !CurrentFileExtension.Extension.IsStringNullOrEmpty() && !CurrentFileExtension.Alias.IsStringNullOrEmpty();
 
     #endregion
 
@@ -180,7 +180,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     {
         CurrentFileExtension.Extension = CurrentFileExtension.Extension.Trim('.').Replace(".", "").Replace(" ", "").ToLower();
         CurrentFileExtension.Alias = CurrentFileExtension.Alias.Trim();
-        if (CurrentFileExtension.Extension.IsNullOrEmpty() || CurrentFileExtension.Alias.IsNullOrEmpty())
+        if (CurrentFileExtension.Extension.IsStringNullOrEmpty() || CurrentFileExtension.Alias.IsStringNullOrEmpty())
             return;
 
         var existingFileExtension = FileExtensions
@@ -244,7 +244,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     private void SaveSiteAddress()
     {
         var siteAddress = SelectedSiteAddress?.Trim().Replace('\\', '/').Replace(" ", "").GetDomainFromUrl();
-        if (siteAddress.IsNullOrEmpty())
+        if (siteAddress.IsStringNullOrEmpty())
             return;
 
         if (SiteAddresses.Any(sa => sa.Equals(siteAddress!)))
@@ -261,14 +261,14 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
 
     private void DeleteClearSiteAddress()
     {
-        if (SelectedSiteAddress.IsNullOrEmpty())
+        if (SelectedSiteAddress.IsStringNullOrEmpty())
         {
             SelectedSiteAddress = string.Empty;
             return;
         }
 
         var existingSiteAddress = SiteAddresses.FirstOrDefault(sa => sa.Equals(SelectedSiteAddress!));
-        if (existingSiteAddress.IsNullOrEmpty())
+        if (existingSiteAddress.IsStringNullOrEmpty())
         {
             SelectedSiteAddress = string.Empty;
             return;
@@ -284,7 +284,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
     {
         try
         {
-            if (owner == null || CategoryTitle.IsNullOrEmpty() || SaveDirectory.IsNullOrEmpty())
+            if (owner == null || CategoryTitle.IsStringNullOrEmpty() || SaveDirectory.IsStringNullOrEmpty())
                 return;
 
             CategoryTitle = CategoryTitle!.Trim();
@@ -401,7 +401,7 @@ public class AddEditCategoryWindowViewModel : ViewModelBase
             IsGeneralCategory = category.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase);
 
             var json = category.AutoAddLinkFromSites;
-            SiteAddresses = json.IsNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();
+            SiteAddresses = json.IsStringNullOrEmpty() ? [] : json!.ConvertFromJson<List<string>>().ToObservableCollection();
             if (category.CategorySaveDirectory != null)
                 SaveDirectory = category.CategorySaveDirectory.SaveDirectory;
         }

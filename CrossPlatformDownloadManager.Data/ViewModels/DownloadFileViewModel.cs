@@ -1,48 +1,16 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
-using System.Net;
-using System.Net.Http.Headers;
-using Avalonia.Threading;
-using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.CustomEventArgs;
 using CrossPlatformDownloadManager.Utils.Enums;
 using CrossPlatformDownloadManager.Utils.PropertyChanged;
-using Downloader;
-using MathNet.Numerics;
-using MathNet.Numerics.Statistics;
-using Newtonsoft.Json;
-using Serilog;
-using Constants = CrossPlatformDownloadManager.Utils.Constants;
+using MultipartDownloader.Core;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
 public sealed class DownloadFileViewModel : PropertyChangedBase
 {
     #region Private Fields
-
-    private const int NumberOfSamples = 101;
-
-    // ElapsedTime timer
-    private DispatcherTimer? _elapsedTimeTimer;
-    private TimeSpan? _elapsedTimeOfStartingDownload;
-
-    // TimeLeft timer
-    private DispatcherTimer? _timeLeftTimer;
-    private long _receivedBytesSize;
-    private readonly List<double> _downloadSpeeds = [];
-    private readonly List<double> _medianDownloadSpeeds = [];
-
-    // UpdateChunksData timer
-    private DispatcherTimer? _updateChunksDataTimer;
-    private List<ChunkProgressViewModel>? _chunkProgresses;
-
-    private DownloadService? _downloadService;
-    private CancellationTokenSource? _resumeCapabilityCancellationTokenSource;
-
-    // Backup timer
-    private DispatcherTimer? _backupTimer;
 
     private int _id;
     private string? _url;
@@ -68,6 +36,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private ObservableCollection<ChunkDataViewModel> _chunksData = [];
     private int _countOfError;
     private bool? _canResumeDownload;
+    private double _mergeProgress;
 
     #endregion
 
@@ -158,10 +127,11 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
 
     public bool IsCompleted => Status == DownloadFileStatus.Completed;
     public bool IsDownloading => Status == DownloadFileStatus.Downloading;
-    public bool IsStopping => Status == DownloadFileStatus.Stopping;
     public bool IsStopped => Status == DownloadFileStatus.Stopped;
     public bool IsPaused => Status == DownloadFileStatus.Paused;
     public bool IsError => Status == DownloadFileStatus.Error;
+    public bool IsStopping => Status == DownloadFileStatus.Stopping;
+    public bool IsMerging => Status == DownloadFileStatus.Merging;
 
     public DateTime? LastTryDate
     {
@@ -303,510 +273,114 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         set => SetField(ref _canResumeDownload, value);
     }
 
+    public double MergeProgress
+    {
+        get => _mergeProgress;
+        set => SetField(ref _mergeProgress, value);
+    }
+
     public bool PlayStopSound { get; set; } = true;
     public int? TempDownloadQueueId { get; set; }
+    public bool IsCompletelyStopped { get; set; }
+    public bool IsUrlDuplicate { get; set; }
+    public bool IsFileNameDuplicate { get; set; }
 
     #endregion
 
     #region Events
 
+    /// <summary>
+    /// Event that is raised when the download is finished.
+    /// </summary>
     public event EventHandler<DownloadFileEventArgs>? DownloadFinished;
+
+    /// <summary>
+    /// Event that is raised when the download is paused.
+    /// </summary>
     public event EventHandler<DownloadFileEventArgs>? DownloadPaused;
+
+    /// <summary>
+    /// Event that is raised when the download is resumed.
+    /// </summary>
     public event EventHandler<DownloadFileEventArgs>? DownloadResumed;
+
+    /// <summary>
+    /// Event that is raised when the download is stopped.
+    /// </summary>
     public event EventHandler<DownloadFileEventArgs>? DownloadStopped;
 
     #endregion
 
-    public async Task StartDownloadFileAsync(DownloadService? downloadService,
-        DownloadConfiguration downloadConfiguration,
-        IUnitOfWork? unitOfWork,
-        IWebProxy? proxy)
+    /// <summary>
+    /// Raises the <see cref="DownloadFinished"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
+    public void RaiseDownloadFinishedEvent(DownloadFileEventArgs eventArgs)
     {
-        if (downloadService == null || unitOfWork == null)
-            return;
-
-        _downloadService = downloadService;
-
-        downloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
-        downloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
-        downloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
-        downloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
-
-        var downloadPath = SaveLocation;
-        if (downloadPath.IsNullOrEmpty())
-        {
-            var saveDirectory = await unitOfWork
-                .CategorySaveDirectoryRepository
-                .GetAsync(where: sd => sd.CategoryId == null);
-
-            downloadPath = saveDirectory?.SaveDirectory;
-            if (downloadPath.IsNullOrEmpty())
-                return;
-        }
-
-        if (FileName.IsNullOrEmpty() || Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
-            return;
-
-        if (!Directory.Exists(downloadPath!))
-            Directory.CreateDirectory(downloadPath!);
-
-        CreateChunksData(downloadConfiguration.ChunkCount);
-        CalculateElapsedTime();
-        UpdateChunksData();
-
-        // Start backup timer
-        StartBackup();
-
-        // Cancellation token source for times when the user stops the download but the operation is still in progress to check whether the server supports the resumption feature
-        _resumeCapabilityCancellationTokenSource = new CancellationTokenSource();
-
-        // Check resume capability
-        CanResumeDownload = null;
-        _ = CheckResumeCapabilityAsync(proxy);
-
-        // Get file name
-        var fileName = Path.Combine(downloadPath!, FileName!);
-        // Get download package
-        var downloadPackage = DownloadPackage.ConvertFromJson<DownloadPackage>();
-        // If download package is null, it should be checked whether the backup file exists or not
-        if (downloadPackage == null)
-        {
-            var filePath = GetBackupFilePath();
-            // If a backup file exists, its value must be converted to the correct format and included in the download package
-            if (File.Exists(filePath))
-            {
-                // Get json content from file
-                var json = await File.ReadAllTextAsync(filePath);
-                // Convert json to download package
-                var package = json.ConvertFromJson<DownloadPackage?>();
-                // Make sure package has value
-                if (package != null)
-                {
-                    // Change download package value
-                    package.Storage = null;
-                    downloadPackage = package;
-                }
-            }
-        }
-
-        if (downloadPackage == null)
-        {
-            await downloadService.DownloadFileTaskAsync(address: Url!, fileName: fileName);
-        }
-        else
-        {
-            // Compare download package with existing backup
-            downloadPackage = await CompareBackupAsync(downloadPackage);
-            // Load previous chunks data
-            LoadChunksData(downloadPackage.Chunks);
-
-            // Update download url if user changed it
-            var urls = downloadPackage.Urls.ToList();
-            var currentUrl = urls.FirstOrDefault(u => u.Equals(Url!));
-            if (currentUrl.IsNullOrEmpty())
-            {
-                urls.Clear();
-                urls.Add(Url!);
-
-                downloadPackage.Urls = urls.ToArray();
-            }
-
-            await downloadService.DownloadFileTaskAsync(downloadPackage);
-        }
-    }
-
-    public async Task StopDownloadFileAsync(DownloadService? downloadService)
-    {
-        // Make sure download service has value
-        if (downloadService == null)
-            return;
-
-        // Reset download service
-        _downloadService = downloadService;
-        // Reset download options
-        ResetDownload();
-        // Change download status to stopping
-        Status = DownloadFileStatus.Stopping;
-
-        // If resume capability cancellation token source is not null
-        if (_resumeCapabilityCancellationTokenSource != null)
-        {
-            // Make sure resume capability cancelled
-            await _resumeCapabilityCancellationTokenSource.CancelAsync();
-            _resumeCapabilityCancellationTokenSource = null;
-        }
-
-        // Cancel download
-        _ = downloadService.CancelTaskAsync();
-        // Raise download stopped event
-        DownloadStopped?.Invoke(this, new DownloadFileEventArgs { Id = Id });
-    }
-
-    public void ResumeDownloadFile(DownloadService? downloadService)
-    {
-        if (downloadService == null)
-            return;
-
-        _downloadService = downloadService;
-
-        downloadService.Resume();
-        _elapsedTimeTimer?.Start();
-        _timeLeftTimer?.Start();
-        _updateChunksDataTimer?.Start();
-        Status = DownloadFileStatus.Downloading;
-
-        DownloadResumed?.Invoke(this, new DownloadFileEventArgs { Id = Id });
-    }
-
-    public void PauseDownloadFile(DownloadService? downloadService)
-    {
-        if (downloadService == null)
-            return;
-
-        _downloadService = downloadService;
-
-        downloadService.Pause();
-        _elapsedTimeTimer?.Stop();
-        _timeLeftTimer?.Stop();
-        _updateChunksDataTimer?.Stop();
-        Status = DownloadFileStatus.Paused;
-        UpdateChunksDataTimerOnTick(null, EventArgs.Empty);
-        SaveDownloadPackage(downloadService.Package);
-
-        DownloadPaused?.Invoke(this, new DownloadFileEventArgs { Id = Id });
-    }
-
-    public void RemoveBackup()
-    {
-        var filePath = GetBackupFilePath();
-        if (File.Exists(filePath))
-            File.Delete(filePath);
-    }
-
-    #region Helpers
-
-    private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
-    {
-        Status = DownloadFileStatus.Downloading;
-        LastTryDate = DateTime.Now;
-    }
-
-    private void DownloadServiceOnDownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
-    {
-        bool isSuccess;
-        Exception? error = null;
-
-        // Save download package
-        SaveDownloadPackage(_downloadService!.Package);
-        // Clear timers
-        ResetDownload();
-
-        // Change download status and if error occurred, store that
-        if (e is { Error: not null, Cancelled: false })
-        {
-            Status = DownloadFileStatus.Error;
-            isSuccess = false;
-            error = e.Error;
-        }
-        else if (e.Cancelled)
-        {
-            Status = DownloadFileStatus.Stopped;
-            isSuccess = true;
-        }
-        else
-        {
-            Status = DownloadFileStatus.Completed;
-            isSuccess = true;
-
-            // Remove backup
-            RemoveBackup();
-        }
-
-        // Create an object of DownloadFileEventArgs
-        var eventArgs = new DownloadFileEventArgs
-        {
-            Id = Id,
-            IsSuccess = isSuccess,
-            Error = error,
-        };
-
-        // Raise download finished event
         DownloadFinished?.Invoke(this, eventArgs);
     }
 
-    private void ResetDownload()
+    /// <summary>
+    /// Raises the <see cref="DownloadPaused"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
+    public void RaiseDownloadPausedEvent(DownloadFileEventArgs eventArgs)
     {
-        // Clear elapsed time timer
-        if (_elapsedTimeTimer != null)
-        {
-            _elapsedTimeTimer.Stop();
-            _elapsedTimeTimer.Tick -= ElapsedTimeTimerOnTick;
-            _elapsedTimeTimer = null;
-        }
+        DownloadPaused?.Invoke(this, eventArgs);
+    }
 
-        // Clear time left timer
-        if (_timeLeftTimer != null)
-        {
-            _timeLeftTimer.Stop();
-            _timeLeftTimer.Tick -= TimeLeftTimerOnTick;
-            _timeLeftTimer = null;
-        }
+    /// <summary>
+    /// Raises the <see cref="DownloadResumed"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
+    public void RaiseDownloadResumedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadResumed?.Invoke(this, eventArgs);
+    }
 
-        // Clear update chunks data timer
-        if (_updateChunksDataTimer != null)
-        {
-            _updateChunksDataTimer.Stop();
-            _updateChunksDataTimer.Tick -= UpdateChunksDataTimerOnTick;
-            _updateChunksDataTimer = null;
-        }
+    /// <summary>
+    /// Raises the <see cref="DownloadStopped"/> event.
+    /// </summary>
+    /// <param name="eventArgs">The <see cref="DownloadFileEventArgs"/> object that contains the event data.</param>
+    public void RaiseDownloadStoppedEvent(DownloadFileEventArgs eventArgs)
+    {
+        DownloadStopped?.Invoke(this, eventArgs);
+    }
 
-        // Clear backup timer
-        if (_backupTimer != null)
-        {
-            _backupTimer.Stop();
-            _backupTimer.Tick -= BackupTimerOnTick;
-            _backupTimer = null;
-        }
+    /// <summary>
+    /// Gets the download package of the download file.
+    /// </summary>
+    /// <returns>Returns the download package of the download file.</returns>
+    public DownloadPackage? GetDownloadPackage()
+    {
+        return DownloadPackage.IsStringNullOrEmpty() ? null : DownloadPackage.ConvertFromJson<DownloadPackage?>();
+    }
 
-        // Reset elapsed time of starting download
-        _elapsedTimeOfStartingDownload = null;
-        // Reset chunk progresses
-        _chunkProgresses = null;
-        // Clear download speeds list
-        _downloadSpeeds.Clear();
-        // Clear median download speeds list
-        _medianDownloadSpeeds.Clear();
-        // Reset resume capability
+    /// <summary>
+    /// Resets the properties of the download file.
+    /// </summary>
+    public void Reset()
+    {
+        Status = DownloadFileStatus.None;
+        LastTryDate = null;
+        DownloadProgress = null;
+        DownloadedSize = null;
+        ElapsedTime = null;
+        TimeLeft = null;
+        TransferRate = null;
+        DownloadPackage = null;
+        ChunksData.Clear();
+        CountOfError = 0;
         CanResumeDownload = null;
+        MergeProgress = 0;
+        PlayStopSound = true;
+        TempDownloadQueueId = null;
+        IsCompletelyStopped = false;
+        IsUrlDuplicate = false;
+        IsFileNameDuplicate = false;
     }
 
-    private void DownloadServiceOnDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
-    {
-        DownloadProgress = (float)e.ProgressPercentage;
-        TransferRate = (float)e.BytesPerSecondSpeed;
-        DownloadedSize = e.ReceivedBytesSize;
-
-        // Save required data to calculate time left
-        _receivedBytesSize = e.ReceivedBytesSize;
-        // Store average download speeds to find median
-        _downloadSpeeds.Add(e.AverageBytesPerSecondSpeed);
-        // Store specified number of samples
-        // For calculating median it's better to have odd number of samples
-        if (_downloadSpeeds.Count > NumberOfSamples)
-            _downloadSpeeds.RemoveAt(0);
-
-        // Initialize time left timer and start it to calculate time left
-        if (_timeLeftTimer != null)
-            return;
-
-        _timeLeftTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _timeLeftTimer.Tick += TimeLeftTimerOnTick;
-        _timeLeftTimer.Start();
-    }
-
-    private void TimeLeftTimerOnTick(object? sender, EventArgs e)
-    {
-        var timeLeft = TimeSpan.Zero;
-
-        // Calculate median download speed
-        var median = _downloadSpeeds.Median();
-        // Store median download speed to calculate average better
-        _medianDownloadSpeeds.Add(median);
-        // Store specified number of samples
-        if (_medianDownloadSpeeds.Count > NumberOfSamples)
-            _medianDownloadSpeeds.RemoveAt(0);
-
-        // Calculate average download speed
-        var averageDownloadSpeed = _medianDownloadSpeeds.Mean();
-        // Make sure download speeds count is greater than 1
-        if (averageDownloadSpeed <= 0)
-        {
-            TimeLeft = timeLeft;
-            return;
-        }
-
-        // Calculate remain size
-        var remainSizeToReceive = (Size ?? 0) - _receivedBytesSize;
-        // Calculate remain seconds by average download speed
-        var remainSeconds = (remainSizeToReceive / averageDownloadSpeed).Round(0);
-        if (!double.IsInfinity(remainSeconds))
-            timeLeft = TimeSpan.FromSeconds(remainSeconds);
-
-        TimeLeft = timeLeft;
-    }
-
-    private void DownloadServiceOnChunkDownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
-    {
-        if (_chunkProgresses == null || _chunkProgresses.Count == 0)
-            return;
-
-        var chunkProgress = _chunkProgresses.FirstOrDefault(cp => cp.ProgressId.Equals(e.ProgressId));
-        if (chunkProgress == null)
-            return;
-
-        chunkProgress.ReceivedBytesSize = e.ReceivedBytesSize;
-        chunkProgress.TotalBytesToReceive = e.TotalBytesToReceive;
-        chunkProgress.IsCompleted = e.ReceivedBytesSize >= e.TotalBytesToReceive;
-    }
-
-    private void CreateChunksData(int count)
-    {
-        var chunks = new List<ChunkDataViewModel>();
-        _chunkProgresses ??= [];
-
-        for (var i = 0; i < count; i++)
-        {
-            chunks.Add(new ChunkDataViewModel { ChunkIndex = i });
-            _chunkProgresses.Add(new ChunkProgressViewModel { ProgressId = i.ToString() });
-        }
-
-        ChunksData = chunks.ToObservableCollection();
-    }
-
-    private void CalculateElapsedTime()
-    {
-        _elapsedTimeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _elapsedTimeTimer.Tick += ElapsedTimeTimerOnTick;
-        _elapsedTimeTimer.Start();
-    }
-
-    private void ElapsedTimeTimerOnTick(object? sender, EventArgs e)
-    {
-        _elapsedTimeOfStartingDownload ??= TimeSpan.Zero;
-        _elapsedTimeOfStartingDownload = TimeSpan.FromSeconds(_elapsedTimeOfStartingDownload.Value.TotalSeconds + 1);
-        ElapsedTime = _elapsedTimeOfStartingDownload;
-    }
-
-    private void UpdateChunksData()
-    {
-        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-        _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
-        _updateChunksDataTimer.Start();
-    }
-
-    private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
-    {
-        if (_chunkProgresses == null || _chunkProgresses.Count == 0)
-            return;
-
-        var chunkProgresses = _chunkProgresses.Where(c => !c.IsCompletionChecked).ToList();
-        foreach (var chunkProgress in chunkProgresses)
-        {
-            if (!int.TryParse(chunkProgress.ProgressId, out var progressId))
-                return;
-
-            var chunkData = ChunksData.FirstOrDefault(cd => cd.ChunkIndex == progressId);
-            if (chunkData == null)
-                return;
-
-            if (chunkProgress.CheckCount % 10 == 0)
-            {
-                if (_updateChunksDataTimer!.IsEnabled && chunkData.DownloadedSize != chunkData.TotalSize)
-                {
-                    chunkData.Info = chunkData.DownloadedSize == chunkProgress.ReceivedBytesSize
-                        ? "Connecting..."
-                        : "Receiving...";
-                }
-
-                chunkProgress.CheckCount = 1;
-            }
-            else
-            {
-                chunkProgress.CheckCount++;
-            }
-
-            chunkData.DownloadedSize = chunkProgress.ReceivedBytesSize;
-            chunkData.TotalSize = chunkProgress.TotalBytesToReceive;
-
-            if (!_updateChunksDataTimer!.IsEnabled)
-                chunkData.Info = "Paused";
-
-            if (chunkProgress.IsCompleted)
-            {
-                chunkData.Info = "Completed";
-                chunkProgress.IsCompletionChecked = true;
-            }
-        }
-    }
-
-    private void SaveDownloadPackage(DownloadPackage? downloadPackage)
-    {
-        DownloadPackage = downloadPackage?.ConvertToJson();
-    }
-
-    private async Task CheckResumeCapabilityAsync(IWebProxy? proxy)
-    {
-        try
-        {
-            // Check url
-            if (Url.IsNullOrEmpty() || !Url.CheckUrlValidation())
-            {
-                CanResumeDownload = false;
-                return;
-            }
-
-            // Make sure cancellation token source is not null
-            if (_resumeCapabilityCancellationTokenSource == null)
-                throw new InvalidOperationException("Cancellation token source is invalid.");
-
-            // Use handler to handle http request
-            using var handler = new HttpClientHandler();
-            if (proxy != null)
-            {
-                handler.Proxy = proxy;
-                handler.UseProxy = true;
-            }
-
-            // Prepare for sending request
-            using var client = new HttpClient(handler);
-            client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
-
-            // Send HEAD request
-            using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, Url), _resumeCapabilityCancellationTokenSource.Token);
-            response.EnsureSuccessStatusCode();
-
-            // Check for Accept-Ranges header
-            if (response.Headers.Contains("Accept-Ranges"))
-            {
-                var acceptRanges = response.Headers.GetValues("Accept-Ranges");
-                if (acceptRanges.Contains("bytes"))
-                {
-                    CanResumeDownload = true;
-                    return;
-                }
-            }
-
-            // Some servers don't include Accept-Ranges but still support partial content.
-            // If Range request succeeds with Partial Content status:
-            if (response.StatusCode == HttpStatusCode.PartialContent)
-            {
-                CanResumeDownload = true;
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while checking resume capability. Error message: {ErrorMessage}", ex.Message);
-        }
-
-        CanResumeDownload = false;
-    }
-
-    private void LoadChunksData(Chunk[] chunks)
-    {
-        if (chunks.Length == 0)
-            return;
-
-        foreach (var chunk in chunks)
-        {
-            var chunkProgress = _chunkProgresses?.Find(c => c.ProgressId.Equals(chunk.Id));
-            if (chunkProgress == null)
-                continue;
-
-            chunkProgress.ReceivedBytesSize = chunk.IsDownloadCompleted() ? chunk.Length : chunk.Position;
-            chunkProgress.TotalBytesToReceive = chunk.Length;
-        }
-    }
+    #region Helpers
 
     private void NotifyDownloadStatusChanged(DownloadFileStatus? status)
     {
@@ -827,12 +401,6 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 break;
             }
 
-            case DownloadFileStatus.Stopping:
-            {
-                OnPropertyChanged(nameof(IsStopping));
-                break;
-            }
-
             case DownloadFileStatus.Stopped:
             {
                 OnPropertyChanged(nameof(IsStopped));
@@ -850,102 +418,19 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 OnPropertyChanged(nameof(IsError));
                 break;
             }
-        }
-    }
 
-    private async Task<DownloadPackage> CompareBackupAsync(DownloadPackage downloadPackage)
-    {
-        try
-        {
-            // When the file size is unknown and the server does not specify the file size, do not compare the backup to the original value
-            if (IsSizeUnknown)
-                return downloadPackage;
-            
-            // Get backup file path and validate it
-            var filePath = GetBackupFilePath();
-            if (!File.Exists(filePath) || !Path.GetExtension(filePath).Equals(".backup"))
-                return downloadPackage;
-
-            // Get json content from file
-            var json = await File.ReadAllTextAsync(filePath);
-            // Convert json to download package
-            var package = json.ConvertFromJson<DownloadPackage?>();
-            // Make sure package has value
-            if (package == null)
-                return downloadPackage;
-
-            // Compare save progresses
-            if (downloadPackage.SaveProgress >= package.SaveProgress)
-                return downloadPackage;
-
-            // Update chunks data
-            foreach (var chunk in package.Chunks)
+            case DownloadFileStatus.Stopping:
             {
-                // Find original chunk
-                var originalChunk = downloadPackage.Chunks.FirstOrDefault(c => c.Id.Equals(chunk.Id));
-                if (originalChunk == null)
-                    continue;
-
-                // Update position
-                originalChunk.Position = Math.Max(chunk.Position - Constants.MaximumMemoryBufferBytes, 0);
+                OnPropertyChanged(nameof(IsStopping));
+                break;
             }
-            
-            // Update save progress
-            downloadPackage.SaveProgress = downloadPackage.Chunks.Sum(c => c.Position) / (double)downloadPackage.TotalFileSize * 100;
 
-            return downloadPackage;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while trying to read backup file. Error message: {ErrorMessage}", ex.Message);
-            return downloadPackage;
-        }
-    }
-
-    private void StartBackup()
-    {
-        // Do not back up when the file size is unknown and the server does not specify the file size
-        if (IsSizeUnknown)
-            return;
-        
-        _backupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
-        _backupTimer.Tick += BackupTimerOnTick;
-        _backupTimer.Start();
-    }
-
-    private async void BackupTimerOnTick(object? sender, EventArgs e)
-    {
-        try
-        {
-            // Make sure download service is not null
-            if (_downloadService == null)
-                return;
-
-            // Initialize json serializer settings
-            var settings = new JsonSerializerSettings
+            case DownloadFileStatus.Merging:
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.None
-            };
-
-            // Convert download package to json
-            var json = _downloadService.Package.ConvertToJson(settings);
-
-            // Define backup file path
-            var filePath = GetBackupFilePath();
-            // Write data to back up file
-            await File.WriteAllTextAsync(filePath, json);
+                OnPropertyChanged(nameof(IsMerging));
+                break;
+            }
         }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error An error occurred while trying to backup download data. Error message: {ErrorMessage}", ex.Message);
-        }
-    }
-
-    private string GetBackupFilePath()
-    {
-        var filePath = Path.Combine(Constants.BackupDirectory, $"{Id}.backup");
-        return filePath;
     }
 
     #endregion

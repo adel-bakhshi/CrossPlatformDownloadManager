@@ -4,15 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
-using CrossPlatformDownloadManager.Utils.Enums;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
@@ -21,7 +18,14 @@ public class BrowserExtension : IBrowserExtension
 {
     #region Private Fields
 
+    /// <summary>
+    /// The app service instance.
+    /// </summary>
     private readonly IAppService _appService;
+
+    /// <summary>
+    /// The HTTP listener for listening to the request that the browser extension sends.
+    /// </summary>
     private readonly HttpListener _httpListener;
 
     #endregion
@@ -49,12 +53,12 @@ public class BrowserExtension : IBrowserExtension
                 _ = ProcessRequestAsync(context);
             }
         }
-        catch (HttpListenerException ex)
+        catch (HttpListenerException ex) when (ex.ErrorCode != 995)
         {
             // The I/O operation has been aborted because of either a thread exit or an application request.
-            // This error occurs when the HttpListener is stopped and as a result the GetContextAsync method fails because it cannot find any Listener. This error does not need to be written to the application logs.
-            if (ex.ErrorCode != 995)
-                Log.Error(ex, "An error occurred while listening for requests.");
+            // This error occurs when the HttpListener is stopped and as a result the GetContextAsync method fails because it cannot find any Listener.
+            // This error does not need to be written to the application logs.
+            Log.Error(ex, "An error occurred while listening for requests.");
         }
         catch (Exception ex)
         {
@@ -77,9 +81,14 @@ public class BrowserExtension : IBrowserExtension
 
     #region Helpers
 
+    /// <summary>
+    /// Processes the request and sends the response back to the browser extension.
+    /// </summary>
+    /// <param name="context">The HTTP listener context.</param>
     private async Task ProcessRequestAsync(HttpListenerContext context)
     {
-        var response = new ResponseViewModel
+        // Create a response object
+        var response = new ExtensionResponse
         {
             IsSuccessful = false,
             Message = string.Empty
@@ -96,6 +105,7 @@ public class BrowserExtension : IBrowserExtension
                 return;
             }
 
+            // Get the requested URL and send the correct response
             var requestedUrl = context.Request.Url?.AbsoluteUri;
             response = requestedUrl switch
             {
@@ -113,9 +123,15 @@ public class BrowserExtension : IBrowserExtension
         await SendResponseAsync(context, response);
     }
 
-    private ResponseViewModel<List<string>> GetFileTypes(HttpListenerContext context)
+    /// <summary>
+    /// Gets all file types from the database and sends them back to the browser extension.
+    /// </summary>
+    /// <param name="context">The HTTP listener context.</param>
+    /// <returns>Returns the response object containing the file types.</returns>
+    private ExtensionResponse<List<string>> GetFileTypes(HttpListenerContext context)
     {
-        var response = new ResponseViewModel<List<string>>
+        // Create a response object
+        var response = new ExtensionResponse<List<string>>
         {
             IsSuccessful = false,
             Message = string.Empty,
@@ -124,6 +140,7 @@ public class BrowserExtension : IBrowserExtension
 
         // Make sure this is a GET request
         var validateResult = ValidateRequestMethod(context, "GET");
+        // Check if the request is valid
         if (!validateResult.IsSuccessful)
         {
             response.IsSuccessful = validateResult.IsSuccessful;
@@ -131,6 +148,7 @@ public class BrowserExtension : IBrowserExtension
             return response;
         }
 
+        // Get all file types from the database
         var fileExtensions = _appService
             .CategoryService
             .Categories
@@ -143,9 +161,15 @@ public class BrowserExtension : IBrowserExtension
         return response;
     }
 
-    private async Task<ResponseViewModel> AddDownloadFileUrlAsync(HttpListenerContext context)
+    /// <summary>
+    /// Adds the URL that received from the browser extension to database.
+    /// </summary>
+    /// <param name="context">The HTTP listener context.</param>
+    /// <returns>Returns the response object containing the result of the operation.</returns>
+    private async Task<ExtensionResponse> AddDownloadFileUrlAsync(HttpListenerContext context)
     {
-        var response = new ResponseViewModel
+        // Create a response object
+        var response = new ExtensionResponse
         {
             IsSuccessful = false,
             Message = string.Empty
@@ -153,6 +177,7 @@ public class BrowserExtension : IBrowserExtension
 
         // Make sure this is a POST request
         var validateResult = ValidateRequestMethod(context, "POST");
+        // Check if the request is valid
         if (!validateResult.IsSuccessful)
         {
             response.IsSuccessful = validateResult.IsSuccessful;
@@ -160,22 +185,27 @@ public class BrowserExtension : IBrowserExtension
             return response;
         }
 
+        // Read the input stream of the request
         using var reader = new StreamReader(context.Request.InputStream);
+        // Read the JSON data from the request
         var json = await reader.ReadToEndAsync();
-        if (json.IsNullOrEmpty())
+        // Make sure the JSON data is not null or empty
+        if (json.IsStringNullOrEmpty())
         {
             response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
             return response;
         }
 
-        var requestViewModel = json.ConvertFromJson<RequestViewModel?>();
-        if (requestViewModel == null)
+        // Convert the JSON data to a ExtensionRequest
+        var extensionRequest = json.ConvertFromJson<ExtensionRequest?>();
+        if (extensionRequest == null)
         {
             response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
             return response;
         }
 
-        var urlIsValid = requestViewModel.Url.CheckUrlValidation();
+        // Check if URL is valid
+        var urlIsValid = extensionRequest.Url.CheckUrlValidation();
         if (!urlIsValid)
         {
             response.Message = "CDM can't accept this URL.";
@@ -183,37 +213,37 @@ public class BrowserExtension : IBrowserExtension
         }
 
         // Change URL to correct format
-        requestViewModel.Url = requestViewModel.Url!.Replace('\\', '/').Trim();
-
+        extensionRequest.Url = extensionRequest.Url!.Replace('\\', '/').Trim();
         // Check for user option for showing start download dialog
         var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
         // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
         if (showStartDownloadDialog)
         {
-            ShowStartDownloadDialog(requestViewModel.Url);
+            ShowStartDownloadDialog(extensionRequest.Url);
         }
         // Otherwise, add link to database and start it
         else
         {
-            var addResult = await AddNewDownloadFileAndStartItAsync(requestViewModel.Url);
-            if (!addResult.IsSuccessful)
-            {
-                response.Message = addResult.Message;
-                return response;
-            }
+            await AddNewDownloadFileAndStartItAsync(extensionRequest.Url);
         }
 
         // Log captured URL
-        Log.Information($"Captured URL: {requestViewModel.Url}");
-
+        Log.Information($"Captured URL: {extensionRequest.Url}");
+        // Return the response
         response.IsSuccessful = true;
         response.Message = "Link added to CDM.";
         return response;
     }
 
-    private static ResponseViewModel ValidateRequestMethod(HttpListenerContext context, string? httpMethod)
+    /// <summary>
+    /// Validates the request method.
+    /// </summary>
+    /// <param name="context">The context of the HttpListener of the request.</param>
+    /// <param name="httpMethod">The HTTP method to validate.</param>
+    /// <returns>Returns the response object containing the result of the operation.</returns>
+    private static ExtensionResponse ValidateRequestMethod(HttpListenerContext context, string? httpMethod)
     {
-        var response = new ResponseViewModel
+        var response = new ExtensionResponse
         {
             IsSuccessful = false,
             Message = string.Empty
@@ -234,9 +264,14 @@ public class BrowserExtension : IBrowserExtension
         return response;
     }
 
-    private static async Task SendResponseAsync(HttpListenerContext context, ResponseViewModel response)
+    /// <summary>
+    /// Sends the response to the browser.
+    /// </summary>
+    /// <param name="context">The context of the HttpListener of the request.</param>
+    /// <param name="extensionResponse">The response to send.</param>
+    private static async Task SendResponseAsync(HttpListenerContext context, ExtensionResponse extensionResponse)
     {
-        var json = response.ConvertToJson();
+        var json = extensionResponse.ConvertToJson();
 
         var buffer = Encoding.UTF8.GetBytes(json);
         context.Response.ContentLength64 = buffer.Length;
@@ -245,6 +280,10 @@ public class BrowserExtension : IBrowserExtension
         context.Response.OutputStream.Close();
     }
 
+    /// <summary>
+    /// Shows the start download dialog.
+    /// </summary>
+    /// <param name="url">The URL of the file to download.</param>
     private void ShowStartDownloadDialog(string url)
     {
         var vm = new AddDownloadLinkWindowViewModel(_appService)
@@ -260,60 +299,13 @@ public class BrowserExtension : IBrowserExtension
         window.Show();
     }
 
-    private async Task<ResponseViewModel> AddNewDownloadFileAndStartItAsync(string url)
+    /// <summary>
+    /// Adds a new download file to database and starts it.
+    /// </summary>
+    /// <param name="url">The URL of the file to download.</param>
+    private async Task AddNewDownloadFileAndStartItAsync(string url)
     {
-        var result = new ResponseViewModel();
-
-        // Get url details
-        var urlDetails = await _appService.DownloadFileService.GetUrlDetailsAsync(url, CancellationToken.None);
-        // Validate url details
-        var validateUrlDetails = _appService.DownloadFileService.ValidateUrlDetails(urlDetails);
-        if (!validateUrlDetails.IsValid)
-        {
-            result.IsSuccessful = validateUrlDetails.IsValid;
-            result.Message = validateUrlDetails.Message;
-            return result;
-        }
-
-        // Check for duplicate download file
-        DuplicateDownloadLinkAction? duplicateAction = null;
-        if (urlDetails.IsUrlDuplicate)
-        {
-            var savedDuplicateAction = _appService.SettingsService.Settings.DuplicateDownloadLinkAction;
-            if (savedDuplicateAction == DuplicateDownloadLinkAction.LetUserChoose)
-            {
-                duplicateAction = await _appService
-                    .DownloadFileService
-                    .GetUserDuplicateActionAsync(urlDetails.Url, urlDetails.FileName, urlDetails.Category!.CategorySaveDirectory!.SaveDirectory);
-            }
-            else
-            {
-                duplicateAction = savedDuplicateAction;
-            }
-        }
-
-        // Create a new download file
-        var downloadFile = new DownloadFileViewModel
-        {
-            Url = urlDetails.Url,
-            FileName = urlDetails.FileName,
-            CategoryId = urlDetails.Category?.Id,
-            Size = urlDetails.FileSize,
-            IsSizeUnknown = urlDetails.IsFileSizeUnknown
-        };
-
-        // Add download file
-        var addResult = await _appService
-            .DownloadFileService
-            .AddDownloadFileAsync(downloadFile,
-                isUrlDuplicate: urlDetails.IsUrlDuplicate,
-                duplicateAction: duplicateAction,
-                isFileNameDuplicate: urlDetails.IsFileNameDuplicate,
-                startDownloading: true);
-
-        // Check download file added or not
-        result.IsSuccessful = addResult != null;
-        return result;
+        await _appService.DownloadFileService.AddDownloadFileAsync(url, startDownloading: true);
     }
 
     #endregion

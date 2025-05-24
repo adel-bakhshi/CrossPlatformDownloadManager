@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Net;
 using Avalonia.Media;
 using Avalonia.Platform;
 using ICSharpCode.SharpZipLib.Zip;
@@ -8,15 +9,20 @@ namespace CrossPlatformDownloadManager.Utils;
 
 public static class ExtensionMethods
 {
-    public static bool IsNullOrEmpty(this string? value)
+    public static bool IsStringNullOrEmpty(this string? value)
     {
         value = value?.Trim();
         return string.IsNullOrEmpty(value);
     }
 
+    public static T? ConvertFromJson<T>(this string? json, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        return json.IsStringNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!, jsonSerializerSettings);
+    }
+
     public static T? ConvertFromJson<T>(this string? json)
     {
-        return json.IsNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!);
+        return json.ConvertFromJson<T>(null);
     }
 
     public static string ConvertToJson(this object? value, JsonSerializerSettings? serializerSettings = null)
@@ -129,30 +135,59 @@ public static class ExtensionMethods
 
     public static bool CheckUrlValidation(this string? url)
     {
-        if (url.IsNullOrEmpty())
+        if (url.IsStringNullOrEmpty())
             return false;
 
-        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) &&
-               (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-    public static T? OpenJsonAsset<T>(this Uri? uri)
+    public static string? OpenTextAsset(this Uri? assetUri)
     {
-        if (uri == null)
+        if (assetUri == null)
+            return null;
+
+        using var stream = AssetLoader.Open(assetUri);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
+    public static string? OpenTextAsset(this string? assetPath)
+    {
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
+            return null;
+
+        var assetUri = new Uri(assetPath);
+        return assetUri.OpenTextAsset();
+    }
+
+    public static T? OpenJsonAsset<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        var json = assetUri.OpenTextAsset();
+        return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
+    }
+
+    public static T? OpenJsonAsset<T>(this string? assetPath, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
             return default;
 
-        using var stream = AssetLoader.Open(uri);
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        reader.Close();
-        stream.Close();
-
-        return json.ConvertFromJson<T>();
+        var assetUri = new Uri(assetPath);
+        return assetUri.OpenJsonAsset<T>();
     }
 
+    public static T? OpenJsonAsset<T>(this Uri? assetUri)
+    {
+        return assetUri.OpenJsonAsset<T>(null);
+    }
+
+    /// <summary>
+    /// Gets the file name from an URL.
+    /// </summary>
+    /// <param name="url">The URL to get the file name from.</param>
+    /// <returns>Returns the file name if found, otherwise null.</returns>
     public static string? GetFileName(this string? url)
     {
-        if (url.IsNullOrEmpty())
+        if (url.IsStringNullOrEmpty())
             return null;
 
         url = url!.Replace('\\', '/').Trim();
@@ -163,7 +198,7 @@ public static class ExtensionMethods
             fileName = Path.GetFileName(uri.LocalPath);
 
         var tempBaseUri = new Uri("https://localhost/temp");
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
         {
             if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                 uri = new Uri(tempBaseUri, url);
@@ -171,7 +206,7 @@ public static class ExtensionMethods
             fileName = Path.GetFileName(uri.LocalPath);
         }
 
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
         {
             var startIndex = url.LastIndexOf('/') + 1;
             var path = url.Substring(startIndex);
@@ -194,7 +229,7 @@ public static class ExtensionMethods
             }
         }
 
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
             return fileName;
 
         if (fileName!.Contains('/'))
@@ -206,12 +241,48 @@ public static class ExtensionMethods
         return fileName;
     }
 
+    /// <summary>
+    /// Gets the file name from the Content-Disposition header.
+    /// </summary>
+    /// <param name="contentDisposition">The Content-Disposition header value.</param>
+    /// <returns>Returns the file name if found, otherwise null.</returns>
+    public static string? GetFileNameFromContentDisposition(this string? contentDisposition)
+    {
+        // Possible values for Content-Disposition header:
+        // Content-Disposition: inline
+        // Content-Disposition: attachment
+        // Content-Disposition: attachment; filename="file name.jpg"
+        // Content-Disposition: attachment; filename*=UTF-8''file%20name.jpg
+
+        // Check if Content-Disposition header value is null or empty
+        if (contentDisposition.IsStringNullOrEmpty())
+            return null;
+
+        // Find the file name section and make sure it has value
+        var fileNameSection = contentDisposition!.Split(';').FirstOrDefault(s => s.Trim().StartsWith("filename="))?.Trim();
+        if (fileNameSection.IsStringNullOrEmpty())
+            return null;
+
+        // Get the file name from the section and make sure it has value
+        var fileName = fileNameSection!.Split('=').LastOrDefault()?.Trim('\"');
+        if (fileName.IsStringNullOrEmpty())
+            return null;
+
+        // Check if the filename contains encoded characters
+        if (!fileName!.Contains("''"))
+            return fileName;
+
+        var encodedFileName = fileName.Split("''").LastOrDefault()?.Trim();
+        // Decode the encoded filename
+        return encodedFileName.IsStringNullOrEmpty() ? null : WebUtility.UrlDecode(encodedFileName);
+    }
+
     public static bool HasFileExtension(this string? fileName)
     {
-        if (fileName.IsNullOrEmpty())
+        if (fileName.IsStringNullOrEmpty())
             return false;
 
-        return !Path.GetExtension(fileName!).IsNullOrEmpty();
+        return !Path.GetExtension(fileName!).IsStringNullOrEmpty();
     }
 
     public static string GetShortTime(this TimeSpan? time)
@@ -239,66 +310,6 @@ public static class ExtensionMethods
         };
 
         return DeepCopy(obj, serializerSettings);
-    }
-
-    public static void UpdateList<T, TKey>(this List<T> oldList, List<T> newList, Func<T, TKey> keySelector) where TKey : notnull
-    {
-        // Create dictionaries for fast lookup
-        var oldItemsByKey = oldList.ToDictionary(keySelector);
-        var newItemsByKey = newList.ToDictionary(keySelector);
-
-        // Find items to remove
-        var itemsToRemove = oldItemsByKey.Keys.Except(newItemsByKey.Keys).Select(key => oldItemsByKey[key]).ToList();
-        foreach (var item in itemsToRemove)
-            oldList.Remove(item);
-
-        // Update existing items or add new ones
-        foreach (var newItem in newList)
-        {
-            // Get key from new item
-            var key = keySelector(newItem);
-            if (oldItemsByKey.TryGetValue(key, out var existingItem))
-            {
-                // Update existing item by replacing it
-                var index = oldList.IndexOf(existingItem);
-                oldList[index] = newItem;
-            }
-            else
-            {
-                // Add new item
-                oldList.Add(newItem);
-            }
-        }
-    }
-
-    public static void UpdateCollection<T, TKey>(this ObservableCollection<T> oldCollection, ObservableCollection<T> newCollection, Func<T, TKey> keySelector) where TKey : notnull
-    {
-        // Create dictionaries for fast lookup
-        var oldItemsByKey = oldCollection.ToDictionary(keySelector);
-        var newItemsByKey = newCollection.ToDictionary(keySelector);
-
-        // Find items to remove
-        var itemsToRemove = oldItemsByKey.Keys.Except(newItemsByKey.Keys).Select(key => oldItemsByKey[key]).ToList();
-        foreach (var item in itemsToRemove)
-            oldCollection.Remove(item);
-
-        // Update existing items or add new ones
-        foreach (var newItem in newCollection)
-        {
-            // Get key from new item
-            var key = keySelector(newItem);
-            if (oldItemsByKey.TryGetValue(key, out var existingItem))
-            {
-                // Update existing item by replacing it
-                var index = oldCollection.IndexOf(existingItem);
-                oldCollection[index] = newItem;
-            }
-            else
-            {
-                // Add new item
-                oldCollection.Add(newItem);
-            }
-        }
     }
 
     public static async Task CopyFileAsync(this string sourcePath, string destinationPath)
@@ -341,7 +352,7 @@ public static class ExtensionMethods
 
             var targetFile = Path.Combine(destinationDir, entry.Name).Replace('/', '\\');
             var directoryPath = Path.GetDirectoryName(targetFile);
-            if (directoryPath.IsNullOrEmpty())
+            if (directoryPath.IsStringNullOrEmpty())
                 continue;
 
             if (!Directory.Exists(directoryPath))
@@ -378,10 +389,10 @@ public static class ExtensionMethods
         var uri = new Uri(url!);
         return uri.Host;
     }
-    
+
     public static Color? ConvertFromHex(this string? hexValue)
     {
-        if (hexValue.IsNullOrEmpty())
+        if (hexValue.IsStringNullOrEmpty())
             return null;
 
         return Color.TryParse(hexValue, out var color) ? color : null;

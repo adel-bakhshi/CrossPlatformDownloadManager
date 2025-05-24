@@ -9,7 +9,6 @@ using Avalonia.Controls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.SettingsWindowViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.SettingsWindowControls;
@@ -49,7 +48,7 @@ public class SettingsWindowViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedTabItem, value);
-            
+
             switch (SelectedTabItem)
             {
                 case "File Types":
@@ -58,7 +57,7 @@ public class SettingsWindowViewModel : ViewModelBase
                     FileTypesViewModel?.LoadFileExtensionsAsync();
                     break;
                 }
-                
+
                 case "Save Locations":
                 {
                     // Load file extensions when selected tab changed
@@ -199,14 +198,24 @@ public class SettingsWindowViewModel : ViewModelBase
             {
                 throw new InvalidOperationException("An error occurred while trying to save settings.");
             }
-            
+
+            // Validate selected theme
+            if (GeneralsViewModel.SelectedTheme == null)
+            {
+                await DialogBoxManager.ShowInfoDialogAsync("Theme Not Specified",
+                    "Please choose a valid theme and try again.",
+                    DialogButtons.Ok);
+
+                return;
+            }
+
             // Validate font
-            if (GeneralsViewModel.SelectedFont.IsNullOrEmpty())
+            if (GeneralsViewModel.SelectedFont.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Font Not Specified",
                     "Please choose a valid font and try again.",
                     DialogButtons.Ok);
-                
+
                 return;
             }
 
@@ -214,7 +223,7 @@ public class SettingsWindowViewModel : ViewModelBase
             if (SaveLocationsViewModel.DisableCategories)
             {
                 // Check that the global save location is valid
-                if (SaveLocationsViewModel.GlobalSaveDirectory.IsNullOrEmpty() ||
+                if (SaveLocationsViewModel.GlobalSaveDirectory.IsStringNullOrEmpty() ||
                     !Directory.Exists(SaveLocationsViewModel.GlobalSaveDirectory))
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("Save Location Not Specified",
@@ -230,7 +239,7 @@ public class SettingsWindowViewModel : ViewModelBase
                 var categoryWithNoSaveDirectory = SaveLocationsViewModel
                     .Categories
                     .FirstOrDefault(c =>
-                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsNullOrEmpty());
+                        c.CategorySaveDirectory == null || c.CategorySaveDirectory.SaveDirectory.IsStringNullOrEmpty());
 
                 if (categoryWithNoSaveDirectory != null)
                 {
@@ -243,7 +252,7 @@ public class SettingsWindowViewModel : ViewModelBase
             }
 
             // Validate selected duplicate download link action
-            if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsNullOrEmpty())
+            if (DownloadsViewModel.SelectedDuplicateDownloadLinkAction.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Duplicate Link Handling Not Specified",
                     "No action has been specified for handling duplicate links. Please define how duplicate links should be managed when added.",
@@ -261,24 +270,86 @@ public class SettingsWindowViewModel : ViewModelBase
 
                 return;
             }
+            
+            // If maximum connections count is greater than 8, show a message to user and ask him/her to confirm the count
+            if (DownloadsViewModel.SelectedMaximumConnectionsCount > 8)
+            {
+                var result = await DialogBoxManager.ShowWarningDialogAsync(dialogHeader: "Too Many Connections Selected",
+                    dialogMessage: "You've selected more than 8 connections. Using a higher connection count may lead to unexpected issues such as server disconnections or corrupted downloads. Would you like to reset the connection count to the recommended default (8)?",
+                    dialogButtons: DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                    DownloadsViewModel.SelectedMaximumConnectionsCount = 8;
+            }
 
             // Validate selected speed unit
-            if (DownloadsViewModel.SelectedSpeedUnit.IsNullOrEmpty())
+            if (DownloadsViewModel.SelectedSpeedUnit.IsStringNullOrEmpty())
             {
                 var result = await DialogBoxManager.ShowInfoDialogAsync("Speed Limiter Unit Not Specified",
-                    "You haven’t specified the unit for the speed limiter. Would you like to use KB as the default unit?",
+                    "You haven’t specified the unit for the speed limiter. Would you like to use 'KB' as the default unit?",
                     DialogButtons.YesNo);
 
                 if (result == DialogResult.Yes)
+                {
                     DownloadsViewModel.SelectedSpeedUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
                 else
+                {
                     return;
+                }
+            }
+            
+            // Validate selected merge speed unit
+            if (DownloadsViewModel.SelectedMergeSpeedUnit.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Merge Speed Limiter Unit Not Specified",
+                    "You haven’t specified the unit for the merge speed limiter. Would you like to use 'KB' as the default unit?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    DownloadsViewModel.SelectedMergeSpeedUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Validate selected maximum memory buffer bytes unit
+            if (DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync("Maximum Memory Buffer Unit Not Specified",
+                    "You haven’t specified the unit for the maximum memory buffer. Would you like to use 'KB' as the default unit?",
+                    DialogButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit = Constants.SpeedLimiterUnits.FirstOrDefault();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Validate the temporary file location
+            if (DownloadsViewModel.TemporaryFileLocation.IsStringNullOrEmpty())
+            {
+                var result = await DialogBoxManager.ShowInfoDialogAsync(dialogHeader: "Temporary Location Not Set",
+                    dialogMessage: "You haven't specified a location for storing temporary files. Would you like to use the default location instead?",
+                    dialogButtons: DialogButtons.YesNo);
+
+                if (result == DialogResult.No)
+                    return;
+                
+                DownloadsViewModel.TemporaryFileLocation = Constants.TempDownloadDirectory;
             }
 
             // Save general settings
             AppService.SettingsService.Settings.StartOnSystemStartup = GeneralsViewModel.StartOnSystemStartup;
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
-            AppService.SettingsService.Settings.DarkMode = GeneralsViewModel.DarkMode;
+            AppService.SettingsService.Settings.ThemeFilePath = GeneralsViewModel.SelectedTheme.ThemePath;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
             AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
             AppService.SettingsService.Settings.ApplicationFont = GeneralsViewModel.SelectedFont;
@@ -311,7 +382,8 @@ public class SettingsWindowViewModel : ViewModelBase
                     .FirstOrDefault(c => c.Id == saveDirectory!.CategoryId);
 
                 // If category doesn't have a save directory or the save directory is the same, continue
-                if (category?.CategorySaveDirectory?.SaveDirectory.IsNullOrEmpty() != false || saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
+                if (category?.CategorySaveDirectory?.SaveDirectory.IsStringNullOrEmpty() != false ||
+                    saveDirectory!.SaveDirectory.Equals(category.CategorySaveDirectory?.SaveDirectory))
                     continue;
 
                 // Update save directory
@@ -338,6 +410,12 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.IsSpeedLimiterEnabled = DownloadsViewModel.IsSpeedLimiterEnabled;
             AppService.SettingsService.Settings.LimitSpeed = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SpeedLimit : null;
             AppService.SettingsService.Settings.LimitUnit = DownloadsViewModel.IsSpeedLimiterEnabled ? DownloadsViewModel.SelectedSpeedUnit : null;
+            AppService.SettingsService.Settings.IsMergeSpeedLimitEnabled = DownloadsViewModel.IsMergeSpeedLimiterEnabled;
+            AppService.SettingsService.Settings.MergeLimitSpeed = DownloadsViewModel.IsMergeSpeedLimiterEnabled ? DownloadsViewModel.MergeSpeedLimit : null;
+            AppService.SettingsService.Settings.MergeLimitUnit = DownloadsViewModel.IsMergeSpeedLimiterEnabled ? DownloadsViewModel.SelectedMergeSpeedUnit : null;
+            AppService.SettingsService.Settings.MaximumMemoryBufferBytes = (long)(DownloadsViewModel.MaximumMemoryBufferBytes ?? 0);
+            AppService.SettingsService.Settings.MaximumMemoryBufferBytesUnit = DownloadsViewModel.SelectedMaximumMemoryBufferBytesUnit!;
+            AppService.SettingsService.Settings.TemporaryFileLocation = DownloadsViewModel.TemporaryFileLocation!;
 
             // Save proxy settings
             switch (ProxyViewModel)

@@ -225,7 +225,7 @@ public class FileTypesViewModel : ViewModelBase
     private void FilterFileExtensions()
     {
         var selectedFileExtensionId = SelectedFileExtension?.Id;
-        if (SearchText.IsNullOrEmpty())
+        if (SearchText.IsStringNullOrEmpty())
         {
             FileExtensions = _dbFileExtensions.ToObservableCollection();
         }

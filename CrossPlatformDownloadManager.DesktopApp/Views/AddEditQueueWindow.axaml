@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
         xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
-        xmlns:uc="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.AddEditQueueWindowControls"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -34,14 +33,14 @@
                  SelectedItem="{Binding SelectedTabItem}" />
 
         <!-- Options content -->
-        <uc:OptionsView Grid.Row="1"
-                        IsVisible="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
-                        DataContext="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).OptionsViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+        <ContentControl Grid.Row="1"
+                        IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
+                        Content="{Binding OptionsView}" />
 
         <!-- Files content -->
-        <uc:FilesView Grid.Row="1"
-                      IsVisible="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Files', FallbackValue=False, TargetNullValue=False}"
-                      DataContext="{Binding $parent[Window].((vm:AddEditQueueWindowViewModel)DataContext).FilesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+        <ContentControl Grid.Row="1"
+                        IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Files', FallbackValue=False, TargetNullValue=False}"
+                        Content="{Binding FilesView}" />
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="2"

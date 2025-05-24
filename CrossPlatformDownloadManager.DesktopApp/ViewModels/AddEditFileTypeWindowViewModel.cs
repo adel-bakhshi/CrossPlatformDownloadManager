@@ -107,10 +107,10 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 return;
-            
+
             Extension = "." + Extension?.Trim('.').Replace(".", "").Replace(" ", "").ToLower();
             Alias = Alias?.Trim();
-            if (Extension.IsNullOrEmpty() || Alias.IsNullOrEmpty() || SelectedCategory == null)
+            if (Extension.IsStringNullOrEmpty() || Alias.IsStringNullOrEmpty() || SelectedCategory == null)
                 return;
 
             if (IsEditMode)
@@ -126,7 +126,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
                 fileExtension.Extension = Extension!;
                 fileExtension.Alias = Alias!;
-                
+
                 await AppService.CategoryService.UpdateFileExtensionAsync(SelectedCategory, fileExtension);
             }
             else
@@ -136,7 +136,7 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
                     .Categories
                     .SelectMany(c => c.FileExtensions)
                     .FirstOrDefault(fe => fe.Extension.Equals(Extension, StringComparison.OrdinalIgnoreCase)
-                                          && fe.Category != null 
+                                          && fe.Category != null
                                           && fe.Category.Id == SelectedCategory.Id);
 
                 if (fileExtension != null)
@@ -176,13 +176,12 @@ public class AddEditFileTypeWindowViewModel : ViewModelBase
 
     private void LoadCategories()
     {
-        var categories = AppService
+        Categories = AppService
             .CategoryService
             .Categories
             .Where(c => !c.Title.Equals(Constants.GeneralCategoryTitle))
             .ToObservableCollection();
-        
-        Categories.UpdateCollection(categories, c => c.Id);
+
         if (!IsEditMode)
             SelectedCategory = Categories.FirstOrDefault();
     }

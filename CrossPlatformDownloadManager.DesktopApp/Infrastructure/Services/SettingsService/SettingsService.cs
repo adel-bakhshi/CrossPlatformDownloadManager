@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Avalonia;
@@ -84,6 +83,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 if (settings.StartOnSystemStartup)
                     RegisterStartup();
 
+                // Set the default temporary file location
+                settings.TemporaryFileLocation = Constants.TempDownloadDirectory;
                 // Save settings
                 await _unitOfWork.SettingsRepository.AddAsync(settings);
                 await _unitOfWork.SaveAsync();
@@ -293,7 +294,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         proxySettings.Username = proxySettings.Username?.Trim();
         proxySettings.Password = proxySettings.Password?.Trim();
 
-        if (proxySettings.Host.IsNullOrEmpty() || proxySettings.Port.IsNullOrEmpty())
+        if (proxySettings.Host.IsStringNullOrEmpty() || proxySettings.Port.IsStringNullOrEmpty())
             throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
 
         if (!int.TryParse(proxySettings.Port, out _))
@@ -350,49 +351,6 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         _managerWindow = null;
     }
 
-    public IWebProxy? GetProxy()
-    {
-        IWebProxy? proxy = null;
-        switch (Settings.ProxyMode)
-        {
-            case ProxyMode.DisableProxy:
-            {
-                proxy = null;
-                break;
-            }
-
-            case ProxyMode.UseSystemProxySettings:
-            {
-                var systemProxy = WebRequest.DefaultWebProxy;
-                if (systemProxy == null)
-                    break;
-
-                proxy = systemProxy;
-                break;
-            }
-
-            case ProxyMode.UseCustomProxy:
-            {
-                var activeProxy = Settings.Proxies.FirstOrDefault(p => p.IsActive);
-                if (activeProxy == null)
-                    break;
-
-                proxy = new WebProxy
-                {
-                    Address = new Uri(activeProxy.GetProxyUri()),
-                    Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password)
-                };
-
-                break;
-            }
-
-            default:
-                throw new InvalidOperationException("Invalid proxy mode.");
-        }
-
-        return proxy;
-    }
-
     #region Helpers
 
     private static void RegisterStartup()
@@ -420,7 +378,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (appThemeService == null)
             throw new InvalidOperationException("Can't find app theme service.");
 
-        appThemeService.LoadThemeDataFromAssets();
+        appThemeService.LoadThemeData();
     }
 
     private void SetApplicationFont()

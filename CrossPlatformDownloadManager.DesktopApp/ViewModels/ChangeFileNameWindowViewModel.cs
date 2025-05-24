@@ -123,8 +123,8 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
             .FirstOrDefault(df => df.Id == _downloadFile?.Id);
 
         if (downloadFile == null ||
-            downloadFile.SaveLocation.IsNullOrEmpty() ||
-            downloadFile.FileName.IsNullOrEmpty())
+            downloadFile.SaveLocation.IsStringNullOrEmpty() ||
+            downloadFile.FileName.IsStringNullOrEmpty())
         {
             throw new InvalidOperationException("Download file not found.");
         }
@@ -142,8 +142,8 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
             .FirstOrDefault(df => df.Id == _downloadFile?.Id);
 
         if (downloadFile == null ||
-            downloadFile.SaveLocation.IsNullOrEmpty() ||
-            downloadFile.FileName.IsNullOrEmpty())
+            downloadFile.SaveLocation.IsStringNullOrEmpty() ||
+            downloadFile.FileName.IsStringNullOrEmpty())
         {
             return false;
         }
@@ -154,10 +154,10 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
 
         var newFilePath = Path.Combine(downloadFile.SaveLocation!, NewFileName);
         var fileExtension = Path.GetExtension(newFilePath);
-        if (fileExtension.IsNullOrEmpty())
+        if (fileExtension.IsStringNullOrEmpty())
         {
             fileExtension = Path.GetExtension(filePath);
-            if (fileExtension.IsNullOrEmpty())
+            if (fileExtension.IsStringNullOrEmpty())
                 throw new InvalidOperationException("An error occurred while trying to get file extension.");
 
             newFilePath += fileExtension;

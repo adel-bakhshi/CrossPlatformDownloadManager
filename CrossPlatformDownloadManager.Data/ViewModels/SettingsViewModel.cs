@@ -11,9 +11,10 @@ public class SettingsViewModel : PropertyChangedBase
     private int _id;
     private bool _startOnSystemStartup;
     private bool _useBrowserExtension;
-    private bool _darkMode;
+    private string? _themeFilePath;
     private bool _useManager;
     private bool _alwaysKeepManagerOnTop;
+    private string? _applicationFont;
     private bool _disableCategories;
     private string? _globalSaveLocation;
     private bool _showStartDownloadDialog;
@@ -23,6 +24,12 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _isSpeedLimiterEnabled;
     private double? _limitSpeed;
     private string? _limitUnit;
+    private bool _isMergeSpeedLimitEnabled;
+    private double? _mergeLimitSpeed;
+    private string? _mergeLimitUnit;
+    private long _maximumMemoryBufferBytes;
+    private string _maximumMemoryBufferBytesUnit = string.Empty;
+    private string _temporaryFileLocation = string.Empty;
     private ProxyMode _proxyMode;
     private ProxyType _proxyType;
     private bool _useDownloadCompleteSound;
@@ -36,7 +43,6 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _showCategoriesPanel = true;
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private bool _hasApplicationBeenRunYet;
-    private string? _applicationFont;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
     #endregion
@@ -61,12 +67,12 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _useBrowserExtension, value);
     }
 
-    public bool DarkMode
+    public string? ThemeFilePath
     {
-        get => _darkMode;
-        set => SetField(ref _darkMode, value);
+        get => _themeFilePath;
+        set => SetField(ref _themeFilePath, value);
     }
-    
+
     public bool UseManager
     {
         get => _useManager;
@@ -77,6 +83,12 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _alwaysKeepManagerOnTop;
         set => SetField(ref _alwaysKeepManagerOnTop, value);
+    }
+
+    public string? ApplicationFont
+    {
+        get => _applicationFont;
+        set => SetField(ref _applicationFont, value);
     }
 
     public bool DisableCategories
@@ -131,6 +143,42 @@ public class SettingsViewModel : PropertyChangedBase
     {
         get => _limitUnit;
         set => SetField(ref _limitUnit, value);
+    }
+
+    public bool IsMergeSpeedLimitEnabled
+    {
+        get => _isMergeSpeedLimitEnabled;
+        set => SetField(ref _isMergeSpeedLimitEnabled, value);
+    }
+
+    public double? MergeLimitSpeed
+    {
+        get => _mergeLimitSpeed;
+        set => SetField(ref _mergeLimitSpeed, value);
+    }
+
+    public string? MergeLimitUnit
+    {
+        get => _mergeLimitUnit;
+        set => SetField(ref _mergeLimitUnit, value);
+    }
+
+    public long MaximumMemoryBufferBytes
+    {
+        get => _maximumMemoryBufferBytes;
+        set => SetField(ref _maximumMemoryBufferBytes, value);
+    }
+
+    public string MaximumMemoryBufferBytesUnit
+    {
+        get => _maximumMemoryBufferBytesUnit;
+        set => SetField(ref _maximumMemoryBufferBytesUnit, value);
+    }
+
+    public string TemporaryFileLocation
+    {
+        get => _temporaryFileLocation;
+        set => SetField(ref _temporaryFileLocation, value);
     }
 
     public ProxyMode ProxyMode
@@ -198,23 +246,17 @@ public class SettingsViewModel : PropertyChangedBase
         get => _showCategoriesPanel;
         set => SetField(ref _showCategoriesPanel, value);
     }
-    
+
     public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
     {
         get => _dataGridColumnsSettings;
         set => SetField(ref _dataGridColumnsSettings, value);
     }
-    
+
     public bool HasApplicationBeenRunYet
     {
         get => _hasApplicationBeenRunYet;
         set => SetField(ref _hasApplicationBeenRunYet, value);
-    }
-
-    public string? ApplicationFont
-    {
-        get => _applicationFont;
-        set => SetField(ref _applicationFont, value);
     }
 
     public ObservableCollection<ProxySettingsViewModel> Proxies

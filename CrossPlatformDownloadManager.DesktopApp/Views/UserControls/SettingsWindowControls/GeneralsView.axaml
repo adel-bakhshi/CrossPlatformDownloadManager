@@ -65,29 +65,74 @@
             </Grid>
         </Border>
 
-        <!-- Dark mode -->
+        <!-- Theme -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
                 Background="{DynamicResource SecondaryColor}">
             <Grid ColumnDefinitions="*, Auto">
+                <!-- Title -->
                 <TextBlock Grid.Column="0"
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Center"
                            TextAlignment="Left"
-                           Text="Dark mode"
+                           Text="Theme"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding DarkMode}" />
+                <!-- Theme content -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                    <!-- Themes -->
+                    <cc:CustomComboBox PlaceholderText="Theme"
+                                       Background="{DynamicResource PrimaryColor}"
+                                       ToggleIconColor="{DynamicResource TertiaryColor}"
+                                       OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                       IconData="{DynamicResource FontSvgIcon}"
+                                       IconColor="{DynamicResource IconColor}"
+                                       IconSize="{DynamicResource SmallIconSize}"
+                                       BorderThickness="0"
+                                       SelectedItem="{Binding SelectedTheme}"
+                                       ItemsSource="{Binding Themes}"
+                                       MaxDropDownHeight="300"
+                                       Width="170"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Stretch">
+                        <cc:CustomComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ThemeName}" />
+                            </DataTemplate>
+                        </cc:CustomComboBox.ItemTemplate>
+                    </cc:CustomComboBox>
+
+                    <!-- Add new theme button -->
+                    <Button Classes="button success"
+                            Height="{Binding $parent[StackPanel].Bounds.Height}"
+                            Width="{Binding $self.Bounds.Height}"
+                            VerticalAlignment="Center"
+                            Command="{Binding AddNewThemeCommand}">
+                        <PathIcon Data="{DynamicResource PlusSvgIcon}"
+                                  Foreground="{DynamicResource ButtonTextColor}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                    </Button>
+                    
+                    <!-- Remove theme button -->
+                    <Button Classes="button danger"
+                            Height="{Binding $parent[StackPanel].Bounds.Height}"
+                            Width="{Binding $self.Bounds.Height}"
+                            VerticalAlignment="Center"
+                            Command="{Binding RemoveThemeCommand}"
+                            IsEnabled="{Binding CanRemoveTheme}">
+                        <PathIcon Data="{DynamicResource XMarkSvgIcon}"
+                                  Foreground="{DynamicResource ButtonTextColor}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 

@@ -14,7 +14,10 @@ public class Settings : DbModelBase
     [JsonProperty("useBrowserExtension")]
     public bool UseBrowserExtension { get; set; }
 
-    [Required] [JsonProperty("darkMode")] public bool DarkMode { get; set; }
+    [Required]
+    [MaxLength(150)]
+    [JsonProperty("themeFilePath")]
+    public string? ThemeFilePath { get; set; }
 
     [Required]
     [JsonProperty("useManager")]
@@ -24,7 +27,13 @@ public class Settings : DbModelBase
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
 
-    [JsonProperty("disableCategories")] public bool DisableCategories { get; set; }
+    [MaxLength(50)]
+    [Required]
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
+
+    [JsonProperty("disableCategories")]
+    public bool DisableCategories { get; set; }
 
     [MaxLength(500)]
     [JsonProperty("globalSaveLocation")]
@@ -50,15 +59,44 @@ public class Settings : DbModelBase
     [JsonProperty("isSpeedLimiterEnabled")]
     public bool IsSpeedLimiterEnabled { get; set; }
 
-    [JsonProperty("limitSpeed")] public double? LimitSpeed { get; set; }
+    [JsonProperty("limitSpeed")]
+    public double? LimitSpeed { get; set; }
 
     [MaxLength(50)]
     [JsonProperty("limitUnit")]
     public string? LimitUnit { get; set; }
 
-    [Required] [JsonProperty("proxyMode")] public ProxyMode ProxyMode { get; set; }
+    [Required]
+    [JsonProperty("isMergeSpeedLimitEnabled")]
+    public bool IsMergeSpeedLimitEnabled { get; set; }
 
-    [Required] [JsonProperty("proxyType")] public ProxyType ProxyType { get; set; }
+    [JsonProperty("mergeLimitSpeed")]
+    public double? MergeLimitSpeed { get; set; }
+
+    [MaxLength(50)]
+    [JsonProperty("mergeLimitUnit")]
+    public string? MergeLimitUnit { get; set; }
+
+    [Required]
+    [JsonProperty("maximumMemoryBufferBytes")]
+    public long MaximumMemoryBufferBytes { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    [JsonProperty("maximumMemoryBufferBytesUnit")]
+    public string MaximumMemoryBufferBytesUnit { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(300)]
+    public string TemporaryFileLocation { get; set; } = string.Empty;
+
+    [Required]
+    [JsonProperty("proxyMode")]
+    public ProxyMode ProxyMode { get; set; }
+
+    [Required]
+    [JsonProperty("proxyType")]
+    public ProxyType ProxyType { get; set; }
 
     [Required]
     [JsonProperty("useDownloadCompleteSound")]
@@ -88,20 +126,17 @@ public class Settings : DbModelBase
     [JsonProperty("useSystemNotifications")]
     public bool UseSystemNotifications { get; set; }
 
-    [MaxLength(100)] public string? ManagerPoint { get; set; }
+    [MaxLength(100)]
+    public string? ManagerPoint { get; set; }
 
-    [JsonProperty("showCategoriesPanel")] public bool ShowCategoriesPanel { get; set; } = true;
+    [JsonProperty("showCategoriesPanel")]
+    public bool ShowCategoriesPanel { get; set; } = true;
 
     [MaxLength(5000)]
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
 
     public bool HasApplicationBeenRunYet { get; set; }
-
-    [MaxLength(50)]
-    [Required]
-    [JsonProperty("applicationFont")]
-    public string? ApplicationFont { get; set; }
 
     // ReSharper disable once CollectionNeverUpdated.Global
     public ICollection<ProxySettings> Proxies { get; } = [];
@@ -113,9 +148,10 @@ public class Settings : DbModelBase
 
         StartOnSystemStartup = settings.StartOnSystemStartup;
         UseBrowserExtension = settings.UseBrowserExtension;
-        DarkMode = settings.DarkMode;
+        ThemeFilePath = settings.ThemeFilePath;
         UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+        ApplicationFont = settings.ApplicationFont;
         DisableCategories = settings.DisableCategories;
         GlobalSaveLocation = settings.GlobalSaveLocation;
         ShowStartDownloadDialog = settings.ShowStartDownloadDialog;
@@ -125,6 +161,12 @@ public class Settings : DbModelBase
         IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled;
         LimitSpeed = settings.LimitSpeed;
         LimitUnit = settings.LimitUnit;
+        IsMergeSpeedLimitEnabled = settings.IsMergeSpeedLimitEnabled;
+        MergeLimitSpeed = settings.MergeLimitSpeed;
+        MergeLimitUnit = settings.MergeLimitUnit;
+        MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes;
+        MaximumMemoryBufferBytesUnit = settings.MaximumMemoryBufferBytesUnit;
+        TemporaryFileLocation = settings.TemporaryFileLocation;
         ProxyMode = settings.ProxyMode;
         ProxyType = settings.ProxyType;
         UseDownloadCompleteSound = settings.UseDownloadCompleteSound;
@@ -138,6 +180,5 @@ public class Settings : DbModelBase
         ShowCategoriesPanel = settings.ShowCategoriesPanel;
         DataGridColumnsSettings = settings.DataGridColumnsSettings;
         HasApplicationBeenRunYet = settings.HasApplicationBeenRunYet;
-        ApplicationFont = settings.ApplicationFont;
     }
 }

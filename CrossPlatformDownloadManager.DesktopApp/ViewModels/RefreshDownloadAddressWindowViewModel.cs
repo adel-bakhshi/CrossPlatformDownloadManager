@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -28,7 +26,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
     #endregion
 
     #region Properties
-    
+
     public string CurrentAddress
     {
         get => _currentAddress;
@@ -65,8 +63,9 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
     {
         try
         {
+            // Validate new address and the owner window
             NewAddress = NewAddress.Replace("\\", "/").Trim();
-            if (owner == null || NewAddress.IsNullOrEmpty() || !NewAddress.CheckUrlValidation())
+            if (owner == null || NewAddress.IsStringNullOrEmpty() || !NewAddress.CheckUrlValidation())
                 return;
 
             // Check if the new address is the same as the current address
@@ -76,14 +75,17 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Find the download file
             var downloadFile = AppService
                 .DownloadFileService
                 .DownloadFiles
                 .FirstOrDefault(df => df.Id == _downloadFile?.Id);
 
+            // Make sure the download file exists
             if (downloadFile == null)
                 throw new InvalidOperationException("Download file not found.");
 
+            // Check if the download file is completed
             if (downloadFile.IsCompleted)
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Download completed",
@@ -93,6 +95,8 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                 return;
             }
 
+            // Check if the download file is downloading or paused
+            // Stop the download before changing the URL of it
             var restartDownloadFile = false;
             if (downloadFile.IsDownloading || downloadFile.IsPaused)
             {
@@ -103,6 +107,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                 if (result != DialogResult.Yes)
                     return;
 
+                // Stop download file
                 await AppService
                     .DownloadFileService
                     .StopDownloadFileAsync(downloadFile, ensureStopped: true);
@@ -111,20 +116,16 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
             }
 
             // Get url details
-            var urlDetails = await AppService.DownloadFileService.GetUrlDetailsAsync(NewAddress, CancellationToken.None);
-            if (urlDetails == null)
-                throw new InvalidOperationException("Failed to retrieve URL details.");
-
-            var urlDetailsValidation = AppService.DownloadFileService.ValidateUrlDetails(urlDetails);
-            if (!urlDetailsValidation.IsValid)
-            {
-                await DialogBoxManager.ShowDangerDialogAsync(urlDetailsValidation.Title!, urlDetailsValidation.Message!, DialogButtons.Ok);
+            var newDownloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(NewAddress);
+            var isValid = await AppService.DownloadFileService.ValidateDownloadFileAsync(newDownloadFile);
+            if (!isValid)
                 return;
-            }
 
             // Compare file size
-            var newFileSize = (long)urlDetails.FileSize;
+            var newFileSize = (long)(newDownloadFile.Size ?? 0);
             var oldFileSize = (long)(downloadFile.Size ?? 0);
+            // Check if the new size is not equal to the old size.
+            // If the size is not equal, ask the user if they want to continue.
             if (newFileSize != oldFileSize)
             {
                 var result = await DialogBoxManager.ShowWarningDialogAsync("File size mismatch",
@@ -134,65 +135,18 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                 if (result != DialogResult.Yes)
                     return;
 
-                downloadFile.Size = newFileSize;
-            }
-
-            // Compare file name
-            if (!urlDetails.FileName.Equals(downloadFile.FileName))
-            {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("File name mismatch",
-                    "The expected file name has changed. This might happen occasionally. Do you want to continue downloading with the new name?",
-                    DialogButtons.YesNo);
-
-                if (result == DialogResult.Yes)
-                {
-                    // Save new file name
-                    var newFileName = urlDetails.FileName;
-                    // Rename existing file
-                    if (!downloadFile.SaveLocation.IsNullOrEmpty() && !downloadFile.FileName.IsNullOrEmpty())
-                    {
-                        // If the file exists, rename it
-                        var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                        if (File.Exists(filePath))
-                        {
-                            // Select new name for file and check if it already exists or not
-                            var newFilePath = Path.Combine(downloadFile.SaveLocation!, newFileName);
-                            var overwriteExistingFile = false;
-                            if (File.Exists(newFilePath))
-                            {
-                                result = await DialogBoxManager.ShowWarningDialogAsync("File already exists",
-                                    $"A file named '{newFileName}' already exists in this location. Overwrite it?",
-                                    DialogButtons.YesNo);
-
-                                // When user chooses to overwrite the existing file, overwrite it
-                                if (result == DialogResult.Yes)
-                                {
-                                    overwriteExistingFile = true;
-                                }
-                                // Otherwise, choose a new name for the file
-                                else
-                                {
-                                    newFileName = AppService.DownloadFileService.GetNewFileName(newFileName, downloadFile.SaveLocation!);
-                                    newFilePath = Path.Combine(downloadFile.SaveLocation!, newFileName);
-                                }
-                            }
-
-                            File.Move(filePath, newFilePath, overwriteExistingFile);
-                        }
-                    }
-
-                    // Save new download file name
-                    downloadFile.FileName = newFileName;
-                }
+                downloadFile.Size = newDownloadFile.Size;
+                downloadFile.IsSizeUnknown = newDownloadFile.IsSizeUnknown;
             }
 
             // Save new address
-            downloadFile.Url = NewAddress;
-
+            downloadFile.Url = newDownloadFile.Url;
+            // Update the download file with the new data
             await AppService
                 .DownloadFileService
                 .UpdateDownloadFileAsync(downloadFile);
 
+            // If the download file was downloading or paused, restart it
             if (restartDownloadFile)
             {
                 _ = AppService
@@ -200,6 +154,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                     .StartDownloadFileAsync(downloadFile);
             }
 
+            // Close the window
             owner.Close();
         }
         catch (Exception ex)
@@ -216,7 +171,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            if (!NewAddress.IsNullOrEmpty() && NewAddress.CheckUrlValidation())
+            if (!NewAddress.IsStringNullOrEmpty() && NewAddress.CheckUrlValidation())
             {
                 NewAddress = NewAddress.Replace("\\", "/").Trim();
 
@@ -225,7 +180,7 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                     .DownloadFiles
                     .FirstOrDefault(df => df.Id == _downloadFile?.Id);
 
-                if (downloadFile != null && !downloadFile.Url.IsNullOrEmpty() && !downloadFile.Url!.Equals(NewAddress))
+                if (downloadFile != null && !downloadFile.Url.IsStringNullOrEmpty() && !downloadFile.Url!.Equals(NewAddress))
                 {
                     var result = await DialogBoxManager.ShowWarningDialogAsync(
                         "Refresh Download Address",

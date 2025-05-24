@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -35,7 +36,7 @@ public partial class App : Application
             var serviceProvider = this.TryGetServiceProvider();
             var appViewModel = serviceProvider?.GetService<AppViewModel>();
             DataContext = appViewModel ?? throw new NullReferenceException(nameof(appViewModel));
-            
+
             var mainWindow = serviceProvider?.GetService<MainWindow>();
             if (mainWindow == null)
                 throw new NullReferenceException(nameof(mainWindow));
@@ -45,6 +46,7 @@ public partial class App : Application
                 Desktop = desktop;
                 Desktop.MainWindow = mainWindow;
                 Desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                Desktop.Startup += ApplicationOnStartup;
                 Desktop.Exit += ApplicationOnExit;
             }
 
@@ -75,6 +77,26 @@ public partial class App : Application
         {
             Log.Error(ex, "An error occurred while trying to show main window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    private static void ApplicationOnStartup(object? sender, ControlledApplicationLifetimeStartupEventArgs e)
+    {
+        try
+        {
+            // Check if the application is already running
+            var runningInstanceExists = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1;
+            if (!runningInstanceExists)
+                return;
+
+            // Exit the application
+            Log.Information("Application is already running. Exiting...");
+            Environment.Exit(0);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while starting the application. Error message: {ErrorMessage}", ex.Message);
+            Environment.Exit(0);
         }
     }
 

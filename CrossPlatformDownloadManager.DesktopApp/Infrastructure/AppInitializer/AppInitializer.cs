@@ -49,7 +49,7 @@ public class AppInitializer : IAppInitializer
             AudioManager.Initialize();
             
             // Load theme data
-            _appService.AppThemeService.LoadThemeDataFromAssets();
+            _appService.AppThemeService.LoadThemeData();
         }
         catch (Exception ex)
         {

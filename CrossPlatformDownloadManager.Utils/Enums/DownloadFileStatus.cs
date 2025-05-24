@@ -8,5 +8,6 @@ public enum DownloadFileStatus : byte
     Stopped,
     Paused,
     Error,
-    Stopping
+    Stopping,
+    Merging
 }

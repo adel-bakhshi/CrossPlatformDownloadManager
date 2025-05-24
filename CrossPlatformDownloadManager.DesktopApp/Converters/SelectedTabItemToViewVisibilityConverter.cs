@@ -11,7 +11,7 @@ public class SelectedTabItemToViewVisibilityConverter : IValueConverter
     {
         var currentTab = value?.ToString();
         var expectedTab = parameter?.ToString();
-        if (currentTab.IsNullOrEmpty() || expectedTab.IsNullOrEmpty())
+        if (currentTab.IsStringNullOrEmpty() || expectedTab.IsStringNullOrEmpty())
             return false;
 
         return currentTab!.Equals(expectedTab!);
@@ -23,7 +23,7 @@ public class SelectedTabItemToViewVisibilityConverter : IValueConverter
             return string.Empty;
 
         var expectedTab = parameter?.ToString();
-        if (expectedTab.IsNullOrEmpty())
+        if (expectedTab.IsStringNullOrEmpty())
             return string.Empty;
 
         return isVisible ? expectedTab! : string.Empty;

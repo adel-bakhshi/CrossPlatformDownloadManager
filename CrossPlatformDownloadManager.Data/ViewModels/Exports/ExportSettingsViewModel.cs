@@ -14,14 +14,14 @@ public class ExportSettingsViewModel
     [JsonProperty("useBrowserExtension")]
     public bool UseBrowserExtension { get; set; }
 
-    [JsonProperty("darkMode")]
-    public bool DarkMode { get; set; }
-
     [JsonProperty("useManager")]
     public bool UseManager { get; set; }
 
     [JsonProperty("alwaysKeepManagerOnTop")]
     public bool AlwaysKeepManagerOnTop { get; set; }
+
+    [JsonProperty("applicationFont")]
+    public string? ApplicationFont { get; set; }
 
     [JsonProperty("showStartDownloadDialog")]
     public bool ShowStartDownloadDialog { get; set; }
@@ -43,6 +43,21 @@ public class ExportSettingsViewModel
 
     [JsonProperty("limitUnit")]
     public string? LimitUnit { get; set; }
+
+    [JsonProperty("isMergeSpeedLimitEnabled")]
+    public bool IsMergeSpeedLimitEnabled { get; set; }
+
+    [JsonProperty("mergeLimitSpeed")]
+    public double? MergeLimitSpeed { get; set; }
+
+    [JsonProperty("mergeLimitUnit")]
+    public string? MergeLimitUnit { get; set; }
+
+    [JsonProperty("maximumMemoryBufferBytes")]
+    public long MaximumMemoryBufferBytes { get; set; }
+
+    [JsonProperty("maximumMemoryBufferBytesUnit")]
+    public string MaximumMemoryBufferBytesUnit { get; set; } = string.Empty;
 
     [JsonProperty("proxyMode")]
     public ProxyMode ProxyMode { get; set; }
@@ -77,9 +92,6 @@ public class ExportSettingsViewModel
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
 
-    [JsonProperty("applicationFont")]
-    public string? ApplicationFont { get; set; }
-
     [JsonProperty("proxies")]
     public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
 
@@ -88,7 +100,7 @@ public class ExportSettingsViewModel
     public static ExportSettingsViewModel CreateExportFile(SettingsViewModel settings, List<ProxySettingsViewModel> proxies)
     {
         var exportProxies = proxies
-            .Where(p => !p.Name.IsNullOrEmpty() && !p.Type.IsNullOrEmpty() && !p.Host.IsNullOrEmpty() && !p.Port.IsNullOrEmpty())
+            .Where(p => !p.Name.IsStringNullOrEmpty() && !p.Type.IsStringNullOrEmpty() && !p.Host.IsStringNullOrEmpty() && !p.Port.IsStringNullOrEmpty())
             .Select(p => new ExportProxySettingsViewModel
             {
                 Name = p.Name!,
@@ -104,7 +116,7 @@ public class ExportSettingsViewModel
         {
             StartOnSystemStartup = settings.StartOnSystemStartup,
             UseBrowserExtension = settings.UseBrowserExtension,
-            DarkMode = settings.DarkMode,
+            ApplicationFont = settings.ApplicationFont,
             UseManager = settings.UseManager,
             AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop,
             ShowStartDownloadDialog = settings.ShowStartDownloadDialog,
@@ -114,6 +126,11 @@ public class ExportSettingsViewModel
             IsSpeedLimiterEnabled = settings.IsSpeedLimiterEnabled,
             LimitSpeed = settings.LimitSpeed,
             LimitUnit = settings.LimitUnit,
+            IsMergeSpeedLimitEnabled = settings.IsMergeSpeedLimitEnabled,
+            MergeLimitSpeed = settings.MergeLimitSpeed,
+            MergeLimitUnit = settings.MergeLimitUnit,
+            MaximumMemoryBufferBytes = settings.MaximumMemoryBufferBytes,
+            MaximumMemoryBufferBytesUnit = settings.MaximumMemoryBufferBytesUnit,
             ProxyMode = settings.ProxyMode,
             ProxyType = settings.ProxyType,
             UseDownloadCompleteSound = settings.UseDownloadCompleteSound,
@@ -125,7 +142,6 @@ public class ExportSettingsViewModel
             UseSystemNotifications = settings.UseSystemNotifications,
             ShowCategoriesPanel = settings.ShowCategoriesPanel,
             DataGridColumnsSettings = settings.DataGridColumnsSettings.ConvertToJson(),
-            ApplicationFont = settings.ApplicationFont,
             Proxies = exportProxies
         };
     }

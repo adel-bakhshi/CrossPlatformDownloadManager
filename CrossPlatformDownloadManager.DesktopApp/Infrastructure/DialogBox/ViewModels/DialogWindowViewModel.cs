@@ -97,7 +97,7 @@ public class DialogWindowViewModel : ViewModelBase
         }
     }
 
-    public bool InfoMessageIsVisible => !InfoMessage.IsNullOrEmpty();
+    public bool InfoMessageIsVisible => !InfoMessage.IsStringNullOrEmpty();
 
     #endregion
 

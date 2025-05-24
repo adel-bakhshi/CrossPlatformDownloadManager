@@ -16,7 +16,8 @@
         MinHeight="460"
         MaxWidth="640"
         MaxHeight="460"
-        CanResize="False">
+        CanResize="False"
+        Topmost="True">
 
     <!-- Main content -->
     <Grid Margin="20"

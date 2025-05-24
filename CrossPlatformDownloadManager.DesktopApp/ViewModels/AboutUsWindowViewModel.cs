@@ -61,7 +61,7 @@ public class AboutUsWindowViewModel : ViewModelBase
     private void FillData()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
-        if (!version.IsNullOrEmpty())
+        if (!version.IsStringNullOrEmpty())
             AppVersion = version!;
 
         CurrentYear = DateTime.Now.Year.ToString();

@@ -41,49 +41,70 @@ public class DownloadService : AbstractDownloadService
     /// Starts the download operation.
     /// </summary>
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
-    protected override async Task<Stream?> StartDownload(bool forceBuildStorage = true)
+    protected override async Task<Stream?> StartDownloadAsync(bool forceBuildStorage = true)
     {
         try
         {
+            Logger?.LogInformation("Starting download process with forceBuildStorage={ForceBuildStorage}", forceBuildStorage);
             await SingleInstanceSemaphore.WaitAsync().ConfigureAwait(false);
-            Package.TotalFileSize = await RequestInstances[0].GetFileSize().ConfigureAwait(false);
-            Package.IsSupportDownloadInRange = await RequestInstances[0].IsSupportDownloadInRange().ConfigureAwait(false);
 
-            if (forceBuildStorage || !Package.IsStorageExists())
+            var firstRequest = RequestInstances[0];
+            Logger?.LogDebug("Getting file size from first request");
+            Package.TotalFileSize = await Client.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
+            Package.IsSupportDownloadInRange = await Client.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
+            Logger?.LogInformation("File size: {TotalFileSize}, Supports range download: {IsSupportDownloadInRange}", Package.TotalFileSize, Package.IsSupportDownloadInRange);
+
+            // Check if we need to rebuild storage
+            bool needToBuildStorage = forceBuildStorage || !Package.IsStorageExists() || Package.Chunks.Any(c => c.Position > 0);
+            if (needToBuildStorage)
+            {
+                Logger?.LogDebug("Building storage with ReserveStorageSpace={ReserveStorage}, MaxMemoryBuffer={MaxMemoryBuffer}",
+                    Options.ReserveStorageSpaceBeforeStartingDownload, Options.MaximumMemoryBufferBytes);
+
                 Package.BuildStorage(Options.ReserveStorageSpaceBeforeStartingDownload);
+            }
 
             ValidateBeforeChunking();
             ChunkHub.SetFileChunks(Package);
 
-            // firing the start event after creating chunks
+            Logger?.LogInformation("Starting download of {FileName} with size {TotalFileSize}", Package.FileName, Package.TotalFileSize);
             OnDownloadStarted(new DownloadStartedEventArgs(Package.FileName, Package.TotalFileSize));
 
             if (Options.ParallelDownload)
             {
-                await ParallelDownload(PauseTokenSource.Token).ConfigureAwait(false);
+                Logger?.LogDebug("Starting parallel download with {ChunkCount} chunks", Package.Chunks?.Length);
+                await ParallelDownloadAsync(PauseTokenSource.Token).ConfigureAwait(false);
             }
             else
             {
-                await SerialDownload(PauseTokenSource.Token).ConfigureAwait(false);
+                Logger?.LogDebug("Starting serial download with {ChunkCount} chunks", Package.Chunks?.Length);
+                await SerialDownloadAsync(PauseTokenSource.Token).ConfigureAwait(false);
             }
 
-            // Merge chunks
-            await MergeChunksAsync();
-            // Complete download
-            SendDownloadCompletionSignal(DownloadStatus.Completed);
+            // Check if download is completed
+            if (Status == DownloadStatus.Running)
+            {
+                Logger?.LogInformation("Download completed successfully");
+                // Merge chunks
+                await MergeChunksAsync().ConfigureAwait(false);
+                // Send the completion signal
+                SendDownloadCompletionSignal(DownloadStatus.Completed);
+            }
         }
-        catch (OperationCanceledException exp) // or TaskCanceledException
+        catch (OperationCanceledException exp)
         {
+            Logger?.LogWarning(exp, "Download was cancelled");
             SendDownloadCompletionSignal(DownloadStatus.Stopped, exp);
         }
         catch (Exception exp)
         {
+            Logger?.LogError(exp, "Download failed with error: {ErrorMessage}", exp.Message);
             SendDownloadCompletionSignal(DownloadStatus.Failed, exp);
         }
         finally
         {
             SingleInstanceSemaphore.Release();
-            await Task.Yield();
+            Logger?.LogDebug("Download process completed, semaphore released");
         }
 
         return Package.GetStorageStream();
@@ -197,9 +218,14 @@ public class DownloadService : AbstractDownloadService
     /// <returns>A task that represents the asynchronous operation.</returns>
     private void SendDownloadCompletionSignal(DownloadStatus state, Exception? error = null)
     {
-        var isCancelled = state == DownloadStatus.Stopped;
-        Package.IsSaveComplete = state == DownloadStatus.Completed;
+        // Another event throws before this
+        if (Status == DownloadStatus.Failed)
+            return;
+
         Status = state;
+        var isCancelled = Status == DownloadStatus.Stopped;
+        Package.IsSaveComplete = Status == DownloadStatus.Completed && error == null;
+        Package.IsSaving = false; // Reset IsSaving flag regardless of status
         OnDownloadFileCompleted(new AsyncCompletedEventArgs(error, isCancelled, Package));
     }
 
@@ -210,7 +236,6 @@ public class DownloadService : AbstractDownloadService
     {
         CheckSingleChunkDownload();
         CheckSupportDownloadInRange();
-        SetRangedSizes();
         CheckSizes();
         CheckOutputDirectory();
     }
@@ -235,50 +260,9 @@ public class DownloadService : AbstractDownloadService
         var temporaryPath = Path.Combine(Options.ChunkFilesOutputDirectory, fileName);
         if (Directory.Exists(Package.TemporarySavePath) && Directory.GetFiles(Package.TemporarySavePath, $"{fileName}.*.tmp").Length > 0)
             return;
-        
+
         Package.TemporarySavePath = temporaryPath;
         Package.CreateTemporarySavePath();
-    }
-
-    /// <summary>
-    /// Sets the range sizes for the download operation.
-    /// </summary>
-    private void SetRangedSizes()
-    {
-        if (Options.RangeDownload)
-        {
-            if (!Package.IsSupportDownloadInRange)
-            {
-                throw new NotSupportedException(
-                    "The server of your desired address does not support download in a specific range");
-            }
-
-            if (Options.RangeHigh < Options.RangeLow)
-            {
-                Options.RangeLow = Options.RangeHigh - 1;
-            }
-
-            if (Options.RangeLow < 0)
-            {
-                Options.RangeLow = 0;
-            }
-
-            if (Options.RangeHigh < 0)
-            {
-                Options.RangeHigh = Options.RangeLow;
-            }
-
-            if (Package.TotalFileSize > 0)
-            {
-                Options.RangeHigh = Math.Min(Package.TotalFileSize, Options.RangeHigh);
-            }
-
-            Package.TotalFileSize = Options.RangeHigh - Options.RangeLow + 1;
-        }
-        else
-        {
-            Options.RangeHigh = Options.RangeLow = 0; // reset range options
-        }
     }
 
     /// <summary>
@@ -326,15 +310,33 @@ public class DownloadService : AbstractDownloadService
     /// </summary>
     /// <param name="pauseToken">The pause token for pausing the download.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task ParallelDownload(PauseToken pauseToken)
+    private async Task ParallelDownloadAsync(PauseToken pauseToken)
     {
-        var tasks = GetChunksTasks(pauseToken);
-        var result = Task.WhenAll(tasks);
-        await result.ConfigureAwait(false);
-
-        if (result.IsFaulted)
+        try
         {
-            throw result.Exception;
+            var chunkTasks = GetChunksTasks(pauseToken).ToList();
+            int maxConcurrentTasks = Math.Min(Options.ParallelCount, chunkTasks.Count);
+
+            Logger?.LogDebug("Starting parallel download with {MaxConcurrentTasks} concurrent tasks", maxConcurrentTasks);
+
+            // Process tasks in batches to prevent overwhelming the system
+            for (int i = 0; i < chunkTasks.Count; i += maxConcurrentTasks)
+            {
+                var batch = chunkTasks.Skip(i).Take(maxConcurrentTasks).ToList();
+                await Task.WhenAll(batch).ConfigureAwait(false);
+
+                // Check for cancellation after each batch
+                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    Logger?.LogInformation("Download cancelled during batch processing");
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError(ex, "Error during parallel download: {ErrorMessage}", ex.Message);
+            throw;
         }
     }
 
@@ -343,10 +345,30 @@ public class DownloadService : AbstractDownloadService
     /// </summary>
     /// <param name="pauseToken">The pause token for pausing the download.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task SerialDownload(PauseToken pauseToken)
+    private async Task SerialDownloadAsync(PauseToken pauseToken)
     {
-        foreach (var task in GetChunksTasks(pauseToken))
-            await task.ConfigureAwait(false);
+        try
+        {
+            var chunkTasks = GetChunksTasks(pauseToken).ToList();
+            Logger?.LogDebug("Starting serial download with {ChunkCount} chunks", chunkTasks.Count);
+
+            foreach (Task task in chunkTasks)
+            {
+                await task.ConfigureAwait(false);
+
+                // Check for cancellation after each chunk
+                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    Logger?.LogInformation("Download cancelled during serial processing");
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError(ex, "Error during serial download: {ErrorMessage}", ex.Message);
+            throw;
+        }
     }
 
     /// <summary>
@@ -380,15 +402,16 @@ public class DownloadService : AbstractDownloadService
         try
         {
             cancellationTokenSource.Token.ThrowIfCancellationRequested();
-            return await chunkDownloader.Download(request, pause, cancellationTokenSource.Token).ConfigureAwait(false);
+            return await chunkDownloader.DownloadAsync(request, pause, cancellationTokenSource.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
+            SendDownloadCompletionSignal(DownloadStatus.Stopped);
             throw;
         }
-        catch (Exception)
+        catch (Exception exp)
         {
-            cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            SendDownloadCompletionSignal(DownloadStatus.Failed, exp);
             cancellationTokenSource.Cancel(false);
             throw;
         }
@@ -411,6 +434,6 @@ public class DownloadService : AbstractDownloadService
             chunk.TempFilePath = Path.Combine(Package.TemporarySavePath, fileName);
         }
 
-        return new(chunk, Options, Logger);
+        return new(chunk, Options, Client, Logger);
     }
 }

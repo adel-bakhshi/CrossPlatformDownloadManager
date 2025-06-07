@@ -1,6 +1,6 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace MultipartDownloader.Core;
 
@@ -9,19 +9,20 @@ namespace MultipartDownloader.Core;
 /// </summary>
 public class Request
 {
-    private const string GetRequestMethod = "GET";
-    private const string HeaderContentLengthKey = "Content-Length";
-    private const string HeaderContentDispositionKey = "Content-Disposition";
-    private const string HeaderContentRangeKey = "Content-Range";
-    private const string HeaderAcceptRangesKey = "Accept-Ranges";
-    private readonly RequestConfiguration _configuration;
-    private readonly Dictionary<string, string> _responseHeaders;
-    private readonly Regex _contentRangePattern;
+    /// <summary>
+    /// Gets the configuration for the request.
+    /// </summary>
+    public readonly RequestConfiguration Configuration;
 
     /// <summary>
     /// Gets the URI address of the request.
     /// </summary>
-    public Uri Address { get; private set; }
+    public Uri Address { get; set; }
+
+    /// <summary>
+    /// Gets or sets the file name extracted from the URL.
+    /// </summary>
+    public string FileName { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Request"/> class with the specified address.
@@ -39,258 +40,53 @@ public class Request
     public Request(string address, RequestConfiguration config)
     {
         if (!Uri.TryCreate(address, UriKind.Absolute, out var uri))
-        {
             uri = new Uri(new Uri("http://localhost"), address);
-        }
 
         Address = uri;
-        _configuration = config ?? new RequestConfiguration();
-        _responseHeaders = [];
-        _contentRangePattern = new Regex(@"bytes\s*((?<from>\d*)\s*-\s*(?<to>\d*)|\*)\s*\/\s*(?<size>\d+|\*)", RegexOptions.Compiled);
+        Configuration = config ?? new RequestConfiguration();
     }
 
     /// <summary>
     /// Creates an HTTP request with the specified method.
     /// </summary>
-    /// <param name="method">The HTTP method to use for the request.</param>
-    /// <returns>An instance of <see cref="HttpWebRequest"/> representing the HTTP request.</returns>
-    private HttpWebRequest GetRequest(string method)
+    /// <returns>An instance of <see cref="HttpRequestMessage"/> representing the HTTP request.</returns>
+    public HttpRequestMessage GetRequest()
     {
-#pragma warning disable SYSLIB0014
-        HttpWebRequest request = WebRequest.CreateHttp(Address);
-#pragma warning restore SYSLIB0014
-        request.UseDefaultCredentials = _configuration.UseDefaultCredentials; // Note: set default before other configs
-        request.Headers = _configuration.Headers;
-        request.Accept = _configuration.Accept;
-        request.AllowAutoRedirect = _configuration.AllowAutoRedirect;
-        request.AuthenticationLevel = _configuration.AuthenticationLevel;
-        request.AutomaticDecompression = _configuration.AutomaticDecompression;
-        request.CachePolicy = _configuration.CachePolicy;
-        request.ClientCertificates = _configuration.ClientCertificates;
-        request.ConnectionGroupName = _configuration.ConnectionGroupName;
-        request.ContentType = _configuration.ContentType;
-        request.CookieContainer = _configuration.CookieContainer;
-        request.Expect = _configuration.Expect;
-        request.ImpersonationLevel = _configuration.ImpersonationLevel;
-        request.KeepAlive = _configuration.KeepAlive;
-        request.MaximumAutomaticRedirections = _configuration.MaximumAutomaticRedirections;
-        request.MediaType = _configuration.MediaType;
-        request.Method = method;
-        request.Pipelined = _configuration.Pipelined;
-        request.PreAuthenticate = _configuration.PreAuthenticate;
-        request.ProtocolVersion = _configuration.ProtocolVersion;
-        request.Proxy = _configuration.Proxy;
-        request.Referer = _configuration.Referer;
-        request.SendChunked = _configuration.SendChunked;
-        request.Timeout = _configuration.Timeout;
-        request.TransferEncoding = _configuration.TransferEncoding;
-        request.UserAgent = _configuration.UserAgent;
+        HttpRequestMessage request = new(HttpMethod.Get, Address);
+        request.Version = Configuration.ProtocolVersion;
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+        request.Headers.IfModifiedSince = Configuration.IfModifiedSince;
 
-        if (_configuration.Credentials != null)
+        // Handle authentication
+        if (Configuration.Authorization != null)
         {
-            request.Credentials = _configuration.Credentials;
+            request.Headers.Authorization = Configuration.Authorization;
         }
-
-        if (_configuration.IfModifiedSince.HasValue)
+        else if (Configuration.Credentials != null)
         {
-            request.IfModifiedSince = _configuration.IfModifiedSince.Value;
+            if (Configuration.Credentials is NetworkCredential networkCredential)
+            {
+                if (!string.IsNullOrWhiteSpace(networkCredential.UserName) &&
+                    !string.IsNullOrWhiteSpace(networkCredential.Password))
+                {
+                    request.Headers.Authorization = GetAuthHeader(networkCredential.UserName, networkCredential.Password);
+                }
+            }
+            else if (Configuration.Credentials is CredentialCache credentialCache)
+            {
+                // For CredentialCache, we need to get the credentials for the current URI
+                var creds = credentialCache.GetCredential(Address, "Basic");
+                if (creds != null)
+                    request.Headers.Authorization = GetAuthHeader(creds.UserName, creds.Password);
+            }
         }
 
         return request;
     }
 
-    /// <summary>
-    /// Creates an HTTP GET request.
-    /// </summary>
-    /// <returns>An instance of <see cref="HttpWebRequest"/> representing the HTTP GET request.</returns>
-    public HttpWebRequest GetRequest()
+    private static AuthenticationHeaderValue GetAuthHeader(string user, string password)
     {
-        return GetRequest(GetRequestMethod);
-    }
-
-    /// <summary>
-    /// Fetches the response headers asynchronously.
-    /// </summary>
-    /// <param name="addRange">Indicates whether to add a range header to the request.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task FetchResponseHeaders(bool addRange = true)
-    {
-        try
-        {
-            if (_responseHeaders.Count > 0)
-            {
-                return;
-            }
-
-            HttpWebRequest request = GetRequest();
-
-            if (addRange) // to check the content range supporting
-                request.AddRange(0, 0); // first byte
-
-            using WebResponse response = await request.GetResponseAsync().ConfigureAwait(false);
-            EnsureResponseAddressIsSameWithOrigin(response);
-            if (response.SupportsHeaders)
-            {
-                foreach (string headerKey in response.Headers.AllKeys)
-                {
-                    string headerValue = response.Headers[headerKey] ?? string.Empty;
-                    _responseHeaders.Add(headerKey, headerValue);
-                }
-            }
-        }
-        catch (WebException exp) when (_configuration.AllowAutoRedirect &&
-                                       exp.Response is HttpWebResponse
-                                       {
-                                           SupportsHeaders: true,
-                                           StatusCode:
-                                           HttpStatusCode.Found or
-                                           HttpStatusCode.Moved or
-                                           HttpStatusCode.MovedPermanently or
-                                           HttpStatusCode.RequestedRangeNotSatisfiable
-                                       } response)
-        {
-            if (response.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable)
-            {
-                await FetchResponseHeaders(addRange: false).ConfigureAwait(false);
-            }
-            else if (!EnsureResponseAddressIsSameWithOrigin(exp.Response))
-            {
-                // Read the response to see if we have the redirected url
-                await FetchResponseHeaders().ConfigureAwait(false);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Ensures that the response address is the same as the original address.
-    /// </summary>
-    /// <param name="response">The web response to check.</param>
-    /// <returns>True if the response address is the same as the original address; otherwise, false.</returns>
-    private bool EnsureResponseAddressIsSameWithOrigin(WebResponse response)
-    {
-        var redirectUri = GetRedirectUrl(response);
-        if (!redirectUri.Equals(Address))
-        {
-            Address = redirectUri;
-            return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Gets the redirect URL from the web response.
-    /// </summary>
-    /// <param name="response">The web response to get the redirect URL from.</param>
-    /// <returns>The redirect URL.</returns>
-    public Uri GetRedirectUrl(WebResponse response)
-    {
-        // https://github.com/dotnet/runtime/issues/23264
-        var redirectLocation = response?.Headers["location"];
-        if (!string.IsNullOrWhiteSpace(redirectLocation))
-        {
-            return new Uri(redirectLocation);
-        }
-        else if (response?.ResponseUri != null)
-        {
-            return response.ResponseUri;
-        }
-
-        return Address;
-    }
-
-    /// <summary>
-    /// Gets the file size asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the file size.</returns>
-    public async Task<long> GetFileSize()
-    {
-        if (await IsSupportDownloadInRange().ConfigureAwait(false))
-            return GetTotalSizeFromContentRange(_responseHeaders);
-
-        return GetTotalSizeFromContentLength(_responseHeaders);
-    }
-
-    /// <summary>
-    /// Throws an exception if the download in range is not supported.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task ThrowIfIsNotSupportDownloadInRange()
-    {
-        var isSupport = await IsSupportDownloadInRange().ConfigureAwait(false);
-        if (!isSupport)
-        {
-            throw new NotSupportedException(
-                "The downloader cannot continue downloading because the network or server failed to download in range.");
-        }
-    }
-
-    /// <summary>
-    /// Checks if the download in range is supported.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the download in range is supported.</returns>
-    public async Task<bool> IsSupportDownloadInRange()
-    {
-        await FetchResponseHeaders().ConfigureAwait(false);
-
-        // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.5
-        if (_responseHeaders.TryGetValue(HeaderAcceptRangesKey, out var acceptRanges) && acceptRanges.Equals("none", StringComparison.CurrentCultureIgnoreCase))
-        {
-            return false;
-        }
-
-        // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.16
-        return _responseHeaders.TryGetValue(HeaderContentRangeKey, out var contentRange) && !string.IsNullOrWhiteSpace(contentRange);
-    }
-
-    /// <summary>
-    /// Gets the total size from the content range headers.
-    /// </summary>
-    /// <param name="headers">The headers to get the total size from.</param>
-    /// <returns>The total size of the content.</returns>
-    public long GetTotalSizeFromContentRange(Dictionary<string, string> headers)
-    {
-        if (headers.TryGetValue(HeaderContentRangeKey, out var contentRange) && !string.IsNullOrWhiteSpace(contentRange) && _contentRangePattern.IsMatch(contentRange))
-        {
-            var match = _contentRangePattern.Match(contentRange);
-            var size = match.Groups["size"].Value;
-
-            return long.TryParse(size, out var totalSize) ? totalSize : -1L;
-        }
-
-        return -1L;
-    }
-
-    /// <summary>
-    /// Gets the total size from the content length headers.
-    /// </summary>
-    /// <param name="headers">The headers to get the total size from.</param>
-    /// <returns>The total size of the content.</returns>
-    public static long GetTotalSizeFromContentLength(Dictionary<string, string> headers)
-    {
-        if (headers.TryGetValue(HeaderContentLengthKey, out var contentLengthText) && long.TryParse(contentLengthText, out long contentLength))
-            return contentLength;
-
-        return -1L;
-    }
-
-    /// <summary>
-    /// Gets the file name asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the file name.</returns>
-    public async Task<string> GetFileName()
-    {
-        var filename = await GetUrlDispositionFilenameAsync().ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(filename))
-        {
-            filename = GetFileNameFromUrl();
-            if (string.IsNullOrWhiteSpace(filename))
-            {
-                filename = Guid.NewGuid().ToString("N");
-            }
-        }
-
-        return filename;
+        return new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{password}")));
     }
 
     /// <summary>
@@ -302,47 +98,9 @@ public class Request
         string filename = Path.GetFileName(Address.LocalPath);
         int queryIndex = filename.IndexOf('?', StringComparison.Ordinal);
         if (queryIndex >= 0)
-        {
             filename = filename[..queryIndex];
-        }
 
         return filename;
-    }
-
-    /// <summary>
-    /// Gets the file name from the URL disposition header asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the file name.</returns>
-    public async Task<string> GetUrlDispositionFilenameAsync()
-    {
-        try
-        {
-            if (Address?.IsWellFormedOriginalString() == true
-                && Address?.Segments.Length > 1)
-            {
-                await FetchResponseHeaders().ConfigureAwait(false);
-                if (_responseHeaders.TryGetValue(HeaderContentDispositionKey, out var disposition))
-                {
-                    string unicodeDisposition = ToUnicode(disposition);
-                    if (!string.IsNullOrWhiteSpace(unicodeDisposition))
-                    {
-                        const string filenameStartPointKey = "filename=";
-                        var dispositionParts = unicodeDisposition.Split(';');
-                        var filenamePart = dispositionParts.FirstOrDefault(part => part.Trim().StartsWith(filenameStartPointKey, StringComparison.OrdinalIgnoreCase));
-                        if (!string.IsNullOrWhiteSpace(filenamePart))
-                        {
-                            return filenamePart.Replace(filenameStartPointKey, "").Replace("\"", "").Trim();
-                        }
-                    }
-                }
-            }
-        }
-        catch (WebException)
-        {
-            // No matter in this point
-        }
-
-        return string.Empty;
     }
 
     /// <summary>

@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MultipartDownloader.Core.CustomEventArgs;
-using MultipartDownloader.Core.Extensions.Helpers;
 using System.ComponentModel;
-using System.Net;
 
 namespace MultipartDownloader.Core;
 
@@ -24,7 +22,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// Semaphore to ensure single instance operations.
     /// </summary>
-    protected readonly SemaphoreSlim SingleInstanceSemaphore = new SemaphoreSlim(1, 1);
+    protected readonly SemaphoreSlim SingleInstanceSemaphore = new(1, 1);
 
     /// <summary>
     /// Global cancellation token source for managing download cancellation.
@@ -91,9 +89,9 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     }
 
     /// <summary>
-    /// The last progress value.
+    /// The Socket client for the download service.
     /// </summary>
-    protected long LastProgressValue { get; set; }
+    protected SocketClient Client { get; private set; }
 
     /// <summary>
     /// Event triggered when the download file operation is completed.
@@ -140,30 +138,6 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
         Bandwidth = new Bandwidth();
         Options = options ?? new DownloadConfiguration();
         Package = new DownloadPackage();
-
-        // This property selects the version of the Secure Sockets Layer (SSL) or
-        // existing connections aren't changed.
-        ServicePointManager.SecurityProtocol =
-            SecurityProtocolType.Tls | SecurityProtocolType.Tls11 |
-            SecurityProtocolType.Tls12;
-
-#if NET8_0_OR_GREATER
-        ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls13;
-#endif
-
-        // Accept the request for POST, PUT and PATCH verbs
-        ServicePointManager.Expect100Continue = false;
-
-        // Note: Any changes to the DefaultConnectionLimit property affect both HTTP 1.0 and HTTP 1.1 connections.
-        // It is not possible to separately alter the connection limit for HTTP 1.0 and HTTP 1.1 protocols.
-        ServicePointManager.DefaultConnectionLimit = 1000;
-
-        // Set the maximum idle time of a ServicePoint instance to 10 seconds.
-        // After the idle time expires, the ServicePoint object is eligible for
-        // garbage collection and cannot be used by the ServicePointManager object.
-        ServicePointManager.MaxServicePointIdleTime = 10000;
-
-        ServicePointManager.ServerCertificateValidationCallback = ExceptionHelper.CertificateValidationCallBack;
     }
 
     /// <summary>
@@ -184,8 +158,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="address">The URL address of the file to download.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
-    public Task<Stream?> DownloadFileTaskAsync(DownloadPackage package, string address,
-        CancellationToken cancellationToken = default)
+    public Task<Stream?> DownloadFileTaskAsync(DownloadPackage package, string address, CancellationToken cancellationToken = default)
     {
         return DownloadFileTaskAsync(package, [address], cancellationToken);
     }
@@ -197,12 +170,11 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="urls">The array of URL addresses of the file to download.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
-    public virtual async Task<Stream?> DownloadFileTaskAsync(DownloadPackage package, string[] urls,
-        CancellationToken cancellationToken = default)
+    public virtual async Task<Stream?> DownloadFileTaskAsync(DownloadPackage package, string[] urls, CancellationToken cancellationToken = default)
     {
         Package = package;
         await InitialDownloader(cancellationToken, urls).ConfigureAwait(false);
-        return await StartDownload(false).ConfigureAwait(false);
+        return await StartDownloadAsync(false).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -222,11 +194,10 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="urls">The array of URL addresses of the file to download.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
-    public virtual async Task<Stream?> DownloadFileTaskAsync(string[] urls,
-        CancellationToken cancellationToken = default)
+    public virtual async Task<Stream?> DownloadFileTaskAsync(string[] urls, CancellationToken cancellationToken = default)
     {
         await InitialDownloader(cancellationToken, urls).ConfigureAwait(false);
-        return await StartDownload().ConfigureAwait(false);
+        return await StartDownloadAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -248,11 +219,10 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="fileName">The name of the file to save the download as.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation.</returns>
-    public virtual async Task DownloadFileTaskAsync(string[] urls, string fileName,
-        CancellationToken cancellationToken = default)
+    public virtual async Task DownloadFileTaskAsync(string[] urls, string fileName, CancellationToken cancellationToken = default)
     {
         await InitialDownloader(cancellationToken, urls).ConfigureAwait(false);
-        await StartDownload(fileName).ConfigureAwait(false);
+        await StartDownloadAsync(fileName).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -262,8 +232,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="folder">The directory to save the downloaded file in.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation.</returns>
-    public Task DownloadFileTaskAsync(string address, DirectoryInfo folder,
-        CancellationToken cancellationToken = default)
+    public Task DownloadFileTaskAsync(string address, DirectoryInfo folder, CancellationToken cancellationToken = default)
     {
         return DownloadFileTaskAsync([address], folder, cancellationToken);
     }
@@ -275,13 +244,12 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <param name="folder">The directory to save the downloaded file in.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the download.</param>
     /// <returns>A task that represents the asynchronous download operation.</returns>
-    public virtual async Task DownloadFileTaskAsync(string[] urls, DirectoryInfo folder,
-        CancellationToken cancellationToken = default)
+    public virtual async Task DownloadFileTaskAsync(string[] urls, DirectoryInfo folder, CancellationToken cancellationToken = default)
     {
         await InitialDownloader(cancellationToken, urls).ConfigureAwait(false);
-        var name = await RequestInstances[0].GetFileName().ConfigureAwait(false);
+        var name = await Client.SetRequestFileNameAsync(RequestInstances[0]).ConfigureAwait(false);
         var filename = Path.Combine(folder.FullName, name);
-        await StartDownload(filename).ConfigureAwait(false);
+        await StartDownloadAsync(filename).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -290,8 +258,8 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     public virtual void CancelAsync()
     {
         GlobalCancellationTokenSource?.Cancel(true);
-        Resume();
         Status = DownloadStatus.Stopped;
+        Resume();
     }
 
     /// <summary>
@@ -327,7 +295,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// Clears the current download operation, including cancellation and disposal of resources.
     /// </summary>
     /// <returns>A task that represents the asynchronous clear operation.</returns>
-    public virtual async Task Clear()
+    public virtual async Task ClearAsync()
     {
         try
         {
@@ -365,10 +333,11 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <returns>A task that represents the asynchronous initialization operation.</returns>
     protected async Task InitialDownloader(CancellationToken cancellationToken, params string[] addresses)
     {
-        await Clear().ConfigureAwait(false);
+        await ClearAsync().ConfigureAwait(false);
         Status = DownloadStatus.Created;
         GlobalCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         TaskCompletion = new TaskCompletionSource<AsyncCompletedEventArgs>();
+        Client = new SocketClient(Options.RequestConfiguration);
         RequestInstances = addresses.Select(url => new Request(url, Options.RequestConfiguration)).ToList();
         Package.Urls = RequestInstances.Select(req => req.Address.OriginalString).ToArray();
         ChunkHub = new ChunkHub(Options);
@@ -380,7 +349,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// </summary>
     /// <param name="fileName">The name of the file to save the download as.</param>
     /// <returns>A task that represents the asynchronous download operation.</returns>
-    protected async Task StartDownload(string fileName)
+    protected async Task StartDownloadAsync(string fileName)
     {
         if (!string.IsNullOrWhiteSpace(fileName))
         {
@@ -389,22 +358,22 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
             if (!string.IsNullOrWhiteSpace(dirName))
             {
                 Directory.CreateDirectory(dirName); // ensure the folder is existing
+                await Task.Delay(100).ConfigureAwait(false); // Add a small delay to ensure directory creation is complete
             }
 
+            // Remove file from storage if exists
             if (File.Exists(fileName))
-            {
                 File.Delete(fileName);
-            }
         }
 
-        await StartDownload().ConfigureAwait(false);
+        await StartDownloadAsync().ConfigureAwait(false);
     }
 
     /// <summary>
     /// Starts the download operation.
     /// </summary>
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
-    protected abstract Task<Stream?> StartDownload(bool forceBuildStorage = true);
+    protected abstract Task<Stream?> StartDownloadAsync(bool forceBuildStorage = true);
 
     /// <summary>
     /// Raises the <see cref="DownloadStarted"/> event.
@@ -447,7 +416,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     }
 
     /// <summary>
-    /// Raises the <see cref="ChunkDownloadProgressChanged"/> and <see cref="DownloadProgressChanged"/> events.
+    /// Raises the <see cref="ChunkDownloadProgressChanged"/> and <see cref="DownloadProgressChanged"/> events in a unified way.
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
     /// <param name="e">The event arguments for the download progress changed event.</param>
@@ -520,7 +489,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// </summary>
     public void Dispose()
     {
-        Clear().Wait();
+        ClearAsync().Wait();
     }
 
     /// <summary>
@@ -528,6 +497,6 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// </summary>
     public virtual async ValueTask DisposeAsync()
     {
-        await Clear().ConfigureAwait(false);
+        await ClearAsync().ConfigureAwait(false);
     }
 }

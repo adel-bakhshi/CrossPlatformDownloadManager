@@ -50,7 +50,7 @@ public class ChunkHub
     private void Validate(DownloadPackage package)
     {
         _chunkCount = _config.ChunkCount;
-        _startOffset = _config.RangeLow;
+        _startOffset = 0;
 
         if (_startOffset < 0)
         {
@@ -82,7 +82,7 @@ public class ChunkHub
         return new(start, end)
         {
             Id = id,
-            MaxTryAgainOnFailover = _config.MaxTryAgainOnFailover,
+            MaxTryAgainOnFailure = _config.MaxTryAgainOnFailure,
             Timeout = _config.Timeout,
             MaxRestartWithoutClearTempFile = _config.MaxRestartWithoutClearTempFile
         };

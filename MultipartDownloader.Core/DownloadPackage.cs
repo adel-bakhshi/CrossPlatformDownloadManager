@@ -126,6 +126,7 @@ public class DownloadPackage : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         Clear();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -134,9 +135,8 @@ public class DownloadPackage : IDisposable, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         Clear();
-        await ValueTask.FromResult(true);
-
         GC.SuppressFinalize(this);
+        await ValueTask.FromResult(true);
     }
 
     /// <summary>

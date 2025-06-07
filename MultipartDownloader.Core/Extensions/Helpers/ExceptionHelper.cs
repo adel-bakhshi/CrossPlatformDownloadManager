@@ -7,15 +7,37 @@ namespace MultipartDownloader.Core.Extensions.Helpers;
 
 internal static class ExceptionHelper
 {
+    internal static bool IsRedirectError(this Exception error)
+    {
+        return error is HttpRequestException { StatusCode: not null } responseException && responseException.StatusCode.Value.IsRedirectStatus();
+    }
+
+    internal static bool IsRedirectStatus(this HttpStatusCode statusCode)
+    {
+        return statusCode is
+            HttpStatusCode.Moved or
+            HttpStatusCode.Redirect or
+            HttpStatusCode.RedirectMethod or
+            HttpStatusCode.TemporaryRedirect or
+            HttpStatusCode.PermanentRedirect;
+    }
+
+    internal static bool IsRequestedRangeNotSatisfiable(this Exception error)
+    {
+        return error is HttpRequestException { StatusCode: HttpStatusCode.RequestedRangeNotSatisfiable };
+    }
+
     internal static bool IsMomentumError(this Exception error)
     {
-        if (error.HasSource("System.Net.Http", "System.Net.Sockets", "System.Net.Security"))
+        if (error is HttpRequestException { StatusCode: HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway })
+            return false;
+
+        if (error is HttpRequestException { StatusCode: HttpStatusCode.Ambiguous or HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout })
             return true;
 
-        if (error.HasTypeOf(typeof(WebException), typeof(SocketException)))
-            return true;
-
-        return false;
+        return error.IsRedirectError()
+            || error.HasSource("System.Net.Http", "System.Net.Sockets", "System.Net.Security")
+            || error.HasTypeOf(typeof(WebException), typeof(SocketException));
     }
 
     internal static bool HasTypeOf(this Exception exp, params Type[] types)
@@ -40,11 +62,8 @@ internal static class ExceptionHelper
         Exception? innerException = exp;
         while (innerException != null)
         {
-            foreach (string source in sources)
-            {
-                if (string.Equals(innerException.Source, source, StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
+            if (sources.Any(source => string.Equals(innerException.Source, source, StringComparison.OrdinalIgnoreCase)))
+                return true;
 
             innerException = innerException.InnerException;
         }
@@ -56,11 +75,10 @@ internal static class ExceptionHelper
     /// Sometime a server get certificate validation error
     /// https://stackoverflow.com/questions/777607/the-remote-certificate-is-invalid-according-to-the-validation-procedure-using
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="certificate"></param>
-    /// <param name="chain"></param>
-    /// <param name="sslPolicyErrors"></param>
-    internal static bool CertificateValidationCallBack(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
+    internal static bool CertificateValidationCallBack(object sender,
+        X509Certificate certificate,
+        X509Chain chain,
+        SslPolicyErrors sslPolicyErrors)
     {
         // If the certificate is a valid, signed certificate, return true.
         if (sslPolicyErrors == SslPolicyErrors.None)
@@ -97,10 +115,8 @@ internal static class ExceptionHelper
             // for default Exchange server installations, so return true.
             return true;
         }
-        else
-        {
-            // In all other cases, return false.
-            return false;
-        }
+
+        // In all other cases, return false.
+        return false;
     }
 }

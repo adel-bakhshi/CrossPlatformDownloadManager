@@ -124,13 +124,13 @@ internal class Download : IDownload
 
     public async ValueTask DisposeAsync()
     {
-        await _downloadService.Clear().ConfigureAwait(false);
+        await _downloadService.ClearAsync().ConfigureAwait(false);
         Package = null;
     }
 
     public void Dispose()
     {
-        _downloadService.Clear().Wait();
+        _downloadService.ClearAsync().Wait();
         Package = null;
     }
 }

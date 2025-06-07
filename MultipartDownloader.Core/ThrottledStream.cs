@@ -20,10 +20,7 @@ internal class ThrottledStream : Stream
     public ThrottledStream(Stream baseStream, long bandwidthLimit)
     {
         if (bandwidthLimit < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(bandwidthLimit),
-                bandwidthLimit, "The maximum number of bytes per second can't be negative.");
-        }
+            throw new ArgumentOutOfRangeException(nameof(bandwidthLimit), bandwidthLimit, "The maximum number of bytes per second can't be negative.");
 
         _baseStream = baseStream ?? throw new ArgumentNullException(nameof(baseStream));
         BandwidthLimit = bandwidthLimit;
@@ -92,7 +89,7 @@ internal class ThrottledStream : Stream
         CancellationToken cancellationToken)
     {
         await ThrottleAsync(count).ConfigureAwait(false);
-        return await _baseStream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+        return await _baseStream.ReadAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -106,7 +103,7 @@ internal class ThrottledStream : Stream
     public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         await ThrottleAsync(count).ConfigureAwait(false);
-        await _baseStream.WriteAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+        await _baseStream.WriteAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);
     }
 
     public override void Close()

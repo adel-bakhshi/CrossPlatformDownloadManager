@@ -4,7 +4,7 @@ using MultipartDownloader.Core.CustomExceptions;
 using MultipartDownloader.Core.Enums;
 using MultipartDownloader.Core.Extensions.Helpers;
 using System.ComponentModel;
-using System.Net;
+using System.Net.Http.Headers;
 
 namespace MultipartDownloader.Core;
 
@@ -15,6 +15,7 @@ internal class ChunkDownloader
     private readonly int _timeoutIncrement = 10;
     private ThrottledStream? _sourceStream;
     private MemoryBufferedStream? _storage;
+    private readonly SocketClient _client;
 
     internal Chunk Chunk { get; set; }
 
@@ -22,10 +23,11 @@ internal class ChunkDownloader
 
     public event EventHandler<ChunkDownloadRestartedEventArgs>? DownloadRestarted;
 
-    public ChunkDownloader(Chunk chunk, DownloadConfiguration config, ILogger? logger = null)
+    public ChunkDownloader(Chunk chunk, DownloadConfiguration config, SocketClient client, ILogger? logger = null)
     {
         Chunk = chunk;
         _configuration = config;
+        _client = client;
         _logger = logger;
         _configuration.PropertyChanged += ConfigurationPropertyChanged;
     }
@@ -42,23 +44,30 @@ internal class ChunkDownloader
             _storage.MaxMemoryBuffer = _configuration.MaximumMemoryBufferBytesPerChunk;
     }
 
-    public async Task<Chunk> Download(Request downloadRequest, PauseToken pause, CancellationToken cancelToken)
+    public async ValueTask<Chunk> DownloadAsync(Request downloadRequest, PauseToken pause, CancellationToken cancelToken)
     {
         try
         {
-            _logger?.LogDebug($"Starting download the chunk {Chunk.Id}");
-            await DownloadChunk(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+            _logger?.LogDebug($"Starting download the chunk {Chunk.Id}.");
+            await DownloadChunkAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
             return Chunk;
         }
-        catch (TaskCanceledException error) // when stream reader timeout occurred
+        catch (TaskCanceledException error) when (!cancelToken.IsCancellationRequested)
         {
-            _logger?.LogError(error, $"Task Canceled on download chunk {Chunk.Id} with retry");
-            return await ContinueWithDelay(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+            // when stream reader timeout occurred
+            _logger?.LogError(error, $"Task time-outed on download chunk {Chunk.Id}. Retry ...");
+            return await ContinueWithDelayAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
         }
-        catch (ObjectDisposedException error) // when stream reader cancel/timeout occurred
+        catch (ObjectDisposedException error) when (!cancelToken.IsCancellationRequested)
         {
-            _logger?.LogError(error, $"Disposed object error on download chunk {Chunk.Id} with retry");
-            return await ContinueWithDelay(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+            // when stream reader cancel/timeout occurred
+            _logger?.LogError(error, $"Disposed object error on download chunk {Chunk.Id}. Retry ...");
+            return await ContinueWithDelayAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+        }
+        catch (HttpRequestException error) when (!cancelToken.IsCancellationRequested && Chunk.CanTryAgainOnFailure())
+        {
+            _logger?.LogError(error, $"HTTP request error on download chunk {Chunk.Id}. Retry ...");
+            return await ContinueWithDelayAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
         }
         catch (DownloadException error) when (error.ErrorCode == DownloadException.FileSizeNotMatchWithChunkLength) // when file size in not match with chunk length
         {
@@ -76,87 +85,77 @@ internal class ChunkDownloader
             }
 
             // Re-request and continue downloading
-            return await ContinueWithDelay(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+            return await ContinueWithDelayAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
         }
-        catch (Exception error) when (Chunk.CanTryAgainOnFailover() && error.IsMomentumError())
+        catch (Exception error) when (!cancelToken.IsCancellationRequested && error.IsMomentumError() && Chunk.CanTryAgainOnFailure())
         {
-            _logger?.LogError(error, $"Error on download chunk {Chunk.Id} with retry");
-            return await ContinueWithDelay(downloadRequest, pause, cancelToken).ConfigureAwait(false);
+            _logger?.LogError(error, $"Error on download chunk {Chunk.Id}. Retry ...");
+            return await ContinueWithDelayAsync(downloadRequest, pause, cancelToken).ConfigureAwait(false);
         }
         catch (Exception error)
         {
+            cancelToken.ThrowIfCancellationRequested();
             // Can't handle this exception
-            _logger?.LogCritical(error, $"Fatal error on download chunk {Chunk.Id}");
+            _logger?.LogCritical(error, $"Fatal error on download chunk {Chunk.Id}.");
             throw;
-        }
-        finally
-        {
-            _logger?.LogDebug($"Exit from download method of the chunk {Chunk.Id}");
-            await Task.Yield();
         }
     }
 
-    private async Task<Chunk> ContinueWithDelay(Request request, PauseToken pause, CancellationToken cancelToken)
+    private async ValueTask<Chunk> ContinueWithDelayAsync(Request request, PauseToken pause, CancellationToken cancelToken)
     {
+        if (cancelToken.IsCancellationRequested)
+            return Chunk;
+
         _logger?.LogDebug($"ContinueWithDelay of the chunk {Chunk.Id}");
-        await request.ThrowIfIsNotSupportDownloadInRange().ConfigureAwait(false);
+        await _client.ThrowIfIsNotSupportDownloadInRange(request).ConfigureAwait(false);
         await Task.Delay(Chunk.Timeout, cancelToken).ConfigureAwait(false);
         // Increasing reading timeout to reduce stress and conflicts
         Chunk.Timeout += _timeoutIncrement;
         // re-request and continue downloading
-        return await Download(request, pause, cancelToken).ConfigureAwait(false);
+        return await DownloadAsync(request, pause, cancelToken).ConfigureAwait(false);
     }
 
-    private async Task DownloadChunk(Request downloadRequest, PauseToken pauseToken, CancellationToken cancelToken)
+    private async ValueTask DownloadChunkAsync(Request request, PauseToken pauseToken, CancellationToken cancelToken)
     {
-        cancelToken.ThrowIfCancellationRequested();
-        _logger?.LogDebug($"DownloadChunk of the chunk {Chunk.Id}");
-        if (!Chunk.IsDownloadCompleted())
-        {
-            // Open or create temp stream for saving chunk data
-            _storage = new MemoryBufferedStream(Chunk.TempFilePath, _configuration.MaximumMemoryBufferBytesPerChunk, Chunk.FilePosition);
-            // Sync storage with chunk position
-            SyncPositionWithStorage();
+        if (cancelToken.IsCancellationRequested || Chunk.IsDownloadCompleted())
+            return;
 
-            HttpWebRequest request = downloadRequest.GetRequest();
-            SetRequestRange(request);
-            using var downloadResponse = await request.GetResponseAsync().ConfigureAwait(false) as HttpWebResponse;
-            if (downloadResponse?.StatusCode == HttpStatusCode.OK ||
-                downloadResponse?.StatusCode == HttpStatusCode.PartialContent ||
-                downloadResponse?.StatusCode == HttpStatusCode.Created ||
-                downloadResponse?.StatusCode == HttpStatusCode.Accepted ||
-                downloadResponse?.StatusCode == HttpStatusCode.ResetContent)
-            {
-                _logger?.LogDebug($"DownloadChunk of the chunk {Chunk.Id} with response status: {downloadResponse.StatusCode}");
-                _configuration.RequestConfiguration.CookieContainer = request.CookieContainer;
-                await using Stream responseStream = downloadResponse.GetResponseStream();
-                await using (_sourceStream = new ThrottledStream(responseStream, _configuration.MaximumSpeedPerChunk))
-                {
-                    await ReadStream(_sourceStream, pauseToken, cancelToken).ConfigureAwait(false);
-                }
-            }
-            else
-            {
-                throw new WebException($"Download response status of the chunk {Chunk.Id} was " + $"{downloadResponse?.StatusCode}: " + downloadResponse?.StatusDescription);
-            }
+        _logger?.LogDebug($"Memory buffered stream created for chunk {Chunk.Id}.");
+        // Dispose the storage if it is not null
+        if (_storage != null)
+        {
+            await _storage.DisposeAsync();
+            _storage = null;
         }
+
+        // Open or create temp stream for saving chunk data
+        _storage = new MemoryBufferedStream(Chunk.TempFilePath, _configuration.MaximumMemoryBufferBytesPerChunk, Chunk.FilePosition);
+        // Sync storage with chunk position
+        SyncPositionWithStorage();
+
+        _logger?.LogDebug($"DownloadChunk of the chunk {Chunk.Id}.");
+        var requestMsg = request.GetRequest();
+        SetRequestRange(requestMsg);
+        using var responseMsg = await _client.SendRequestAsync(requestMsg, cancelToken).ConfigureAwait(false);
+
+        _logger?.LogDebug($"Downloading the chunk {Chunk.Id} " + $"with response status code: {responseMsg.StatusCode}");
+        await using var responseStream = await responseMsg.Content.ReadAsStreamAsync(cancelToken).ConfigureAwait(false);
+
+        _sourceStream = new ThrottledStream(responseStream, _configuration.MaximumSpeedPerChunk);
+        await ReadStreamAsync(_sourceStream, pauseToken, cancelToken).ConfigureAwait(false);
+        await _sourceStream.DisposeAsync();
     }
 
-    private void SetRequestRange(HttpWebRequest request)
+    private void SetRequestRange(HttpRequestMessage request)
     {
         long startOffset = Chunk.Start + Chunk.Position;
 
-        // has limited range
-        if (Chunk.End > 0 && (_configuration.ChunkCount > 1 || Chunk.Position > 0 || _configuration.RangeDownload))
-        {
-            if (startOffset < Chunk.End)
-                request.AddRange(startOffset, Chunk.End);
-            else
-                request.AddRange(startOffset);
-        }
+        // Set the range of the content
+        if (Chunk.End > 0 && startOffset < Chunk.End && (_configuration.ChunkCount > 1 || Chunk.Position > 0))
+            request.Headers.Range = new RangeHeaderValue(startOffset, Chunk.End);
     }
 
-    internal async Task ReadStream(Stream stream, PauseToken pauseToken, CancellationToken cancelToken)
+    internal async Task ReadStreamAsync(Stream stream, PauseToken pauseToken, CancellationToken cancelToken)
     {
         int readSize = 1;
         CancellationToken? innerToken = null;

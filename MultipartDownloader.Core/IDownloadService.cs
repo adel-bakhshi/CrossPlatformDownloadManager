@@ -178,7 +178,7 @@ public interface IDownloadService
     /// Clears any data related to the current download operation.
     /// </summary>
     /// <returns>A Task object that represents the asynchronous clearing operation.</returns>
-    Task Clear();
+    Task ClearAsync();
 
     /// <summary>
     /// Add logger class to log the Downloader events

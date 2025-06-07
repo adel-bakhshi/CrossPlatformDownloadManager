@@ -12,47 +12,47 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// Logger instance for logging messages.
     /// </summary>
-    protected ILogger? Logger;
+    protected ILogger? Logger { get; set; }
 
     /// <summary>
     /// Semaphore to control parallel downloads.
     /// </summary>
-    protected SemaphoreSlim ParallelSemaphore;
+    protected SemaphoreSlim? ParallelSemaphore { get; set; }
 
     /// <summary>
     /// Semaphore to ensure single instance operations.
     /// </summary>
-    protected readonly SemaphoreSlim SingleInstanceSemaphore = new(1, 1);
+    protected SemaphoreSlim SingleInstanceSemaphore { get; } = new(1, 1);
 
     /// <summary>
     /// Global cancellation token source for managing download cancellation.
     /// </summary>
-    protected CancellationTokenSource GlobalCancellationTokenSource;
+    protected CancellationTokenSource? GlobalCancellationTokenSource { get; set; }
 
     /// <summary>
     /// Task completion source for managing asynchronous operations.
     /// </summary>
-    protected TaskCompletionSource<AsyncCompletedEventArgs>? TaskCompletion;
+    protected TaskCompletionSource<AsyncCompletedEventArgs>? TaskCompletion { get; set; }
 
     /// <summary>
     /// Pause token source for managing download pausing.
     /// </summary>
-    protected readonly PauseTokenSource PauseTokenSource;
+    protected PauseTokenSource PauseTokenSource { get; }
 
     /// <summary>
     /// Chunk hub for managing download chunks.
     /// </summary>
-    protected ChunkHub ChunkHub;
+    protected ChunkHub? ChunkHub { get; set; }
 
     /// <summary>
     /// List of request instances for download operations.
     /// </summary>
-    protected List<Request> RequestInstances;
+    protected List<Request> RequestInstances { get; set; } = [];
 
     /// <summary>
     /// Bandwidth tracker for download speed calculations.
     /// </summary>
-    protected readonly Bandwidth Bandwidth;
+    protected Bandwidth Bandwidth { get; }
 
     /// <summary>
     /// Configuration options for the download service.
@@ -91,42 +91,42 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// The Socket client for the download service.
     /// </summary>
-    protected SocketClient Client { get; private set; }
+    protected SocketClient? Client { get; private set; }
 
     /// <summary>
     /// Event triggered when the download file operation is completed.
     /// </summary>
-    public event EventHandler<AsyncCompletedEventArgs> DownloadFileCompleted;
+    public event EventHandler<AsyncCompletedEventArgs>? DownloadFileCompleted;
 
     /// <summary>
     /// Event triggered when the download progress changes.
     /// </summary>
-    public event EventHandler<CustomEventArgs.DownloadProgressChangedEventArgs> DownloadProgressChanged;
+    public event EventHandler<DownloadProgressChangedEventArgs>? DownloadProgressChanged;
 
     /// <summary>
     /// Event triggered when the progress of a chunk download changes.
     /// </summary>
-    public event EventHandler<CustomEventArgs.DownloadProgressChangedEventArgs> ChunkDownloadProgressChanged;
+    public event EventHandler<DownloadProgressChangedEventArgs>? ChunkDownloadProgressChanged;
 
     /// <summary>
     /// Event triggered when the download operation starts.
     /// </summary>
-    public event EventHandler<DownloadStartedEventArgs> DownloadStarted;
+    public event EventHandler<DownloadStartedEventArgs>? DownloadStarted;
 
     /// <summary>
     /// Event triggered when the merge operation starts.
     /// </summary>
-    public event EventHandler<MergeStartedEventArgs> MergeStarted;
+    public event EventHandler<MergeStartedEventArgs>? MergeStarted;
 
     /// <summary>
     /// Event triggered when the merge operation progress changed.
     /// </summary>
-    public event EventHandler<MergeProgressChangedEventArgs> MergeProgressChanged;
+    public event EventHandler<MergeProgressChangedEventArgs>? MergeProgressChanged;
 
     /// <summary>
     /// Event triggered when a chunk starts downloading again from the beginning for some reason.
     /// </summary>
-    public event EventHandler<ChunkDownloadRestartedEventArgs> ChunkDownloadRestarted;
+    public event EventHandler<ChunkDownloadRestartedEventArgs>? ChunkDownloadRestarted;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AbstractDownloadService"/> class with the specified options.
@@ -247,7 +247,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     public virtual async Task DownloadFileTaskAsync(string[] urls, DirectoryInfo folder, CancellationToken cancellationToken = default)
     {
         await InitialDownloader(cancellationToken, urls).ConfigureAwait(false);
-        var name = await Client.SetRequestFileNameAsync(RequestInstances[0]).ConfigureAwait(false);
+        var name = await Client!.SetRequestFileNameAsync(RequestInstances[0]).ConfigureAwait(false);
         var filename = Path.Combine(folder.FullName, name);
         await StartDownloadAsync(filename).ConfigureAwait(false);
     }
@@ -255,7 +255,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// Cancels the current download operation.
     /// </summary>
-    public virtual void CancelAsync()
+    public virtual void Cancel()
     {
         GlobalCancellationTokenSource?.Cancel(true);
         Status = DownloadStatus.Stopped;
@@ -268,7 +268,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <returns>A task that represents the asynchronous cancellation operation.</returns>
     public virtual async Task CancelTaskAsync()
     {
-        CancelAsync();
+        Cancel();
         if (TaskCompletion != null)
             await TaskCompletion.Task.ConfigureAwait(false);
     }
@@ -420,14 +420,14 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
     /// <param name="e">The event arguments for the download progress changed event.</param>
-    protected void OnChunkDownloadProgressChanged(object? sender, CustomEventArgs.DownloadProgressChangedEventArgs e)
+    protected void OnChunkDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
     {
         if (e.ReceivedBytesSize > Package.TotalFileSize)
             Package.TotalFileSize = e.ReceivedBytesSize;
 
         Bandwidth.CalculateSpeed(e.ProgressedByteSize);
-        Options.ActiveChunks = Options.ParallelCount - ParallelSemaphore.CurrentCount;
-        var totalProgressArg = new CustomEventArgs.DownloadProgressChangedEventArgs(nameof(DownloadService))
+        Options.ActiveChunks = Options.ParallelCount - ParallelSemaphore!.CurrentCount;
+        var totalProgressArg = new DownloadProgressChangedEventArgs(nameof(DownloadService))
         {
             TotalBytesToReceive = Package.TotalFileSize,
             ReceivedBytesSize = Package.ReceivedBytesSize,
@@ -490,6 +490,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     public void Dispose()
     {
         ClearAsync().Wait();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -498,5 +499,6 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     public virtual async ValueTask DisposeAsync()
     {
         await ClearAsync().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
     }
 }

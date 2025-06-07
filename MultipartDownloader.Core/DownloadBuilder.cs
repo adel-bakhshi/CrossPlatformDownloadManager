@@ -8,7 +8,7 @@ public class DownloadBuilder
     private string _url = string.Empty;
     private string _directoryPath = string.Empty;
     private string _filename = string.Empty;
-    private DownloadConfiguration _downloadConfiguration;
+    private DownloadConfiguration? _downloadConfiguration;
 
     /// <summary>
     /// Creates a new instance of the <see cref="DownloadBuilder"/> class.
@@ -150,7 +150,7 @@ public class DownloadBuilder
             throw new ArgumentNullException($"{nameof(_url)} has not been declared.");
         }
 
-        return new Download(_url, _directoryPath, _filename, _downloadConfiguration);
+        return new Download(_url, _directoryPath, _filename, _downloadConfiguration!);
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public class DownloadBuilder
     /// <returns>A new <see cref="IDownload"/> instance.</returns>
     public IDownload Build(DownloadPackage package)
     {
-        return new Download(package, _url, _downloadConfiguration);
+        return new Download(package, _url, _downloadConfiguration!);
     }
 
     /// <summary>

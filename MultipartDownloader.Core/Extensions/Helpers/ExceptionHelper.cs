@@ -76,8 +76,8 @@ internal static class ExceptionHelper
     /// https://stackoverflow.com/questions/777607/the-remote-certificate-is-invalid-according-to-the-validation-procedure-using
     /// </summary>
     internal static bool CertificateValidationCallBack(object sender,
-        X509Certificate certificate,
-        X509Chain chain,
+        X509Certificate? certificate,
+        X509Chain? chain,
         SslPolicyErrors sslPolicyErrors)
     {
         // If the certificate is a valid, signed certificate, return true.
@@ -97,7 +97,7 @@ internal static class ExceptionHelper
                         return true;
                     }
 
-                    if (status.Status == X509ChainStatusFlags.UntrustedRoot && certificate.Subject == certificate.Issuer)
+                    if (status.Status == X509ChainStatusFlags.UntrustedRoot && certificate?.Subject == certificate?.Issuer)
                     {
                         // Self-signed certificates with an untrusted root are valid.
                     }

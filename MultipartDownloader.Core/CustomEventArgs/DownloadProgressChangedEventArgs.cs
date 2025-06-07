@@ -59,7 +59,7 @@ public class DownloadProgressChangedEventArgs : EventArgs
     /// This property is filled when the EnableLiveStreaming option is true.
     /// </summary>
     /// <returns>A byte array that indicates the received bytes.</returns>
-    public byte[] ReceivedBytes { get; internal set; }
+    public byte[] ReceivedBytes { get; internal set; } = [];
 
     /// <summary>
     /// Gets the number of chunks being downloaded currently.

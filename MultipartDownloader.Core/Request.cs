@@ -22,7 +22,7 @@ public class Request
     /// <summary>
     /// Gets or sets the file name extracted from the URL.
     /// </summary>
-    public string FileName { get; set; }
+    public string FileName { get; set; } = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Request"/> class with the specified address.

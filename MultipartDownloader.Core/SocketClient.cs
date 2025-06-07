@@ -352,7 +352,7 @@ public partial class SocketClient : IDisposable
                 }
             }
         }
-        catch (Exception) // Catch all exceptions, not just WebException
+        catch // Catch all exceptions, not just WebException
         {
             // No matter in this point
         }

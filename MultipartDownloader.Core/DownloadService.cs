@@ -50,8 +50,8 @@ public class DownloadService : AbstractDownloadService
 
             var firstRequest = RequestInstances[0];
             Logger?.LogDebug("Getting file size from first request");
-            Package.TotalFileSize = await Client.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
-            Package.IsSupportDownloadInRange = await Client.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
+            Package.TotalFileSize = await Client!.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
+            Package.IsSupportDownloadInRange = await Client!.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
             Logger?.LogInformation("File size: {TotalFileSize}, Supports range download: {IsSupportDownloadInRange}", Package.TotalFileSize, Package.IsSupportDownloadInRange);
 
             // Check if we need to rebuild storage
@@ -65,7 +65,7 @@ public class DownloadService : AbstractDownloadService
             }
 
             ValidateBeforeChunking();
-            ChunkHub.SetFileChunks(Package);
+            ChunkHub!.SetFileChunks(Package);
 
             Logger?.LogInformation("Starting download of {FileName} with size {TotalFileSize}", Package.FileName, Package.TotalFileSize);
             OnDownloadStarted(new DownloadStartedEventArgs(Package.FileName, Package.TotalFileSize));
@@ -138,7 +138,7 @@ public class DownloadService : AbstractDownloadService
             await MergeFileWithProgressAsync(finalStream, chunk).ConfigureAwait(false);
 
         // Check if operation is canceled
-        if (GlobalCancellationTokenSource.IsCancellationRequested)
+        if (GlobalCancellationTokenSource!.IsCancellationRequested)
             return;
 
         // Check final size
@@ -183,7 +183,7 @@ public class DownloadService : AbstractDownloadService
         while ((bytesRead = await throttledStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
         {
             // Check if operation is canceled
-            if (GlobalCancellationTokenSource.IsCancellationRequested)
+            if (GlobalCancellationTokenSource!.IsCancellationRequested)
                 break;
 
             // Write bytes to final stream
@@ -326,7 +326,7 @@ public class DownloadService : AbstractDownloadService
                 await Task.WhenAll(batch).ConfigureAwait(false);
 
                 // Check for cancellation after each batch
-                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                if (GlobalCancellationTokenSource!.Token.IsCancellationRequested)
                 {
                     Logger?.LogInformation("Download cancelled during batch processing");
                     return;
@@ -357,7 +357,7 @@ public class DownloadService : AbstractDownloadService
                 await task.ConfigureAwait(false);
 
                 // Check for cancellation after each chunk
-                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                if (GlobalCancellationTokenSource!.Token.IsCancellationRequested)
                 {
                     Logger?.LogInformation("Download cancelled during serial processing");
                     return;
@@ -381,7 +381,7 @@ public class DownloadService : AbstractDownloadService
         for (int i = 0; i < Package.Chunks.Length; i++)
         {
             var request = RequestInstances[i % RequestInstances.Count];
-            yield return DownloadChunk(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource);
+            yield return DownloadChunk(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource!);
         }
     }
 
@@ -398,7 +398,8 @@ public class DownloadService : AbstractDownloadService
         ChunkDownloader chunkDownloader = GetChunkDownloader(chunk);
         chunkDownloader.DownloadProgressChanged += OnChunkDownloadProgressChanged;
         chunkDownloader.DownloadRestarted += OnChunkDownloadRestarted;
-        await ParallelSemaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+        await ParallelSemaphore!.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+
         try
         {
             cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -434,6 +435,6 @@ public class DownloadService : AbstractDownloadService
             chunk.TempFilePath = Path.Combine(Package.TemporarySavePath, fileName);
         }
 
-        return new(chunk, Options, Client, Logger);
+        return new(chunk, Options, Client!, Logger);
     }
 }

@@ -34,42 +34,49 @@ public interface IDownloadService
     /// The event handler is passed an AsyncCompletedEventArgs object that contains
     /// information about the completion status of the operation.
     /// </summary>
-    event EventHandler<AsyncCompletedEventArgs> DownloadFileCompleted;
+    event EventHandler<AsyncCompletedEventArgs>? DownloadFileCompleted;
 
     /// <summary>
     /// Event that is raised periodically during the download operation to report the progress of the download.
     /// The event handler is passed a DownloadProgressChangedEventArgs object that contains
     /// information about the progress of the download, such as the number of bytes downloaded and the total file size.
     /// </summary>
-    event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressChanged;
+    event EventHandler<DownloadProgressChangedEventArgs>? DownloadProgressChanged;
 
     /// <summary>
     /// Event that is raised periodically during the download operation to report the progress of a single chunk download.
     /// The event handler is passed a DownloadProgressChangedEventArgs object that contains
     /// information about the progress of the chunk download, such as the number of bytes downloaded and the total chunk size.
     /// </summary>
-    event EventHandler<DownloadProgressChangedEventArgs> ChunkDownloadProgressChanged;
+    event EventHandler<DownloadProgressChangedEventArgs>? ChunkDownloadProgressChanged;
 
     /// <summary>
     /// Event that is raised when the download operation starts.
     /// The event handler is passed a DownloadStartedEventArgs object that contains
     /// information about the download operation, such as the download URL and the local file path.
     /// </summary>
-    event EventHandler<DownloadStartedEventArgs> DownloadStarted;
+    event EventHandler<DownloadStartedEventArgs>? DownloadStarted;
 
     /// <summary>
     /// Event that is raised periodically during the merge operation to report the progress of merging chunks.
     /// The event handler is passed a MergeProgressChangedEventArgs object that contains
     /// information about the merge operation, such as the merge progress.
     /// </summary>
-    event EventHandler<MergeProgressChangedEventArgs> MergeProgressChanged;
+    event EventHandler<MergeProgressChangedEventArgs>? MergeProgressChanged;
 
     /// <summary>
     /// Event that is raised when the download operation is totally complete and the downloaded file is ready to be merged.
     /// The event handler is passed a MergeStartedEventArgs object that contains
     /// information about the merge operation, such as the local file path and the total file size.
     /// </summary>
-    event EventHandler<MergeStartedEventArgs> MergeStarted;
+    event EventHandler<MergeStartedEventArgs>? MergeStarted;
+
+    /// <summary>
+    /// Event that is raised when the download operation of a chunk for some reason restarted.
+    /// The event handler is passed a ChunkDownloadRestartedEventArgs object that contains
+    /// information about the restart operation, such as the reason of the restart.
+    /// </summary>
+    event EventHandler<ChunkDownloadRestartedEventArgs>? ChunkDownloadRestarted;
 
     /// <summary>
     /// Asynchronously resume downloads a file and returns a Stream object that contains the downloaded file data.
@@ -152,7 +159,7 @@ public interface IDownloadService
     /// <summary>
     /// Cancels the current download operation asynchronously.
     /// </summary>
-    void CancelAsync();
+    void Cancel();
 
     /// <summary>
     /// Cancels the current download operation asynchronously and returns a Task object that represents the cancellation operation.

@@ -36,7 +36,7 @@ public interface IDownload : IDisposable, IAsyncDisposable
     /// <summary>
     /// Gets the download package containing information about the download.
     /// </summary>
-    public DownloadPackage Package { get; }
+    public DownloadPackage? Package { get; }
 
     /// <summary>
     /// Gets the current status of the download.

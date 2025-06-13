@@ -6,12 +6,13 @@ namespace MultipartDownloader.Core;
 internal class Download : IDownload
 {
     private readonly IDownloadService _downloadService;
-    public string Url { get; }
-    public string Folder { get; }
-    public string Filename { get; }
+
+    public string Url { get; } = string.Empty;
+    public string Folder { get; } = string.Empty;
+    public string Filename { get; } = string.Empty;
     public long DownloadedFileSize => _downloadService?.Package?.ReceivedBytesSize ?? 0;
     public long TotalFileSize => _downloadService?.Package?.TotalFileSize ?? DownloadedFileSize;
-    public DownloadPackage Package { get; private set; }
+    public DownloadPackage? Package { get; private set; }
     public DownloadStatus Status => Package?.Status ?? DownloadStatus.None;
 
     public event EventHandler<DownloadProgressChangedEventArgs> ChunkDownloadProgressChanged

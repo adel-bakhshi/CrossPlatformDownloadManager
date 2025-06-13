@@ -351,6 +351,15 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         _managerWindow = null;
     }
 
+    public string GetTemporaryFileLocation()
+    {
+        var location = Settings.TemporaryFileLocation;
+        if (location.IsStringNullOrEmpty())
+            location = Constants.TempDownloadDirectory;
+
+        return location;
+    }
+
     #region Helpers
 
     private static void RegisterStartup()

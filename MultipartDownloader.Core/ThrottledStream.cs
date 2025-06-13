@@ -8,10 +8,10 @@ internal class ThrottledStream : Stream
     public const long Infinite = long.MaxValue;
     private readonly Stream _baseStream;
     private long _bandwidthLimit;
-    private Bandwidth _bandwidth;
+    private Bandwidth? _bandwidth;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="T:ThrottledStream" /> class.
+    /// Initializes a new instance of the <see cref="T:ThrottledStream" /> class.
     /// </summary>
     /// <param name="baseStream">The base stream.</param>
     /// <param name="bandwidthLimit">The maximum bytes per second that can be transferred through the base stream.</param>
@@ -27,7 +27,7 @@ internal class ThrottledStream : Stream
     }
 
     /// <summary>
-    ///     Bandwidth Limit (in B/s)
+    /// Bandwidth Limit (in B/s)
     /// </summary>
     /// <value>The maximum bytes per second.</value>
     public long BandwidthLimit
@@ -118,7 +118,7 @@ internal class ThrottledStream : Stream
         if (BandwidthLimit > 0 && transmissionVolume > 0)
         {
             // Calculate the time to sleep.
-            _bandwidth.CalculateSpeed(transmissionVolume);
+            _bandwidth!.CalculateSpeed(transmissionVolume);
             await SleepAsync(_bandwidth.PopSpeedRetrieveTime()).ConfigureAwait(false);
         }
     }

@@ -20,7 +20,7 @@ public class TaskStateManagement
     /// Gets the <see cref="AggregateException"/> that caused the task to end prematurely.
     /// If the task completed successfully or has not yet thrown any exceptions, this will return null.
     /// </summary>
-    public AggregateException Exception { get; private set; }
+    public AggregateException? Exception { get; private set; }
 
     /// <summary>
     /// Gets a value that indicates whether the task has completed.
@@ -84,7 +84,7 @@ public class TaskStateManagement
     /// <param name="callerName">The name of the caller method (automatically populated).</param>
     internal void SetException(Exception exp, [CallerMemberName] string? callerName = null)
     {
-        Logger?.LogCritical(exp, $"TaskStateManagement: SetException catch an exception on {callerName}");
+        Logger?.LogCritical(exp, "TaskStateManagement: SetException catch an exception on {CallerName}", callerName);
         Status = TaskStatus.Faulted;
         _exceptions.Enqueue(exp);
         Exception = new AggregateException(_exceptions);

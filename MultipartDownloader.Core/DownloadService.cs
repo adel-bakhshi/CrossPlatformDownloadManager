@@ -50,8 +50,8 @@ public class DownloadService : AbstractDownloadService
 
             var firstRequest = RequestInstances[0];
             Logger?.LogDebug("Getting file size from first request");
-            Package.TotalFileSize = await Client.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
-            Package.IsSupportDownloadInRange = await Client.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
+            Package.TotalFileSize = await Client!.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
+            Package.IsSupportDownloadInRange = await Client!.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
             Logger?.LogInformation("File size: {TotalFileSize}, Supports range download: {IsSupportDownloadInRange}", Package.TotalFileSize, Package.IsSupportDownloadInRange);
 
             // Check if we need to rebuild storage
@@ -65,19 +65,19 @@ public class DownloadService : AbstractDownloadService
             }
 
             ValidateBeforeChunking();
-            ChunkHub.SetFileChunks(Package);
+            ChunkHub!.SetFileChunks(Package);
 
             Logger?.LogInformation("Starting download of {FileName} with size {TotalFileSize}", Package.FileName, Package.TotalFileSize);
             OnDownloadStarted(new DownloadStartedEventArgs(Package.FileName, Package.TotalFileSize));
 
             if (Options.ParallelDownload)
             {
-                Logger?.LogDebug("Starting parallel download with {ChunkCount} chunks", Package.Chunks?.Length);
+                Logger?.LogDebug("Starting parallel download with {ChunkCount} chunks", Package.Chunks.Length);
                 await ParallelDownloadAsync(PauseTokenSource.Token).ConfigureAwait(false);
             }
             else
             {
-                Logger?.LogDebug("Starting serial download with {ChunkCount} chunks", Package.Chunks?.Length);
+                Logger?.LogDebug("Starting serial download with {ChunkCount} chunks", Package.Chunks.Length);
                 await SerialDownloadAsync(PauseTokenSource.Token).ConfigureAwait(false);
             }
 
@@ -107,7 +107,10 @@ public class DownloadService : AbstractDownloadService
             Logger?.LogDebug("Download process completed, semaphore released");
         }
 
-        return Package.GetStorageStream();
+        // When we use the commented code, the stream always be open and the final file will be locked
+        // So, we need to return a null stream to avoid this issue
+        //return Package.GetStorageStream();
+        return Stream.Null;
     }
 
     /// <summary>
@@ -138,7 +141,7 @@ public class DownloadService : AbstractDownloadService
             await MergeFileWithProgressAsync(finalStream, chunk).ConfigureAwait(false);
 
         // Check if operation is canceled
-        if (GlobalCancellationTokenSource.IsCancellationRequested)
+        if (GlobalCancellationTokenSource!.IsCancellationRequested)
             return;
 
         // Check final size
@@ -168,26 +171,26 @@ public class DownloadService : AbstractDownloadService
     /// <summary>
     /// Merges the temp file that belongs to a chunk with the final file and change the progress of merge operation.
     /// </summary>
-    /// <param name="finalStrem">The final file that all chunks merge to it.</param>
-    /// <param name="chunk">The chunk that should be merge with the final file.</param>
+    /// <param name="finalStream">The final file that all chunks merge to it.</param>
+    /// <param name="chunk">The chunk that should be merged with the final file.</param>
     /// <returns>A task that represents the asynchronous download operation.</returns>
-    private async Task MergeFileWithProgressAsync(Stream finalStrem, Chunk chunk)
+    private async Task MergeFileWithProgressAsync(Stream finalStream, Chunk chunk)
     {
         // Open temp stream
         await using var tempStream = new FileStream(chunk.TempFilePath, FileMode.Open, FileAccess.Read);
         await using var throttledStream = new ThrottledStream(tempStream, Options.MaximumBytesPerSecondForMerge);
         var buffer = new byte[8192]; // 8 kilobyte buffer
-        var bytesRead = 0;
+        int bytesRead;
 
         // Read bytes from temp stream
         while ((bytesRead = await throttledStream.ReadAsync(buffer).ConfigureAwait(false)) > 0)
         {
             // Check if operation is canceled
-            if (GlobalCancellationTokenSource.IsCancellationRequested)
+            if (GlobalCancellationTokenSource!.IsCancellationRequested)
                 break;
 
             // Write bytes to final stream
-            await finalStrem.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
+            await finalStream.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
             // Update position
             _mergePosition += bytesRead;
 
@@ -200,7 +203,7 @@ public class DownloadService : AbstractDownloadService
     /// Sends the merge progress changed signal with the given parameters.
     /// </summary>
     /// <param name="copiedBytesSize">The amount of file size that merged.</param>
-    /// <param name="totalBytesSize">The total file size that should be merge.</param>
+    /// <param name="totalBytesSize">The total file size that should be merged.</param>
     private void SendMergeProgressChangedSignal(double copiedBytesSize, double totalBytesSize)
     {
         // Calculate progress percentage
@@ -245,8 +248,8 @@ public class DownloadService : AbstractDownloadService
     /// </summary>
     private void CheckOutputDirectory()
     {
-        Options.ChunkFilesOutputDirectory = Options.ChunkFilesOutputDirectory?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(Options.ChunkFilesOutputDirectory?.Trim()) && !string.IsNullOrEmpty(Package.FileName?.Trim()))
+        Options.ChunkFilesOutputDirectory = Options.ChunkFilesOutputDirectory.Trim();
+        if (string.IsNullOrEmpty(Options.ChunkFilesOutputDirectory.Trim()) && !string.IsNullOrEmpty(Package.FileName.Trim()))
         {
             var directory = Path.GetDirectoryName(Package.FileName);
             if (!string.IsNullOrEmpty(directory))
@@ -256,7 +259,7 @@ public class DownloadService : AbstractDownloadService
         if (string.IsNullOrEmpty(Options.ChunkFilesOutputDirectory))
             throw DownloadException.CreateDownloadException(DownloadException.ChunkFilesDirectoryIsNotValid);
 
-        var fileName = Path.GetFileNameWithoutExtension(Package.FileName) ?? Guid.NewGuid().ToString();
+        var fileName = Path.GetFileNameWithoutExtension(Package.FileName);
         var temporaryPath = Path.Combine(Options.ChunkFilesOutputDirectory, fileName);
         if (Directory.Exists(Package.TemporarySavePath) && Directory.GetFiles(Package.TemporarySavePath, $"{fileName}.*.tmp").Length > 0)
             return;
@@ -326,7 +329,7 @@ public class DownloadService : AbstractDownloadService
                 await Task.WhenAll(batch).ConfigureAwait(false);
 
                 // Check for cancellation after each batch
-                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                if (GlobalCancellationTokenSource!.Token.IsCancellationRequested)
                 {
                     Logger?.LogInformation("Download cancelled during batch processing");
                     return;
@@ -357,7 +360,7 @@ public class DownloadService : AbstractDownloadService
                 await task.ConfigureAwait(false);
 
                 // Check for cancellation after each chunk
-                if (GlobalCancellationTokenSource.Token.IsCancellationRequested)
+                if (GlobalCancellationTokenSource!.Token.IsCancellationRequested)
                 {
                     Logger?.LogInformation("Download cancelled during serial processing");
                     return;
@@ -381,7 +384,7 @@ public class DownloadService : AbstractDownloadService
         for (int i = 0; i < Package.Chunks.Length; i++)
         {
             var request = RequestInstances[i % RequestInstances.Count];
-            yield return DownloadChunk(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource);
+            yield return DownloadChunk(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource!);
         }
     }
 
@@ -398,7 +401,8 @@ public class DownloadService : AbstractDownloadService
         ChunkDownloader chunkDownloader = GetChunkDownloader(chunk);
         chunkDownloader.DownloadProgressChanged += OnChunkDownloadProgressChanged;
         chunkDownloader.DownloadRestarted += OnChunkDownloadRestarted;
-        await ParallelSemaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+        await ParallelSemaphore!.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+
         try
         {
             cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -434,6 +438,6 @@ public class DownloadService : AbstractDownloadService
             chunk.TempFilePath = Path.Combine(Package.TemporarySavePath, fileName);
         }
 
-        return new(chunk, Options, Client, Logger);
+        return new(chunk, Options, Client!, Logger);
     }
 }

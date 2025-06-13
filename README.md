@@ -1,3 +1,5 @@
+![CDM Banner](./Assets/Banners/iranian-flag.png)
+
 # 🌐 Cross Platform Download Manager (CDM)
 
 ![CDM Banner](./Assets/Screenshots/banner.png)

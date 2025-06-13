@@ -107,6 +107,16 @@ Since we haven't been able to publish the browser extension on the Chrome Web St
 
 ---
 
+## 🎨 Custom Themes
+
+CDM supports custom themes to personalize your experience. You can:
+
+- Use built-in dark/light themes
+- Create your own custom themes
+- Share themes with the community
+
+For detailed instructions on creating and applying custom themes, see our [Theme Customization Guide](./Assets/MarkDown/THEME_GUIDE.md).
+
 ## ✨ Features & Enhancements
 
 **Cross Platform Download Manager (CDM)** is packed with powerful features designed to enhance your downloading experience:

@@ -1,3 +1,10 @@
+- Version 0.7.0; 2025-06-13
+
+* Technical Updates:
+  - Enhanced Disk Space Checks: Improved logic to handle unknown file sizes and ensure adequate space in both the final destination and temporary file paths, considering already downloaded temporary chunks.
+  - Core Download Library Improvements: Refactored internal logic for better nullability handling and made minor enhancements to chunk merging and resource cleanup.
+  - Temporary File Handling: Delegated temporary file path resolution to Settings and improved Memory buffer operation behavior for seeking and flushing data.
+
 - Version 0.6.0; 2025-05-24
 
 * Technical Updates:

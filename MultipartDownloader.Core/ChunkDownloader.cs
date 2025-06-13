@@ -154,16 +154,16 @@ internal class ChunkDownloader
 
     private void SetRequestRange(HttpRequestMessage request)
     {
-        long startOffset = _chunk.Start + _chunk.Position;
+        var startOffset = _chunk.Start + _chunk.Position;
 
         // Set the range of the content
         if (_chunk.End > 0 && startOffset < _chunk.End && (_configuration.ChunkCount > 1 || _chunk.Position > 0))
             request.Headers.Range = new RangeHeaderValue(startOffset, _chunk.End);
     }
 
-    internal async Task ReadStreamAsync(Stream stream, PauseToken pauseToken, CancellationToken cancelToken)
+    private async Task ReadStreamAsync(Stream stream, PauseToken pauseToken, CancellationToken cancelToken)
     {
-        int readSize = 1;
+        var readSize = 1;
         CancellationToken? innerToken = null;
 
         try
@@ -175,7 +175,7 @@ internal class ChunkDownloader
             {
                 cancelToken.ThrowIfCancellationRequested();
                 await pauseToken.WaitWhilePausedAsync().ConfigureAwait(false);
-                byte[] buffer = new byte[_configuration.BufferBlockSize];
+                var buffer = new byte[_configuration.BufferBlockSize];
                 using var innerCts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
                 innerToken = innerCts.Token;
                 innerCts.CancelAfter(_chunk.Timeout);
@@ -189,6 +189,7 @@ internal class ChunkDownloader
                 readSize = (int)Math.Min(_chunk.EmptyLength, readSize);
                 if (readSize > 0)
                 {
+                    // ReSharper disable once PossiblyMistakenUseOfCancellationToken
                     await _storage!.WriteAsync(buffer, 0, readSize, cancelToken).ConfigureAwait(false);
 
                     _logger?.LogDebug("Write {ReadSize} bytes in the chunk {ChunkId}", readSize, _chunk.Id);
@@ -291,7 +292,7 @@ internal class ChunkDownloader
     /// <summary>
     /// Flushes the temp storage and writes all data that stored in the memory to the storage.
     /// </summary>
-    /// <param name="dispose">Whether the storage should be dispose or not.</param>
+    /// <param name="dispose">Whether the storage should be disposed or not.</param>
     /// <returns>Returns the position of the temp file after release memory and flush storage.</returns>
     private async Task<long> FlushStorageAsync(bool dispose)
     {

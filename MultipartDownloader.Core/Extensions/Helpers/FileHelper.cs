@@ -6,14 +6,10 @@ internal static class FileHelper
     {
         var directory = Path.GetDirectoryName(filename);
         if (string.IsNullOrWhiteSpace(directory))
-        {
             return Stream.Null;
-        }
 
         if (!Directory.Exists(directory))
-        {
             Directory.CreateDirectory(directory);
-        }
 
         return new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete);
     }
@@ -21,9 +17,7 @@ internal static class FileHelper
     public static string GetTempFile(string baseDirectory, string fileExtension)
     {
         if (string.IsNullOrWhiteSpace(baseDirectory))
-        {
             baseDirectory = Path.GetTempPath();
-        }
 
         string filename = Path.Combine(baseDirectory, Guid.NewGuid().ToString("N") + fileExtension);
         CreateFile(filename).Dispose();
@@ -54,10 +48,7 @@ internal static class FileHelper
         {
             long availableFreeSpace = GetAvailableFreeSpaceOnDisk(directory);
             if (availableFreeSpace > 0 && availableFreeSpace < actualNeededSize)
-            {
-                throw new IOException($"There is not enough space on the disk `{directory}` " +
-                                      $"with {availableFreeSpace} bytes");
-            }
+                throw new IOException($"There is not enough space on the disk `{directory}` with {availableFreeSpace} bytes");
         }
     }
 }

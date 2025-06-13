@@ -53,7 +53,7 @@ public class FileDownloader
     /// <summary>
     /// The http client handler.
     /// </summary>
-    private readonly DownloadRequest _checkResumeCapableRequest;
+    private readonly DownloadRequest _downloadRequest;
 
     /// <summary>
     /// Cancellation token source for checking resume capability. 
@@ -138,7 +138,7 @@ public class FileDownloader
     public FileDownloader(DownloadFileViewModel downloadFile)
     {
         _appService = GetAppService();
-        _checkResumeCapableRequest = new DownloadRequest(downloadFile.Url ?? string.Empty);
+        _downloadRequest = new DownloadRequest(downloadFile.Url ?? string.Empty);
 
         DownloadFile = downloadFile;
         DownloadConfiguration = GetDownloadConfiguration();
@@ -630,14 +630,14 @@ public class FileDownloader
             ParallelDownload = true,
             MaximumMemoryBufferBytes = GetMaximumMemoryBufferBytes(),
             ReserveStorageSpaceBeforeStartingDownload = true,
-            ChunkFilesOutputDirectory = GetTemporaryFileLocation(),
-            MaxRestartWithoutClearTempFile = 5,
+            ChunkFilesOutputDirectory = _appService.SettingsService.GetTemporaryFileLocation(),
+            MaxRestartWithoutClearTempFile = 1,
             MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
 
         // If the proxy is not null, set the proxy in the request configuration
-        if (_checkResumeCapableRequest.Proxy != null)
-            configuration.RequestConfiguration.Proxy = _checkResumeCapableRequest.Proxy;
+        if (_downloadRequest.Proxy != null)
+            configuration.RequestConfiguration.Proxy = _downloadRequest.Proxy;
 
         // Return the configuration
         return configuration;
@@ -700,19 +700,6 @@ public class FileDownloader
 
         // Return the limit speed multiplied by the limit unit
         return maximumMemoryBufferBytes * unit;
-    }
-
-    /// <summary>
-    /// Gets the temporary file location for saving the temp download files.
-    /// </summary>
-    /// <returns></returns>
-    private string GetTemporaryFileLocation()
-    {
-        var location = _appService.SettingsService.Settings.TemporaryFileLocation;
-        if (location.IsStringNullOrEmpty())
-            location = Constants.TempDownloadDirectory;
-
-        return location;
     }
 
     /// <summary>
@@ -914,7 +901,7 @@ public class FileDownloader
             // Create a cancellation token source for managing resume capability operation
             _checkResumeCancelToken = new CancellationTokenSource();
             // Check if URL supports download in range
-            DownloadFile.CanResumeDownload = await _checkResumeCapableRequest.CheckSupportsDownloadInRangeAsync(_checkResumeCancelToken.Token).ConfigureAwait(false);
+            DownloadFile.CanResumeDownload = await _downloadRequest.CheckSupportsDownloadInRangeAsync(_checkResumeCancelToken.Token).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

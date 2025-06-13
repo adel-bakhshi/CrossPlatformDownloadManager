@@ -88,7 +88,7 @@ public class MemoryBufferedStream
     /// <param name="initialPosition">The initial position of the stream.</param>
     public MemoryBufferedStream(string filePath, long maxMemoryBuffer, long initialPosition = 0)
     {
-        _writeSemaphore = new SemaphoreSlim(1, 1);
+        _writeSemaphore = new SemaphoreSlim(1);
         _memoryPackets = [];
         _baseStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite) { Position = 0 };
 
@@ -107,7 +107,7 @@ public class MemoryBufferedStream
     /// <param name="initialPosition">The initial position of the stream.</param>
     public MemoryBufferedStream(Stream baseStream, long maxMemoryBuffer, long initialPosition = 0)
     {
-        _writeSemaphore = new SemaphoreSlim(1, 1);
+        _writeSemaphore = new SemaphoreSlim(1);
         _memoryPackets = [];
         _baseStream = baseStream;
         _baseStream.Position = 0;

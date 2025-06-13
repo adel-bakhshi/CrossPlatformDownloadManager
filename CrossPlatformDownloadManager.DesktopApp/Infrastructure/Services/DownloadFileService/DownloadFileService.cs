@@ -1185,7 +1185,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     /// </summary>
     /// <param name="downloadFile">The download file to check.</param>
     /// <returns>Returns true if there is enough space, otherwise false.</returns>
-    private static async Task<bool> CheckDiskSpaceAsync(DownloadFileViewModel downloadFile)
+    private async Task<bool> CheckDiskSpaceAsync(DownloadFileViewModel downloadFile)
     {
         // Make sure save location and file name are not empty
         if (downloadFile.SaveLocation.IsStringNullOrEmpty() || downloadFile.FileName.IsStringNullOrEmpty())
@@ -1213,17 +1213,45 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Make sure size is greater than 0
         if (downloadFile.Size is null or <= 0)
+        {
+            await DialogBoxManager.ShowDangerDialogAsync("Unknown file size",
+                "The size of the file you're trying to download is unknown, so it's not possible to determine how much storage space is required on your hard drive.",
+                DialogButtons.Ok);
+            
             return false;
+        }
 
         // Find the drive where the file is stored and check the free space
         var driveInfo = new DriveInfo(downloadFile.SaveLocation!);
         var hasEnoughSpace = driveInfo.AvailableFreeSpace >= downloadFile.Size!.Value - downloadedSize;
+        if (!hasEnoughSpace)
+        {
+            await DialogBoxManager.ShowDangerDialogAsync("Insufficient disk space",
+                $"There is not enough free space available on the path '{downloadFile.SaveLocation}'.",
+                DialogButtons.Ok);
+            
+            return false;
+        }
+
+        downloadedSize = 0;
+        var tempFileLocation = _settingsService.GetTemporaryFileLocation();
+        var tempDirectory = Path.Combine(tempFileLocation, Path.GetFileNameWithoutExtension(downloadFile.FileName!));
+        if (Directory.Exists(tempDirectory))
+        {
+            var tempFiles = Directory.GetFiles(tempDirectory, "*.tmp");
+            downloadedSize += tempFiles.Select(tempFile => new FileInfo(tempFile)).Select(fileInfo => fileInfo.Length).Sum();
+        }
+
+        driveInfo = new DriveInfo(tempFileLocation);
+        var requiredSpace = downloadFile.Size!.Value - downloadedSize;
+        hasEnoughSpace = driveInfo.AvailableFreeSpace >= requiredSpace;
         if (hasEnoughSpace)
             return true;
 
         // If there is no available space, notify user
         await DialogBoxManager.ShowDangerDialogAsync("Insufficient disk space",
-            $"There is not enough free space available on the path '{downloadFile.SaveLocation}'.",
+            $"There is not enough free space available on the path '{tempFileLocation}'." +
+            $" Please ensure that at least {requiredSpace.ToFileSize()} of free space is available, or change the temporary file storage location from the settings.",
             DialogButtons.Ok);
 
         return false;

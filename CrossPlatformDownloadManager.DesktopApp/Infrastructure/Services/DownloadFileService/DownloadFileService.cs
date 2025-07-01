@@ -966,7 +966,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                         _ = AudioManager.PlayAsync(AppNotificationType.DownloadCompleted);
 
                     // Show complete download dialog when user want's this
-                    if (_settingsService.Settings.ShowCompleteDownloadDialog)
+                    if (_settingsService.Settings.ShowCompleteDownloadDialog && !downloadFile.IsRunningInQueue)
                     {
                         // Run this code on UI thread
                         await Dispatcher.UIThread.InvokeAsync(async () =>
@@ -1005,6 +1005,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     downloadFile.PlayStopSound = true;
                 }
 
+                // Reset is running in queue flag
+                downloadFile.IsRunningInQueue = false;
                 // Get all completed tasks that should run when download file is completed.
                 var completedAsyncTasks = fileDownloader.GetCompletedAsyncTasks();
                 // Check if there is any completed tasks
@@ -1217,7 +1219,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             await DialogBoxManager.ShowDangerDialogAsync("Unknown file size",
                 "The size of the file you're trying to download is unknown, so it's not possible to determine how much storage space is required on your hard drive.",
                 DialogButtons.Ok);
-            
+
             return false;
         }
 
@@ -1229,7 +1231,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             await DialogBoxManager.ShowDangerDialogAsync("Insufficient disk space",
                 $"There is not enough free space available on the path '{downloadFile.SaveLocation}'.",
                 DialogButtons.Ok);
-            
+
             return false;
         }
 
@@ -1298,7 +1300,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     /// <summary>
     /// Handles the duplicate URLs.
-    /// If there is a duplicate URL, based on the application settings, this method handle the duplicate donwload file and change its name of something else.
+    /// If there is a duplicate URL, based on the application settings, this method handle the duplicate download file and change its name of something else.
     /// </summary>
     /// <param name="downloadFile">The download file to handle.</param>
     /// <returns>In some cases, we have to use an existing download file and then return it.</returns>

@@ -1117,6 +1117,19 @@
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
+
+                                            <StackPanel VerticalAlignment="Top"
+                                                        HorizontalAlignment="Stretch"
+                                                        IsVisible="{Binding IsMerging}"
+                                                        Spacing="3">
+                                                <TextBlock Text="{Binding MergeProgress, StringFormat={}Merging - {0}}"
+                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+
+                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
+                                                             Background="{DynamicResource TextColor}"
+                                                             Value="{Binding MergeProgress}"
+                                                             Classes="customProgressBar dataGridProgressBar" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

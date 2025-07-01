@@ -621,6 +621,8 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
         {
             // Get download file by index
             var downloadFile = downloadFiles[index];
+            // Set is running in queue flag to true
+            downloadFile.IsRunningInQueue = true;
             // Add completed tasks for the current download file
             _downloadFileService.AddCompletedTask(downloadFile, DownloadFileFinishedTaskAsync);
             // Subscribe to DownloadPaused event for managing paused files

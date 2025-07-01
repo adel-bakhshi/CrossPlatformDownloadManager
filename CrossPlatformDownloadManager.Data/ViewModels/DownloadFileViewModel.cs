@@ -284,6 +284,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     public bool IsCompletelyStopped { get; set; }
     public bool IsUrlDuplicate { get; set; }
     public bool IsFileNameDuplicate { get; set; }
+    public bool IsRunningInQueue { get; set; }
 
     #endregion
 
@@ -363,7 +364,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     {
         Status = DownloadFileStatus.None;
         LastTryDate = null;
-        DownloadProgress = null;
+        DownloadProgress = 0.0f;
         DownloadedSize = null;
         ElapsedTime = null;
         TimeLeft = null;
@@ -378,6 +379,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         IsCompletelyStopped = false;
         IsUrlDuplicate = false;
         IsFileNameDuplicate = false;
+        IsRunningInQueue = false;
     }
 
     #region Helpers

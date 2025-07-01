@@ -54,14 +54,14 @@ public class AppThemeService : IAppThemeService
         // Set the last theme path
         _lastThemePath = themeFilePath;
         // Log information
-        Log.Information($"{appTheme.ThemeName} theme loaded successfully.");
+        Log.Information("{ThemeName} theme loaded successfully.", appTheme.ThemeName);
     }
 
     public bool ValidateAppTheme(string? json)
     {
         if (json.IsStringNullOrEmpty())
             return false;
-        
+
         var appTheme = ConvertJsonToAppTheme(json);
         return appTheme != null && appTheme.Validate();
     }

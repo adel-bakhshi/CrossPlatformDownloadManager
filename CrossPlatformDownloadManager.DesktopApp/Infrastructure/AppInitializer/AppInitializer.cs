@@ -47,7 +47,7 @@ public class AppInitializer : IAppInitializer
 
             // Initialize AudioManager
             AudioManager.Initialize();
-            
+
             // Load theme data
             _appService.AppThemeService.LoadThemeData();
         }

@@ -1,3 +1,12 @@
+- Version 0.7.1; 2025-07-01
+
+* Technical Updates:
+  - Upgraded to Avalonia 11.3.2: Updated the Avalonia UI framework package to version 11.3.2 for improved performance and stability.
+* Bug Fixes:
+  - Fixed Download List Issues: Resolved problems with files not downloading properly in download lists.
+  - Improved Download List Stability: Addressed various minor issues in download list functionality.
+  - General Fixes: Fixed several other minor bugs and stability improvements.
+
 - Version 0.7.0; 2025-06-13
 
 * Technical Updates:

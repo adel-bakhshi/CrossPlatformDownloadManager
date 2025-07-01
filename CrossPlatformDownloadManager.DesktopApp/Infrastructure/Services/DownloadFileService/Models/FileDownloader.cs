@@ -288,12 +288,15 @@ public class FileDownloader
     /// <param name="showWindow">This parameter indicates whether the created window should be opened and showed to the user or not.</param>
     public void CreateDownloadWindow(bool showWindow = true)
     {
-        var viewModel = new DownloadWindowViewModel(_appService, DownloadFile);
-        DownloadWindow = new DownloadWindow { DataContext = viewModel };
-        DownloadWindow.Closing += DownloadWindowOnClosing;
+        Dispatcher.UIThread.Post(() =>
+        {
+            var viewModel = new DownloadWindowViewModel(_appService, DownloadFile);
+            DownloadWindow = new DownloadWindow { DataContext = viewModel };
+            DownloadWindow.Closing += DownloadWindowOnClosing;
 
-        if (showWindow)
-            Dispatcher.UIThread.Post(() => DownloadWindow.Show());
+            if (showWindow)
+                DownloadWindow.Show();
+        });
     }
 
     /// <summary>

@@ -24,13 +24,13 @@ public class ThemeBrushJsonConverter : JsonConverter
         if (!Enum.TryParse(brushModeValue.Value<byte>().ToString(), out ThemeBrushMode brushMode))
             return null;
 
-        IThemeBrush? themeBrush = brushMode switch
+        IThemeBrush themeBrush = brushMode switch
         {
             ThemeBrushMode.Solid => new ThemeSolidBrush(),
             ThemeBrushMode.Gradient => new ThemeGradientBrush(),
             _ => throw new JsonSerializationException("Theme data is not valid.")
         };
-        
+
         serializer.Populate(jsonObject.CreateReader(), themeBrush);
         return themeBrush;
     }

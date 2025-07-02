@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using Avalonia;
 using Avalonia.Styling;
@@ -11,6 +12,9 @@ using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 
+/// <summary>
+/// Service for managing application themes.
+/// </summary>
 public class AppThemeService : IAppThemeService
 {
     #region Private Fields
@@ -99,7 +103,12 @@ public class AppThemeService : IAppThemeService
             return null;
 
         // Json serializer settings for converting IThemeBrush
-        var settings = new JsonSerializerSettings { Converters = [new ThemeBrushJsonConverter()] };
+        var settings = new JsonSerializerSettings
+        {
+            Converters = [new ThemeBrushJsonConverter()],
+            Culture = CultureInfo.InvariantCulture
+        };
+
         return jsonData.ConvertFromJson<AppTheme?>(settings);
     }
 
@@ -118,8 +127,10 @@ public class AppThemeService : IAppThemeService
         // Validate app theme
         if (!appTheme.Validate())
         {
-            throw new InvalidOperationException(
-                "The theme data appears to be corrupted or invalid. Please try again. If the problem continues, please reach out to the developers for assistance.");
+            const string message = "The theme data appears to be corrupted or invalid. Please try again. " +
+                                   "If the problem continues, please reach out to the developers for assistance.";
+
+            throw new InvalidOperationException(message);
         }
 
         // Load theme data

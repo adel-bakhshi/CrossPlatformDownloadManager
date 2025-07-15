@@ -4,15 +4,28 @@
 
 ![CDM Banner](./Assets/Screenshots/banner.png)
 
-<div align="center">
 
-[![GitHub release](https://img.shields.io/github/v/release/adel-bakhshi/CrossPlatformDownloadManager?style=flat-square)](https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases)
-[![Contributors](https://img.shields.io/github/contributors/adel-bakhshi/CrossPlatformDownloadManager?style=flat-square)](https://github.com/adel-bakhshi/CrossPlatformDownloadManager/graphs/contributors)
-[![License](https://img.shields.io/github/license/adel-bakhshi/CrossPlatformDownloadManager?style=flat-square)](LICENSE)
-[![Issues](https://img.shields.io/github/issues/adel-bakhshi/CrossPlatformDownloadManager?style=flat-square)](https://github.com/adel-bakhshi/CrossPlatformDownloadManager/issues)
-[![Downloads](https://img.shields.io/github/downloads/adel-bakhshi/CrossPlatformDownloadManager/total?style=flat-square)](https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases)
 
-</div>
+<p align="center">
+  <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases">
+    <img src="https://img.shields.io/github/v/release/adel-bakhshi/CrossPlatformDownloadManager?label=Latest%20Release&logo=git&style=plastic&color=6f42c1" alt="Release">
+  </a>
+  <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/adel-bakhshi/CrossPlatformDownloadManager?label=Contributors&logo=github&style=plastic&color=fbca04" alt="Contributors">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/adel-bakhshi/CrossPlatformDownloadManager?label=License&logo=open-source-initiative&style=plastic&color=2cbe4e" alt="License">
+  </a>
+  <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager/issues">
+    <img src="https://img.shields.io/github/issues/adel-bakhshi/CrossPlatformDownloadManager?label=Issues&logo=bugatti&style=plastic&color=f66a0a" alt="Issues">
+  </a>
+  <a href="https://github.com/adel-bakhshi/CrossPlatformDownloadManager/releases">
+    <img src="https://img.shields.io/github/downloads/adel-bakhshi/CrossPlatformDownloadManager/total?label=Total%20Downloads&logo=cloudsmith&style=plastic&color=0e8a16" alt="Downloads">
+  </a>
+</p>
+
+
+
 
 ---
 

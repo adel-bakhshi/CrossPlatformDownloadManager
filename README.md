@@ -91,40 +91,20 @@ CDM lets you customize your experience:
 
 ### ✨ Features & Enhancements
 
-**CDM** brings a complete suite of powerful features to enhance and streamline your downloading experience:
+**CDM** brings a powerful suite of features to enhance your download experience:
 
-- ✅ **Free & Open Source**  
-  100% open under the AGPL-3 license — use it freely and contribute back!
-
-- 💻 **Cross-Platform Support**  
-  Runs seamlessly on **Windows**, **macOS**, and **Linux**.
-
-- ⚡ **Faster Download Speeds**  
-  Supports **multi-threaded downloads** for maximum efficiency.
-
-- 📂 **Download Queues**  
-  Automatically manage multiple downloads in sequence or parallel.
-
-- 🌐 **Browser Extension Integration**  
-  Capture download links from **Chrome**, **Firefox**, and other Chromium-based browsers.
-
-- ⏯️ **Pause & Resume Downloads**  
-  Stop and resume downloads anytime without losing progress.
-
-- 🕹 **Speed Limiting**  
-  Set bandwidth limits to control internet usage.
-
-- 🧠 **User-Friendly Interface**  
-  Simple and clean design — easy for both beginners and pros.
-
-- ⚙️ **Customizable Settings**  
-  Tailor CDM to your preferences with flexible configuration options.
-
-- 🎵 **Wide File Type Support**  
-  Supports videos, music, documents, archives, and much more.
+- ✅ **Free & Open Source:** 100% under AGPL‑3 — use it freely and contribute!
+- 💻 **Cross‑Platform:** Windows, macOS & Linux support.
+- ⚡ **Multi‑Threaded Speeds:** Faster downloads via parallel threads.
+- 📂 **Download Queues:** Manage multiple tasks in sequence or parallel.
+- 🌐 **Browser Extension:** Integrates with Chrome, Firefox, Edge & more.
+- ⏸ **Pause & Resume:** Stop and resume without losing progress.
+- 📶 **Speed Limiting:** Control your bandwidth usage.
+- 🧠 **User‑Friendly UI:** Clean design for both beginners and advanced users.
+- ⚙️ **Customizable Settings:** Tailor CDM to your preferences.
+- 🎵 **Wide File Support:** Videos, music, documents, archives, etc.
 
 > 🔄 *We’re constantly improving CDM based on your feedback — stay tuned for exciting updates and new features!*
-
 
 ---
 

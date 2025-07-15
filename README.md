@@ -89,18 +89,42 @@ CDM lets you customize your experience:
 
 ---
 
-## ✨ Features at a Glance
+### ✨ Features & Enhancements
 
-- ⚙️ **Cross-Platform:** Windows, macOS, Linux
-- 🚀 **High-Speed Downloads:** Multi-threaded support
-- 🧩 **Browser Integration:** Chrome, Firefox, Edge, Brave, etc.
-- ⏸️ **Pause & Resume**
-- ⏬ **Download Queue**
-- 📶 **Speed Limiting**
-- 🧠 **Smart UI:** Beginner-friendly & advanced settings
-- 📁 **Wide File Support:** From videos to archives
-- 🎨 **Theme Customization**
-- 🆓 **100% Free & Open-Source** (AGPL-3.0 License)
+**CDM** brings a complete suite of powerful features to enhance and streamline your downloading experience:
+
+- ✅ **Free & Open Source**  
+  100% open under the AGPL-3 license — use it freely and contribute back!
+
+- 💻 **Cross-Platform Support**  
+  Runs seamlessly on **Windows**, **macOS**, and **Linux**.
+
+- ⚡ **Faster Download Speeds**  
+  Supports **multi-threaded downloads** for maximum efficiency.
+
+- 📂 **Download Queues**  
+  Automatically manage multiple downloads in sequence or parallel.
+
+- 🌐 **Browser Extension Integration**  
+  Capture download links from **Chrome**, **Firefox**, and other Chromium-based browsers.
+
+- ⏯️ **Pause & Resume Downloads**  
+  Stop and resume downloads anytime without losing progress.
+
+- 🕹 **Speed Limiting**  
+  Set bandwidth limits to control internet usage.
+
+- 🧠 **User-Friendly Interface**  
+  Simple and clean design — easy for both beginners and pros.
+
+- ⚙️ **Customizable Settings**  
+  Tailor CDM to your preferences with flexible configuration options.
+
+- 🎵 **Wide File Type Support**  
+  Supports videos, music, documents, archives, and much more.
+
+> 🔄 *We’re constantly improving CDM based on your feedback — stay tuned for exciting updates and new features!*
+
 
 ---
 

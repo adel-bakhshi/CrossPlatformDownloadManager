@@ -811,12 +811,19 @@
                             </MenuItem>
                         </MenuItem>
 
+                        <!-- Help -->
                         <MenuItem Header="Help"
                                   Classes="headerMenuItem">
                             <MenuItem Header="About CDM"
                                       Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding OpenAboutUsWindowCommand}"
+                                      CommandParameter="{Binding $parent[Window]}" />
+                            
+                            <MenuItem Header="Check for updates"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      Command="{Binding CheckForUpdatesCommand}"
                                       CommandParameter="{Binding $parent[Window]}" />
                         </MenuItem>
                     </Menu>

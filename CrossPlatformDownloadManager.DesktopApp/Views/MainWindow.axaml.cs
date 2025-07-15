@@ -111,6 +111,10 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 settingsService.Settings.HasApplicationBeenRunYet = true;
                 await settingsService.SaveSettingsAsync(settingsService.Settings, reloadData: true);
             }
+            
+            // Check for updates
+            if (ViewModel != null)
+                _ = ViewModel.CheckForUpdatesAsync(null);
         }
         catch (Exception ex)
         {

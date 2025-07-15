@@ -93,6 +93,16 @@ public static class Constants
     public const string Email = "adelbakhshi78@yahoo.com";
 
     /// <summary>
+    /// The URL of the CDM website.
+    /// </summary>
+    public const string CdmWebsiteUrl = "https://cdmapp.netlify.app";
+
+    /// <summary>
+    /// The API URL of the CDM website.
+    /// </summary>
+    public const string CdmApiUrl = $"{CdmWebsiteUrl}/api";
+
+    /// <summary>
     /// The file path of the light theme data.
     /// </summary>
     public const string LightThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json";

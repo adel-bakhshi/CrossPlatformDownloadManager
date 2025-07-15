@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Media;
@@ -38,12 +39,12 @@ public class ThemeGradientBrush : IThemeBrush
     {
         var startPoint = StartPoint!
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => double.Parse(p.Trim()))
+            .Select(p => double.Parse(p.Trim(), CultureInfo.InvariantCulture))
             .ToList();
 
         var endPoint = EndPoint!
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => double.Parse(p.Trim()))
+            .Select(p => double.Parse(p.Trim(), CultureInfo.InvariantCulture))
             .ToList();
 
         var gradientBrush = new LinearGradientBrush
@@ -71,7 +72,7 @@ public class ThemeGradientBrush : IThemeBrush
 
         foreach (var point in points)
         {
-            if (!double.TryParse(point, out var value))
+            if (!double.TryParse(point, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
                 return false;
 
             if (value is < 0 or > 1)

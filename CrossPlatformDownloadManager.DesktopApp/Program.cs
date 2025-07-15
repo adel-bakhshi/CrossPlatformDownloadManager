@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using System.Globalization;
 using System.IO;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
@@ -52,6 +53,10 @@ sealed class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
+        // Set the default culture for the application to en-US
+        CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+
         const string fileName = "logs.txt";
         var logFilePath = Path.Combine(Constants.ApplicationDataDirectory, fileName);
 

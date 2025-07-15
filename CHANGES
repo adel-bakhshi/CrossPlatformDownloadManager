@@ -1,3 +1,11 @@
+- Version 0.8.0; 2025-07-15
+
+* New Features:
+  - Added Version Check Feature: Implemented a new feature to check for available updates of the application.
+* Bug Fixes:
+  - Fixed Theme Loading Issues: Resolved problems related to loading themes properly.
+  - General Fixes and Performance Improvements: Addressed various minor bugs and enhanced overall performance.
+
 - Version 0.7.1; 2025-07-01
 
 * Technical Updates:

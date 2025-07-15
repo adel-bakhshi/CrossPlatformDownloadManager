@@ -64,7 +64,7 @@ public class AboutUsWindowViewModel : ViewModelBase
         if (!version.IsStringNullOrEmpty())
             AppVersion = version!;
 
-        CurrentYear = DateTime.Now.Year.ToString();
+        CurrentYear = $"2024 - {DateTime.Now.Year}";
         GithubUrl = Constants.GithubProjectUrl;
         TelegramUrl = Constants.TelegramUrl;
         EmailAddress = $"mailto:{Constants.Email}";

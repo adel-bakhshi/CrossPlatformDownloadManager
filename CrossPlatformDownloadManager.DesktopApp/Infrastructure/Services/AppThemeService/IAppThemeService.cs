@@ -1,5 +1,8 @@
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 
+/// <summary>
+/// Interface for the AppThemeService.
+/// </summary>
 public interface IAppThemeService
 {
     /// <summary>

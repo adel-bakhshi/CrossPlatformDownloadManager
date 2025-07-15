@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -268,6 +270,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand OpenAboutUsWindowCommand { get; }
 
+    public ICommand CheckForUpdatesCommand { get; }
+
     #endregion
 
     public MainWindowViewModel(IAppService appService) : base(appService)
@@ -339,6 +343,7 @@ public class MainWindowViewModel : ViewModelBase
         OpenSettingsMenuItemCommand = ReactiveCommand.CreateFromTask<Window?>(OpenSettingsMenuItemAsync);
         SaveColumnsSettingsCommand = ReactiveCommand.CreateFromTask(SaveColumnsSettingsAsync);
         OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenAboutUsWindowAsync);
+        CheckForUpdatesCommand = ReactiveCommand.CreateFromTask<Window?>(CheckForUpdatesAsync);
     }
 
     private void LoadDownloadQueues()
@@ -544,7 +549,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = Constants.GithubProjectUrl,
+                FileName = Constants.CdmWebsiteUrl,
                 UseShellExecute = true
             };
 
@@ -882,6 +887,60 @@ public class MainWindowViewModel : ViewModelBase
         {
             Log.Error(ex, "An error occurred while trying to open about us window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Checks for new versions of the application.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">When unable to get version from server.</exception>
+    public async Task CheckForUpdatesAsync(Window? owner)
+    {
+        try
+        {
+            // Get new version from server
+            const string url = $"{Constants.CdmApiUrl}/version";
+            using var httpClient = new HttpClient();
+            using var request = await httpClient.GetAsync(url);
+            request.EnsureSuccessStatusCode();
+
+            // Convert response to AppVersion class
+            var response = await request.Content.ReadAsStringAsync();
+            var appVersion = response.ConvertFromJson<AppVersion?>();
+            // Make sure the AppVersion exists
+            if (appVersion == null)
+                throw new InvalidOperationException("Unable to get version from server.");
+
+            // Get the current version of the application
+            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            // Compare the versions
+            if (currentVersion?.Equals($"{appVersion.Version.TrimStart('v')}.0") == true)
+            {
+                // If the versions are the same, show a dialog box to the user and inform them that they are using the latest version
+                if (owner != null)
+                {
+                    await DialogBoxManager.ShowInfoDialogAsync("No Updates Available",
+                        "You are using the latest version of Cross Platform Download Manager.",
+                        DialogButtons.Ok);
+                }
+
+                return;
+            }
+
+            // If the versions are different, show a dialog box to the user and ask if they want to download the new version
+            var result = await DialogBoxManager.ShowInfoDialogAsync("New Version Available",
+                "A new version of Cross Platform Download Manager is available. Would you like to download it now?",
+                DialogButtons.YesNo);
+
+            if (result == DialogResult.No)
+                return;
+
+            // Open website to download the new version
+            await ShareAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to check for updates. Error message: {ErrorMessage}", ex.Message);
         }
     }
 

@@ -31,7 +31,7 @@ public partial class SocketClient : IDisposable
         _client = GetHttpClientWithSocketHandler(config);
     }
 
-    private SocketsHttpHandler GetSocketsHttpHandler(RequestConfiguration config)
+    private static SocketsHttpHandler GetSocketsHttpHandler(RequestConfiguration config)
     {
         SocketsHttpHandler handler = new()
         {
@@ -49,7 +49,7 @@ public partial class SocketClient : IDisposable
         };
 
         // Set up the SslClientAuthenticationOptions for custom certificate validation
-        if (config.ClientCertificates?.Count > 0)
+        if (config.ClientCertificates.Count > 0)
         {
             handler.SslOptions.ClientCertificates = config.ClientCertificates;
         }
@@ -93,46 +93,48 @@ public partial class SocketClient : IDisposable
         client.DefaultRequestHeaders.Clear();
 
         // Add standard headers
-        if (!string.IsNullOrWhiteSpace(config.Accept))
-            client.DefaultRequestHeaders.Add("Accept", config.Accept);
-
-        if (!string.IsNullOrWhiteSpace(config.UserAgent))
-            client.DefaultRequestHeaders.Add("User-Agent", config.UserAgent);
+        AddHeaderIfNotEmpty(client.DefaultRequestHeaders, "Accept", config.Accept);
+        AddHeaderIfNotEmpty(client.DefaultRequestHeaders, "User-Agent", config.UserAgent);
 
         client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
         client.DefaultRequestHeaders.Add("Connection", config.KeepAlive ? "keep-alive" : "close");
         client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
 
         // Add custom headers
-        if (config.Headers?.Count > 0)
+        if (config.Headers.Count > 0)
         {
-            foreach (string key in config.Headers.AllKeys)
-            {
-                if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(config.Headers[key]))
-                    client.DefaultRequestHeaders.Add(key, config.Headers[key]);
-            }
+            foreach (var key in config.Headers.AllKeys.Where(k => !string.IsNullOrWhiteSpace(k.Trim())))
+                AddHeaderIfNotEmpty(client.DefaultRequestHeaders, key, config.Headers[key]);
         }
 
-        // Add referer
+        // Add optional headers
         if (!string.IsNullOrWhiteSpace(config.Referer))
             client.DefaultRequestHeaders.Referrer = new Uri(config.Referer);
 
-        // Add content type
         if (!string.IsNullOrWhiteSpace(config.ContentType))
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(config.ContentType));
 
-        // Add transfer encoding
         if (!string.IsNullOrWhiteSpace(config.TransferEncoding))
         {
             client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue(config.TransferEncoding));
             client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue(config.TransferEncoding));
         }
 
-        // Add expect header
-        if (!string.IsNullOrWhiteSpace(config.Expect))
-            client.DefaultRequestHeaders.Add("Expect", config.Expect);
-
+        AddHeaderIfNotEmpty(client.DefaultRequestHeaders, "Expect", config.Expect);
         return client;
+    }
+
+    /// <summary>
+    /// Adds the header to the request headers if it is not empty.
+    /// </summary>
+    /// <param name="headers">The request headers.</param>
+    /// <param name="key">The key of the header.</param>
+    /// <param name="value">The value of the header.</param>
+    private static void AddHeaderIfNotEmpty(HttpRequestHeaders headers, string key, string? value)
+    {
+        value = value?.Trim();
+        if (!string.IsNullOrWhiteSpace(value))
+            headers.Add(key, value);
     }
 
     /// <summary>
@@ -149,36 +151,32 @@ public partial class SocketClient : IDisposable
                 return;
 
             var requestMsg = request.GetRequest();
-            if (addRange) // to check the content range supporting
-                requestMsg.Headers.Range = new RangeHeaderValue(0, 0); // first byte
+            if (addRange)
+                requestMsg.Headers.Range = new RangeHeaderValue(0, 0);
 
             using var response = await SendRequestAsync(requestMsg, cancelToken).ConfigureAwait(false);
-            // Handle redirects
             if (response.StatusCode.IsRedirectStatus() && request.Configuration.AllowAutoRedirect)
                 return;
 
-            if (response.Headers.Location != null)
+            var redirectUrl = response.Headers.Location?.ToString();
+            if (!string.IsNullOrWhiteSpace(redirectUrl) && !request.Address.ToString().Equals(redirectUrl, StringComparison.OrdinalIgnoreCase))
             {
-                string redirectUrl = response.Headers.Location.ToString();
-                if (!string.IsNullOrWhiteSpace(redirectUrl) && !request.Address.ToString().Equals(redirectUrl, StringComparison.OrdinalIgnoreCase))
-                {
-                    request.Address = new Uri(redirectUrl);
-                    await FetchResponseHeaders(request, true, cancelToken).ConfigureAwait(false);
-                    return;
-                }
+                request.Address = new Uri(redirectUrl);
+                await FetchResponseHeaders(request, true, cancelToken).ConfigureAwait(false);
+                return;
             }
 
             EnsureResponseAddressIsSameWithOrigin(request, response);
         }
-        catch (HttpRequestException exp) when (exp.IsRequestedRangeNotSatisfiable())
+        catch (HttpRequestException exp) when (addRange && exp.IsRequestedRangeNotSatisfiable())
         {
             await FetchResponseHeaders(request, false, cancelToken).ConfigureAwait(false);
         }
         catch (HttpRequestException exp) when (request.Configuration.AllowAutoRedirect
-            && exp.IsRedirectError()
-            && _responseHeaders.TryGetValue("location", out var redirectedUrl)
-            && !string.IsNullOrWhiteSpace(redirectedUrl)
-            && !request.Address.ToString().Equals(redirectedUrl, StringComparison.OrdinalIgnoreCase))
+                                               && exp.IsRedirectError()
+                                               && _responseHeaders.TryGetValue("location", out var redirectedUrl)
+                                               && !string.IsNullOrWhiteSpace(redirectedUrl)
+                                               && !request.Address.ToString().Equals(redirectedUrl, StringComparison.OrdinalIgnoreCase))
         {
             request.Address = new Uri(redirectedUrl);
             await FetchResponseHeaders(request, true, cancelToken).ConfigureAwait(false);
@@ -203,11 +201,11 @@ public partial class SocketClient : IDisposable
     /// </summary>
     /// <param name="response">The web response to get the redirect URL from.</param>
     /// <returns>The redirect URL.</returns>
-    internal static Uri? GetRedirectUrl(HttpResponseMessage response)
+    private static Uri? GetRedirectUrl(HttpResponseMessage response)
     {
         // https://github.com/dotnet/runtime/issues/23264
-        var redirectLocation = response?.Headers.Location;
-        return redirectLocation ?? (response?.RequestMessage?.RequestUri);
+        var redirectLocation = response.Headers.Location;
+        return redirectLocation ?? response.RequestMessage?.RequestUri;
     }
 
     /// <summary>
@@ -222,10 +220,10 @@ public partial class SocketClient : IDisposable
         return GetTotalSizeFromContentLength(_responseHeaders.ToDictionary());
     }
 
-    internal static long GetTotalSizeFromContentLength(Dictionary<string, string> headers)
+    private static long GetTotalSizeFromContentLength(Dictionary<string, string> headers)
     {
         // gets the total size from the content length headers.
-        if (headers.TryGetValue(HeaderContentLengthKey, out var contentLengthText) && long.TryParse(contentLengthText, out long contentLength))
+        if (headers.TryGetValue(HeaderContentLengthKey, out var contentLengthText) && long.TryParse(contentLengthText, out var contentLength))
             return contentLength;
 
         return -1L;
@@ -237,7 +235,7 @@ public partial class SocketClient : IDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask ThrowIfIsNotSupportDownloadInRange(Request request)
     {
-        bool isSupport = await IsSupportDownloadInRange(request).ConfigureAwait(false);
+        var isSupport = await IsSupportDownloadInRange(request).ConfigureAwait(false);
         if (!isSupport)
             throw new NotSupportedException("The downloader cannot continue downloading because the network or server failed to download in range.");
     }
@@ -276,14 +274,14 @@ public partial class SocketClient : IDisposable
     /// </summary>
     /// <param name="headers">The headers to get the total size from.</param>
     /// <returns>The total size of the content.</returns>
-    internal long GetTotalSizeFromContentRange(Dictionary<string, string> headers)
+    private long GetTotalSizeFromContentRange(Dictionary<string, string> headers)
     {
         if (headers.TryGetValue(HeaderContentRangeKey, out var contentRange) && !string.IsNullOrWhiteSpace(contentRange) && _contentRangePattern.IsMatch(contentRange))
         {
-            Match match = _contentRangePattern.Match(contentRange);
-            string size = match.Groups["size"].Value;
+            var match = _contentRangePattern.Match(contentRange);
+            var size = match.Groups["size"].Value;
 
-            return long.TryParse(size, out long totalSize) ? totalSize : -1L;
+            return long.TryParse(size, out var totalSize) ? totalSize : -1L;
         }
 
         return -1L;
@@ -314,47 +312,40 @@ public partial class SocketClient : IDisposable
     /// Gets the file name from the URL disposition header asynchronously.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains the file name.</returns>
-    internal async Task<string?> GetUrlDispositionFilenameAsync(Request request)
+    private async Task<string?> GetUrlDispositionFilenameAsync(Request request)
     {
         try
         {
             // Validate URL format
-            if (request.Address?.IsAbsoluteUri != true)
-                return null;
-
-            // Check if URL has a valid scheme (http/https)
-            if (!request.Address.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) && !request.Address.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            // Check if URL has a valid host
-            if (string.IsNullOrWhiteSpace(request.Address.Host))
-                return null;
-
-            // Check if URL has a valid path
-            if (string.IsNullOrWhiteSpace(request.Address.AbsolutePath)
+            if (request.Address.IsAbsoluteUri != true
+                || !(request.Address.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) || request.Address.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                || string.IsNullOrWhiteSpace(request.Address.Host)
+                || string.IsNullOrWhiteSpace(request.Address.AbsolutePath)
                 || request.Address.AbsolutePath.Equals("/", StringComparison.OrdinalIgnoreCase)
                 || request.Address.Segments.Length <= 1)
             {
                 return null;
             }
 
-            // Only fetch headers if all validations pass
+            // Fetch headers if validations pass
             await FetchResponseHeaders(request, true).ConfigureAwait(false);
+
             if (_responseHeaders.TryGetValue(HeaderContentDispositionKey, out var disposition))
             {
-                var unicodeDisposition = Request.ToUnicode(disposition);
-                if (!string.IsNullOrWhiteSpace(unicodeDisposition))
-                {
-                    var dispositionParts = unicodeDisposition.Split(';');
-                    var filenamePart = dispositionParts.FirstOrDefault(part => part.Trim().StartsWith(FilenameStartPointKey, StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrWhiteSpace(filenamePart))
-                        return filenamePart.Replace(FilenameStartPointKey, "").Replace("\"", "").Trim();
-                }
+                var filename = request
+                    .ToUnicode(disposition)
+                    .Split(';')
+                    .FirstOrDefault(part => part.Trim().StartsWith(FilenameStartPointKey, StringComparison.OrdinalIgnoreCase))?
+                    .Replace(FilenameStartPointKey, "")
+                    .Replace("\"", "")
+                    .Trim();
+
+                return string.IsNullOrWhiteSpace(filename) ? null : filename;
             }
         }
-        catch // Catch all exceptions, not just WebException
+        catch
         {
-            // No matter in this point
+            // Ignore exceptions
         }
 
         return null;
@@ -374,10 +365,10 @@ public partial class SocketClient : IDisposable
 
         // Copy all response headers to our dictionary
         _responseHeaders.Clear();
-        foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers)
+        foreach (var header in response.Headers)
             _responseHeaders.TryAdd(header.Key, header.Value.FirstOrDefault() ?? string.Empty);
 
-        foreach (KeyValuePair<string, IEnumerable<string>> header in response.Content.Headers)
+        foreach (var header in response.Content.Headers)
             _responseHeaders.TryAdd(header.Key, header.Value.FirstOrDefault() ?? string.Empty);
 
         // throws an HttpRequestException error if the response status code isn't within the 200-299 range.
@@ -391,12 +382,12 @@ public partial class SocketClient : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (!_isDisposed)
-        {
-            _isDisposed = true;
-            _client?.Dispose();
-            GC.SuppressFinalize(this);
-        }
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
+        _client.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     #region Generated regex

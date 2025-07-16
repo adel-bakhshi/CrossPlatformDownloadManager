@@ -64,20 +64,25 @@ public class Request
         }
         else if (Configuration.Credentials != null)
         {
-            if (Configuration.Credentials is NetworkCredential networkCredential)
+            switch (Configuration.Credentials)
             {
-                if (!string.IsNullOrWhiteSpace(networkCredential.UserName) &&
-                    !string.IsNullOrWhiteSpace(networkCredential.Password))
+                case NetworkCredential networkCredential:
                 {
-                    request.Headers.Authorization = GetAuthHeader(networkCredential.UserName, networkCredential.Password);
+                    if (!string.IsNullOrWhiteSpace(networkCredential.UserName) && !string.IsNullOrWhiteSpace(networkCredential.Password))
+                        request.Headers.Authorization = GetAuthHeader(networkCredential.UserName, networkCredential.Password);
+
+                    break;
                 }
-            }
-            else if (Configuration.Credentials is CredentialCache credentialCache)
-            {
-                // For CredentialCache, we need to get the credentials for the current URI
-                var creds = credentialCache.GetCredential(Address, "Basic");
-                if (creds != null)
-                    request.Headers.Authorization = GetAuthHeader(creds.UserName, creds.Password);
+
+                case CredentialCache credentialCache:
+                {
+                    // For CredentialCache, we need to get the credentials for the current URI
+                    var credentials = credentialCache.GetCredential(Address, "Basic");
+                    if (credentials != null)
+                        request.Headers.Authorization = GetAuthHeader(credentials.UserName, credentials.Password);
+
+                    break;
+                }
             }
         }
 
@@ -95,8 +100,8 @@ public class Request
     /// <returns>The file name extracted from the URL.</returns>
     public string GetFileNameFromUrl()
     {
-        string filename = Path.GetFileName(Address.LocalPath);
-        int queryIndex = filename.IndexOf('?', StringComparison.Ordinal);
+        var filename = Path.GetFileName(Address.LocalPath);
+        var queryIndex = filename.IndexOf('?', StringComparison.Ordinal);
         if (queryIndex >= 0)
             filename = filename[..queryIndex];
 
@@ -108,7 +113,7 @@ public class Request
     /// </summary>
     /// <param name="otherEncodedText">The text to convert.</param>
     /// <returns>The converted text in 'utf-8' encoding.</returns>
-    public static string ToUnicode(string otherEncodedText)
+    public string ToUnicode(string otherEncodedText)
     {
         // decode 'latin-1' to 'utf-8'
         return Encoding.UTF8.GetString(Encoding.GetEncoding("iso-8859-1").GetBytes(otherEncodedText));

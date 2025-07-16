@@ -226,10 +226,9 @@ public class DownloadService : AbstractDownloadService
             return;
 
         Status = state;
-        var isCancelled = Status == DownloadStatus.Stopped;
         Package.IsSaveComplete = Status == DownloadStatus.Completed && error == null;
         Package.IsSaving = false; // Reset IsSaving flag regardless of status
-        OnDownloadFileCompleted(new AsyncCompletedEventArgs(error, isCancelled, Package));
+        OnDownloadFileCompleted(new AsyncCompletedEventArgs(error, Status == DownloadStatus.Stopped, Package));
     }
 
     /// <summary>
@@ -384,7 +383,7 @@ public class DownloadService : AbstractDownloadService
         for (int i = 0; i < Package.Chunks.Length; i++)
         {
             var request = RequestInstances[i % RequestInstances.Count];
-            yield return DownloadChunk(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource!);
+            yield return DownloadChunkAsync(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource!);
         }
     }
 
@@ -396,9 +395,9 @@ public class DownloadService : AbstractDownloadService
     /// <param name="pause">The pause token for pausing the download.</param>
     /// <param name="cancellationTokenSource">The cancellation token source for cancelling the download.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the downloaded chunk.</returns>
-    private async Task<Chunk> DownloadChunk(Chunk chunk, Request request, PauseToken pause, CancellationTokenSource cancellationTokenSource)
+    private async Task<Chunk> DownloadChunkAsync(Chunk chunk, Request request, PauseToken pause, CancellationTokenSource cancellationTokenSource)
     {
-        ChunkDownloader chunkDownloader = GetChunkDownloader(chunk);
+        var chunkDownloader = GetChunkDownloader(chunk);
         chunkDownloader.DownloadProgressChanged += OnChunkDownloadProgressChanged;
         chunkDownloader.DownloadRestarted += OnChunkDownloadRestarted;
         await ParallelSemaphore!.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);

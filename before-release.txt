@@ -2,5 +2,6 @@
 2. Change the version of the app in PupNet config
 3. Change the CHANGES file
 4. Test on your machine
-5. Push the latest changes with the new tag (new version) to the repo
-6. Create a new release on github
+5. Pull request from develop branch (or other branches) to the main branch
+6. Push the latest changes with the new tag (new version) to the repo
+7. Create a new release on github

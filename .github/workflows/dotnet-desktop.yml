@@ -23,7 +23,7 @@ jobs:
         run: choco install innosetup -y
 
       - name: Install Pupnet Deploy
-        run: dotnet tool install -g KuiperZone.PupNet
+        run: dotnet tool install -g KuiperZone.PupNet --version 1.8.*
 
       - name: Restore Dependencies
         run: dotnet restore
@@ -61,7 +61,7 @@ jobs:
           chmod +x ./appimagetool-x86_64.AppImage
 
       - name: Install Pupnet Deploy
-        run: dotnet tool install -g KuiperZone.PupNet
+        run: dotnet tool install -g KuiperZone.PupNet --version 1.8.*
 
       - name: Restore Dependencies
         run: dotnet restore

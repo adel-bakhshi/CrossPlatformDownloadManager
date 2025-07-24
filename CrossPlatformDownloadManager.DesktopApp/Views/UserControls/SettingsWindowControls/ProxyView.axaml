@@ -27,7 +27,7 @@
             <!-- Disable proxy -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}">
+                    Background="{DynamicResource SecondaryBackgroundColor}">
                 <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
                                HorizontalAlignment="Stretch"
@@ -56,7 +56,7 @@
             <!-- Use system proxy settings -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}">
+                    Background="{DynamicResource SecondaryBackgroundColor}">
                 <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
                                HorizontalAlignment="Stretch"
@@ -86,7 +86,7 @@
             <Border Name="UseCustomProxyBorder"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}">
+                    Background="{DynamicResource SecondaryBackgroundColor}">
                 <StackPanel Orientation="Vertical"
                             Spacing="10">
                     <!-- Title -->
@@ -126,10 +126,10 @@
                             <cc:CustomSelectBox Grid.Column="0"
                                                 ItemsSource="{Binding ProxyTypes}"
                                                 SelectedItem="{Binding ProxySettings.Type}"
-                                                ItemsBackground="{DynamicResource PrimaryColor}"
-                                                OnHoverItemsBackground="{DynamicResource PrimaryColor}"
-                                                OnFocusItemsBackground="{DynamicResource PrimaryColor}"
-                                                OnSelectItemsBackground="{DynamicResource SuccessGradientBrush}">
+                                                ItemsBackground="{DynamicResource MainBackgroundColor}"
+                                                OnHoverItemsBackground="{DynamicResource MainBackgroundColor}"
+                                                OnFocusItemsBackground="{DynamicResource MainBackgroundColor}"
+                                                OnSelectItemsBackground="{DynamicResource SuccessColor}">
                                 <cc:CustomSelectBox.ItemTemplate>
                                     <DataTemplate DataType="x:String">
                                         <TextBlock Text="{Binding}" />
@@ -204,9 +204,9 @@
                                     Spacing="10">
                             <!-- Host -->
                             <cc:CustomTextBox Width="260"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Host"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource ServerSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -214,17 +214,17 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Left"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding ProxySettings.Host}" />
 
                             <!-- Port -->
                             <cc:CustomTextBox Width="90"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Port"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource EthernetSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -232,10 +232,10 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Left"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding ProxySettings.Port}" />
                         </StackPanel>
 
@@ -250,9 +250,9 @@
                                     Spacing="10">
                             <!-- Username -->
                             <cc:CustomTextBox Width="175"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Username"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource UserSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -260,17 +260,17 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Left"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding ProxySettings.Username}" />
 
                             <!-- Password -->
                             <cc:CustomTextBox Width="175"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Password"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource UnlockKeyholeSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -278,10 +278,10 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Left"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding ProxySettings.Password}" />
                         </StackPanel>
 
@@ -294,9 +294,9 @@
 
                         <!-- Username -->
                         <cc:CustomTextBox Width="360"
-                                          Background="{DynamicResource PrimaryColor}"
+                                          Background="{DynamicResource MainBackgroundColor}"
                                           Watermark="Proxy name"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          WatermarkForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource ICursorSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"
@@ -304,10 +304,10 @@
                                           Padding="12, 10"
                                           HorizontalAlignment="Left"
                                           VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                          OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                           BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          BorderBrush="{DynamicResource MainBackgroundColor}"
                                           Text="{Binding ProxySettings.Name}" />
                     </StackPanel>
 
@@ -406,9 +406,9 @@
                                         <Border.Styles>
                                             <Style Selector="Border">
                                                 <Setter Property="Background"
-                                                        Value="{DynamicResource PrimaryColor}" />
+                                                        Value="{DynamicResource MainBackgroundColor}" />
                                                 <Setter Property="BorderBrush"
-                                                        Value="{DynamicResource DangerGradientBrush}" />
+                                                        Value="{DynamicResource DangerColor}" />
                                                 <Setter Property="Margin">
                                                     <Setter.Value>
                                                         <MultiBinding>
@@ -440,13 +440,13 @@
                                                 <!-- Is active styles -->
                                                 <Style Selector="^.isActive">
                                                     <Setter Property="Background"
-                                                            Value="{DynamicResource SuccessGradientBrush}" />
+                                                            Value="{DynamicResource SuccessColor}" />
                                                 </Style>
 
                                                 <!-- Is responsive style -->
                                                 <Style Selector="^.isResponsive">
                                                     <Setter Property="BorderBrush"
-                                                            Value="{DynamicResource SuccessGradientBrush}" />
+                                                            Value="{DynamicResource SuccessColor}" />
                                                 </Style>
                                             </Style>
                                         </Border.Styles>
@@ -464,12 +464,12 @@
                                                 <TextBlock.Styles>
                                                     <Style Selector="TextBlock">
                                                         <Setter Property="Foreground"
-                                                                Value="{DynamicResource TertiaryColor}" />
+                                                                Value="{DynamicResource AccentColor}" />
 
                                                         <!-- Is active styles -->
                                                         <Style Selector="^.isActive">
                                                             <Setter Property="Foreground"
-                                                                    Value="{DynamicResource SelectedAvailableProxyTypeColor}" />
+                                                                    Value="{DynamicResource SelectedProxyColor}" />
                                                         </Style>
                                                     </Style>
                                                 </TextBlock.Styles>

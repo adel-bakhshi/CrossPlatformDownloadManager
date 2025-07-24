@@ -104,7 +104,7 @@
                                         Height="20"
                                         Width="40"
                                         CornerRadius="10"
-                                        Background="{DynamicResource TertiaryColor}"
+                                        Background="{DynamicResource AccentColor}"
                                         BorderBrush="{DynamicResource ThemeBorderMidColor}"
                                         BorderThickness="0" />
 
@@ -114,7 +114,7 @@
                                         Height="20"
                                         Width="40"
                                         CornerRadius="10"
-                                        Background="{DynamicResource PrimaryGradientBrush}"
+                                        Background="{DynamicResource MainColor}"
                                         BorderBrush="{DynamicResource ThemeAccentColor}"
                                         BorderThickness="0" />
 
@@ -130,12 +130,12 @@
                                           Height="20">
 
                                         <Ellipse x:Name="SwitchKnobOn"
-                                                 Fill="{DynamicResource ToggleSwitchCircleColor}"
+                                                 Fill="{DynamicResource ToggleCircleColor}"
                                                  Width="16"
                                                  Height="16" />
 
                                         <Ellipse x:Name="SwitchKnobOff"
-                                                 Fill="{DynamicResource ToggleSwitchCircleColor}"
+                                                 Fill="{DynamicResource ToggleCircleColor}"
                                                  Width="16"
                                                  Height="16" />
                                     </Grid>
@@ -155,22 +155,22 @@
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeBorderHighColor}" />
                     <Setter Property="Background"
-                            Value="{DynamicResource TertiaryColor}" />
+                            Value="{DynamicResource AccentColor}" />
                 </Style>
 
                 <Style Selector="^:pointerover /template/ Ellipse#SwitchKnobOff">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:pointerover /template/ Ellipse#SwitchKnobOn">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:pointerover /template/ Border#SwitchKnobBounds">
                     <Setter Property="Background"
-                            Value="{DynamicResource PrimaryGradientBrush}" />
+                            Value="{DynamicResource MainColor}" />
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeAccentColor2}" />
                 </Style>
@@ -185,14 +185,14 @@
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeBorderHighColor}" />
                     <Setter Property="Background"
-                            Value="{DynamicResource TertiaryColor}" />
+                            Value="{DynamicResource AccentColor}" />
                     <Setter Property="Opacity"
                             Value="0.9" />
                 </Style>
 
                 <Style Selector="^:pressed /template/ Border#SwitchKnobBounds">
                     <Setter Property="Background"
-                            Value="{DynamicResource PrimaryGradientBrush}" />
+                            Value="{DynamicResource MainColor}" />
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeAccentColor3}" />
                     <Setter Property="Opacity"
@@ -201,12 +201,12 @@
 
                 <Style Selector="^:pressed /template/ Ellipse#SwitchKnobOff">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:pressed /template/ Ellipse#SwitchKnobOn">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:pressed /template/ Grid#SwitchAreaGrid">
@@ -226,17 +226,17 @@
                     <Setter Property="BorderBrush"
                             Value="{DynamicResource ThemeForegroundLowColor}" />
                     <Setter Property="Background"
-                            Value="{DynamicResource TertiaryColor}" />
+                            Value="{DynamicResource AccentColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOff">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOn">
                     <Setter Property="Fill"
-                            Value="{DynamicResource ToggleSwitchCircleColor}" />
+                            Value="{DynamicResource ToggleCircleColor}" />
                 </Style>
 
                 <Style Selector="^:disabled /template/ Border#SwitchKnobBounds">

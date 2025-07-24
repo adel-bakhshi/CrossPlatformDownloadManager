@@ -14,7 +14,7 @@
     <!-- Content -->
     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
             Padding="15"
-            Background="{DynamicResource SecondaryColor}">
+            Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid RowDefinitions="Auto, Auto, *">
             <!-- Title -->
             <TextBlock Grid.Row="0"
@@ -32,9 +32,9 @@
                 <!-- Search -->
                 <cc:CustomTextBox Grid.Column="0"
                                   Width="250"
-                                  Background="{DynamicResource PrimaryColor}"
+                                  Background="{DynamicResource MainBackgroundColor}"
                                   Watermark="Search file type"
-                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource MagnifyingGlassSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -42,10 +42,10 @@
                                   Padding="12, 10"
                                   HorizontalAlignment="Left"
                                   VerticalAlignment="Center"
-                                  OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                  OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource PrimaryColor}"
+                                  BorderBrush="{DynamicResource MainBackgroundColor}"
                                   Text="{Binding SearchText}" />
 
                 <!-- Action buttons -->

@@ -64,7 +64,7 @@
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
-                            Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                            Value="{DynamicResource MenuItemHoverColor}" />
                 </Style>
             </Style>
         </Style>
@@ -114,7 +114,7 @@
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                        Value="{DynamicResource MenuItemHoverColor}" />
             </Style>
         </Style>
     </Window.Styles>
@@ -134,12 +134,12 @@
                 <TextBlock Text="Your queues"
                            FontWeight="Bold"
                            Margin="8, 0"
-                           Foreground="{DynamicResource TextColor}" />
+                           Foreground="{DynamicResource MainTextColor}" />
 
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 0" />
 
                 <!-- Queues list -->
@@ -188,7 +188,7 @@
 
                                         <Style Selector="^:pointerover">
                                             <Setter Property="Background"
-                                                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                                    Value="{DynamicResource MenuItemHoverColor}" />
                                         </Style>
                                     </Style>
                                 </Border.Styles>
@@ -203,7 +203,7 @@
                                                Margin="0, 0, 10, 0"
                                                HorizontalAlignment="Stretch"
                                                VerticalAlignment="Center"
-                                               Foreground="{DynamicResource TextColor}" />
+                                               Foreground="{DynamicResource MainTextColor}" />
 
                                     <!-- Action buttons -->
                                     <StackPanel Grid.Column="1"
@@ -222,13 +222,13 @@
                                                         <Setter Property="Data"
                                                                 Value="{DynamicResource PlaySvgIcon}" />
                                                         <Setter Property="Foreground"
-                                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                                                Value="{DynamicResource SuccessColor}" />
 
                                                         <Style Selector="^.isRunning">
                                                             <Setter Property="Data"
                                                                     Value="{DynamicResource PauseSvgIcon}" />
                                                             <Setter Property="Foreground"
-                                                                    Value="{DynamicResource DangerGradientBrush}" />
+                                                                    Value="{DynamicResource DangerColor}" />
                                                         </Style>
                                                     </Style>
                                                 </PathIcon.Styles>
@@ -243,7 +243,7 @@
                                             <PathIcon Width="16"
                                                       Height="16"
                                                       Data="{DynamicResource EllipsisVerticalSvgIcon}"
-                                                      Foreground="{DynamicResource InfoGradientBrush}" />
+                                                      Foreground="{DynamicResource InfoColor}" />
                                         </Button>
                                     </StackPanel>
                                 </Grid>
@@ -255,7 +255,7 @@
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 0" />
 
                 <!-- Add new queue button -->
@@ -320,7 +320,7 @@
 
                                     <Style Selector="^:pointerover">
                                         <Setter Property="Background"
-                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                                Value="{DynamicResource MenuItemHoverColor}" />
                                     </Style>
                                 </Style>
                             </Border.Styles>
@@ -335,7 +335,7 @@
                                            Margin="0, 0, 10, 0"
                                            HorizontalAlignment="Stretch"
                                            VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextColor}" />
+                                           Foreground="{DynamicResource MainTextColor}" />
 
                                 <!-- Stop queue button -->
                                 <Button Grid.Column="1"
@@ -346,7 +346,7 @@
                                     <PathIcon Width="16"
                                               Height="16"
                                               Data="{DynamicResource PauseSvgIcon}"
-                                              Foreground="{DynamicResource DangerGradientBrush}" />
+                                              Foreground="{DynamicResource DangerColor}" />
                                 </Button>
                             </Grid>
                         </Border>
@@ -399,7 +399,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Open file button -->
                 <Button Content="Open file"
@@ -419,7 +419,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Rename button -->
                 <Button Content="Rename"
@@ -439,7 +439,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Redownload button -->
                 <Button Content="Redownload"
@@ -452,7 +452,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Resume button -->
                 <Button Content="Resume"
@@ -472,7 +472,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Refresh download address button -->
                 <Button Content="Refresh download address"
@@ -485,7 +485,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Remove button -->
                 <Button Content="Remove"
@@ -498,7 +498,7 @@
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
                            Margin="8, 4"
-                           Fill="{DynamicResource SecondaryColor}" />
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
 
                 <!-- Add to queue button -->
                 <Button Classes="contextMenuButton"
@@ -511,11 +511,11 @@
                         <TextBlock Grid.Column="0"
                                    Text="Add to queue"
                                    VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextColor}" />
+                                   Foreground="{DynamicResource MainTextColor}" />
 
                         <PathIcon Grid.Column="1"
                                   Data="{DynamicResource ChevronDownSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}"
+                                  Foreground="{DynamicResource MainTextColor}"
                                   Width="8"
                                   Height="8"
                                   VerticalAlignment="Center"
@@ -565,7 +565,7 @@
                                       Command="{Binding AddNewLinkMenuItemCommand}"
                                       CommandParameter="{Binding $parent[Window]}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Export data"
@@ -578,7 +578,7 @@
                                       Width="250"
                                       Command="{Binding ImportDataMenuItemCommand}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Export settings"
@@ -591,7 +591,7 @@
                                       Width="250"
                                       Command="{Binding ImportSettingsMenuItemCommand}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <MenuItem Header="Exit"
@@ -632,7 +632,7 @@
                                       IsEnabled="{Binding MainMenuItemsEnabledState.IsResumeAllDownloadsEnabled}"
                                       Command="{Binding ResumeAllDownloadsMenuItemCommand}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <!-- Start download -->
@@ -675,7 +675,7 @@
                                       Command="{Binding RedownloadMenuItemCommand}"
                                       CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <!-- Delete -->
@@ -693,7 +693,7 @@
                                       IsEnabled="{Binding MainMenuItemsEnabledState.IsDeleteAllCompletedEnabled}"
                                       Command="{Binding DeleteAllCompletedDownloadsMenuItemCommand}" />
 
-                            <Separator Background="{DynamicResource SecondaryColor}"
+                            <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
                             <!-- Settings -->
@@ -833,19 +833,19 @@
                 <cc:CustomTextBox Grid.Row="0"
                                   Grid.Column="1"
                                   Width="250"
-                                  Background="{DynamicResource SecondaryColor}"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
                                   Watermark="Search in the list"
-                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource MagnifyingGlassSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
                                   IconSize="{DynamicResource SmallIconSize}"
                                   Padding="12, 10"
                                   VerticalAlignment="Center"
-                                  OnFocusBorderColor="{DynamicResource PrimaryGradientBrush}"
-                                  OnHoverBorderColor="{DynamicResource PrimaryGradientBrush}"
+                                  OnFocusBorderColor="{DynamicResource MainColor}"
+                                  OnHoverBorderColor="{DynamicResource MainColor}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                   Text="{Binding SearchText, Mode=OneWayToSource}" />
 
                 <!-- Separator -->
@@ -854,7 +854,7 @@
                            Grid.ColumnSpan="2"
                            HorizontalAlignment="Stretch"
                            Height="1"
-                           Background="{DynamicResource SecondaryColor}"
+                           Background="{DynamicResource SecondaryBackgroundColor}"
                            Margin="0, 20" />
             </Grid>
         </Border>
@@ -899,12 +899,12 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Add Url"
                                                  IconData="{DynamicResource LinkSvgIcon}"
-                                                 IconColor="{DynamicResource SuccessGradientBrush}"
+                                                 IconColor="{DynamicResource SuccessColor}"
                                                  Command="{Binding AddNewLinkCommand}"
                                                  CommandParameter="{Binding $parent[Window]}" />
                             </StackPanel>
 
-                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                            <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
                                        Width="1"
                                        VerticalAlignment="Stretch" />
 
@@ -913,23 +913,23 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Resume"
                                                  IconData="{DynamicResource BoltSvgIcon}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 IconColor="{DynamicResource WarningColor}"
                                                  Command="{Binding ResumeDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop"
                                                  IconData="{DynamicResource StopSvgIcon}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 IconColor="{DynamicResource WarningColor}"
                                                  Command="{Binding StopDownloadFileCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Stop All"
                                                  IconData="{DynamicResource HandSvgIcon}"
-                                                 IconColor="{DynamicResource WarningGradientBrush}"
+                                                 IconColor="{DynamicResource WarningColor}"
                                                  Command="{Binding StopAllDownloadFilesCommand}" />
                             </StackPanel>
 
-                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                            <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
                                        Width="1"
                                        VerticalAlignment="Stretch" />
 
@@ -938,17 +938,17 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Delete"
                                                  IconData="{DynamicResource TrashSvgIcon}"
-                                                 IconColor="{DynamicResource DangerGradientBrush}"
+                                                 IconColor="{DynamicResource DangerColor}"
                                                  Command="{Binding DeleteDownloadFilesCommand}"
                                                  CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
                                 <uc:ActionButton Text="Delete Completed"
                                                  IconData="{DynamicResource FolderMinusSvgIcon}"
-                                                 IconColor="{DynamicResource DangerGradientBrush}"
+                                                 IconColor="{DynamicResource DangerColor}"
                                                  Command="{Binding DeleteCompletedDownloadFilesCommand}" />
                             </StackPanel>
 
-                            <Rectangle Fill="{DynamicResource SecondaryColor}"
+                            <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
                                        Width="1"
                                        VerticalAlignment="Stretch" />
 
@@ -957,25 +957,25 @@
                                         Spacing="5">
                                 <uc:ActionButton Text="Settings"
                                                  IconData="{DynamicResource GearSvgIcon}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 IconColor="{DynamicResource InfoColor}"
                                                  Command="{Binding OpenSettingsWindowCommand}"
                                                  CommandParameter="{Binding $parent[Window]}" />
 
                                 <uc:ActionButton Text="Queues"
                                                  IconData="{DynamicResource ListOlSvgIcon}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 IconColor="{DynamicResource InfoColor}"
                                                  Flyout="{StaticResource QueuesListFlyout}" />
 
                                 <uc:ActionButton Text="Share"
                                                  IconData="{DynamicResource ShareSvgIcon}"
-                                                 IconColor="{DynamicResource InfoGradientBrush}"
+                                                 IconColor="{DynamicResource InfoColor}"
                                                  Command="{Binding ShareCommand}" />
                             </StackPanel>
                         </StackPanel>
 
                         <Separator Grid.Row="1"
                                    HorizontalAlignment="Stretch"
-                                   Background="{DynamicResource SecondaryColor}"
+                                   Background="{DynamicResource SecondaryBackgroundColor}"
                                    Margin="0, 20, 0, 10" />
                     </Grid>
 
@@ -1023,7 +1023,7 @@
                                                     VerticalAlignment="Center">
                                             <TextBlock Text="{Binding FileName}" />
                                             <TextBlock Text="{Binding FileType}"
-                                                       Foreground="{DynamicResource TertiaryColor}" />
+                                                       Foreground="{DynamicResource AccentColor}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -1068,7 +1068,7 @@
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Top">
                                             <TextBlock Text="Completed"
-                                                       Foreground="{DynamicResource SuccessGradientBrush}"
+                                                       Foreground="{DynamicResource SuccessColor}"
                                                        IsVisible="{Binding IsCompleted}"
                                                        VerticalAlignment="Top"
                                                        HorizontalAlignment="Stretch" />
@@ -1078,10 +1078,10 @@
                                                         IsVisible="{Binding IsDownloading}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Downloading - {0}}"
-                                                           Foreground="{DynamicResource InfoGradientBrush}" />
+                                                           Foreground="{DynamicResource InfoColor}" />
 
-                                                <ProgressBar Foreground="{DynamicResource InfoGradientBrush}"
-                                                             Background="{DynamicResource TextColor}"
+                                                <ProgressBar Foreground="{DynamicResource InfoColor}"
+                                                             Background="{DynamicResource MainTextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -1091,10 +1091,10 @@
                                                         IsVisible="{Binding IsStopped}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Stopped - {0}}"
-                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                           Foreground="{DynamicResource WarningColor}" />
 
-                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
-                                                             Background="{DynamicResource TextColor}"
+                                                <ProgressBar Foreground="{DynamicResource WarningColor}"
+                                                             Background="{DynamicResource MainTextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -1104,10 +1104,10 @@
                                                         IsVisible="{Binding IsPaused}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Paused - {0}}"
-                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                           Foreground="{DynamicResource WarningColor}" />
 
-                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
-                                                             Background="{DynamicResource TextColor}"
+                                                <ProgressBar Foreground="{DynamicResource WarningColor}"
+                                                             Background="{DynamicResource MainTextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -1117,10 +1117,10 @@
                                                         IsVisible="{Binding IsError}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Error - {0}}"
-                                                           Foreground="{DynamicResource DangerGradientBrush}" />
+                                                           Foreground="{DynamicResource DangerColor}" />
 
-                                                <ProgressBar Foreground="{DynamicResource DangerGradientBrush}"
-                                                             Background="{DynamicResource TextColor}"
+                                                <ProgressBar Foreground="{DynamicResource DangerColor}"
+                                                             Background="{DynamicResource MainTextColor}"
                                                              Value="{Binding DownloadProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -1130,10 +1130,10 @@
                                                         IsVisible="{Binding IsMerging}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding MergeProgress, StringFormat={}Merging - {0}}"
-                                                           Foreground="{DynamicResource WarningGradientBrush}" />
+                                                           Foreground="{DynamicResource WarningColor}" />
 
-                                                <ProgressBar Foreground="{DynamicResource WarningGradientBrush}"
-                                                             Background="{DynamicResource TextColor}"
+                                                <ProgressBar Foreground="{DynamicResource WarningColor}"
+                                                             Background="{DynamicResource MainTextColor}"
                                                              Value="{Binding MergeProgress}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
@@ -1185,7 +1185,7 @@
 
         <!-- Status bar -->
         <Border Grid.Row="2"
-                Background="{DynamicResource SecondaryColor}"
+                Background="{DynamicResource SecondaryBackgroundColor}"
                 Padding="20, 10"
                 Margin="0, 20, 0, 0">
             <StackPanel Orientation="Horizontal"
@@ -1232,7 +1232,7 @@
 
                     <!-- Button content -->
                     <PathIcon Data="{DynamicResource ClockRotateLeftSvgIcon}"
-                              Foreground="{DynamicResource TertiaryColor}"
+                              Foreground="{DynamicResource AccentColor}"
                               Width="16"
                               Height="16" />
                 </Button>
@@ -1243,11 +1243,11 @@
                             VerticalAlignment="Center"
                             ToolTip.Tip="Total size of selected files">
                     <PathIcon Data="{DynamicResource CubeSvgIcon}"
-                              Foreground="{DynamicResource TertiaryColor}"
+                              Foreground="{DynamicResource AccentColor}"
                               Width="16"
                               Height="16" />
                     <TextBlock Text="{Binding SelectedFilesTotalSize}"
-                               Foreground="{DynamicResource TertiaryColor}" />
+                               Foreground="{DynamicResource AccentColor}" />
                 </StackPanel>
 
                 <!-- Global speed limit -->
@@ -1257,12 +1257,12 @@
                             ToolTip.Tip="Global speed limit"
                             IsVisible="{Binding IsGlobalSpeedLimitVisible}">
                     <PathIcon Data="{DynamicResource GaugeHighSvgIcon}"
-                              Foreground="{DynamicResource WarningGradientBrush}"
+                              Foreground="{DynamicResource WarningColor}"
                               Width="16"
                               Height="16"
                               VerticalAlignment="Center" />
                     <TextBlock Text="{Binding GlobalSpeedLimit}"
-                               Foreground="{DynamicResource WarningGradientBrush}"
+                               Foreground="{DynamicResource WarningColor}"
                                VerticalAlignment="Center" />
                 </StackPanel>
 
@@ -1272,12 +1272,12 @@
                             VerticalAlignment="Center"
                             ToolTip.Tip="Total download speed">
                     <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
-                              Foreground="{DynamicResource SuccessGradientBrush}"
+                              Foreground="{DynamicResource SuccessColor}"
                               Width="16"
                               Height="16"
                               VerticalAlignment="Center" />
                     <TextBlock Text="{Binding DownloadSpeed}"
-                               Foreground="{DynamicResource SuccessGradientBrush}"
+                               Foreground="{DynamicResource SuccessColor}"
                                VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>

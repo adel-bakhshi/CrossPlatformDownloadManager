@@ -36,7 +36,7 @@
             <Border Grid.Row="1"
                     Padding="15"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource SecondaryColor}"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
                     Height="254"
                     Margin="0, 0, 0, 10"
                     ClipToBounds="True">
@@ -58,7 +58,7 @@
             <!-- Download progress bar -->
             <ProgressBar Grid.Row="2"
                          Classes="customProgressBar"
-                         Foreground="{DynamicResource PrimaryGradientBrush}"
+                         Foreground="{DynamicResource MainColor}"
                          Value="{Binding DownloadFile.DownloadProgress, FallbackValue=0, TargetNullValue=0}"
                          Margin="0, 0, 0, 10"
                          IsVisible="{Binding !DownloadFile.IsMerging}" />
@@ -66,7 +66,7 @@
             <!-- Merge progress bar -->
             <ProgressBar Grid.Row="2"
                          Classes="customProgressBar"
-                         Foreground="{DynamicResource PrimaryGradientBrush}"
+                         Foreground="{DynamicResource MainColor}"
                          Value="{Binding DownloadFile.MergeProgress, FallbackValue=0, TargetNullValue=0}"
                          Margin="0, 0, 0, 10"
                          IsVisible="{Binding DownloadFile.IsMerging}" />
@@ -119,7 +119,7 @@
                 <!-- Chunks progress bars -->
                 <Border Grid.Row="0"
                         CornerRadius="{DynamicResource DefaultCornerRadius}"
-                        Background="{DynamicResource MenuItemOnHoverBackgroundColor}"
+                        Background="{DynamicResource MenuItemHoverColor}"
                         ClipToBounds="True"
                         HorizontalAlignment="Stretch"
                         Height="24"

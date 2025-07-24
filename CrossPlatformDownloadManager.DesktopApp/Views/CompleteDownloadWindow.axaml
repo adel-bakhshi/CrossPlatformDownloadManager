@@ -24,7 +24,7 @@
         <TextBlock Grid.Row="0"
                    Text="Download completed"
                    FontWeight="Bold"
-                   Foreground="{DynamicResource SuccessGradientBrush}"
+                   Foreground="{DynamicResource SuccessColor}"
                    Margin="0, 0, 0, 15" />
 
         <ScrollViewer Grid.Row="1"
@@ -35,7 +35,7 @@
                 <!-- Details -->
                 <Border Padding="15"
                         CornerRadius="{DynamicResource DefaultCornerRadius}"
-                        Background="{DynamicResource SecondaryColor}">
+                        Background="{DynamicResource SecondaryBackgroundColor}">
                     <Grid RowDefinitions="Auto, Auto, Auto, Auto"
                           ColumnDefinitions="Auto, *">
                         <!-- File name -->
@@ -95,7 +95,7 @@
                 <!-- Don't show again -->
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
-                        Background="{DynamicResource SecondaryColor}">
+                        Background="{DynamicResource SecondaryBackgroundColor}">
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Grid.Column="0"
                                    HorizontalAlignment="Stretch"

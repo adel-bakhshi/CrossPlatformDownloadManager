@@ -25,9 +25,9 @@
                     Orientation="Vertical"
                     Spacing="10">
             <!-- Current address -->
-            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+            <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
                               Watermark="Current address"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              WatermarkForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource LinkSlashSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -35,17 +35,17 @@
                               Padding="12, 10"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Top"
-                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                               BorderThickness="1"
-                              BorderBrush="{DynamicResource SecondaryColor}"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                               Text="{Binding CurrentAddress}"
                               IsReadOnly="True" />
 
             <!-- New address -->
-            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+            <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
                               Watermark="New address"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              WatermarkForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource LinkSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -53,10 +53,10 @@
                               Padding="12, 10"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Top"
-                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                               BorderThickness="1"
-                              BorderBrush="{DynamicResource SecondaryColor}"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                               Text="{Binding NewAddress}" />
         </StackPanel>
 

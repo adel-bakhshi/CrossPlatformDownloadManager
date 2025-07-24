@@ -29,27 +29,27 @@
                         Spacing="15">
                 <!-- Category title -->
                 <cc:CustomTextBox Padding="12, 10"
-                                  Background="{DynamicResource SecondaryColor}"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource LayerGroupSvgIcon}"
                                   IconSize="16"
                                   IconColor="{DynamicResource IconColor}"
                                   Watermark="Category title"
-                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
                                   Margin="0, 0, 0, 5"
                                   HorizontalAlignment="Stretch"
-                                  OnHoverBorderColor="{DynamicResource PrimaryGradientBrush}"
-                                  OnFocusBorderColor="{DynamicResource PrimaryGradientBrush}"
-                                  OnErrorBorderColor="{DynamicResource DangerGradientBrush}"
+                                  OnHoverBorderColor="{DynamicResource MainColor}"
+                                  OnFocusBorderColor="{DynamicResource MainColor}"
+                                  OnErrorBorderColor="{DynamicResource DangerColor}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                   Text="{Binding CategoryTitle}"
                                   IsReadOnly="{Binding IsDefaultCategory}" />
 
                 <!-- File types section -->
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
-                        Background="{DynamicResource SecondaryColor}"
+                        Background="{DynamicResource SecondaryBackgroundColor}"
                         MaxHeight="300"
                         IsVisible="{Binding !IsGeneralCategory}">
                     <Grid RowDefinitions="Auto, Auto, *">
@@ -66,9 +66,9 @@
                               ColumnDefinitions="*, Auto, *, Auto">
                             <!-- Extension -->
                             <cc:CustomTextBox Grid.Column="0"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Extension"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource FileCircleQuestionSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -76,10 +76,10 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource SecondaryColor}"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                               Text="{Binding CurrentFileExtension.Extension}"
                                               TextChanged="ExtensionTextBlockOnTextChanged" />
 
@@ -89,9 +89,9 @@
 
                             <!-- Alias -->
                             <cc:CustomTextBox Grid.Column="2"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Alias"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource FileCircleCheckSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -99,10 +99,10 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource SecondaryColor}"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                               Text="{Binding CurrentFileExtension.Alias}"
                                               TextChanged="AlisTextBoxOnTextChanged" />
 
@@ -168,7 +168,7 @@
                 <!-- Auto add links to category section -->
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
-                        Background="{DynamicResource SecondaryColor}"
+                        Background="{DynamicResource SecondaryBackgroundColor}"
                         MaxHeight="300"
                         IsVisible="{Binding !IsGeneralCategory}">
                     <Grid RowDefinitions="Auto, Auto, *">
@@ -185,9 +185,9 @@
                               ColumnDefinitions="*, Auto">
                             <!-- Site address -->
                             <cc:CustomTextBox Grid.Column="0"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Site address"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource LinkSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -195,10 +195,10 @@
                                               Padding="12, 10"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource SecondaryColor}"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                               Text="{Binding SelectedSiteAddress, FallbackValue='', TargetNullValue=''}" />
 
                             <!-- Action buttons -->
@@ -259,7 +259,7 @@
                 <!-- Save location section -->
                 <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                         Padding="15"
-                        Background="{DynamicResource SecondaryColor}">
+                        Background="{DynamicResource SecondaryBackgroundColor}">
                     <Grid RowDefinitions="Auto, *">
                         <!-- Title -->
                         <TextBlock Grid.Row="0"
@@ -274,9 +274,9 @@
                               ColumnDefinitions="*, Auto">
                             <!-- Save location address -->
                             <cc:CustomTextBox Grid.Column="0"
-                                              Background="{DynamicResource PrimaryColor}"
+                                              Background="{DynamicResource MainBackgroundColor}"
                                               Watermark="Save location"
-                                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource FolderSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -285,10 +285,10 @@
                                               Margin="0, 0, 10, 0"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Center"
-                                              OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                              OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
-                                              BorderBrush="{DynamicResource PrimaryColor}"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding SaveDirectory, FallbackValue='', TargetNullValue=''}"
                                               IsReadOnly="True" />
 

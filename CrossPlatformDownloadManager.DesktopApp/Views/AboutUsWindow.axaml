@@ -43,12 +43,12 @@
                                LineHeight="{DynamicResource LargeLineHeight}"
                                FontWeight="Bold"
                                FontStyle="Italic"
-                               Foreground="{DynamicResource PrimaryGradientBrush}" />
+                               Foreground="{DynamicResource MainColor}" />
 
                     <!-- Full name -->
                     <TextBlock Text="Cross platform Download Manager"
                                FontStyle="Italic"
-                               Foreground="{DynamicResource TextColor}" />
+                               Foreground="{DynamicResource MainTextColor}" />
                 </StackPanel>
 
                 <!-- Version, author and contact -->
@@ -61,7 +61,7 @@
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
                                    Text="Version:"
-                                   Foreground="{DynamicResource TextColor}"
+                                   Foreground="{DynamicResource MainTextColor}"
                                    Margin="0, 0, 10, 5" />
 
                         <!-- Version number -->
@@ -69,14 +69,14 @@
                                    Grid.Column="1"
                                    Text="{Binding AppVersion}"
                                    FontWeight="Bold"
-                                   Foreground="{DynamicResource TextColor}"
+                                   Foreground="{DynamicResource MainTextColor}"
                                    Margin="0, 0, 0, 5" />
 
                         <!-- Author title -->
                         <TextBlock Grid.Row="1"
                                    Grid.Column="0"
                                    Text="Author:"
-                                   Foreground="{DynamicResource TextColor}"
+                                   Foreground="{DynamicResource MainTextColor}"
                                    Margin="0, 0, 10, 0" />
 
                         <!-- Author name -->
@@ -84,7 +84,7 @@
                                    Grid.Column="1"
                                    Text="Adel Bakhshi"
                                    FontWeight="Bold"
-                                   Foreground="{DynamicResource TextColor}" />
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
 
                     <!-- Contact information -->
@@ -94,7 +94,7 @@
                         <HyperlinkButton Classes="circleHyperLinkButton"
                                          NavigateUri="{Binding GithubUrl}">
                             <PathIcon Data="{DynamicResource GithubBrandsSvgIcon}"
-                                      Foreground="{DynamicResource GithubIconGradientBrush}"
+                                      Foreground="{DynamicResource GithubColor}"
                                       Width="24"
                                       Height="24" />
                         </HyperlinkButton>
@@ -103,7 +103,7 @@
                         <HyperlinkButton Classes="circleHyperLinkButton"
                                          NavigateUri="{Binding TelegramUrl}">
                             <PathIcon Data="{DynamicResource TelegramBrandsSvgIcon}"
-                                      Foreground="{DynamicResource TelegramIconGradientBrush}"
+                                      Foreground="{DynamicResource TelegramColor}"
                                       Width="24"
                                       Height="24" />
                         </HyperlinkButton>
@@ -112,7 +112,7 @@
                         <HyperlinkButton Classes="circleHyperLinkButton"
                                          NavigateUri="{Binding EmailAddress}">
                             <PathIcon Data="{DynamicResource EnvelopeSvgIcon}"
-                                      Foreground="{DynamicResource EmailIconGradientBrush}"
+                                      Foreground="{DynamicResource EmailColor}"
                                       Width="24"
                                       Height="24" />
                         </HyperlinkButton>
@@ -161,7 +161,7 @@
                                      Grid.Column="0"
                                      Width="5"
                                      Height="5"
-                                     Fill="{DynamicResource TertiaryColor}"
+                                     Fill="{DynamicResource AccentColor}"
                                      Margin="0, 5, 10, 5"
                                      VerticalAlignment="Top" />
 
@@ -181,7 +181,7 @@
                                      Grid.Column="0"
                                      Width="5"
                                      Height="5"
-                                     Fill="{DynamicResource TertiaryColor}"
+                                     Fill="{DynamicResource AccentColor}"
                                      Margin="0, 5, 10, 5"
                                      VerticalAlignment="Top" />
 
@@ -201,7 +201,7 @@
                                      Grid.Column="0"
                                      Width="5"
                                      Height="5"
-                                     Fill="{DynamicResource TertiaryColor}"
+                                     Fill="{DynamicResource AccentColor}"
                                      Margin="0, 5, 10, 5"
                                      VerticalAlignment="Top" />
 
@@ -248,7 +248,7 @@
                     <!-- Copyright -->
                     <TextBlock HorizontalAlignment="Center"
                                FontStyle="Italic"
-                               Foreground="{DynamicResource TertiaryColor}">
+                               Foreground="{DynamicResource AccentColor}">
                         <Run Text="©" />
                         <Run Text="{Binding CurrentYear}" />
                         <Run Text="Adel Bakhshi. All rights reserved." />

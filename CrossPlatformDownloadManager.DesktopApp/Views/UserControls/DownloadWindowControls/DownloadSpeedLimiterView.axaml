@@ -15,7 +15,7 @@
                   VerticalScrollBarVisibility="Auto">
         <Border Padding="15"
                 CornerRadius="{DynamicResource DefaultCornerRadius}"
-                Background="{DynamicResource PrimaryColor}"
+                Background="{DynamicResource MainBackgroundColor}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Top">
             <StackPanel Orientation="Vertical"
@@ -48,10 +48,10 @@
                     <!-- Speed  -->
                     <cc:CustomNumericUpDown Grid.Column="0"
                                             Watermark="Speed"
-                                            WatermarkForeground="{DynamicResource TertiaryColor}"
+                                            WatermarkForeground="{DynamicResource AccentColor}"
                                             Padding="12, 10"
                                             CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                            Background="{DynamicResource SecondaryColor}"
+                                            Background="{DynamicResource SecondaryBackgroundColor}"
                                             IconData="{DynamicResource BanSvgIcon}"
                                             IconColor="{DynamicResource IconColor}"
                                             IconSize="{DynamicResource SmallIconSize}"
@@ -70,9 +70,9 @@
                     <cc:CustomComboBox Grid.Column="1"
                                        PlaceholderText="Unit"
                                        MinWidth="80"
-                                       Background="{DynamicResource SecondaryColor}"
-                                       ToggleIconColor="{DynamicResource TertiaryColor}"
-                                       OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                       Background="{DynamicResource SecondaryBackgroundColor}"
+                                       ToggleIconColor="{DynamicResource AccentColor}"
+                                       OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                        ItemsSource="{Binding SpeedUnits}"
                                        SelectedItem="{Binding SelectedSpeedUnit}"
                                        IsEnabled="{Binding IsSpeedLimiterEnabled}"
@@ -88,7 +88,7 @@
                 </Grid>
 
                 <!-- Speed limit info -->
-                <TextBlock Foreground="{DynamicResource TertiaryColor}"
+                <TextBlock Foreground="{DynamicResource AccentColor}"
                            FontStyle="Italic"
                            Text="{Binding SpeedLimitInfo}" />
             </StackPanel>

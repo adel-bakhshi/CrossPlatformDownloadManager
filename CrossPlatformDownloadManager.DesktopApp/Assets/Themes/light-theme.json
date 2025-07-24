@@ -1,22 +1,22 @@
 {
   "themeName": "AppDefaultLightTheme",
   "isDarkTheme": false,
-  "primaryColor": {
+  "mainBackgroundColor": {
     "brushMode": 0,
     "color": "#F5F5F5",
     "opacity": 1
   },
-  "secondaryColor": {
+  "secondaryBackgroundColor": {
     "brushMode": 0,
     "color": "#E6E6E6",
     "opacity": 1
   },
-  "tertiaryColor": {
+  "accentColor": {
     "brushMode": 0,
     "color": "#727272",
     "opacity": 1
   },
-  "textColor": {
+  "mainTextColor": {
     "brushMode": 0,
     "color": "#222222",
     "opacity": 1
@@ -26,7 +26,7 @@
     "color": "#FFFFFF",
     "opacity": 1
   },
-  "categoryItemOnHoverColor": {
+  "categoryHoverColor": {
     "brushMode": 0,
     "color": "#41BAA8",
     "opacity": 1
@@ -36,7 +36,7 @@
     "color": "#DCDCDC",
     "opacity": 1
   },
-  "menuItemOnHoverBackgroundColor": {
+  "menuItemHoverColor": {
     "brushMode": 0,
     "color": "#BFBFBF",
     "opacity": 1
@@ -46,17 +46,17 @@
     "color": "#3A58C2",
     "opacity": 1
   },
-  "selectedAvailableProxyTypeColor": {
+  "selectedProxyColor": {
     "brushMode": 0,
     "color": "#EBEBEB",
     "opacity": 1
   },
-  "toggleSwitchCircleColor": {
+  "toggleCircleColor": {
     "brushMode": 0,
     "color": "#FFFFFF",
     "opacity": 1
   },
-  "loadingColor": {
+  "loadingIndicatorColor": {
     "brushMode": 0,
     "color": "#980C0C",
     "opacity": 1
@@ -66,22 +66,22 @@
     "color": "#FFFFFF",
     "opacity": 1
   },
-  "dialogOkButtonBackgroundColor": {
+  "dialogOkBackgroundColor": {
     "brushMode": 0,
     "color": "#3549C5",
     "opacity": 1
   },
-  "dialogYesButtonBackgroundColor": {
+  "dialogYesBackgroundColor": {
     "brushMode": 0,
     "color": "#10BA18",
     "opacity": 1
   },
-  "dialogNoButtonBackgroundColor": {
+  "dialogNoBackgroundColor": {
     "brushMode": 0,
     "color": "#F44336",
     "opacity": 1
   },
-  "dialogCancelButtonBackgroundColor": {
+  "dialogCancelBackgroundColor": {
     "brushMode": 0,
     "color": "#FF9800",
     "opacity": 1
@@ -91,7 +91,7 @@
     "color": "#FFFFFF",
     "opacity": 1
   },
-  "primaryGradientBrush": {
+  "mainColor": {
     "brushMode": 1,
     "startPoint": "0,0.5",
     "endPoint": "1,0.5",
@@ -122,7 +122,7 @@
       }
     ]
   },
-  "successGradientBrush": {
+  "successColor": {
     "brushMode": 1,
     "startPoint": "0,0",
     "endPoint": "1,1",
@@ -145,7 +145,7 @@
       }
     ]
   },
-  "infoGradientBrush": {
+  "infoColor": {
     "brushMode": 1,
     "startPoint": "0,0",
     "endPoint": "1,1",
@@ -168,7 +168,7 @@
       }
     ]
   },
-  "dangerGradientBrush": {
+  "dangerColor": {
     "brushMode": 1,
     "startPoint": "0,0",
     "endPoint": "1,1",
@@ -191,7 +191,7 @@
       }
     ]
   },
-  "warningGradientBrush": {
+  "warningColor": {
     "brushMode": 1,
     "startPoint": "0,0",
     "endPoint": "1,1",
@@ -214,7 +214,7 @@
       }
     ]
   },
-  "chunkProgressGradientBrush": {
+  "progressColor": {
     "brushMode": 1,
     "startPoint": "0.5,0",
     "endPoint": "0.5,1",
@@ -237,7 +237,7 @@
       }
     ]
   },
-  "dataGridRowGradientBrush": {
+  "gridRowColor": {
     "brushMode": 1,
     "startPoint": "0,0.5",
     "endPoint": "1,0.5",

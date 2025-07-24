@@ -1,24 +1,24 @@
 {
-  "themeName": "AppDefaultDarkTheme",
-  "isDarkTheme": true,
+  "themeName": "AppDefaultOceanBlueTheme",
+  "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,
-    "color": "#131213",
+    "color": "#E6F0FA",
     "opacity": 1
   },
   "secondaryBackgroundColor": {
     "brushMode": 0,
-    "color": "#201E21",
+    "color": "#B3D9FF",
     "opacity": 1
   },
   "accentColor": {
     "brushMode": 0,
-    "color": "#727272",
+    "color": "#6688CC",
     "opacity": 1
   },
   "mainTextColor": {
     "brushMode": 0,
-    "color": "#FFFFFF",
+    "color": "#1A3C6D",
     "opacity": 1
   },
   "buttonTextColor": {
@@ -28,17 +28,17 @@
   },
   "categoryHoverColor": {
     "brushMode": 0,
-    "color": "#25E6C9",
+    "color": "#40C4FF",
     "opacity": 1
   },
   "menuBackgroundColor": {
     "brushMode": 0,
-    "color": "#1C1420",
+    "color": "#B3E5FC",
     "opacity": 1
   },
   "menuItemHoverColor": {
     "brushMode": 0,
-    "color": "#201824",
+    "color": "#81D4FA",
     "opacity": 1
   },
   "iconColor": {
@@ -48,7 +48,7 @@
   },
   "selectedProxyColor": {
     "brushMode": 0,
-    "color": "#CCCCCC",
+    "color": "#E1F5FE",
     "opacity": 1
   },
   "toggleCircleColor": {
@@ -58,7 +58,7 @@
   },
   "loadingIndicatorColor": {
     "brushMode": 0,
-    "color": "#980C0C",
+    "color": "#D32F2F",
     "opacity": 1
   },
   "dialogTextColor": {
@@ -68,7 +68,7 @@
   },
   "dialogOkBackgroundColor": {
     "brushMode": 0,
-    "color": "#3549C5",
+    "color": "#0288D1",
     "opacity": 1
   },
   "dialogYesBackgroundColor": {
@@ -100,7 +100,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#007BFF",
+          "color": "#0288D1",
           "opacity": 1
         }
       },
@@ -108,7 +108,7 @@
         "offset": 0.5,
         "color": {
           "brushMode": 0,
-          "color": "#8000FF",
+          "color": "#29B6F6",
           "opacity": 1
         }
       },
@@ -116,7 +116,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#FF007F",
+          "color": "#4FC3F7",
           "opacity": 1
         }
       }
@@ -223,7 +223,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#09A500",
+          "color": "#0288D1",
           "opacity": 1
         }
       },
@@ -231,7 +231,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#0ABA00",
+          "color": "#29B6F6",
           "opacity": 1
         }
       }
@@ -246,7 +246,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#14041C",
+          "color": "#E6F0FA",
           "opacity": 1
         }
       },
@@ -254,7 +254,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#372B2B",
+          "color": "#B3D9FF",
           "opacity": 0.17
         }
       }

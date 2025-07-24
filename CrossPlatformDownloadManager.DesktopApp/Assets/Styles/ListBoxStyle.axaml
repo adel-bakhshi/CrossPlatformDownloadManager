@@ -94,27 +94,27 @@
             <!-- Pseudo classes  -->
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource SecondaryColor}" />
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
             </Style>
 
             <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource SecondaryColor}" />
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
             </Style>
 
             <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource SecondaryColor}" />
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
             </Style>
 
             <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource SecondaryColor}" />
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
             </Style>
 
             <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource SecondaryColor}" />
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
             </Style>
         </Style>
     </Style>

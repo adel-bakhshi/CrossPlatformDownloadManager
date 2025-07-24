@@ -33,7 +33,7 @@
             <Setter Property="Background"
                     Value="{DynamicResource TransparentColor}" />
             <Setter Property="Foreground"
-                    Value="{DynamicResource TextColor}" />
+                    Value="{DynamicResource MainTextColor}" />
             <Setter Property="HorizontalContentAlignment"
                     Value="Left" />
             <Setter Property="VerticalContentAlignment"
@@ -68,7 +68,7 @@
             <!-- Pointer over styles -->
             <Style Selector="^:pointerover">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource CategoryItemOnHoverColor}" />
+                        Value="{DynamicResource CategoryHoverColor}" />
             </Style>
         </Style>
     </UserControl.Styles>
@@ -188,18 +188,18 @@
                 <TextBlock.Styles>
                     <Style Selector="TextBlock">
                         <Setter Property="Foreground"
-                                Value="{DynamicResource InfoGradientBrush}" />
+                                Value="{DynamicResource InfoColor}" />
 
                         <!-- Resume capability is available style -->
                         <Style Selector="^.resumeCapabilityIsAvailable">
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource SuccessGradientBrush}" />
+                                    Value="{DynamicResource SuccessColor}" />
                         </Style>
 
                         <!-- Resume capability is unavailable style -->
                         <Style Selector="^.resumeCapabilityIsUnavailable">
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource DangerGradientBrush}" />
+                                    Value="{DynamicResource DangerColor}" />
                         </Style>
                     </Style>
                 </TextBlock.Styles>

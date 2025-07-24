@@ -20,7 +20,7 @@
             <!-- Disable categories -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}">
+                    Background="{DynamicResource SecondaryBackgroundColor}">
                 <Grid RowDefinitions="Auto, Auto"
                       ColumnDefinitions="*, Auto">
                     <!-- Title -->
@@ -54,9 +54,9 @@
                           IsEnabled="{Binding DisableCategories}">
                         <!-- Save location -->
                         <cc:CustomTextBox Grid.Column="0"
-                                          Background="{DynamicResource PrimaryColor}"
+                                          Background="{DynamicResource MainBackgroundColor}"
                                           Watermark="Save location"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          WatermarkForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource FolderSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"
@@ -65,10 +65,10 @@
                                           Margin="0, 0, 10, 0"
                                           HorizontalAlignment="Stretch"
                                           VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                          OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                           BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          BorderBrush="{DynamicResource MainBackgroundColor}"
                                           Text="{Binding GlobalSaveDirectory, FallbackValue='', TargetNullValue=''}"
                                           IsReadOnly="True" />
 
@@ -86,7 +86,7 @@
             <!-- Manage categories -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
                     IsVisible="{Binding !DisableCategories}">
                 <Grid RowDefinitions="Auto, *">
                     <!-- Title -->
@@ -104,9 +104,9 @@
                         <!-- Categories -->
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"
-                                           Background="{DynamicResource PrimaryColor}"
-                                           ToggleIconColor="{DynamicResource TertiaryColor}"
-                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           Background="{DynamicResource MainBackgroundColor}"
+                                           ToggleIconColor="{DynamicResource AccentColor}"
+                                           OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                            IconData="{DynamicResource LayerGroupSvgIcon}"
                                            IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
@@ -184,7 +184,7 @@
             <!-- Manage save location -->
             <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                     Padding="15"
-                    Background="{DynamicResource SecondaryColor}"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
                     IsVisible="{Binding !DisableCategories}">
                 <Grid RowDefinitions="Auto, *">
                     <!-- Title -->
@@ -201,9 +201,9 @@
                           ColumnDefinitions="*, Auto">
                         <!-- Save location -->
                         <cc:CustomTextBox Grid.Column="0"
-                                          Background="{DynamicResource PrimaryColor}"
+                                          Background="{DynamicResource MainBackgroundColor}"
                                           Watermark="Save location"
-                                          WatermarkForeground="{DynamicResource TertiaryColor}"
+                                          WatermarkForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource FolderSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"
@@ -212,10 +212,10 @@
                                           Margin="0, 0, 10, 0"
                                           HorizontalAlignment="Stretch"
                                           VerticalAlignment="Center"
-                                          OnFocusBorderColor="{DynamicResource PrimaryColor}"
-                                          OnHoverBorderColor="{DynamicResource PrimaryColor}"
+                                          OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                          OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                           BorderThickness="1"
-                                          BorderBrush="{DynamicResource PrimaryColor}"
+                                          BorderBrush="{DynamicResource MainBackgroundColor}"
                                           Text="{Binding SelectedCategory.CategorySaveDirectory.SaveDirectory, FallbackValue='', TargetNullValue=''}"
                                           IsReadOnly="True" />
 

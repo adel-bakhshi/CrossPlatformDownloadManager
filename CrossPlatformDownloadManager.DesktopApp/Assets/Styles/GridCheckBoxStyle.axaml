@@ -13,7 +13,7 @@
         <Setter Property="Background"
                 Value="{DynamicResource TransparentColor}" />
         <Setter Property="BorderBrush"
-                Value="{DynamicResource TertiaryColor}" />
+                Value="{DynamicResource AccentColor}" />
         <Setter Property="BorderThickness"
                 Value="1" />
         <Setter Property="Padding"
@@ -74,7 +74,7 @@
 
         <Style Selector="^:pointerover /template/ Border#border">
             <Setter Property="BorderBrush"
-                    Value="{DynamicResource TertiaryColor}" />
+                    Value="{DynamicResource AccentColor}" />
         </Style>
 
         <Style Selector="^:checked /template/ Border#border">
@@ -99,7 +99,7 @@
 
         <Style Selector="^:checked">
             <Setter Property="Background"
-                    Value="{DynamicResource PrimaryGradientBrush}" />
+                    Value="{DynamicResource MainColor}" />
         </Style>
 
         <Style Selector="^:indeterminate /template/ Rectangle#indeterminateMark">

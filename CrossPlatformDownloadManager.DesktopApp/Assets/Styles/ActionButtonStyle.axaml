@@ -24,7 +24,7 @@
 
         <Style Selector="^:pointerover">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
         </Style>
         
         <Style Selector="^:pressed /template/ ContentPresenter">

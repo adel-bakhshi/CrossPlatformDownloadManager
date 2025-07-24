@@ -25,9 +25,9 @@
                     Orientation="Vertical"
                     Spacing="10">
             <!-- Current file name -->
-            <cc:CustomTextBox Background="{DynamicResource SecondaryColor}"
+            <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
                               Watermark="Current file name"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              WatermarkForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource FileCircleCheckSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -35,18 +35,18 @@
                               Padding="12, 10"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                               BorderThickness="1"
-                              BorderBrush="{DynamicResource SecondaryColor}"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                               Text="{Binding CurrentFileName}"
                               IsReadOnly="True" />
 
             <!-- New file name -->
             <cc:CustomTextBox Name="NewFileNameTextBox"
-                              Background="{DynamicResource SecondaryColor}"
+                              Background="{DynamicResource SecondaryBackgroundColor}"
                               Watermark="Current file name"
-                              WatermarkForeground="{DynamicResource TertiaryColor}"
+                              WatermarkForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource FileCircleQuestionSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -54,10 +54,10 @@
                               Padding="12, 10"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                              OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                               BorderThickness="1"
-                              BorderBrush="{DynamicResource SecondaryColor}"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                               Text="{Binding NewFileName}" />
         </StackPanel>
 

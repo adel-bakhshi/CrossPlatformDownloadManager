@@ -23,10 +23,10 @@
                            VerticalAlignment="Center" />
 
                 <cc:CustomNumericUpDown Padding="12, 10"
-                                        Background="{DynamicResource SecondaryColor}"
+                                        Background="{DynamicResource SecondaryBackgroundColor}"
                                         CornerRadius="{DynamicResource DefaultCornerRadius}"
                                         Watermark="Count"
-                                        WatermarkForeground="{DynamicResource TertiaryColor}"
+                                        WatermarkForeground="{DynamicResource AccentColor}"
                                         BorderThickness="0"
                                         Value="{Binding DownloadCountAtSameTime}"
                                         VerticalAlignment="Center"
@@ -109,7 +109,7 @@
         <Border Grid.Row="1"
                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
-                Background="{DynamicResource SecondaryColor}"
+                Background="{DynamicResource SecondaryBackgroundColor}"
                 Margin="0, 0, 0, 10">
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0"

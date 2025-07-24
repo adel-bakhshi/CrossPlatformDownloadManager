@@ -53,7 +53,7 @@
                                    Margin="10, 0, 0, 5"
                                    VerticalAlignment="Top"
                                    TextWrapping="Wrap"
-                                   Foreground="{DynamicResource InfoGradientBrush}"
+                                   Foreground="{DynamicResource InfoColor}"
                                    Text="{Binding FileName}" />
 
                         <!-- New file name -->
@@ -67,7 +67,7 @@
                                    Margin="10, 0, 0, 0"
                                    VerticalAlignment="Top"
                                    TextWrapping="Wrap"
-                                   Foreground="{DynamicResource SuccessGradientBrush}"
+                                   Foreground="{DynamicResource SuccessColor}"
                                    Text="{Binding NewFileName}" />
                     </Grid>
                 </cc:CustomRadioContentButton>
@@ -82,7 +82,7 @@
 
                         <!-- File name -->
                         <Run Text="{Binding FileName}"
-                             Foreground="{DynamicResource InfoGradientBrush}" />
+                             Foreground="{DynamicResource InfoColor}" />
 
                         <Run Text="file information from your system and replace it with updated details." />
                     </TextBlock>

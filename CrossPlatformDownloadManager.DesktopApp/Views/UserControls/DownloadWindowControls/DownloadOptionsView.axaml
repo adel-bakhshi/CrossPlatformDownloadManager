@@ -18,7 +18,7 @@
             <!-- Open folder after download finished -->
             <Border Padding="15"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource PrimaryColor}">
+                    Background="{DynamicResource MainBackgroundColor}">
                 <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
                                Text="Open folder after download finished"
@@ -44,7 +44,7 @@
             <!-- Separator -->
             <Rectangle HorizontalAlignment="Stretch"
                        Height="1"
-                       Fill="{DynamicResource TertiaryColor}"
+                       Fill="{DynamicResource AccentColor}"
                        Margin="0, 5"
                        RadiusX="1"
                        RadiusY="1" />
@@ -52,7 +52,7 @@
             <!-- Exit program after download finished -->
             <Border Padding="15"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource PrimaryColor}">
+                    Background="{DynamicResource MainBackgroundColor}">
                 <Grid ColumnDefinitions="*, Auto">
                     <TextBlock Grid.Column="0"
                                Text="Exit program after download finished"
@@ -78,7 +78,7 @@
             <!-- Turn off computer after download finished -->
             <Border Padding="15"
                     CornerRadius="{DynamicResource DefaultCornerRadius}"
-                    Background="{DynamicResource PrimaryColor}">
+                    Background="{DynamicResource MainBackgroundColor}">
                 <Grid ColumnDefinitions="*, Auto"
                       RowDefinitions="Auto, Auto">
                     <TextBlock Grid.Row="0"
@@ -106,9 +106,9 @@
                                        Grid.Column="1"
                                        MinWidth="140"
                                        PlaceholderText="Turn Off Mode"
-                                       Background="{DynamicResource SecondaryColor}"
-                                       ToggleIconColor="{DynamicResource TertiaryColor}"
-                                       OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                       Background="{DynamicResource SecondaryBackgroundColor}"
+                                       ToggleIconColor="{DynamicResource AccentColor}"
+                                       OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                        ItemsSource="{Binding TurnOffComputerModes}"
                                        SelectedItem="{Binding SelectedTurnOffComputerMode}"
                                        IsEnabled="{Binding TurnOffComputerAfterDownloadFinished}"

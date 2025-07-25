@@ -163,12 +163,13 @@ public class AppThemeService : IAppThemeService
         resources["DialogNoBackgroundColor"] = appTheme.DialogNoBackgroundColor!.GetBrush();
         resources["DialogCancelBackgroundColor"] = appTheme.DialogCancelBackgroundColor!.GetBrush();
         resources["ManagerTextColor"] = appTheme.ManagerTextColor!.GetBrush();
+        resources["ChunkProgressBackgroundColor"] = appTheme.ChunkProgressBackgroundColor!.GetBrush();
         resources["MainColor"] = appTheme.MainColor!.GetBrush();
         resources["SuccessColor"] = appTheme.SuccessColor!.GetBrush();
         resources["InfoColor"] = appTheme.InfoColor!.GetBrush();
         resources["DangerColor"] = appTheme.DangerColor!.GetBrush();
         resources["WarningColor"] = appTheme.WarningColor!.GetBrush();
-        resources["ProgressColor"] = appTheme.ProgressColor!.GetBrush();
+        resources["ChunkProgressColor"] = appTheme.ChunkProgressColor!.GetBrush();
         resources["GridRowColor"] = appTheme.GridRowColor!.GetBrush();
 
         // Set application theme variant

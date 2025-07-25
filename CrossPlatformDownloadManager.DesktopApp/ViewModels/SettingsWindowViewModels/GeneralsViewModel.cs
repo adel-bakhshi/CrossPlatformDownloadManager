@@ -275,12 +275,13 @@ public class GeneralsViewModel : ViewModelBase
                 }
             })
             .OfType<ThemeData>()
-            .OrderBy(theme => theme.ThemeName)
             .ToList();
 
         // Add custom themes to results
         results.AddRange(themeFiles);
-        return results.ToObservableCollection();
+        return results
+            .OrderBy(td => td.ThemeName)
+            .ToObservableCollection();
     }
 
     #endregion

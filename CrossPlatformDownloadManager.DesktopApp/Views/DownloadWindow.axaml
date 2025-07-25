@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls.DownloadWindowControls"
         xmlns:converters="clr-namespace:CrossPlatformDownloadManager.DesktopApp.Converters"
         mc:Ignorable="d"
         d:DesignWidth="800"
@@ -119,7 +118,7 @@
                 <!-- Chunks progress bars -->
                 <Border Grid.Row="0"
                         CornerRadius="{DynamicResource DefaultCornerRadius}"
-                        Background="{DynamicResource MenuItemHoverColor}"
+                        Background="{DynamicResource ChunkProgressBackgroundColor}"
                         ClipToBounds="True"
                         HorizontalAlignment="Stretch"
                         Height="24"

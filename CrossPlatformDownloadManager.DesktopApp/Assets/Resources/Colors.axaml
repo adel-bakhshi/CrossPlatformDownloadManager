@@ -20,6 +20,7 @@
     <Color x:Key="DialogNoBackgroundColor">#F44336</Color>
     <Color x:Key="DialogCancelBackgroundColor">#FF9800</Color>
     <Color x:Key="ManagerTextColor">#FFFFFF</Color>
+    <Color x:Key="ChunkProgressBackgroundColor">#FFFFFF</Color>
 
     <!-- Gradients -->
     <LinearGradientBrush x:Key="MainColor"
@@ -79,7 +80,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="ProgressColor"
+    <LinearGradientBrush x:Key="ChunkProgressColor"
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>

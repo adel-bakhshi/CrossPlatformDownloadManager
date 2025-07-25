@@ -157,6 +157,7 @@
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Open"
+                                   Foreground="{DynamicResource MainTextColor}"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center" />
                     </Grid>
@@ -238,7 +239,8 @@
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding Title}"
                                                    HorizontalAlignment="Stretch"
-                                                   VerticalAlignment="Center" />
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource MainTextColor}" />
 
                                         <!-- Start/Stop queue button -->
                                         <Button Grid.Column="2"
@@ -279,7 +281,7 @@
                                Margin="8, 4" />
                 </StackPanel>
 
-                <!-- Add new file -->
+                <!-- Add new link -->
                 <Button Classes="menuItemButton"
                         Command="{Binding AddNewDownloadLinkCommand}">
                     <!-- Content -->
@@ -297,7 +299,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="Add new link"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -319,7 +322,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="Add new queue"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -347,7 +351,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="Settings"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -493,7 +498,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="Help"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -515,7 +521,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="About us"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -543,7 +550,8 @@
                         <TextBlock Grid.Column="1"
                                    Text="Exit"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
             </StackPanel>

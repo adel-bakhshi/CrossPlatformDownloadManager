@@ -69,6 +69,9 @@ public class AppTheme
     [JsonProperty("managerTextColor")]
     public IThemeBrush? ManagerTextColor { get; set; }
 
+    [JsonProperty("chunkProgressBackgroundColor")]
+    public IThemeBrush? ChunkProgressBackgroundColor { get; set; }
+
     [JsonProperty("mainColor")]
     public IThemeBrush? MainColor { get; set; }
 
@@ -84,8 +87,8 @@ public class AppTheme
     [JsonProperty("warningColor")]
     public IThemeBrush? WarningColor { get; set; }
 
-    [JsonProperty("progressColor")]
-    public IThemeBrush? ProgressColor { get; set; }
+    [JsonProperty("chunkProgressColor")]
+    public IThemeBrush? ChunkProgressColor { get; set; }
 
     [JsonProperty("gridRowColor")]
     public IThemeBrush? GridRowColor { get; set; }

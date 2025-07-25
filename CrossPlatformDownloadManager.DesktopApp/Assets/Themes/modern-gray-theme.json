@@ -214,7 +214,7 @@
       }
     ]
   },
-  "progressColor": {
+  "chunkProgressColor": {
     "brushMode": 1,
     "startPoint": "0.5,0",
     "endPoint": "0.5,1",
@@ -236,6 +236,11 @@
         }
       }
     ]
+  },
+  "chunkProgressBackgroundColor": {
+    "brushMode": 0,
+    "color": "#424242",
+    "opacity": 1
   },
   "gridRowColor": {
     "brushMode": 1,

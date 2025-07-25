@@ -568,10 +568,15 @@
                             <Separator Background="{DynamicResource SecondaryBackgroundColor}"
                                        Margin="15, 5" />
 
-                            <MenuItem Header="Export data"
+                            <MenuItem Header="Export data as CDM file"
                                       Classes="subMenuItem"
                                       Width="250"
-                                      Command="{Binding ExportDataMenuItemCommand}" />
+                                      Command="{Binding ExportCdmDataMenuItemCommand}" />
+
+                            <MenuItem Header="Export data as Text file"
+                                      Classes="subMenuItem"
+                                      Width="250"
+                                      Command="{Binding ExportTextDataMenuItemCommand}" />
 
                             <MenuItem Header="Import data"
                                       Classes="subMenuItem"

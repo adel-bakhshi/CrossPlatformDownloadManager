@@ -1,10 +1,13 @@
+using System.Collections.Generic;
+using System.Linq;
+using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using Newtonsoft.Json;
 
-namespace CrossPlatformDownloadManager.Data.ViewModels.Exports;
+namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService.Models;
 
-public class ExportSettingsViewModel
+public class SettingsData
 {
     #region Properties
 
@@ -93,15 +96,15 @@ public class ExportSettingsViewModel
     public string? DataGridColumnsSettings { get; set; }
 
     [JsonProperty("proxies")]
-    public List<ExportProxySettingsViewModel> Proxies { get; set; } = [];
+    public List<ProxySettingsData> Proxies { get; set; } = [];
 
     #endregion
 
-    public static ExportSettingsViewModel CreateExportFile(SettingsViewModel settings, List<ProxySettingsViewModel> proxies)
+    public static SettingsData CreateExportFile(SettingsViewModel settings, List<ProxySettingsViewModel> proxies)
     {
         var exportProxies = proxies
             .Where(p => !p.Name.IsStringNullOrEmpty() && !p.Type.IsStringNullOrEmpty() && !p.Host.IsStringNullOrEmpty() && !p.Port.IsStringNullOrEmpty())
-            .Select(p => new ExportProxySettingsViewModel
+            .Select(p => new ProxySettingsData
             {
                 Name = p.Name!,
                 Type = p.Type!,
@@ -112,7 +115,7 @@ public class ExportSettingsViewModel
             })
             .ToList();
 
-        return new ExportSettingsViewModel
+        return new SettingsData
         {
             StartOnSystemStartup = settings.StartOnSystemStartup,
             UseBrowserExtension = settings.UseBrowserExtension,

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -197,41 +198,61 @@ public class BrowserExtension : IBrowserExtension
         }
 
         // Convert the JSON data to a ExtensionRequest
-        var extensionRequest = json.ConvertFromJson<ExtensionRequest?>();
-        if (extensionRequest == null)
+        var extensionRequests = json.ConvertFromJson<List<ExtensionRequest>?>();
+        if (extensionRequests == null || extensionRequests.Count == 0)
         {
             response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
             return response;
         }
 
-        // Check if URL is valid
-        var urlIsValid = extensionRequest.Url.CheckUrlValidation();
-        if (!urlIsValid)
+        if (extensionRequests.Count == 1)
         {
-            response.Message = "CDM can't accept this URL.";
-            return response;
-        }
+            // Check if URL is valid
+            var urlIsValid = extensionRequests[0].Url.CheckUrlValidation();
+            if (!urlIsValid)
+            {
+                response.Message = "CDM can't accept this URL.";
+                return response;
+            }
 
-        // Change URL to correct format
-        extensionRequest.Url = extensionRequest.Url!.Replace('\\', '/').Trim();
-        // Check for user option for showing start download dialog
-        var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
-        // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
-        if (showStartDownloadDialog)
-        {
-            ShowStartDownloadDialog(extensionRequest.Url);
+            // Change URL to correct format
+            extensionRequests[0].Url = extensionRequests[0].Url!.Replace('\\', '/').Trim();
+            // Check for user option for showing start download dialog
+            var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
+            // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
+            if (showStartDownloadDialog)
+            {
+                ShowStartDownloadDialog(extensionRequests[0].Url!);
+            }
+            // Otherwise, add link to database and start it
+            else
+            {
+                await AddNewDownloadFileAndStartItAsync(extensionRequests[0].Url!);
+            }
+
+            // Log captured URL
+            Log.Information("Captured URL: {Url}", extensionRequests[0].Url);
         }
-        // Otherwise, add link to database and start it
         else
         {
-            await AddNewDownloadFileAndStartItAsync(extensionRequest.Url);
+            // Convert received URLs to DownloadFileViewModel
+            var downloadFiles = extensionRequests
+                .Where(er => er.Url.CheckUrlValidation())
+                .Select(er =>
+                {
+                    var result = new DownloadFileViewModel { Url = er.Url!.Replace('\\', '/').Trim() };
+                    Log.Information("Captured URL: {Url}", result.Url);
+                    return result;
+                })
+                .ToList();
+
+            // Show manage links window
+            ShowManageLinksWindow(downloadFiles);
         }
 
-        // Log captured URL
-        Log.Information($"Captured URL: {extensionRequest.Url}");
         // Return the response
         response.IsSuccessful = true;
-        response.Message = "Link added to CDM.";
+        response.Message = $"{(extensionRequests.Count > 0 ? $"{extensionRequests.Count} Links" : "Link")} added to CDM.";
         return response;
     }
 
@@ -306,6 +327,20 @@ public class BrowserExtension : IBrowserExtension
     private async Task AddNewDownloadFileAndStartItAsync(string url)
     {
         await _appService.DownloadFileService.AddDownloadFileAsync(url, startDownloading: true);
+    }
+
+    /// <summary>
+    /// Shows manage links window and let the user select the URLs that he/she wants.
+    /// </summary>
+    /// <param name="downloadFiles">The download files that received from the browser extensions.</param>
+    private void ShowManageLinksWindow(List<DownloadFileViewModel> downloadFiles)
+    {
+        if (downloadFiles.Count == 0)
+            return;
+
+        var viewModel = new ManageLinksWindowViewModel(_appService, downloadFiles);
+        var window = new ManageLinksWindow { DataContext = viewModel };
+        window.Show();
     }
 
     #endregion

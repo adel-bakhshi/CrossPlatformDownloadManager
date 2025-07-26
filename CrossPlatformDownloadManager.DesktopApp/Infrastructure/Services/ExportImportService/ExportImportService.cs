@@ -26,7 +26,14 @@ public class ExportImportService : IExportImportService
 {
     #region Private fileds
 
+    /// <summary>
+    /// The download file service to access download files.
+    /// </summary>
     private readonly IDownloadFileService _downloadFileService;
+
+    /// <summary>
+    /// The settings service to access settings.
+    /// </summary>
     private readonly ISettingsService _settingsService;
 
     #endregion
@@ -145,6 +152,7 @@ public class ExportImportService : IExportImportService
                 return;
             }
 
+            // Create options
             var options = new FilePickerOpenOptions
             {
                 Title = "Import data",
@@ -156,20 +164,28 @@ public class ExportImportService : IExportImportService
                 ]
             };
 
+            // Open file picker to pick files
             var exportFiles = await storageProvider.OpenFilePickerAsync(options);
             if (exportFiles.Count == 0)
                 return;
 
+            // Get the file path
             var exportFilePath = exportFiles[0].Path.LocalPath;
+            // Get the extension of the file
             var ext = Path.GetExtension(exportFilePath);
             List<DownloadFileViewModel> downloadFiles;
+            // Load download files based on file extension
             if (ext.Equals(".cdm", StringComparison.OrdinalIgnoreCase))
             {
+                // Read the file content
                 var json = await File.ReadAllTextAsync(exportFilePath);
+                // Convert the json content to a list of DownloadFileData
                 var downloadFileDataList = json.ConvertFromJson<List<DownloadFileData>?>();
+                // Check if the list is empty
                 if (downloadFileDataList == null)
                     throw new InvalidOperationException("There is no data in the export file.");
 
+                // Select the urls from the list of DownloadFileData
                 downloadFiles = downloadFileDataList
                     .Where(df => !df.Url.IsStringNullOrEmpty() && df.Url.CheckUrlValidation())
                     .Select(df => new DownloadFileViewModel { Url = df.Url })
@@ -177,13 +193,16 @@ public class ExportImportService : IExportImportService
             }
             else
             {
+                // Read the file content
                 var content = await File.ReadAllLinesAsync(exportFilePath);
+                // Select the urls from the file content
                 downloadFiles = content
                     .Where(url => !url.IsStringNullOrEmpty() && url.CheckUrlValidation())
                     .Select(url => new DownloadFileViewModel { Url = url })
                     .ToList();
             }
 
+            // Check if the list of urls is empty
             if (downloadFiles.Count == 0)
             {
                 await DialogBoxManager.ShowInfoDialogAsync(dialogHeader: "Import data",
@@ -193,7 +212,9 @@ public class ExportImportService : IExportImportService
                 return;
             }
 
+            // Get the service provider
             var serviceProvider = Application.Current?.GetServiceProvider();
+            // Get the app service
             var appService = serviceProvider?.GetService<IAppService>();
             if (appService == null)
             {
@@ -204,13 +225,18 @@ public class ExportImportService : IExportImportService
                 return;
             }
 
+            // Create a new ManageLinksWindowViewModel
             var viewModel = new ManageLinksWindowViewModel(appService, downloadFiles);
+            // Create a new ManageLinksWindow
             var window = new ManageLinksWindow { DataContext = viewModel };
+            // Show the window
             window.Show();
         }
         catch (Exception ex)
         {
+            // Log the error
             Log.Error(ex, "An error occurred while trying to import CDM data. Error message: {ErrorMessage}", ex.Message);
+            // Show an error dialog
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

@@ -473,6 +473,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // When the URL is changed, update the URL of the download file.
         request.PropertyChanged += (_, e) => UpdateDownloadFileUrl(downloadFile, request, e.PropertyName);
         await request.FetchResponseHeadersAsync(cancellationToken);
+        // Check if response headers fetched successfully
+        if (request.ResponseHeaders.Count == 0)
+            return downloadFile;
 
         var isFile = true;
         string? contentDisposition;

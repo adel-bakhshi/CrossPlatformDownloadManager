@@ -87,7 +87,11 @@ public class ManageLinksWindowViewModel : ViewModelBase
     public bool HideHtmlFiles
     {
         get => _hideHtmlFiles;
-        set => this.RaiseAndSetIfChanged(ref _hideHtmlFiles, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _hideHtmlFiles, value);
+            FilterDownloadFiles();
+        }
     }
 
     /// <summary>
@@ -170,6 +174,11 @@ public class ManageLinksWindowViewModel : ViewModelBase
         get => _saveButtonIsEnabled;
         set => this.RaiseAndSetIfChanged(ref _saveButtonIsEnabled, value);
     }
+
+    /// <summary>
+    /// Gets a value that indicates the filtered download files.
+    /// </summary>
+    public ObservableCollection<DownloadFileViewModel> FilteredDownloadFiles { get; private set; } = [];
 
     #endregion
 
@@ -556,6 +565,8 @@ public class ManageLinksWindowViewModel : ViewModelBase
                 downloadFile.FileType = fileType;
                 // Add the download file to the download files list
                 DownloadFiles.Add(downloadFile);
+                // Filter download files
+                FilterDownloadFiles();
             }
 
             // Raise the property changed event for the download files list
@@ -569,6 +580,25 @@ public class ManageLinksWindowViewModel : ViewModelBase
 
         // Enable save button
         SaveButtonIsEnabled = true;
+    }
+
+    /// <summary>
+    /// Filters download files to show/hide HTML files.
+    /// </summary>
+    private void FilterDownloadFiles()
+    {
+        if (HideHtmlFiles)
+        {
+            FilteredDownloadFiles = DownloadFiles
+                .Where(df => Path.GetExtension(df.FileName)?.Equals(".html") == false && Path.GetExtension(df.FileName)?.Equals(".htm") == false)
+                .ToObservableCollection();
+        }
+        else
+        {
+            FilteredDownloadFiles = DownloadFiles;
+        }
+
+        this.RaisePropertyChanged(nameof(FilteredDownloadFiles));
     }
 
     #endregion

@@ -226,7 +226,7 @@
             <!-- Download list -->
             <DataGrid Name="DownloadFilesDataGrid"
                       Classes="mainDataGrid"
-                      ItemsSource="{Binding DownloadFiles}"
+                      ItemsSource="{Binding FilteredDownloadFiles}"
                       SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
                       MaxHeight="350">
                 <!-- Styles -->
@@ -270,13 +270,17 @@
 
                     <!-- File name and file type -->
                     <DataGridTemplateColumn Header="Name"
+                                            Width="300"
                                             MinWidth="150"
                                             SortMemberPath="FileName">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical"
                                             VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding FileName}" />
+                                    <TextBlock Text="{Binding FileName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding FileName}" />
+
                                     <TextBlock Text="{Binding FileType}"
                                                Foreground="{DynamicResource AccentColor}" />
                                 </StackPanel>
@@ -285,9 +289,18 @@
                     </DataGridTemplateColumn>
 
                     <!-- Url -->
-                    <DataGridTextColumn Header="Url"
-                                        MinWidth="150"
-                                        Binding="{Binding Url, FallbackValue='', TargetNullValue=''}" />
+                    <DataGridTemplateColumn Header="Url"
+                                            Width="300"
+                                            MinWidth="150"
+                                            SortMemberPath="Url">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Url}"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip.Tip="{Binding Url}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
                     <!-- File size -->
                     <DataGridTextColumn Header="Size"

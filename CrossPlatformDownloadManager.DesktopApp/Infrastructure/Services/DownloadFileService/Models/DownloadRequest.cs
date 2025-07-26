@@ -33,7 +33,7 @@ public class DownloadRequest : PropertyChangedBase
     /// The HttpClient for sending the request.
     /// </summary>
     private HttpClient? _httpClient;
-    
+
     /// <summary>
     /// The url of the request.
     /// </summary>
@@ -90,7 +90,7 @@ public class DownloadRequest : PropertyChangedBase
     public DownloadRequest(string url, DownloadRequestOptions options)
     {
         _settingsService = GetSettingsService();
-        
+
         Url = url.CheckUrlValidation() ? new Uri(url) : new Uri(new Uri("http://localhost"), url);
         Options = options;
     }
@@ -101,7 +101,7 @@ public class DownloadRequest : PropertyChangedBase
     /// <returns>A dictionary contains response headers.</returns>
     public async Task<HttpStatusCode?> FetchResponseHeadersAsync(CancellationToken cancelToken = default)
     {
-        HttpStatusCode? statusCode;
+        HttpStatusCode? statusCode = null;
         // Try to get the response headers from the URL
         try
         {
@@ -114,10 +114,11 @@ public class DownloadRequest : PropertyChangedBase
             // Set the status code
             statusCode = response.StatusCode;
             // Ensure that the request was successful
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                return statusCode;
+
             // Ensure that the redirect URI is the same as the origin
             EnsureRedirectUriIsTheSameAsTheOrigin(response);
-
             // Store the response headers in the ResponseHeaders property
             ResponseHeaders = response.Content.Headers.ToDictionary(x => x.Key, x => x.Value.First());
         }
@@ -125,8 +126,6 @@ public class DownloadRequest : PropertyChangedBase
         {
             // If an exception is thrown, clear the ResponseHeaders property
             ResponseHeaders.Clear();
-            // Throw the exception
-            throw;
         }
 
         // Return the ResponseHeaders property
@@ -170,7 +169,7 @@ public class DownloadRequest : PropertyChangedBase
                 if (acceptRanges.Contains("bytes"))
                     return true;
             }
-            
+
             // Some servers don't include Accept-Ranges but still support partial content.
             // If Range request succeeds with Partial Content status:
             if (statusCode == HttpStatusCode.PartialContent)
@@ -184,9 +183,9 @@ public class DownloadRequest : PropertyChangedBase
 
         return false;
     }
-    
+
     #region Helpers
-    
+
     /// <summary>
     /// Creates an instance of HttpClient with specific options.
     /// </summary>
@@ -196,7 +195,7 @@ public class DownloadRequest : PropertyChangedBase
         // Check if http client is null.
         if (_httpClient != null)
             return _httpClient;
-        
+
         // Create a SocketsHttpHandler for the request
         var handler = GetHandler();
         // Create a HttpClient with the SocketsHttpHandler

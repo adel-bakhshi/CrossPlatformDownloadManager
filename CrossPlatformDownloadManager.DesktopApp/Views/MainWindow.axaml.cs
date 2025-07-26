@@ -115,15 +115,6 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             // Check for updates
             if (ViewModel != null)
                 _ = ViewModel.CheckForUpdatesAsync(null);
-
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var filePath = Path.Combine(desktopPath, "123.txt");
-            var lines = await File.ReadAllLinesAsync(filePath);
-            var links = lines.Where(l => !l.IsStringNullOrEmpty()).Select(l => new DownloadFileViewModel { Url = l }).ToList();
-            var tempAppService = serviceProvider.GetService<Infrastructure.Services.AppService.IAppService>();
-            var tempVm = new ManageLinksWindowViewModel(tempAppService!, links);
-            var tempWin = new ManageLinksWindow { DataContext = tempVm };
-            tempWin.Show();
         }
         catch (Exception ex)
         {

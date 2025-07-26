@@ -4,14 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
+using Microsoft.Extensions.DependencyInjection;
+using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
@@ -57,7 +63,7 @@ public class ExportImportService : IExportImportService
                 var exportDownloadFiles = downloadFiles
                     .Select(df => new DownloadFileData { Url = df.Url ?? string.Empty })
                     .ToList();
-                    
+
                 downloadFilesContent = exportDownloadFiles.ConvertToJson();
             }
             else
@@ -125,7 +131,88 @@ public class ExportImportService : IExportImportService
 
     public async Task ImportDataAsync()
     {
-        throw new System.NotImplementedException();
+        try
+        {
+            // Get storage provider
+            var storageProvider = App.Desktop?.MainWindow?.StorageProvider;
+            // Check if storage provider is available
+            if (storageProvider == null)
+            {
+                await DialogBoxManager.ShowDangerDialogAsync(dialogHeader: "Export data",
+                    dialogMessage: "Can't access to storage provider. Please, try again later.",
+                    dialogButtons: DialogButtons.Ok);
+
+                return;
+            }
+
+            var options = new FilePickerOpenOptions
+            {
+                Title = "Import data",
+                AllowMultiple = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("CDM export file") { Patterns = ["*.cdm"] },
+                    new FilePickerFileType("Text export file") { Patterns = ["*.txt"] }
+                ]
+            };
+
+            var exportFiles = await storageProvider.OpenFilePickerAsync(options);
+            if (exportFiles.Count == 0)
+                return;
+
+            var exportFilePath = exportFiles[0].Path.LocalPath;
+            var ext = Path.GetExtension(exportFilePath);
+            List<DownloadFileViewModel> downloadFiles;
+            if (ext.Equals(".cdm", StringComparison.OrdinalIgnoreCase))
+            {
+                var json = await File.ReadAllTextAsync(exportFilePath);
+                var downloadFileDataList = json.ConvertFromJson<List<DownloadFileData>?>();
+                if (downloadFileDataList == null)
+                    throw new InvalidOperationException("There is no data in the export file.");
+
+                downloadFiles = downloadFileDataList
+                    .Where(df => !df.Url.IsStringNullOrEmpty() && df.Url.CheckUrlValidation())
+                    .Select(df => new DownloadFileViewModel { Url = df.Url })
+                    .ToList();
+            }
+            else
+            {
+                var content = await File.ReadAllLinesAsync(exportFilePath);
+                downloadFiles = content
+                    .Where(url => !url.IsStringNullOrEmpty() && url.CheckUrlValidation())
+                    .Select(url => new DownloadFileViewModel { Url = url })
+                    .ToList();
+            }
+
+            if (downloadFiles.Count == 0)
+            {
+                await DialogBoxManager.ShowInfoDialogAsync(dialogHeader: "Import data",
+                    dialogMessage: "There is no valid data in the export file.",
+                    dialogButtons: DialogButtons.Ok);
+
+                return;
+            }
+
+            var serviceProvider = Application.Current?.GetServiceProvider();
+            var appService = serviceProvider?.GetService<IAppService>();
+            if (appService == null)
+            {
+                await DialogBoxManager.ShowDangerDialogAsync(dialogHeader: "Import data",
+                    dialogMessage: "Can't access to app service. Please, try again later.",
+                    dialogButtons: DialogButtons.Ok);
+
+                return;
+            }
+
+            var viewModel = new ManageLinksWindowViewModel(appService, downloadFiles);
+            var window = new ManageLinksWindow { DataContext = viewModel };
+            window.Show();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to import CDM data. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
     }
 
     public async Task ExportSettingsAsync()

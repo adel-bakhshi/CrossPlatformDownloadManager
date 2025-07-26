@@ -1409,6 +1409,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task ImportDataMenuItemAsync()
     {
+        await AppService.ExportImportService.ImportDataAsync();
     }
 
     private async Task ExportSettingsMenuItemAsync()

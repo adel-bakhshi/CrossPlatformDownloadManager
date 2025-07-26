@@ -20,7 +20,7 @@
         CanResize="False">
     <!-- Main content -->
     <ScrollViewer HorizontalAlignment="Stretch"
-                  HorizontalScrollBarVisibility="Hidden"
+                  HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto"
                   Margin="20">
         <StackPanel Orientation="Vertical"
@@ -227,7 +227,8 @@
             <DataGrid Name="DownloadFilesDataGrid"
                       Classes="mainDataGrid"
                       ItemsSource="{Binding DownloadFiles}"
-                      SelectionChanged="DownloadFilesDataGridOnSelectionChanged">
+                      SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
+                      MaxHeight="350">
                 <!-- Styles -->
                 <DataGrid.Styles>
                     <Style Selector="DataGrid">
@@ -236,6 +237,11 @@
                                 <Setter Property="CornerRadius"
                                         Value="0, 0, 0, 0" />
                             </Style>
+                        </Style>
+
+                        <Style Selector="^ /template/ DataGridColumnHeader#PART_TopRightCornerHeader">
+                            <Setter Property="CornerRadius"
+                                    Value="0, 8, 8, 0" />
                         </Style>
                     </Style>
                 </DataGrid.Styles>
@@ -289,6 +295,23 @@
                                         Binding="{Binding SizeAsString}" />
                 </DataGrid.Columns>
             </DataGrid>
+
+            <!-- Action buttons -->
+            <StackPanel Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Right"
+                        Margin="0, 20, 0, 0">
+                <Button Classes="button success"
+                        Command="{Binding SaveCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Save"
+                        IsEnabled="{Binding SaveButtonIsEnabled}" />
+
+                <Button Classes="button danger"
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
+                        Content="Cancel" />
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Window>

@@ -24,7 +24,7 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
         {
             if (ViewModel == null)
                 return;
-            
+
             var options = new FolderPickerOpenOptions
             {
                 Title = "Select Directory",
@@ -36,7 +36,7 @@ public partial class AddEditCategoryWindow : MyWindowBase<AddEditCategoryWindowV
                 return;
 
             var directory = directories[0];
-            ViewModel.SaveDirectory = directory.Path.LocalPath;
+            ViewModel.SaveDirectory = directory.Path.IsAbsoluteUri ? directory.Path.LocalPath : directory.Path.OriginalString;
         }
         catch (Exception ex)
         {

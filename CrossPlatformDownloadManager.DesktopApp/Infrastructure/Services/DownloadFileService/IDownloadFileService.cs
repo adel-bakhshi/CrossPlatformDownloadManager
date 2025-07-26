@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.ViewModels;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;

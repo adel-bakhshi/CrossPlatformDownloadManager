@@ -124,6 +124,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             previousDownloadFile.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
         }
 
+        // Set file type for each download file
+        foreach (var downloadFile in DownloadFiles)
+            downloadFile.FileType = GetFileType(downloadFile);
+
         // Notify download files changed
         OnPropertyChanged(nameof(DownloadFiles));
         // Raise changed event
@@ -142,9 +146,13 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Find category
         var category = _categoryService.Categories.FirstOrDefault(c => c.Id == viewModel.CategoryId);
         // Set save location
-        var saveLocation = _settingsService.Settings.DisableCategories
-            ? _settingsService.Settings.GlobalSaveLocation!
-            : category!.CategorySaveDirectory!.SaveDirectory;
+        // Check if the save location has value, use it
+        // Otherwise, get the save location from the categories
+        var saveLocation = viewModel.SaveLocation.IsStringNullOrEmpty()
+            ? _settingsService.Settings.DisableCategories
+                ? _settingsService.Settings.GlobalSaveLocation!
+                : category!.CategorySaveDirectory!.SaveDirectory
+            : viewModel.SaveLocation!;
 
         // Create an instance of DownloadFile
         var downloadFile = new DownloadFile
@@ -167,17 +175,27 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Handle duplicate download links
         DownloadFileViewModel? result = null;
+        // Check is url duplicate another time
+        var isUrlDuplicate = CheckIsUrlDuplicate(downloadFile.Url);
         // Check if there is an existing download file with the same URL and handle it if its exists
-        if (viewModel.IsUrlDuplicate || CheckIsUrlDuplicate(downloadFile.Url))
-            result = await HandleDuplicateUrlAsync(downloadFile);
+        if (viewModel.IsUrlDuplicate || isUrlDuplicate)
+        {
+            if (isUrlDuplicate)
+                result = await HandleDuplicateUrlAsync(downloadFile);
+        }
 
         // If duplicate download action sets to ShowCompleteDialogOrResume, we have to pass the existing download file
         if (result != null)
             return result;
 
+        // Check if the file name is duplicate and handle it if its exists
+        var isFileNameDuplicate = CheckIsFileNameDuplicate(downloadFile.FileName, downloadFile.SaveLocation);
         // Make sure each file has a unique name
-        if (viewModel.IsFileNameDuplicate || CheckIsFileNameDuplicate(downloadFile.FileName, downloadFile.SaveLocation))
-            HandleDuplicateFileName(downloadFile);
+        if (viewModel.IsFileNameDuplicate || isFileNameDuplicate)
+        {
+            if (isFileNameDuplicate)
+                HandleDuplicateFileName(downloadFile);
+        }
 
         // Add new download file and save it
         await _unitOfWork.DownloadFileRepository.AddAsync(downloadFile);
@@ -658,29 +676,59 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         return false;
     }
 
-    public async Task<DuplicateDownloadLinkAction> GetUserDuplicateActionAsync(string url, string fileName,
-        string saveLocation)
+    public async Task<DuplicateDownloadLinkAction> GetUserDuplicateActionAsync(string url, string fileName, string saveLocation)
     {
+        // Get the duplicate download link action from the settings
         var duplicateAction = _settingsService.Settings.DuplicateDownloadLinkAction;
+        // If the duplicate download link action is not set to LetUserChoose, throw an exception
         if (duplicateAction != DuplicateDownloadLinkAction.LetUserChoose)
             throw new InvalidOperationException("Only works when settings related to managing duplicate links have been delegated to the user.");
 
+        // Get the owner window
         var ownerWindow = App.Desktop?.Windows.FirstOrDefault(w => w.IsFocused) ?? App.Desktop?.MainWindow;
+        // If the owner window is not found, throw an exception
         if (ownerWindow == null)
             throw new InvalidOperationException("Owner window not found.");
 
+        // Get the service provider
         var serviceProvider = Application.Current?.GetServiceProvider();
+        // Get the app service
         var appService = serviceProvider?.GetService<IAppService>();
+        // If the app service is not found, throw an exception
         if (appService == null)
             throw new InvalidOperationException("Can't find app service.");
 
+        // Create a new DuplicateDownloadLinkWindowViewModel
         var viewModel = new DuplicateDownloadLinkWindowViewModel(appService, url, saveLocation, fileName);
+        // Create a new DuplicateDownloadLinkWindow
         var window = new DuplicateDownloadLinkWindow { DataContext = viewModel };
+        DuplicateDownloadLinkAction? action;
+        // If the owner window is not visible
+        if (!ownerWindow.IsVisible)
+        {
+            // Create a new TaskCompletionSource
+            var duplicateCompletionSource = new TaskCompletionSource<bool>();
+            // Add a Closed event handler to the window
+            window.Closed += (_, _) => duplicateCompletionSource.TrySetResult(true);
+            // Show the window
+            window.Show();
+            // Wait for the window to close
+            await duplicateCompletionSource.Task;
+            // Get the result from the view model
+            action = viewModel.GetResult();
+        }
+        // If the owner window is visible
+        else
+        {
+            // Show the dialog and get the result
+            action = await window.ShowDialog<DuplicateDownloadLinkAction?>(ownerWindow);
+        }
 
-        var action = await window.ShowDialog<DuplicateDownloadLinkAction?>(ownerWindow);
+        // If the action is null, throw an exception
         if (action == null)
             throw new InvalidOperationException("Duplicate download link action is null.");
 
+        // Return the action
         return action.Value;
     }
 
@@ -1417,6 +1465,45 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             if (!deleteResult)
                 throw new InvalidOperationException("Could not remove the temporary directory.");
         }
+    }
+
+    /// <summary>
+    /// Gets the file type of download file.
+    /// </summary>
+    /// <param name="downloadFile">The download file to get the file type of.</param>
+    /// <returns>The file type of the download file.</returns>
+    private string GetFileType(DownloadFileViewModel downloadFile)
+    {
+        // Declare a string variable to store the file type
+        string fileType;
+        // Get the file extension from the downloadFile
+        var ext = Path.GetExtension(downloadFile.FileName);
+        // Get the file extension from the category service
+        var fileExtension = _categoryService
+            .Categories
+            .FirstOrDefault(c => c.Id == downloadFile.CategoryId)?
+            .FileExtensions
+            .FirstOrDefault(fe => fe.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+
+        // If the file extension is null
+        if (fileExtension == null)
+        {
+            // Get the file extension from the category service
+            var fileExtensions = _categoryService
+                .Categories
+                .SelectMany(c => c.FileExtensions)
+                .FirstOrDefault(fe => fe.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+
+            // Set the file type to the alias of the file extension or the unknown file type
+            fileType = fileExtensions?.Alias ?? Constants.UnknownFileType;
+        }
+        else
+        {
+            // Set the file type to the alias of the file extension
+            fileType = fileExtension.Alias;
+        }
+
+        return fileType;
     }
 
     #endregion

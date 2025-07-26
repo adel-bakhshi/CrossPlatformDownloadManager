@@ -363,9 +363,13 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         if (!SelectAllDownloadFiles)
+        {
             dataGrid.SelectedIndex = -1;
+        }
         else
+        {
             dataGrid.SelectAll();
+        }
     }
 
     private async Task AddNewLinkAsync(Window? owner)

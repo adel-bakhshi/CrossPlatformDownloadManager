@@ -8,7 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-        <AssemblyVersion>0.8.0</AssemblyVersion>
+        <AssemblyVersion>0.9.0</AssemblyVersion>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

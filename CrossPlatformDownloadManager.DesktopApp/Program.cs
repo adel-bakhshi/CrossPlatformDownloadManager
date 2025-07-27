@@ -14,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeSe
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -92,6 +93,9 @@ sealed class Program
 
                 // Add DownloadQueueService to services
                 services.AddSingleton<IDownloadQueueService, DownloadQueueService>();
+
+                // Add ExportImportService to services
+                services.AddSingleton<IExportImportService, ExportImportService>();
 
                 // Add AppService to services
                 services.AddSingleton<IAppService, AppService>();

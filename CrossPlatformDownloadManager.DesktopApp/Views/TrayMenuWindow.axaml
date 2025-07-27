@@ -74,17 +74,17 @@
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                        Value="{DynamicResource MenuItemHoverColor}" />
             </Style>
 
             <Style Selector="^:pressed">
                 <Setter Property="Background"
-                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                        Value="{DynamicResource MenuItemHoverColor}" />
             </Style>
 
             <Style Selector="^:disabled">
                 <Setter Property="Background"
-                        Value="{DynamicResource TertiaryColor}" />
+                        Value="{DynamicResource AccentColor}" />
             </Style>
         </Style>
 
@@ -157,6 +157,7 @@
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Open"
+                                   Foreground="{DynamicResource MainTextColor}"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center" />
                     </Grid>
@@ -165,7 +166,7 @@
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 4" />
 
                 <!-- Download queues -->
@@ -218,7 +219,7 @@
 
                                             <Style Selector="^:pointerover">
                                                 <Setter Property="Background"
-                                                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                                        Value="{DynamicResource MenuItemHoverColor}" />
                                             </Style>
                                         </Style>
                                     </Border.Styles>
@@ -232,13 +233,14 @@
                                                   Width="16"
                                                   Height="16"
                                                   Data="{DynamicResource ClockRotateLeftSvgIcon}"
-                                                  Foreground="{DynamicResource TextColor}" />
+                                                  Foreground="{DynamicResource MainTextColor}" />
 
                                         <!-- Queue title -->
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding Title}"
                                                    HorizontalAlignment="Stretch"
-                                                   VerticalAlignment="Center" />
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource MainTextColor}" />
 
                                         <!-- Start/Stop queue button -->
                                         <Button Grid.Column="2"
@@ -254,13 +256,13 @@
                                                         <Setter Property="Data"
                                                                 Value="{DynamicResource PlaySvgIcon}" />
                                                         <Setter Property="Foreground"
-                                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                                                Value="{DynamicResource SuccessColor}" />
 
                                                         <Style Selector="^.isRunning">
                                                             <Setter Property="Data"
                                                                     Value="{DynamicResource PauseSvgIcon}" />
                                                             <Setter Property="Foreground"
-                                                                    Value="{DynamicResource DangerGradientBrush}" />
+                                                                    Value="{DynamicResource DangerColor}" />
                                                         </Style>
                                                     </Style>
                                                 </PathIcon.Styles>
@@ -275,11 +277,11 @@
                     <!-- Separator -->
                     <Rectangle Height="1"
                                HorizontalAlignment="Stretch"
-                               Fill="{DynamicResource SecondaryColor}"
+                               Fill="{DynamicResource SecondaryBackgroundColor}"
                                Margin="8, 4" />
                 </StackPanel>
 
-                <!-- Add new file -->
+                <!-- Add new link -->
                 <Button Classes="menuItemButton"
                         Command="{Binding AddNewDownloadLinkCommand}">
                     <!-- Content -->
@@ -291,13 +293,14 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource PlusSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Add new link"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -313,20 +316,21 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource PlusSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Add new queue"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 4" />
 
                 <!-- Settings -->
@@ -341,20 +345,21 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource GearSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Settings"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 4" />
 
                 <!-- Proxies -->
@@ -398,16 +403,16 @@
                                     <Setter Property="Background"
                                             Value="{DynamicResource TransparentColor}" />
                                     <Setter Property="Foreground"
-                                            Value="{DynamicResource TextColor}" />
+                                            Value="{DynamicResource MainTextColor}" />
 
                                     <Style Selector="^:selected">
                                         <Setter Property="Foreground"
-                                                Value="{DynamicResource SuccessGradientBrush}" />
+                                                Value="{DynamicResource SuccessColor}" />
                                     </Style>
 
                                     <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                         <Setter Property="Background"
-                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                                Value="{DynamicResource MenuItemHoverColor}" />
                                     </Style>
 
                                     <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
@@ -427,7 +432,7 @@
 
                                     <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                         <Setter Property="Background"
-                                                Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                                                Value="{DynamicResource MenuItemHoverColor}" />
                                     </Style>
                                 </Style>
                             </Style>
@@ -471,7 +476,7 @@
                     <!-- Separator -->
                     <Rectangle Height="1"
                                HorizontalAlignment="Stretch"
-                               Fill="{DynamicResource SecondaryColor}"
+                               Fill="{DynamicResource SecondaryBackgroundColor}"
                                Margin="8, 4" />
                 </StackPanel>
 
@@ -487,13 +492,14 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource CircleQuestionSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Help"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
@@ -509,20 +515,21 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource CircleInfoSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="About us"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
 
                 <!-- Separator -->
                 <Rectangle Height="1"
                            HorizontalAlignment="Stretch"
-                           Fill="{DynamicResource SecondaryColor}"
+                           Fill="{DynamicResource SecondaryBackgroundColor}"
                            Margin="8, 4" />
 
                 <!-- Exit -->
@@ -537,13 +544,14 @@
                                   Width="16"
                                   Height="16"
                                   Data="{DynamicResource CircleXMarkSvgIcon}"
-                                  Foreground="{DynamicResource TextColor}" />
+                                  Foreground="{DynamicResource MainTextColor}" />
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
                                    Text="Exit"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MainTextColor}" />
                     </Grid>
                 </Button>
             </StackPanel>

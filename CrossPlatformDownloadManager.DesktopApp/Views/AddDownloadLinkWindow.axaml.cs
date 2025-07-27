@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.Utils;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
@@ -13,7 +14,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 {
     #region Private Fields
 
-    private readonly DispatcherTimer _urlTextBoxChangedTimer;
+    private readonly Debouncer _urlTextChangedDebouncer;
     private readonly DispatcherTimer _removeTopmostTimer;
 
     #endregion
@@ -22,8 +23,7 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
     {
         InitializeComponent();
 
-        _urlTextBoxChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _urlTextBoxChangedTimer.Tick += UrlTextBoxChangedTimerOnTick;
+        _urlTextChangedDebouncer = new Debouncer(TimeSpan.FromSeconds(1));
 
         _removeTopmostTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
         _removeTopmostTimer.Tick += RemoveTopmostTimerOnTick;
@@ -37,22 +37,16 @@ public partial class AddDownloadLinkWindow : MyWindowBase<AddDownloadLinkWindowV
 
     #region Helpers
 
-    private void UrlTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Reset timer when user still typing
-        _urlTextBoxChangedTimer.Stop();
-        _urlTextBoxChangedTimer.Start();
-    }
-
-    private async void UrlTextBoxChangedTimerOnTick(object? sender, EventArgs e)
+    private async void UrlTextBoxOnTextChanged(object? sender, TextChangedEventArgs e)
     {
         try
         {
+            // Check if view model is null
             if (ViewModel == null)
                 return;
 
-            _urlTextBoxChangedTimer.Stop();
-            await ViewModel.GetUrlDetailsAsync();
+            // Run debouncer
+            _ = _urlTextChangedDebouncer.RunAsync(ViewModel.GetUrlDetailsAsync);
         }
         catch (Exception ex)
         {

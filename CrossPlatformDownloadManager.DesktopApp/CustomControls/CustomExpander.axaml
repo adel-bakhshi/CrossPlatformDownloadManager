@@ -135,12 +135,12 @@
 
             <Style Selector="^:expanded">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource CategoryItemOnHoverColor}" />
+                        Value="{DynamicResource CategoryHoverColor}" />
             </Style>
 
             <Style Selector="^:pointerover">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource CategoryItemOnHoverColor}" />
+                        Value="{DynamicResource CategoryHoverColor}" />
             </Style>
         </Style>
 

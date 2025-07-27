@@ -68,7 +68,7 @@
 
     <!-- Main content -->
     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
-            Background="{DynamicResource SecondaryColor}"
+            Background="{DynamicResource SecondaryBackgroundColor}"
             Padding="20">
         <ListBox Name="CategoriesTreeItemViewsLibBox"
                  ItemsSource="{Binding CategoriesTreeItemViews}"

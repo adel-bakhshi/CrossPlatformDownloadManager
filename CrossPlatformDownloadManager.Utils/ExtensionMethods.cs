@@ -322,8 +322,8 @@ public static class ExtensionMethods
         var buffer = new byte[bufferSize];
         int bytesRead;
 
-        while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-            await destinationStream.WriteAsync(buffer, 0, bytesRead);
+        while ((bytesRead = await sourceStream.ReadAsync(buffer)) > 0)
+            await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead));
     }
 
     public static async Task ZipDirectoryAsync(this string sourceDir, string zipFilePath)

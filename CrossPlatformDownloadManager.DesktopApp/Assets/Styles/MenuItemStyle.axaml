@@ -13,7 +13,7 @@
 
         <!-- Header menu item transparent color -->
         <SolidColorBrush x:Key="HeaderMenuItemTransparentColor"
-                         Color="{DynamicResource SecondaryColor}"
+                         Color="{DynamicResource SecondaryBackgroundColor}"
                          Opacity="0" />
     </Styles.Resources>
 
@@ -197,13 +197,13 @@
         <!-- On pointer over root border styles -->
         <Style Selector="^:pointerover /template/ Border#root">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
         </Style>
 
         <!-- On selected root border styles -->
         <Style Selector="^:selected /template/ Border#root">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
         </Style>
     </Style>
 
@@ -384,13 +384,13 @@
         <!-- On pointer over root border styles -->
         <Style Selector="^:pointerover /template/ Border#root">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <!-- On selected root border styles -->
         <Style Selector="^:selected /template/ Border#root">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
     </Style>
 </Styles>

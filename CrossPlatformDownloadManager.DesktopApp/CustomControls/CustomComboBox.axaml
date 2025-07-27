@@ -36,27 +36,27 @@
 
         <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
     </Style>
 
@@ -64,7 +64,7 @@
         <Setter Property="Background"
                 Value="{DynamicResource TransparentColor}" />
         <Setter Property="Foreground"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource MainTextColor}" />
         <Setter Property="BorderBrush"
                 Value="{DynamicResource ThemeBorderMidBrush}" />
         <Setter Property="BorderThickness"
@@ -78,7 +78,7 @@
         <Setter Property="MinHeight"
                 Value="0" />
         <Setter Property="PlaceholderForeground"
-                Value="{DynamicResource TertiaryColor}" />
+                Value="{DynamicResource AccentColor}" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
                 Value="Disabled" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
@@ -86,9 +86,9 @@
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="ToggleIconColor"
-                Value="{DynamicResource TertiaryColor}" />
+                Value="{DynamicResource AccentColor}" />
         <Setter Property="OnHoverToggleIconColor"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource MainTextColor}" />
         <Setter Property="PopupBackground"
                 Value="{DynamicResource MenuBackgroundColor}" />
 
@@ -212,7 +212,7 @@
 
         <Style Selector="^:disabled">
             <Setter Property="Foreground"
-                    Value="{DynamicResource TertiaryColor}" />
+                    Value="{DynamicResource AccentColor}" />
         </Style>
 
         <Style Selector="^ /template/ PathIcon#TogglePathIcon">

@@ -33,7 +33,7 @@
             <TextBlock VerticalAlignment="Center">
                 <Run Text="{Binding TimeRemaining}"
                      FontWeight="Bold"
-                     Foreground="{DynamicResource DangerGradientBrush}" />
+                     Foreground="{DynamicResource DangerColor}" />
 
                 <Run Text="{Binding TimeUnit}" />
             </TextBlock>
@@ -42,8 +42,8 @@
         <!-- Progress bar -->
         <ProgressBar Grid.Row="1"
                      Classes="customProgressBar dataGridProgressBar"
-                     Foreground="{DynamicResource DangerGradientBrush}"
-                     Background="{DynamicResource SecondaryColor}"
+                     Foreground="{DynamicResource DangerColor}"
+                     Background="{DynamicResource SecondaryBackgroundColor}"
                      Margin="0, 0, 0, 10"
                      Value="{Binding Progress}" />
 
@@ -52,7 +52,7 @@
                    Text="{Binding Message}"
                    TextWrapping="Wrap"
                    TextTrimming="CharacterEllipsis"
-                   Foreground="{DynamicResource WarningGradientBrush}" />
+                   Foreground="{DynamicResource WarningColor}" />
 
         <Button Grid.Row="3"
                 Classes="button danger"

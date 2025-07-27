@@ -100,7 +100,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
             SetField(ref _isSizeUnknown, value);
             OnPropertyChanged(nameof(SizeAsString));
             OnPropertyChanged(nameof(DownloadProgressAsString));
-            OnPropertyChanged(nameof(CeilingDownloadProgressAsString));
+            OnPropertyChanged(nameof(FloorDownloadProgressAsString));
             OnPropertyChanged(nameof(TimeLeftAsString));
         }
     }
@@ -182,12 +182,12 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
                 return;
 
             OnPropertyChanged(nameof(DownloadProgressAsString));
-            OnPropertyChanged(nameof(CeilingDownloadProgressAsString));
+            OnPropertyChanged(nameof(FloorDownloadProgressAsString));
         }
     }
 
     public string DownloadProgressAsString => IsSizeUnknown ? "Unknown" : DownloadProgress == null ? "00.00%" : $"{DownloadProgress ?? 0:00.00}%";
-    public string CeilingDownloadProgressAsString => IsSizeUnknown ? "Unknown" : DownloadProgress == null ? "00.00%" : $"{Math.Ceiling(DownloadProgress ?? 0):00}%";
+    public string FloorDownloadProgressAsString => IsSizeUnknown ? "Unknown" : DownloadProgress == null ? "00%" : $"{Math.Floor(DownloadProgress ?? 0):00}%";
 
     public double? DownloadedSize
     {

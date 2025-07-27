@@ -18,11 +18,11 @@
 
         <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
         </Style>
         <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
         </Style>
         <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background"
@@ -32,7 +32,7 @@
             <Setter Property="Opacity"
                     Value="0.5" />
             <Setter Property="Background"
-                    Value="{DynamicResource TertiaryColor}" />
+                    Value="{DynamicResource AccentColor}" />
         </Style>
     </Style>
 </Styles>

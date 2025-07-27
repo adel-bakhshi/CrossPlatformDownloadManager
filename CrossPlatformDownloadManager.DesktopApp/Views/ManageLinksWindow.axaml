@@ -1,0 +1,335 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        xmlns:viewModel="using:CrossPlatformDownloadManager.Data.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.ManageLinksWindow"
+        x:DataType="vm:ManageLinksWindowViewModel"
+        Title="CDM - Manage Links"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        CanResize="False">
+    <!-- Main content -->
+    <Grid RowDefinitions="*, Auto"
+          Margin="20">
+        <!-- Download files and options -->
+        <ScrollViewer Grid.Row="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Stretch">
+                <!-- Download list -->
+                <DataGrid Name="DownloadFilesDataGrid"
+                          Classes="mainDataGrid"
+                          ItemsSource="{Binding FilteredDownloadFiles}"
+                          SelectionChanged="DownloadFilesDataGridOnSelectionChanged"
+                          MaxHeight="350">
+                    <!-- Styles -->
+                    <DataGrid.Styles>
+                        <Style Selector="DataGrid">
+                            <Style Selector="^ DataGridColumnHeader">
+                                <Style Selector="^:nth-last-child(2)">
+                                    <Setter Property="CornerRadius"
+                                            Value="0, 0, 0, 0" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^ /template/ DataGridColumnHeader#PART_TopRightCornerHeader">
+                                <Setter Property="CornerRadius"
+                                        Value="0, 8, 8, 0" />
+                            </Style>
+                        </Style>
+                    </DataGrid.Styles>
+
+                    <!-- Content -->
+                    <DataGrid.Columns>
+                        <!-- Checkbox for select all rows -->
+                        <DataGridTemplateColumn MinWidth="50">
+                            <DataGridTemplateColumn.Header>
+                                <CheckBox IsChecked="{Binding SelectAllDownloadFiles}"
+                                          Classes="dataGridCheckBox"
+                                          Command="{Binding SelectAllRowsCommand}"
+                                          CommandParameter="{Binding $parent[DataGrid]}" />
+                            </DataGridTemplateColumn.Header>
+
+                            <!-- Checkbox for select current row -->
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Classes="dataGridCheckBox"
+                                              IsChecked="{Binding $parent[DataGridRow].IsSelected}"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Top" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- File name and file type -->
+                        <DataGridTemplateColumn Header="Name"
+                                                Width="300"
+                                                MinWidth="150"
+                                                SortMemberPath="FileName">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding FileName}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip.Tip="{Binding FileName}" />
+
+                                        <TextBlock Text="{Binding FileType}"
+                                                   Foreground="{DynamicResource AccentColor}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Url -->
+                        <DataGridTemplateColumn Header="Url"
+                                                Width="300"
+                                                MinWidth="150"
+                                                SortMemberPath="Url">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Url}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding Url}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- File size -->
+                        <DataGridTextColumn Header="Size"
+                                            MinWidth="150"
+                                            Binding="{Binding SizeAsString}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Separator -->
+                <Rectangle HorizontalAlignment="Stretch"
+                           Height="1"
+                           Margin="0, 10"
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
+
+                <!-- Options -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="15"
+                            HorizontalAlignment="Stretch">
+                    <!-- Title -->
+                    <TextBlock Text="Manage links"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Stretch"
+                               Foreground="{DynamicResource MainTextColor}" />
+
+                    <!-- Hide HTML files -->
+                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            Padding="15"
+                            Background="{DynamicResource SecondaryBackgroundColor}">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Left"
+                                       Text="Hide HTML files"
+                                       FontWeight="Bold" />
+
+                            <ToggleSwitch Grid.Column="1"
+                                          OffContent="{x:Null}"
+                                          OnContent="{x:Null}"
+                                          Margin="0"
+                                          Padding="0"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Right"
+                                          HorizontalContentAlignment="Right"
+                                          VerticalContentAlignment="Center"
+                                          Width="40"
+                                          IsChecked="{Binding HideHtmlFiles}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Save each file by category -->
+                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            Padding="15"
+                            Background="{DynamicResource SecondaryBackgroundColor}">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Left"
+                                       Text="Save each file to the appropriate directory based on its category"
+                                       FontWeight="Bold" />
+
+                            <ToggleSwitch Name="SaveEachFileByCategoryToggleSwitch"
+                                          Grid.Column="1"
+                                          OffContent="{x:Null}"
+                                          OnContent="{x:Null}"
+                                          Margin="0"
+                                          Padding="0"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Right"
+                                          HorizontalContentAlignment="Right"
+                                          VerticalContentAlignment="Center"
+                                          Width="40"
+                                          IsChecked="{Binding SaveEachFileByCategory}"
+                                          Command="{Binding ChangeSaveModeCommand}"
+                                          CommandParameter="{Binding $self}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Assign all files to a single category -->
+                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            Padding="15"
+                            Background="{DynamicResource SecondaryBackgroundColor}">
+                        <Grid RowDefinitions="Auto, *">
+                            <!-- Title and switch -->
+                            <Grid ColumnDefinitions="*, Auto"
+                                  Margin="0, 0, 0, 10">
+                                <TextBlock Grid.Column="0"
+                                           Text="Assign all files to a single category"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch"
+                                           TextAlignment="Left"
+                                           FontWeight="Bold" />
+
+                                <ToggleSwitch Name="AssignAllFilesToSpecificCategoryToggleSwitch"
+                                              Grid.Column="1"
+                                              OffContent="{x:Null}"
+                                              OnContent="{x:Null}"
+                                              Margin="0"
+                                              Padding="0"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Right"
+                                              HorizontalContentAlignment="Right"
+                                              VerticalContentAlignment="Center"
+                                              Width="40"
+                                              IsChecked="{Binding AssignAllFilesToSpecificCategory}"
+                                              Command="{Binding ChangeSaveModeCommand}"
+                                              CommandParameter="{Binding $self}" />
+                            </Grid>
+
+                            <cc:CustomComboBox Grid.Row="1"
+                                               PlaceholderText="Category"
+                                               Background="{DynamicResource MainBackgroundColor}"
+                                               ToggleIconColor="{DynamicResource AccentColor}"
+                                               OnHoverToggleIconColor="{DynamicResource MainTextColor}"
+                                               IconData="{DynamicResource LayerGroupSvgIcon}"
+                                               IconColor="{DynamicResource IconColor}"
+                                               IconSize="{DynamicResource SmallIconSize}"
+                                               BorderThickness="0"
+                                               SelectedItem="{Binding SelectedCategory}"
+                                               ItemsSource="{Binding Categories}"
+                                               MaxDropDownHeight="300"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Stretch"
+                                               IsEnabled="{Binding AssignAllFilesToSpecificCategory}">
+                                <cc:CustomComboBox.ItemTemplate>
+                                    <DataTemplate DataType="viewModel:CategoryViewModel">
+                                        <TextBlock Text="{Binding Title}" />
+                                    </DataTemplate>
+                                </cc:CustomComboBox.ItemTemplate>
+                            </cc:CustomComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Save all files to a single directory -->
+                    <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            Padding="15"
+                            Background="{DynamicResource SecondaryBackgroundColor}">
+                        <Grid RowDefinitions="Auto, Auto"
+                              ColumnDefinitions="*, Auto">
+                            <!-- Title -->
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Left"
+                                       Text="Save all files to a single directory"
+                                       FontWeight="Bold"
+                                       Margin="0, 0, 0, 10" />
+
+                            <!-- Switch -->
+                            <ToggleSwitch Name="SaveAllFilesToSpecificDirectoryToggleSwitch"
+                                          Grid.Row="0"
+                                          Grid.Column="1"
+                                          OffContent="{x:Null}"
+                                          OnContent="{x:Null}"
+                                          Margin="0, 0, 0, 10"
+                                          Padding="0"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Right"
+                                          HorizontalContentAlignment="Right"
+                                          VerticalContentAlignment="Center"
+                                          Width="40"
+                                          IsChecked="{Binding SaveAllFilesToSpecificDirectory}"
+                                          Command="{Binding ChangeSaveModeCommand}"
+                                          CommandParameter="{Binding $self}" />
+
+                            <!-- Save directory -->
+                            <Grid Grid.Row="1"
+                                  Grid.Column="0"
+                                  Grid.ColumnSpan="2"
+                                  ColumnDefinitions="*, Auto"
+                                  IsEnabled="{Binding SaveAllFilesToSpecificDirectory}">
+                                <!-- Save location -->
+                                <cc:CustomTextBox Grid.Column="0"
+                                                  Background="{DynamicResource MainBackgroundColor}"
+                                                  Watermark="Directory"
+                                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                                  IconData="{DynamicResource FolderSvgIcon}"
+                                                  IconColor="{DynamicResource IconColor}"
+                                                  IconSize="{DynamicResource SmallIconSize}"
+                                                  Padding="12, 10"
+                                                  Margin="0, 0, 10, 0"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Center"
+                                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                                  BorderThickness="1"
+                                                  BorderBrush="{DynamicResource MainBackgroundColor}"
+                                                  Text="{Binding SaveAllFilesToSpecificDirectoryPath, FallbackValue='', TargetNullValue=''}"
+                                                  IsReadOnly="True" />
+
+                                <!-- Browse button -->
+                                <Button Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Classes="button success"
+                                        Content="Browse"
+                                        Command="{Binding BrowseSaveDirectoryCommand}"
+                                        CommandParameter="{Binding $parent[Window]}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="{Binding SaveButtonText}"
+                    IsEnabled="{Binding SaveButtonIsEnabled}" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

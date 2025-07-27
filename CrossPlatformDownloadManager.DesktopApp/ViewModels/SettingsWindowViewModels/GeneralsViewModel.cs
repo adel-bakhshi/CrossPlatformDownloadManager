@@ -148,7 +148,7 @@ public class GeneralsViewModel : ViewModelBase
             var themeFileName = $"{Guid.NewGuid().ToString()}.json";
             var themeFilePath = Path.Combine(Constants.ThemesDirectory, themeFileName);
             await File.WriteAllTextAsync(themeFilePath, json);
-            
+
             // Load themes
             LoadThemes();
         }
@@ -220,12 +220,40 @@ public class GeneralsViewModel : ViewModelBase
     private static ObservableCollection<ThemeData> GetAvailableThemes()
     {
         var results = new List<ThemeData>();
-        // Get default themes
-        var defaultThemes = new List<string> { "dark-theme", "light-theme" }
-            .ConvertAll(theme => new ThemeData
+        // Get default theme names
+        List<string> defaultThemeNames =
+        [
+            "dark-theme",
+            "light-theme",
+            "gold-theme",
+            "ocean-blue-theme",
+            "galactic-purple-theme",
+            "forest-green-theme",
+            "sunset-orange-theme",
+            "dreamy-pink-theme",
+            "modern-gray-theme"
+        ];
+
+        // Convert theme names to ThemeData
+        var defaultThemes = defaultThemeNames
+            .ConvertAll(theme =>
             {
-                ThemeName = theme.Equals("dark-theme") ? "Dark" : "Light",
-                ThemePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/" + theme + ".json",
+                var themeData = new ThemeData { ThemePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/" + theme + ".json" };
+                themeData.ThemeName = theme switch
+                {
+                    "dark-theme" => "Dark",
+                    "light-theme" => "Light",
+                    "gold-theme" => "Gold",
+                    "ocean-blue-theme" => "Ocean Blue",
+                    "galactic-purple-theme" => "Galactic Purple",
+                    "forest-green-theme" => "Forest Green",
+                    "sunset-orange-theme" => "Sunset Orange",
+                    "dreamy-pink-theme" => "Dreamy Pink",
+                    "modern-gray-theme" => "Modern Gray",
+                    _ => themeData.ThemeName
+                };
+
+                return themeData;
             });
 
         // Add default themes to results
@@ -247,12 +275,13 @@ public class GeneralsViewModel : ViewModelBase
                 }
             })
             .OfType<ThemeData>()
-            .OrderBy(theme => theme.ThemeName)
             .ToList();
-        
+
         // Add custom themes to results
         results.AddRange(themeFiles);
-        return results.ToObservableCollection();
+        return results
+            .OrderBy(td => td.ThemeName)
+            .ToObservableCollection();
     }
 
     #endregion

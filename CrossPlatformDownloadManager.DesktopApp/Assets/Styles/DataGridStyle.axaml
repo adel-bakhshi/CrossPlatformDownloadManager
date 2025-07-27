@@ -21,12 +21,12 @@
 
         <!-- Dark rows minimal DataGrid on hover row background -->
         <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnHoverRowBackground"
-                         Color="{DynamicResource TertiaryColor}"
+                         Color="{DynamicResource AccentColor}"
                          Opacity="0.3" />
 
         <!-- Dark rows minimal DataGrid on selected row background -->
         <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnSelectedRowBackground"
-                         Color="{DynamicResource TertiaryColor}"
+                         Color="{DynamicResource AccentColor}"
                          Opacity="0.5" />
 
         <ControlTheme x:Key="{x:Type DataGrid}"
@@ -165,7 +165,7 @@
 
         <Style Selector="^ DataGridColumnHeader">
             <Setter Property="Foreground"
-                    Value="{DynamicResource TextColor}" />
+                    Value="{DynamicResource MainTextColor}" />
             <Setter Property="HorizontalContentAlignment"
                     Value="Left" />
             <Setter Property="VerticalContentAlignment"
@@ -173,7 +173,7 @@
             <Setter Property="AreSeparatorsVisible"
                     Value="False" />
             <Setter Property="SeparatorBrush"
-                    Value="{DynamicResource TertiaryColor}" />
+                    Value="{DynamicResource AccentColor}" />
         </Style>
 
         <Style Selector="^ /template/ Border#DataGridBorder">
@@ -197,7 +197,7 @@
             <Setter Property="Padding"
                     Value="10, 15" />
             <Setter Property="Background"
-                    Value="{DynamicResource SecondaryColor}" />
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
             <Setter Property="FontWeight"
                     Value="Bold" />
 
@@ -222,7 +222,7 @@
                 <Setter Property="Opacity"
                         Value="0" />
                 <Setter Property="Fill"
-                        Value="{DynamicResource DataGridRowGradientBrush}" />
+                        Value="{DynamicResource GridRowColor}" />
                 <Setter Property="RadiusX"
                         Value="8" />
                 <Setter Property="RadiusY"
@@ -257,7 +257,7 @@
 
             <Style Selector="^:selected">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource TextColor}" />
+                        Value="{DynamicResource MainTextColor}" />
             </Style>
 
             <Style Selector="^ /template/ Border#RowBorder">
@@ -302,7 +302,7 @@
             <Setter Property="Padding"
                     Value="10, 9" />
             <Setter Property="Background"
-                    Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                    Value="{DynamicResource MenuItemHoverColor}" />
         </Style>
 
         <Style Selector="^ DataGridRow">
@@ -326,7 +326,7 @@
 
             <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MenuItemOnHoverBackgroundColor}" />
+                        Value="{DynamicResource MenuItemHoverColor}" />
             </Style>
 
             <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
@@ -361,7 +361,7 @@
 
             <Style Selector="^:selected">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource TextColor}" />
+                        Value="{DynamicResource MainTextColor}" />
             </Style>
 
             <Style Selector="^ /template/ Border#RowBorder">
@@ -388,18 +388,18 @@
         <Style Selector="^.darkRows">
             <Style Selector="^ DataGridColumnHeader">
                 <Setter Property="Background"
-                        Value="{DynamicResource PrimaryColor}" />
+                        Value="{DynamicResource MainBackgroundColor}" />
             </Style>
 
             <Style Selector="^ DataGridRow">
                 <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource PrimaryColor}" />
+                            Value="{DynamicResource MainBackgroundColor}" />
                 </Style>
 
                 <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource SecondaryColor}" />
+                            Value="{DynamicResource SecondaryBackgroundColor}" />
                 </Style>
 
                 <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
@@ -426,18 +426,18 @@
             <Style Selector="^.invertColors">
                 <Style Selector="^ DataGridColumnHeader">
                     <Setter Property="Background"
-                            Value="{DynamicResource SecondaryColor}" />
+                            Value="{DynamicResource SecondaryBackgroundColor}" />
                 </Style>
 
                 <Style Selector="^ DataGridRow">
                     <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource SecondaryColor}" />
+                                Value="{DynamicResource SecondaryBackgroundColor}" />
                     </Style>
 
                     <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource PrimaryColor}" />
+                                Value="{DynamicResource MainBackgroundColor}" />
                     </Style>
 
                     <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">

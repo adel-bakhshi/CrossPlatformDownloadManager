@@ -318,6 +318,10 @@ public class SaveLocationsViewModel : ViewModelBase
         };
 
         var directories = await storageProvider.OpenFolderPickerAsync(options);
-        return directories.Any() ? directories[0].Path.LocalPath : null;
+        return directories.Any()
+            ? directories[0].Path.IsAbsoluteUri
+                ? directories[0].Path.LocalPath
+                : directories[0].Path.OriginalString
+            : null;
     }
 }

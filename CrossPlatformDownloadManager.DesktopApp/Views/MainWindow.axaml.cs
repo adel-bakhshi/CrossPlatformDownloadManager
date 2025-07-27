@@ -111,7 +111,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 settingsService.Settings.HasApplicationBeenRunYet = true;
                 await settingsService.SaveSettingsAsync(settingsService.Settings, reloadData: true);
             }
-            
+
             // Check for updates
             if (ViewModel != null)
                 _ = ViewModel.CheckForUpdatesAsync(null);
@@ -154,7 +154,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         };
 
         var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
-        return !directories.Any() ? null : directories[0].Path.AbsolutePath;
+        return !directories.Any()
+            ? null
+            : directories[0].Path.IsAbsoluteUri
+                ? directories[0].Path.AbsolutePath
+                : directories[0].Path.OriginalString;
     }
 
     protected override async void OnClosing(WindowClosingEventArgs e)

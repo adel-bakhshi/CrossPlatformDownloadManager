@@ -14,7 +14,7 @@
         <Setter Property="BorderThickness"
                 Value="0" />
         <Setter Property="Background"
-                Value="{DynamicResource SecondaryColor}" />
+                Value="{DynamicResource SecondaryBackgroundColor}" />
         <Setter Property="Foreground"
                 Value="{DynamicResource ButtonTextColor}" />
         <Setter Property="CornerRadius"
@@ -54,18 +54,18 @@
 
         <Style Selector="^.success">
             <Setter Property="Background"
-                    Value="{DynamicResource SuccessGradientBrush}" />
+                    Value="{DynamicResource SuccessColor}" />
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource SuccessGradientBrush}" />
+                        Value="{DynamicResource SuccessColor}" />
                 <Setter Property="Opacity"
                         Value="0.9" />
             </Style>
 
             <Style Selector="^:pressed">
                 <Setter Property="Background"
-                        Value="{DynamicResource SuccessGradientBrush}" />
+                        Value="{DynamicResource SuccessColor}" />
                 <Setter Property="Opacity"
                         Value="0.85" />
             </Style>
@@ -73,18 +73,18 @@
 
         <Style Selector="^.danger">
             <Setter Property="Background"
-                    Value="{DynamicResource DangerGradientBrush}" />
+                    Value="{DynamicResource DangerColor}" />
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource DangerGradientBrush}" />
+                        Value="{DynamicResource DangerColor}" />
                 <Setter Property="Opacity"
                         Value="0.9" />
             </Style>
 
             <Style Selector="^:pressed">
                 <Setter Property="Background"
-                        Value="{DynamicResource DangerGradientBrush}" />
+                        Value="{DynamicResource DangerColor}" />
                 <Setter Property="Opacity"
                         Value="0.85" />
             </Style>
@@ -92,18 +92,18 @@
 
         <Style Selector="^.warning">
             <Setter Property="Background"
-                    Value="{DynamicResource WarningGradientBrush}" />
+                    Value="{DynamicResource WarningColor}" />
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource WarningGradientBrush}" />
+                        Value="{DynamicResource WarningColor}" />
                 <Setter Property="Opacity"
                         Value="0.9" />
             </Style>
 
             <Style Selector="^:pressed">
                 <Setter Property="Background"
-                        Value="{DynamicResource WarningGradientBrush}" />
+                        Value="{DynamicResource WarningColor}" />
                 <Setter Property="Opacity"
                         Value="0.85" />
             </Style>
@@ -111,18 +111,18 @@
 
         <Style Selector="^.info">
             <Setter Property="Background"
-                    Value="{DynamicResource InfoGradientBrush}" />
+                    Value="{DynamicResource InfoColor}" />
 
             <Style Selector="^:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource InfoGradientBrush}" />
+                        Value="{DynamicResource InfoColor}" />
                 <Setter Property="Opacity"
                         Value="0.9" />
             </Style>
 
             <Style Selector="^:pressed">
                 <Setter Property="Background"
-                        Value="{DynamicResource InfoGradientBrush}" />
+                        Value="{DynamicResource InfoColor}" />
                 <Setter Property="Opacity"
                         Value="0.85" />
             </Style>

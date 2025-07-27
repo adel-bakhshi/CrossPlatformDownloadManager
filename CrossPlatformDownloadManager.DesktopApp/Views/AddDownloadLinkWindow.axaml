@@ -34,9 +34,9 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Queue"
-                                           Background="{DynamicResource SecondaryColor}"
-                                           ToggleIconColor="{DynamicResource TertiaryColor}"
-                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           Background="{DynamicResource SecondaryBackgroundColor}"
+                                           ToggleIconColor="{DynamicResource AccentColor}"
+                                           OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                            IconData="{DynamicResource ListOlSvgIcon}"
                                            IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
@@ -44,7 +44,7 @@
                                            MaxDropDownHeight="120"
                                            ItemsSource="{Binding DownloadQueues}"
                                            SelectedItem="{Binding SelectedDownloadQueue}"
-                                           PopupBackground="{DynamicResource SecondaryColor}">
+                                           PopupBackground="{DynamicResource SecondaryBackgroundColor}">
                             <cc:CustomComboBox.ItemTemplate>
                                 <DataTemplate DataType="viewModels:DownloadQueueViewModel">
                                     <TextBlock Text="{Binding Title}" />
@@ -132,11 +132,11 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Url"
-                                      WatermarkForeground="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource AccentColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                      Background="{DynamicResource SecondaryColor}"
+                                      Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
                                       Text="{Binding DownloadFile.Url}"
                                       TextChanged="UrlTextBoxOnTextChanged" />
@@ -147,9 +147,9 @@
                         <!-- Category ComboBox -->
                         <cc:CustomComboBox Grid.Column="0"
                                            PlaceholderText="Category"
-                                           Background="{DynamicResource SecondaryColor}"
-                                           ToggleIconColor="{DynamicResource TertiaryColor}"
-                                           OnHoverToggleIconColor="{DynamicResource TextColor}"
+                                           Background="{DynamicResource SecondaryBackgroundColor}"
+                                           ToggleIconColor="{DynamicResource AccentColor}"
+                                           OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                            IconData="{DynamicResource LayerGroupSvgIcon}"
                                            IconColor="{DynamicResource IconColor}"
                                            IconSize="{DynamicResource SmallIconSize}"
@@ -186,11 +186,11 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Name"
-                                      WatermarkForeground="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource AccentColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                      Background="{DynamicResource SecondaryColor}"
+                                      Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
                                       Text="{Binding DownloadFile.FileName}" />
 
@@ -199,11 +199,11 @@
                                       IconSize="{DynamicResource SmallIconSize}"
                                       IconColor="{DynamicResource IconColor}"
                                       Watermark="Description"
-                                      WatermarkForeground="{DynamicResource TertiaryColor}"
+                                      WatermarkForeground="{DynamicResource AccentColor}"
                                       VerticalContentAlignment="Center"
                                       Padding="12, 10"
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
-                                      Background="{DynamicResource SecondaryColor}"
+                                      Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
                                       Text="{Binding DownloadFile.Description}" />
                 </StackPanel>
@@ -214,7 +214,7 @@
                         Height="132"
                         Margin="20, 0, 0, 0"
                         CornerRadius="{DynamicResource DefaultCornerRadius}"
-                        Background="{DynamicResource SecondaryColor}"
+                        Background="{DynamicResource SecondaryBackgroundColor}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top">
                     <Grid>
@@ -244,7 +244,7 @@
                                            Height="64"
                                            Duration="0:0:2"
                                            Delay="0:0:0.5"
-                                           Fill="{DynamicResource LoadingColor}" />
+                                           Fill="{DynamicResource LoadingIndicatorColor}" />
                     </Grid>
                 </Border>
             </Grid>

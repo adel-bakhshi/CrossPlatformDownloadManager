@@ -106,13 +106,13 @@
 
     <Style Selector="controls|CustomTextBox">
         <Setter Property="CaretBrush"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource MainTextColor}" />
         <Setter Property="Background"
                 Value="{DynamicResource ThemeBackgroundBrush}" />
         <Setter Property="BorderBrush"
                 Value="{DynamicResource ThemeBorderMidBrush}" />
         <Setter Property="Foreground"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource MainTextColor}" />
         <Setter Property="BorderThickness"
                 Value="{DynamicResource ThemeBorderThickness}" />
         <Setter Property="SelectionBrush"

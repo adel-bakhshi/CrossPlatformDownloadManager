@@ -46,31 +46,31 @@
             <!-- ListBoxItem styles -->
             <Style Selector="^ ListBoxItem">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource TextColor}" />
+                        Value="{DynamicResource MainTextColor}" />
 
                 <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemOnHoverColor}" />
+                            Value="{DynamicResource CategoryHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemOnHoverColor}" />
+                            Value="{DynamicResource CategoryHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemOnHoverColor}" />
+                            Value="{DynamicResource CategoryHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemOnHoverColor}" />
+                            Value="{DynamicResource CategoryHoverColor}" />
                 </Style>
 
                 <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryItemOnHoverColor}" />
+                            Value="{DynamicResource CategoryHoverColor}" />
                 </Style>
             </Style>
         </Style>

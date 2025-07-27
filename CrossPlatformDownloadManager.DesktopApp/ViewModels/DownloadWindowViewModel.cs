@@ -201,7 +201,7 @@ public class DownloadWindowViewModel : ViewModelBase
     /// <summary>
     /// Gets or sets a value that indicates the title of the download window.
     /// </summary>
-    public string Title => $"CDM - {(IsPaused ? "Paused" : "Downloading")} {DownloadFile.CeilingDownloadProgressAsString}";
+    public string Title => $"CDM - {(IsPaused ? "Paused" : "Downloading")} {DownloadFile.FloorDownloadProgressAsString}";
 
     /// <summary>
     /// Gets or sets a value that indicates whether the window can be closed or not.
@@ -511,6 +511,9 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         if (e.PropertyName?.Equals(nameof(DownloadFile.CanResumeDownload)) == true || e.PropertyName?.Equals(nameof(DownloadFile.Status)) == true)
             this.RaisePropertyChanged(nameof(IsPauseResumeButtonEnabled));
+        
+        if (e.PropertyName?.Equals(nameof(DownloadFile.DownloadProgress)) == true)
+            this.RaisePropertyChanged(nameof(Title));
     }
 
     /// <summary>

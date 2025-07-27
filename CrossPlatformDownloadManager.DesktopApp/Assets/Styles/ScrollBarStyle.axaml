@@ -138,7 +138,7 @@
 
                 <Style Selector="^ /template/ Thumb#thumb">
                     <Setter Property="Background"
-                            Value="{DynamicResource TextColor}" />
+                            Value="{DynamicResource MainTextColor}" />
                     <Setter Property="CornerRadius"
                             Value="3" />
                     <Setter Property="Opacity"
@@ -156,14 +156,14 @@
 
                 <Style Selector="^ /template/ Thumb#thumb:pointerover">
                     <Setter Property="Background"
-                            Value="{DynamicResource TextColor}" />
+                            Value="{DynamicResource MainTextColor}" />
                     <Setter Property="Opacity"
                             Value="0.5" />
                 </Style>
 
                 <Style Selector="^ /template/ Thumb#thumb:pressed">
                     <Setter Property="Background"
-                            Value="{DynamicResource TextColor}" />
+                            Value="{DynamicResource MainTextColor}" />
                     <Setter Property="Opacity"
                             Value="0.6" />
                 </Style>

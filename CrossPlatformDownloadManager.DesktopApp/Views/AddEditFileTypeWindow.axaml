@@ -28,9 +28,9 @@
             <Grid ColumnDefinitions="*, Auto, *">
                 <!-- Extension -->
                 <cc:CustomTextBox Grid.Column="0"
-                                  Background="{DynamicResource SecondaryColor}"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
                                   Watermark="Extension"
-                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource FileCircleQuestionSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -38,10 +38,10 @@
                                   Padding="12, 10"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                                  OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                  OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                   Text="{Binding Extension}" />
 
                 <!-- Separator -->
@@ -50,9 +50,9 @@
 
                 <!-- Alias -->
                 <cc:CustomTextBox Grid.Column="2"
-                                  Background="{DynamicResource SecondaryColor}"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
                                   Watermark="Alias"
-                                  WatermarkForeground="{DynamicResource TertiaryColor}"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource FileCircleCheckSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -60,18 +60,18 @@
                                   Padding="12, 10"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  OnFocusBorderColor="{DynamicResource SecondaryColor}"
-                                  OnHoverBorderColor="{DynamicResource SecondaryColor}"
+                                  OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
                                   BorderThickness="1"
-                                  BorderBrush="{DynamicResource SecondaryColor}"
+                                  BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                   Text="{Binding Alias}" />
             </Grid>
             
             <!-- Categories -->
             <cc:CustomComboBox PlaceholderText="Category"
-                               Background="{DynamicResource SecondaryColor}"
-                               ToggleIconColor="{DynamicResource TertiaryColor}"
-                               OnHoverToggleIconColor="{DynamicResource TextColor}"
+                               Background="{DynamicResource SecondaryBackgroundColor}"
+                               ToggleIconColor="{DynamicResource AccentColor}"
+                               OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                IconData="{DynamicResource LayerGroupSvgIcon}"
                                IconColor="{DynamicResource IconColor}"
                                IconSize="{DynamicResource SmallIconSize}"

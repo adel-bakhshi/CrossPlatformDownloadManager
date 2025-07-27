@@ -32,47 +32,47 @@
         <ResourceDictionary>
             <!-- Dialog ok button on hover background color -->
             <SolidColorBrush x:Key="DialogOkButtonOnHoverColor"
-                             Color="{DynamicResource DialogOkButtonBackgroundColor}"
+                             Color="{DynamicResource DialogOkBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog ok button on pressed background color -->
             <SolidColorBrush x:Key="DialogOkButtonOnPressedColor"
-                             Color="{DynamicResource DialogOkButtonBackgroundColor}"
+                             Color="{DynamicResource DialogOkBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog yes button on hover background color -->
             <SolidColorBrush x:Key="DialogYesButtonOnHoverColor"
-                             Color="{DynamicResource DialogYesButtonBackgroundColor}"
+                             Color="{DynamicResource DialogYesBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog yes button on pressed background color -->
             <SolidColorBrush x:Key="DialogYesButtonOnPressedColor"
-                             Color="{DynamicResource DialogYesButtonBackgroundColor}"
+                             Color="{DynamicResource DialogYesBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog no button on hover background color -->
             <SolidColorBrush x:Key="DialogNoButtonOnHoverColor"
-                             Color="{DynamicResource DialogNoButtonBackgroundColor}"
+                             Color="{DynamicResource DialogNoBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog no button on pressed background color -->
             <SolidColorBrush x:Key="DialogNoButtonOnPressedColor"
-                             Color="{DynamicResource DialogNoButtonBackgroundColor}"
+                             Color="{DynamicResource DialogNoBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Dialog cancel button on hover background color -->
             <SolidColorBrush x:Key="DialogCancelButtonOnHoverColor"
-                             Color="{DynamicResource DialogCancelButtonBackgroundColor}"
+                             Color="{DynamicResource DialogCancelBackgroundColor}"
                              Opacity="0.9" />
 
             <!-- Dialog cancel button on pressed background color -->
             <SolidColorBrush x:Key="DialogCancelButtonOnPressedColor"
-                             Color="{DynamicResource DialogCancelButtonBackgroundColor}"
+                             Color="{DynamicResource DialogCancelBackgroundColor}"
                              Opacity="0.8" />
 
             <!-- Footer background color -->
             <SolidColorBrush x:Key="FooterBackgroundColor"
-                             Color="{DynamicResource PrimaryColor}"
+                             Color="{DynamicResource MainBackgroundColor}"
                              Opacity="0.2" />
         </ResourceDictionary>
     </Window.Resources>
@@ -98,25 +98,25 @@
             <!-- Information styles -->
             <Style Selector="^.information">
                 <Setter Property="Background"
-                        Value="{DynamicResource InfoGradientBrush}" />
+                        Value="{DynamicResource InfoColor}" />
             </Style>
 
             <!-- Warning styles -->
             <Style Selector="^.warning">
                 <Setter Property="Background"
-                        Value="{DynamicResource WarningGradientBrush}" />
+                        Value="{DynamicResource WarningColor}" />
             </Style>
 
             <!-- Success styles -->
             <Style Selector="^.success">
                 <Setter Property="Background"
-                        Value="{DynamicResource SuccessGradientBrush}" />
+                        Value="{DynamicResource SuccessColor}" />
             </Style>
 
             <!-- Danger styles -->
             <Style Selector="^.danger">
                 <Setter Property="Background"
-                        Value="{DynamicResource DangerGradientBrush}" />
+                        Value="{DynamicResource DangerColor}" />
             </Style>
         </Style>
 
@@ -170,7 +170,7 @@
             <!-- Ok dialog button style -->
             <Style Selector="^.okButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogOkButtonBackgroundColor}" />
+                        Value="{DynamicResource DialogOkBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -186,7 +186,7 @@
             <!-- Yes dialog button style -->
             <Style Selector="^.yesButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogYesButtonBackgroundColor}" />
+                        Value="{DynamicResource DialogYesBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -202,7 +202,7 @@
             <!-- No dialog button style -->
             <Style Selector="^.noButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogNoButtonBackgroundColor}" />
+                        Value="{DynamicResource DialogNoBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"
@@ -218,7 +218,7 @@
             <!-- Cancel dialog button style -->
             <Style Selector="^.cancelButton">
                 <Setter Property="Background"
-                        Value="{DynamicResource DialogCancelButtonBackgroundColor}" />
+                        Value="{DynamicResource DialogCancelBackgroundColor}" />
 
                 <Style Selector="^:pointerover">
                     <Setter Property="Background"

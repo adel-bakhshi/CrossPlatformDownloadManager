@@ -1,12 +1,13 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.Utils;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
@@ -15,14 +16,13 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
 {
     #region Private Fields
 
-    private readonly DispatcherTimer _saveManagerPointTimer;
+    private readonly Debouncer _saveManagerPointDebouncer;
 
     #endregion
 
     public ManagerWindow()
     {
-        _saveManagerPointTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _saveManagerPointTimer.Tick += SaveManagerPointTimerOnTick;
+        _saveManagerPointDebouncer = new Debouncer(TimeSpan.FromSeconds(2));
 
         InitializeComponent();
 
@@ -42,9 +42,8 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
 
         Position = new PixelPoint(x, y);
 
-        // Restart timer
-        _saveManagerPointTimer.Stop();
-        _saveManagerPointTimer.Start();
+        // Run debouncer to save manager point
+        _saveManagerPointDebouncer.RunAsync(SaveManagerPointAsync);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -115,11 +114,10 @@ public partial class ManagerWindow : MyWindowBase<ManagerWindowViewModel>
 
     #region Helpers
 
-    private async void SaveManagerPointTimerOnTick(object? sender, EventArgs e)
+    private async Task SaveManagerPointAsync()
     {
         try
         {
-            _saveManagerPointTimer.Stop();
             if (ViewModel == null)
                 return;
 

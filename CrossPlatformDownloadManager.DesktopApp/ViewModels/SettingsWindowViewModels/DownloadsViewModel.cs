@@ -219,12 +219,12 @@ public class DownloadsViewModel : ViewModelBase
                 AllowMultiple = false,
                 SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(Constants.TempDownloadDirectory)
             };
-            
+
             var directories = await storageProvider.OpenFolderPickerAsync(options);
             if (!directories.Any())
                 return;
-            
-            TemporaryFileLocation = directories[0].Path.LocalPath;
+
+            TemporaryFileLocation = directories[0].Path.IsAbsoluteUri ? directories[0].Path.LocalPath : directories[0].Path.OriginalString;
         }
         catch (Exception ex)
         {
@@ -259,7 +259,7 @@ public class DownloadsViewModel : ViewModelBase
         var tempLocation = settings.TemporaryFileLocation;
         if (tempLocation.IsStringNullOrEmpty())
             tempLocation = Constants.TempDownloadDirectory;
-        
+
         TemporaryFileLocation = tempLocation;
     }
 

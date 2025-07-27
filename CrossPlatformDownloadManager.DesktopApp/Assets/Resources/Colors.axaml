@@ -2,27 +2,28 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Colors -->
     <Color x:Key="TransparentColor">#00000000</Color>
-    <Color x:Key="PrimaryColor">#131213</Color>
-    <Color x:Key="SecondaryColor">#201E21</Color>
-    <Color x:Key="TertiaryColor">#727272</Color>
-    <Color x:Key="TextColor">#FFFFFF</Color>
+    <Color x:Key="MainBackgroundColor">#131213</Color>
+    <Color x:Key="SecondaryBackgroundColor">#201E21</Color>
+    <Color x:Key="AccentColor">#727272</Color>
+    <Color x:Key="MainTextColor">#FFFFFF</Color>
     <Color x:Key="ButtonTextColor">#FFFFFF</Color>
-    <Color x:Key="CategoryItemOnHoverColor">#25E6C9</Color>
+    <Color x:Key="CategoryHoverColor">#25E6C9</Color>
     <Color x:Key="MenuBackgroundColor">#1C1420</Color>
-    <Color x:Key="MenuItemOnHoverBackgroundColor">#201824</Color>
+    <Color x:Key="MenuItemHoverColor">#201824</Color>
     <Color x:Key="IconColor">#3A58C2</Color>
-    <Color x:Key="SelectedAvailableProxyTypeColor">#CCCCCC</Color>
-    <Color x:Key="ToggleSwitchCircleColor">#FFFFFF</Color>
-    <Color x:Key="LoadingColor">#980C0C</Color>
+    <Color x:Key="SelectedProxyColor">#CCCCCC</Color>
+    <Color x:Key="ToggleCircleColor">#FFFFFF</Color>
+    <Color x:Key="LoadingIndicatorColor">#980C0C</Color>
     <Color x:Key="DialogTextColor">#FFFFFF</Color>
-    <Color x:Key="DialogOkButtonBackgroundColor">#3549C5</Color>
-    <Color x:Key="DialogYesButtonBackgroundColor">#10BA18</Color>
-    <Color x:Key="DialogNoButtonBackgroundColor">#F44336</Color>
-    <Color x:Key="DialogCancelButtonBackgroundColor">#FF9800</Color>
+    <Color x:Key="DialogOkBackgroundColor">#3549C5</Color>
+    <Color x:Key="DialogYesBackgroundColor">#10BA18</Color>
+    <Color x:Key="DialogNoBackgroundColor">#F44336</Color>
+    <Color x:Key="DialogCancelBackgroundColor">#FF9800</Color>
     <Color x:Key="ManagerTextColor">#FFFFFF</Color>
+    <Color x:Key="ChunkProgressBackgroundColor">#FFFFFF</Color>
 
     <!-- Gradients -->
-    <LinearGradientBrush x:Key="PrimaryGradientBrush"
+    <LinearGradientBrush x:Key="MainColor"
                          StartPoint="0%, 50%"
                          EndPoint="100%, 50%">
         <LinearGradientBrush.GradientStops>
@@ -35,7 +36,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="SuccessGradientBrush"
+    <LinearGradientBrush x:Key="SuccessColor"
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -46,7 +47,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="InfoGradientBrush"
+    <LinearGradientBrush x:Key="InfoColor"
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -57,7 +58,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="DangerGradientBrush"
+    <LinearGradientBrush x:Key="DangerColor"
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -68,7 +69,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="WarningGradientBrush"
+    <LinearGradientBrush x:Key="WarningColor"
                          StartPoint="0%, 0%"
                          EndPoint="100%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -79,7 +80,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="ChunkProgressGradientBrush"
+    <LinearGradientBrush x:Key="ChunkProgressColor"
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -90,7 +91,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="DataGridRowGradientBrush"
+    <LinearGradientBrush x:Key="GridRowColor"
                          StartPoint="0%, 50%"
                          EndPoint="100%, 50%">
         <LinearGradientBrush.GradientStops>
@@ -101,7 +102,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="GithubIconGradientBrush"
+    <LinearGradientBrush x:Key="GithubColor"
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -112,7 +113,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="TelegramIconGradientBrush"
+    <LinearGradientBrush x:Key="TelegramColor"
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>
@@ -123,7 +124,7 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="EmailIconGradientBrush"
+    <LinearGradientBrush x:Key="EmailColor"
                          StartPoint="50%, 0%"
                          EndPoint="50%, 100%">
         <LinearGradientBrush.GradientStops>

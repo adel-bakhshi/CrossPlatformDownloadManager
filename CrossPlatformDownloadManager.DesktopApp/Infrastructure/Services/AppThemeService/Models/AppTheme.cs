@@ -15,80 +15,83 @@ public class AppTheme
     [JsonProperty("isDarkTheme")]
     public bool IsDarkTheme { get; set; }
 
-    [JsonProperty("primaryColor")]
-    public IThemeBrush? PrimaryColor { get; set; }
+    [JsonProperty("mainBackgroundColor")]
+    public IThemeBrush? MainBackgroundColor { get; set; }
 
-    [JsonProperty("secondaryColor")]
-    public IThemeBrush? SecondaryColor { get; set; }
+    [JsonProperty("secondaryBackgroundColor")]
+    public IThemeBrush? SecondaryBackgroundColor { get; set; }
 
-    [JsonProperty("tertiaryColor")]
-    public IThemeBrush? TertiaryColor { get; set; }
+    [JsonProperty("accentColor")]
+    public IThemeBrush? AccentColor { get; set; }
 
-    [JsonProperty("textColor")]
-    public IThemeBrush? TextColor { get; set; }
+    [JsonProperty("mainTextColor")]
+    public IThemeBrush? MainTextColor { get; set; }
 
     [JsonProperty("buttonTextColor")]
     public IThemeBrush? ButtonTextColor { get; set; }
 
-    [JsonProperty("categoryItemOnHoverColor")]
-    public IThemeBrush? CategoryItemOnHoverColor { get; set; }
+    [JsonProperty("categoryHoverColor")]
+    public IThemeBrush? CategoryHoverColor { get; set; }
 
     [JsonProperty("menuBackgroundColor")]
     public IThemeBrush? MenuBackgroundColor { get; set; }
 
-    [JsonProperty("menuItemOnHoverBackgroundColor")]
-    public IThemeBrush? MenuItemOnHoverBackgroundColor { get; set; }
+    [JsonProperty("menuItemHoverColor")]
+    public IThemeBrush? MenuItemHoverColor { get; set; }
 
     [JsonProperty("iconColor")]
     public IThemeBrush? IconColor { get; set; }
 
-    [JsonProperty("selectedAvailableProxyTypeColor")]
-    public IThemeBrush? SelectedAvailableProxyTypeColor { get; set; }
+    [JsonProperty("selectedProxyColor")]
+    public IThemeBrush? SelectedProxyColor { get; set; }
 
-    [JsonProperty("toggleSwitchCircleColor")]
-    public IThemeBrush? ToggleSwitchCircleColor { get; set; }
+    [JsonProperty("toggleCircleColor")]
+    public IThemeBrush? ToggleCircleColor { get; set; }
 
-    [JsonProperty("loadingColor")]
-    public IThemeBrush? LoadingColor { get; set; }
+    [JsonProperty("loadingIndicatorColor")]
+    public IThemeBrush? LoadingIndicatorColor { get; set; }
 
     [JsonProperty("dialogTextColor")]
     public IThemeBrush? DialogTextColor { get; set; }
 
-    [JsonProperty("dialogOkButtonBackgroundColor")]
-    public IThemeBrush? DialogOkButtonBackgroundColor { get; set; }
+    [JsonProperty("dialogOkBackgroundColor")]
+    public IThemeBrush? DialogOkBackgroundColor { get; set; }
 
-    [JsonProperty("dialogYesButtonBackgroundColor")]
-    public IThemeBrush? DialogYesButtonBackgroundColor { get; set; }
+    [JsonProperty("dialogYesBackgroundColor")]
+    public IThemeBrush? DialogYesBackgroundColor { get; set; }
 
-    [JsonProperty("dialogNoButtonBackgroundColor")]
-    public IThemeBrush? DialogNoButtonBackgroundColor { get; set; }
+    [JsonProperty("dialogNoBackgroundColor")]
+    public IThemeBrush? DialogNoBackgroundColor { get; set; }
 
-    [JsonProperty("dialogCancelButtonBackgroundColor")]
-    public IThemeBrush? DialogCancelButtonBackgroundColor { get; set; }
+    [JsonProperty("dialogCancelBackgroundColor")]
+    public IThemeBrush? DialogCancelBackgroundColor { get; set; }
 
     [JsonProperty("managerTextColor")]
     public IThemeBrush? ManagerTextColor { get; set; }
 
-    [JsonProperty("primaryGradientBrush")]
-    public IThemeBrush? PrimaryGradientBrush { get; set; }
+    [JsonProperty("chunkProgressBackgroundColor")]
+    public IThemeBrush? ChunkProgressBackgroundColor { get; set; }
 
-    [JsonProperty("successGradientBrush")]
-    public IThemeBrush? SuccessGradientBrush { get; set; }
+    [JsonProperty("mainColor")]
+    public IThemeBrush? MainColor { get; set; }
 
-    [JsonProperty("infoGradientBrush")]
-    public IThemeBrush? InfoGradientBrush { get; set; }
+    [JsonProperty("successColor")]
+    public IThemeBrush? SuccessColor { get; set; }
 
-    [JsonProperty("dangerGradientBrush")]
-    public IThemeBrush? DangerGradientBrush { get; set; }
+    [JsonProperty("infoColor")]
+    public IThemeBrush? InfoColor { get; set; }
 
-    [JsonProperty("warningGradientBrush")]
-    public IThemeBrush? WarningGradientBrush { get; set; }
+    [JsonProperty("dangerColor")]
+    public IThemeBrush? DangerColor { get; set; }
 
-    [JsonProperty("chunkProgressGradientBrush")]
-    public IThemeBrush? ChunkProgressGradientBrush { get; set; }
+    [JsonProperty("warningColor")]
+    public IThemeBrush? WarningColor { get; set; }
 
-    [JsonProperty("dataGridRowGradientBrush")]
-    public IThemeBrush? DataGridRowGradientBrush { get; set; }
+    [JsonProperty("chunkProgressColor")]
+    public IThemeBrush? ChunkProgressColor { get; set; }
+
+    [JsonProperty("gridRowColor")]
+    public IThemeBrush? GridRowColor { get; set; }
 
     #endregion
 

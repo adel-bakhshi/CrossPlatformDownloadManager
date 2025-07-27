@@ -16,7 +16,7 @@
         <Setter Property="Height"
                 Value="16" />
         <Setter Property="Stroke"
-                Value="{DynamicResource TertiaryColor}" />
+                Value="{DynamicResource AccentColor}" />
         <Setter Property="StrokeThickness"
                 Value="1" />
 
@@ -32,7 +32,7 @@
 
         <Style Selector="^.isChecked">
             <Setter Property="Stroke"
-                    Value="{DynamicResource PrimaryGradientBrush}" />
+                    Value="{DynamicResource MainColor}" />
         </Style>
     </Style>
 
@@ -47,7 +47,7 @@
         <Setter Property="Height"
                 Value="8" />
         <Setter Property="Fill"
-                Value="{DynamicResource PrimaryGradientBrush}" />
+                Value="{DynamicResource MainColor}" />
         <Setter Property="Opacity"
                 Value="0" />
 
@@ -78,9 +78,9 @@
         <Setter Property="ClipToBounds"
                 Value="True" />
         <Setter Property="Background"
-                Value="{DynamicResource SecondaryColor}" />
+                Value="{DynamicResource SecondaryBackgroundColor}" />
         <Setter Property="Foreground"
-                Value="{DynamicResource TextColor}" />
+                Value="{DynamicResource MainTextColor}" />
 
         <!-- Template -->
         <Setter Property="Template">

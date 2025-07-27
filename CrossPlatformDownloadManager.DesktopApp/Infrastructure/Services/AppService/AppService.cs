@@ -4,10 +4,14 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeSe
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 
+/// <summary>
+/// Main class for the application services.
+/// </summary>
 public class AppService : IAppService
 {
     #region Properties
@@ -19,6 +23,7 @@ public class AppService : IAppService
     public ISettingsService SettingsService { get; }
     public ICategoryService CategoryService { get; }
     public IAppThemeService AppThemeService { get; }
+    public IExportImportService ExportImportService { get; }
 
     #endregion
 
@@ -29,7 +34,8 @@ public class AppService : IAppService
         ISettingsService settingsService,
         IDownloadQueueService downloadQueueService,
         ICategoryService categoryService,
-        IAppThemeService appThemeService)
+        IAppThemeService appThemeService,
+        IExportImportService exportImportService)
     {
         Mapper = mapper;
         UnitOfWork = unitOfWork;
@@ -38,5 +44,6 @@ public class AppService : IAppService
         CategoryService = categoryService;
         SettingsService = settingsService;
         AppThemeService = appThemeService;
+        ExportImportService = exportImportService;
     }
 }

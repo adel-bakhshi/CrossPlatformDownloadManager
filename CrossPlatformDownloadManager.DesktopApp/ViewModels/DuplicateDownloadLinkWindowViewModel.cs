@@ -84,6 +84,19 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
         CreateNewFileName();
     }
 
+    public DuplicateDownloadLinkAction? GetResult()
+    {
+        DuplicateDownloadLinkAction? dialogResult = this switch
+        {
+            { DuplicateWithNumberedFile: true } => DuplicateDownloadLinkAction.DuplicateWithNumber,
+            { OverwriteExistingFile: true } => DuplicateDownloadLinkAction.OverwriteExisting,
+            { ShowCompleteDialogOrResumeFile: true } => DuplicateDownloadLinkAction.ShowCompleteDialogOrResume,
+            _ => null
+        };
+
+        return dialogResult;
+    }
+
     private void CreateNewFileName()
     {
         NewFileName = AppService
@@ -101,35 +114,14 @@ public class DuplicateDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 return;
 
-            DuplicateDownloadLinkAction dialogResult;
-            switch (this)
+            var dialogResult = GetResult();
+            if (dialogResult == null)
             {
-                case { DuplicateWithNumberedFile: true }:
-                {
-                    dialogResult = DuplicateDownloadLinkAction.DuplicateWithNumber;
-                    break;
-                }
+                await DialogBoxManager.ShowInfoDialogAsync("Select an option",
+                    "You haven't selected any options. Please make a selection and try again.",
+                    DialogButtons.Ok);
 
-                case { OverwriteExistingFile: true }:
-                {
-                    dialogResult = DuplicateDownloadLinkAction.OverwriteExisting;
-                    break;
-                }
-
-                case { ShowCompleteDialogOrResumeFile: true }:
-                {
-                    dialogResult = DuplicateDownloadLinkAction.ShowCompleteDialogOrResume;
-                    break;
-                }
-
-                default:
-                {
-                    await DialogBoxManager.ShowInfoDialogAsync("Select an option",
-                        "You haven't selected any options. Please make a selection and try again.",
-                        DialogButtons.Ok);
-
-                    return;
-                }
+                return;
             }
 
             CloseWindow(owner, dialogResult);

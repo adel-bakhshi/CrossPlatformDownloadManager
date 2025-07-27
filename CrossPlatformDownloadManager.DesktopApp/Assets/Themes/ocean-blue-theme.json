@@ -1,0 +1,268 @@
+{
+  "themeName": "AppDefaultOceanBlueTheme",
+  "isDarkTheme": false,
+  "mainBackgroundColor": {
+    "brushMode": 0,
+    "color": "#E6F0FA",
+    "opacity": 1
+  },
+  "secondaryBackgroundColor": {
+    "brushMode": 0,
+    "color": "#B3D9FF",
+    "opacity": 1
+  },
+  "accentColor": {
+    "brushMode": 0,
+    "color": "#6688CC",
+    "opacity": 1
+  },
+  "mainTextColor": {
+    "brushMode": 0,
+    "color": "#1A3C6D",
+    "opacity": 1
+  },
+  "buttonTextColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "categoryHoverColor": {
+    "brushMode": 0,
+    "color": "#40C4FF",
+    "opacity": 1
+  },
+  "menuBackgroundColor": {
+    "brushMode": 0,
+    "color": "#B3E5FC",
+    "opacity": 1
+  },
+  "menuItemHoverColor": {
+    "brushMode": 0,
+    "color": "#81D4FA",
+    "opacity": 1
+  },
+  "iconColor": {
+    "brushMode": 0,
+    "color": "#3A58C2",
+    "opacity": 1
+  },
+  "selectedProxyColor": {
+    "brushMode": 0,
+    "color": "#E1F5FE",
+    "opacity": 1
+  },
+  "toggleCircleColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "loadingIndicatorColor": {
+    "brushMode": 0,
+    "color": "#D32F2F",
+    "opacity": 1
+  },
+  "dialogTextColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "dialogOkBackgroundColor": {
+    "brushMode": 0,
+    "color": "#0288D1",
+    "opacity": 1
+  },
+  "dialogYesBackgroundColor": {
+    "brushMode": 0,
+    "color": "#10BA18",
+    "opacity": 1
+  },
+  "dialogNoBackgroundColor": {
+    "brushMode": 0,
+    "color": "#F44336",
+    "opacity": 1
+  },
+  "dialogCancelBackgroundColor": {
+    "brushMode": 0,
+    "color": "#FF9800",
+    "opacity": 1
+  },
+  "managerTextColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "mainColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0288D1",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 0.5,
+        "color": {
+          "brushMode": 0,
+          "color": "#29B6F6",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#4FC3F7",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "successColor": {
+    "brushMode": 1,
+    "startPoint": "0,0",
+    "endPoint": "1,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#09A500",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#0ABA00",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "infoColor": {
+    "brushMode": 1,
+    "startPoint": "0,0",
+    "endPoint": "1,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0A20CC",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#2459BC",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "dangerColor": {
+    "brushMode": 1,
+    "startPoint": "0,0",
+    "endPoint": "1,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#CF0509",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#DD0030",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "warningColor": {
+    "brushMode": 1,
+    "startPoint": "0,0",
+    "endPoint": "1,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#EA2F00",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#DF4812",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "chunkProgressColor": {
+    "brushMode": 1,
+    "startPoint": "0.5,0",
+    "endPoint": "0.5,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0288D1",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#29B6F6",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "chunkProgressBackgroundColor": {
+    "brushMode": 0,
+    "color": "#B3D9FF",
+    "opacity": 1
+  },
+  "gridRowColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#E6F0FA",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#B3D9FF",
+          "opacity": 0.17
+        }
+      }
+    ]
+  }
+}

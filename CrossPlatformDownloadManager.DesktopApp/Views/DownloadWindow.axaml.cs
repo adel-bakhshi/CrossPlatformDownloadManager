@@ -31,7 +31,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         InitializeComponent();
 
         _chunksDataRectangles = [];
-        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.25) };
+        _updateChunksDataTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.2) };
         _updateChunksDataTimer.Tick += UpdateChunksDataTimerOnTick;
 
         _focusWindowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -63,12 +63,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
 
     private void UpdateChunksDataTimerOnTick(object? sender, EventArgs e)
     {
-        if (ViewModel == null || !IsVisible)
-            return;
-
-        Title = $"CDM - {(ViewModel.IsPaused ? "Paused" : "Downloading")} {Math.Floor(ViewModel.DownloadFile.DownloadProgress ?? 0):00}%";
-
-        if (ViewModel.IsPaused)
+        if (ViewModel == null || ViewModel.IsPaused || !IsVisible)
             return;
 
         var chunksData = ViewModel.DownloadFile.ChunksData;
@@ -91,7 +86,7 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             {
                 var rect = new Rectangle();
                 rect.Bind(Rectangle.HeightProperty, heightBinding);
-                rect.Fill = this.FindResource("ChunkProgressGradientBrush") as IBrush;
+                rect.Fill = this.FindResource("ChunkProgressColor") as IBrush;
 
                 Canvas.SetLeft(rect, divisionsWidth * i);
                 Canvas.SetTop(rect, 0);

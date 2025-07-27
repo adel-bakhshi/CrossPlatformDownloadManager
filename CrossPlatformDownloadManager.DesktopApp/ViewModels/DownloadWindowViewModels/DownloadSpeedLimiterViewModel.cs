@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
@@ -14,7 +13,7 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
 {
     #region Private Fields
 
-    private readonly DispatcherTimer _speedLimitValueChangedTimer;
+    private readonly Debouncer _speedLimitDebouncer;
 
     private bool _isSpeedLimiterEnabled;
     private double? _speedLimit;
@@ -48,9 +47,8 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _speedLimit, value);
             ChangeSpeedLimitInfo();
 
-            // Restart timer
-            _speedLimitValueChangedTimer.Stop();
-            _speedLimitValueChangedTimer.Start();
+            // Run speed limit debouncer
+            _speedLimitDebouncer.Run(RaiseSpeedLimiterChanged);
         }
     }
 
@@ -67,7 +65,9 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _selectedSpeedUnit, value);
             ChangeSpeedLimitInfo();
-            RaiseSpeedLimiterChanged();
+
+            // Run speed limit debouncer
+            _speedLimitDebouncer.Run(RaiseSpeedLimiterChanged);
         }
     }
 
@@ -87,20 +87,13 @@ public class DownloadSpeedLimiterViewModel : ViewModelBase
 
     public DownloadSpeedLimiterViewModel(IAppService appService) : base(appService)
     {
-        _speedLimitValueChangedTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _speedLimitValueChangedTimer.Tick += SpeedLimitValueChangedTimerOnTick;
+        _speedLimitDebouncer = new Debouncer(TimeSpan.FromSeconds(2));
 
         SpeedUnits = Constants.SpeedLimiterUnits.ToObservableCollection();
         SelectedSpeedUnit = SpeedUnits.FirstOrDefault();
     }
 
     #region Helpers
-
-    private void SpeedLimitValueChangedTimerOnTick(object? sender, EventArgs e)
-    {
-        _speedLimitValueChangedTimer.Stop();
-        RaiseSpeedLimiterChanged();
-    }
 
     private void RaiseSpeedLimiterChanged()
     {

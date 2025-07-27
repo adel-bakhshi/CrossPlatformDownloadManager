@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -26,6 +27,11 @@ public class ManageLinksWindowViewModel : ViewModelBase
     /// List of download files that we want to get their info from the web.
     /// </summary>
     private readonly List<DownloadFileViewModel> _downloadFileDataList;
+
+    /// <summary>
+    /// The cancellation token to cancel loading files.
+    /// </summary>
+    private readonly CancellationTokenSource _cancelToken;
 
     /// <summary>
     /// Indicates whether the HTML files should be removed from the download files list.
@@ -76,6 +82,11 @@ public class ManageLinksWindowViewModel : ViewModelBase
     /// Indicates whether the save button is enabled or not.
     /// </summary>
     private bool _saveButtonIsEnabled = true;
+
+    /// <summary>
+    /// Indicates the text of the save button.
+    /// </summary>
+    private string _saveButtonText = "Save";
 
     #endregion
 
@@ -176,6 +187,15 @@ public class ManageLinksWindowViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Gets or sets a value that indicates the text of the save button.
+    /// </summary>
+    public string SaveButtonText
+    {
+        get => _saveButtonText;
+        set => this.RaiseAndSetIfChanged(ref _saveButtonText, value);
+    }
+
+    /// <summary>
     /// Gets a value that indicates the filtered download files.
     /// </summary>
     public ObservableCollection<DownloadFileViewModel> FilteredDownloadFiles { get; private set; } = [];
@@ -214,6 +234,7 @@ public class ManageLinksWindowViewModel : ViewModelBase
     public ManageLinksWindowViewModel(IAppService appService, List<DownloadFileViewModel> downloadFileDataList) : base(appService)
     {
         _downloadFileDataList = downloadFileDataList;
+        _cancelToken = new CancellationTokenSource();
 
         BrowseSaveDirectoryCommand = ReactiveCommand.CreateFromTask<Window?>(BrowseSaveDirectoryAsync);
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
@@ -477,10 +498,15 @@ public class ManageLinksWindowViewModel : ViewModelBase
     /// Closes the Manage Links window and cancel operation.
     /// </summary>
     /// <param name="owner">The owner window.</param>
-    private static async Task CancelAsync(Window? owner)
+    private async Task CancelAsync(Window? owner)
     {
         try
         {
+            // Cancel loading operation
+            await _cancelToken.CancelAsync();
+            // Dispose the cancellation token
+            _cancelToken.Dispose();
+            // Close the window
             owner?.Close();
         }
         catch (Exception ex)
@@ -535,15 +561,20 @@ public class ManageLinksWindowViewModel : ViewModelBase
     {
         try
         {
-            // Disable save button
+            // Change save button state
             SaveButtonIsEnabled = false;
+            SaveButtonText = "Loading...";
             // Get a list of URLs from the download file data list
             var urls = _downloadFileDataList.Select(df => df.Url).ToList();
             // Loop through each URL
             foreach (var url in urls)
             {
+                // Check if cancellation is requested
+                if (_cancelToken.IsCancellationRequested)
+                    return;
+
                 // Get the download file from the URL
-                var downloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(url);
+                var downloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(url, _cancelToken.Token);
                 // Validate the download file
                 var isValid = await AppService.DownloadFileService.ValidateDownloadFileAsync(downloadFile, showMessage: false);
                 // If the download file is not valid, skip to the next URL
@@ -578,8 +609,9 @@ public class ManageLinksWindowViewModel : ViewModelBase
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
 
-        // Enable save button
+        // Reset save button state
         SaveButtonIsEnabled = true;
+        SaveButtonText = "Save";
     }
 
     /// <summary>

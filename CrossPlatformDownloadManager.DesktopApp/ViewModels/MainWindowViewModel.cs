@@ -33,7 +33,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly DispatcherTimer _updateDownloadSpeedTimer;
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
-    private readonly DispatcherTimer _saveColumnsSettingsTimer;
+    private readonly Debouncer _saveColumnsSettingsDebouncer;
 
     private Views.MainWindow? _mainWindow;
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
@@ -282,8 +282,7 @@ public class MainWindowViewModel : ViewModelBase
         _updateActiveDownloadQueuesTimer.Tick += UpdateActiveDownloadQueuesTimerOnTick;
         _updateActiveDownloadQueuesTimer.Start();
 
-        _saveColumnsSettingsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _saveColumnsSettingsTimer.Tick += SaveColumnsSettingsTimerOnTick;
+        _saveColumnsSettingsDebouncer = new Debouncer(TimeSpan.FromSeconds(5));
 
         LoadCategories();
         FilterDownloadList();
@@ -865,8 +864,8 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            _saveColumnsSettingsTimer.Stop();
-            _saveColumnsSettingsTimer.Start();
+            // Run debouncer to save column settings
+            await _saveColumnsSettingsDebouncer.RunAsync(SaveColumnsSettingsDataAsync);
         }
         catch (Exception ex)
         {
@@ -1819,12 +1818,10 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async void SaveColumnsSettingsTimerOnTick(object? sender, EventArgs e)
+    private async Task SaveColumnsSettingsDataAsync()
     {
         try
         {
-            _saveColumnsSettingsTimer.Stop();
-
             var settings = AppService.SettingsService.Settings;
             settings.DataGridColumnsSettings = DataGridColumnsSettings;
             await AppService.SettingsService.SaveSettingsAsync(settings);

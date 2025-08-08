@@ -54,6 +54,7 @@ public class MainWindowViewModel : ViewModelBase
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private string _globalSpeedLimit = "0 KB";
     private bool _isGlobalSpeedLimitVisible;
+    private string? _activeProxyTitle;
 
     #endregion
 
@@ -170,6 +171,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _isGlobalSpeedLimitVisible;
         set => this.RaiseAndSetIfChanged(ref _isGlobalSpeedLimitVisible, value);
+    }
+
+    public string? ActiveProxyTitle
+    {
+        get => _activeProxyTitle;
+        set => this.RaiseAndSetIfChanged(ref _activeProxyTitle, value);
     }
 
     #endregion
@@ -294,6 +301,7 @@ public class MainWindowViewModel : ViewModelBase
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
 
         CalculateGlobalSpeedLimit();
+        UpdateActiveProxy();
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
@@ -486,33 +494,43 @@ public class MainWindowViewModel : ViewModelBase
         await RemoveDownloadFilesAsync(dataGrid, excludeFilesInRunningQueues: false);
     }
 
+    /// <summary>
+    /// Asynchronously deletes all completed download files from the application.
+    /// This method checks for existing files, prompts the user for confirmation,
+    /// and then proceeds with deletion based on user's choice.
+    /// </summary>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     private async Task DeleteCompletedDownloadFilesAsync()
     {
         try
         {
+            // Get all download files that have been marked as completed
             var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles
                 .Where(df => df.IsCompleted)
                 .ToList();
 
+            // Filter files that have valid save locations and filenames, and actually exist on disk
             var existingDownloadFiles = downloadFiles
                 .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
 
-            var deleteFile = false;
-            if (existingDownloadFiles.Count > 0)
-            {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
-                    $"Do you want to delete the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your computer?",
-                    DialogButtons.YesNo);
+            // Show warning dialog to confirm deletion of files
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
+                $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
+                DialogButtons.YesNoCancel);
 
-                if (result == DialogResult.Yes)
-                    deleteFile = true;
-            }
+            // Return if user cancels the operation
+            if (result == DialogResult.Cancel)
+                return;
 
+            // Determine whether to actually delete files (Yes) or just remove from app (No)
+            var deleteFile = result == DialogResult.Yes;
+
+            // Process each download file
             foreach (var downloadFile in downloadFiles)
             {
                 await AppService
@@ -522,7 +540,9 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            // Log any errors that occur during the process
             Log.Error(ex, "An error occurred while trying to delete completed download files. Error message: {ErrorMessage}", ex.Message);
+            // Show error dialog to inform user about the failure
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -909,14 +929,29 @@ public class MainWindowViewModel : ViewModelBase
             // Convert response to AppVersion class
             var response = await request.Content.ReadAsStringAsync();
             var appVersion = response.ConvertFromJson<AppVersion?>();
-            // Make sure the AppVersion exists
-            if (appVersion == null)
+            // Make sure the AppVersion exists and has value
+            if (appVersion?.Version.IsStringNullOrEmpty() != false)
                 throw new InvalidOperationException("Unable to get version from server.");
 
             // Get the current version of the application
             var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            // Make sure current version is not null
+            if (currentVersion.IsStringNullOrEmpty())
+                throw new InvalidOperationException("Unable to get current version of the application.");
+
+            // Change the format of the versions
+            appVersion.Version = appVersion.Version.Replace("v", "").Replace(".", "");
+            currentVersion = currentVersion!.Replace(".", "");
+            // Make sure the versions have same length
+            while (appVersion.Version.Length < currentVersion.Length)
+                appVersion.Version += "0";
+
+            // Convert versions to int
+            if (!int.TryParse(currentVersion, out var currentVer) || !int.TryParse(appVersion.Version, out var newVer))
+                throw new InvalidOperationException("Unable to compare versions.");
+
             // Compare the versions
-            if (currentVersion?.Equals($"{appVersion.Version.TrimStart('v')}.0") == true)
+            if (currentVer >= newVer)
             {
                 // If the versions are the same, show a dialog box to the user and inform them that they are using the latest version
                 if (owner != null)
@@ -1554,6 +1589,40 @@ public class MainWindowViewModel : ViewModelBase
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
         CalculateGlobalSpeedLimit();
         FilterDownloadList();
+        UpdateActiveProxy();
+    }
+
+    private void UpdateActiveProxy()
+    {
+        var proxyMode = AppService
+            .SettingsService
+            .Settings
+            .ProxyMode;
+
+        switch (proxyMode)
+        {
+            case ProxyMode.UseSystemProxySettings:
+            {
+                ActiveProxyTitle = "System proxy";
+                break;
+            }
+
+            case ProxyMode.UseCustomProxy:
+            {
+                var activeProxy = AppService.SettingsService.Settings.Proxies.FirstOrDefault(p => p.IsActive);
+                if (activeProxy != null)
+                    ActiveProxyTitle = activeProxy.Name;
+
+                break;
+            }
+
+            case ProxyMode.DisableProxy:
+            default:
+            {
+                ActiveProxyTitle = null;
+                break;
+            }
+        }
     }
 
     private void CalculateGlobalSpeedLimit()
@@ -1756,15 +1825,16 @@ public class MainWindowViewModel : ViewModelBase
                 .ToList();
 
             // Ask user if they want to remove the files from the system
-            var deleteFile = false;
-            if (existingDownloadFiles.Count > 0)
-            {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
-                    $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
-                    DialogButtons.YesNo);
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
+                $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
+                DialogButtons.YesNoCancel);
 
-                deleteFile = result == DialogResult.Yes;
-            }
+            // Cancel delete operation if user pressed cancel
+            if (result == DialogResult.Cancel)
+                return;
+
+            // Set delete file flag to true if user pressed yes
+            var deleteFile = result == DialogResult.Yes;
 
             // Get all download files that are currently downloading
             var stopDownloadTasks = downloadFiles

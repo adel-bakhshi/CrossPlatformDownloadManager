@@ -276,8 +276,15 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     public double MergeProgress
     {
         get => _mergeProgress;
-        set => SetField(ref _mergeProgress, value);
+        set
+        {
+            var result = SetField(ref _mergeProgress, value);
+            if (result)
+                OnPropertyChanged(nameof(MergeProgressAsString));
+        }
     }
+
+    public string MergeProgressAsString => $"{MergeProgress:00.00}%";
 
     public bool PlayStopSound { get; set; } = true;
     public int? TempDownloadQueueId { get; set; }

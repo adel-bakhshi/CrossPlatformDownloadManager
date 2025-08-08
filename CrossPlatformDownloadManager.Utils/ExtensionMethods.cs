@@ -57,7 +57,7 @@ public static class ExtensionMethods
                 tb = Math.Round(tb);
         }
 
-        if (tb > 1)
+        if (tb >= 1)
             return $"{tb:N2} TB";
 
         var gb = bytes / Constants.GigaByte;
@@ -71,7 +71,7 @@ public static class ExtensionMethods
                 gb = Math.Round(gb);
         }
 
-        if (gb > 1)
+        if (gb >= 1)
             return $"{gb:N2} GB";
 
         var mb = bytes / Constants.MegaByte;
@@ -85,7 +85,7 @@ public static class ExtensionMethods
                 mb = Math.Round(mb);
         }
 
-        if (mb > 1)
+        if (mb >= 1)
             return $"{mb:N2} MB";
 
         var kb = bytes / Constants.KiloByte;
@@ -99,7 +99,7 @@ public static class ExtensionMethods
                 kb = Math.Round(kb);
         }
 
-        if (kb > 1)
+        if (kb >= 1)
             return $"{kb:N2} KB";
 
         return $"{bytes:N2} Byte" + (bytes > 1 ? "s" : "");

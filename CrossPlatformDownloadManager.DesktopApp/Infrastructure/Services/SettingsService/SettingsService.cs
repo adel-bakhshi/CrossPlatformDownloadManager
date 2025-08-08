@@ -294,11 +294,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         proxySettings.Username = proxySettings.Username?.Trim();
         proxySettings.Password = proxySettings.Password?.Trim();
 
-        if (proxySettings.Host.IsStringNullOrEmpty() || proxySettings.Port.IsStringNullOrEmpty())
+        if (proxySettings.Host.IsStringNullOrEmpty()
+            || proxySettings.Port.IsStringNullOrEmpty()
+            || !int.TryParse(proxySettings.Port, out _))
+        {
             throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
-
-        if (!int.TryParse(proxySettings.Port, out _))
-            throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
+        }
 
         var proxyType = proxySettings.Type?.ToLower() switch
         {

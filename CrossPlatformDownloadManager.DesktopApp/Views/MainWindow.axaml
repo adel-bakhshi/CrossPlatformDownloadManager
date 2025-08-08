@@ -824,12 +824,24 @@
                                       Width="250"
                                       Command="{Binding OpenAboutUsWindowCommand}"
                                       CommandParameter="{Binding $parent[Window]}" />
-                            
+
                             <MenuItem Header="Check for updates"
                                       Classes="subMenuItem"
                                       Width="250"
                                       Command="{Binding CheckForUpdatesCommand}"
                                       CommandParameter="{Binding $parent[Window]}" />
+
+                            <MenuItem Header="Browser Extension"
+                                      Classes="subMenuItem"
+                                      Width="250">
+                                <MenuItem Header="Download"
+                                          Classes="subMenuItem"
+                                          Width="250" />
+
+                                <MenuItem Header="How to install?"
+                                          Classes="subMenuItem"
+                                          Width="250" />
+                            </MenuItem>
                         </MenuItem>
                     </Menu>
                 </StackPanel>
@@ -1026,9 +1038,12 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical"
                                                     VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding FileName}" />
+                                            <TextBlock Text="{Binding FileName}"
+                                                       TextTrimming="CharacterEllipsis" />
+
                                             <TextBlock Text="{Binding FileType}"
-                                                       Foreground="{DynamicResource AccentColor}" />
+                                                       Foreground="{DynamicResource AccentColor}"
+                                                       TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -1083,7 +1098,8 @@
                                                         IsVisible="{Binding IsDownloading}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Downloading - {0}}"
-                                                           Foreground="{DynamicResource InfoColor}" />
+                                                           Foreground="{DynamicResource InfoColor}"
+                                                           TextTrimming="CharacterEllipsis" />
 
                                                 <ProgressBar Foreground="{DynamicResource InfoColor}"
                                                              Background="{DynamicResource MainTextColor}"
@@ -1096,7 +1112,8 @@
                                                         IsVisible="{Binding IsStopped}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Stopped - {0}}"
-                                                           Foreground="{DynamicResource WarningColor}" />
+                                                           Foreground="{DynamicResource WarningColor}"
+                                                           TextTrimming="CharacterEllipsis" />
 
                                                 <ProgressBar Foreground="{DynamicResource WarningColor}"
                                                              Background="{DynamicResource MainTextColor}"
@@ -1109,7 +1126,8 @@
                                                         IsVisible="{Binding IsPaused}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Paused - {0}}"
-                                                           Foreground="{DynamicResource WarningColor}" />
+                                                           Foreground="{DynamicResource WarningColor}"
+                                                           TextTrimming="CharacterEllipsis" />
 
                                                 <ProgressBar Foreground="{DynamicResource WarningColor}"
                                                              Background="{DynamicResource MainTextColor}"
@@ -1122,7 +1140,8 @@
                                                         IsVisible="{Binding IsError}"
                                                         Spacing="3">
                                                 <TextBlock Text="{Binding DownloadProgressAsString, StringFormat={}Error - {0}}"
-                                                           Foreground="{DynamicResource DangerColor}" />
+                                                           Foreground="{DynamicResource DangerColor}"
+                                                           TextTrimming="CharacterEllipsis" />
 
                                                 <ProgressBar Foreground="{DynamicResource DangerColor}"
                                                              Background="{DynamicResource MainTextColor}"
@@ -1134,8 +1153,9 @@
                                                         HorizontalAlignment="Stretch"
                                                         IsVisible="{Binding IsMerging}"
                                                         Spacing="3">
-                                                <TextBlock Text="{Binding MergeProgress, StringFormat={}Merging - {0}}"
-                                                           Foreground="{DynamicResource WarningColor}" />
+                                                <TextBlock Text="{Binding MergeProgressAsString, StringFormat={}Merging - {0}}"
+                                                           Foreground="{DynamicResource WarningColor}"
+                                                           TextTrimming="CharacterEllipsis" />
 
                                                 <ProgressBar Foreground="{DynamicResource WarningColor}"
                                                              Background="{DynamicResource MainTextColor}"
@@ -1197,6 +1217,20 @@
                         Spacing="10"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
+                <!-- Active proxy -->
+                <StackPanel Orientation="Horizontal"
+                            Spacing="5"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Active proxy"
+                            IsVisible="{Binding ActiveProxyTitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <PathIcon Data="{DynamicResource ArrowsLeftRightToLineSvgIcon}"
+                              Foreground="{DynamicResource AccentColor}"
+                              Width="16"
+                              Height="16" />
+                    <TextBlock Text="{Binding ActiveProxyTitle}"
+                               Foreground="{DynamicResource AccentColor}" />
+                </StackPanel>
+
                 <!-- Active queues -->
                 <Button ToolTip.Tip="{Binding ActiveDownloadQueuesToolTipText}"
                         IsVisible="{Binding ActiveDownloadQueueExists}"

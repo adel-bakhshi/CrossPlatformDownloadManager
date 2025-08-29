@@ -54,6 +54,7 @@ public class MainWindowViewModel : ViewModelBase
     private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
     private string _globalSpeedLimit = "0 KB";
     private bool _isGlobalSpeedLimitVisible;
+    private string? _activeProxyTitle;
 
     #endregion
 
@@ -172,6 +173,12 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isGlobalSpeedLimitVisible, value);
     }
 
+    public string? ActiveProxyTitle
+    {
+        get => _activeProxyTitle;
+        set => this.RaiseAndSetIfChanged(ref _activeProxyTitle, value);
+    }
+
     #endregion
 
     #region Commands
@@ -270,6 +277,10 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand CheckForUpdatesCommand { get; }
 
+    public ICommand DownloadBrowserExtensionCommand { get; }
+
+    public ICommand HowToInstallBrowserExtensionCommand { get; }
+
     #endregion
 
     public MainWindowViewModel(IAppService appService) : base(appService)
@@ -294,6 +305,7 @@ public class MainWindowViewModel : ViewModelBase
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
 
         CalculateGlobalSpeedLimit();
+        UpdateActiveProxy();
 
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
@@ -342,6 +354,8 @@ public class MainWindowViewModel : ViewModelBase
         SaveColumnsSettingsCommand = ReactiveCommand.CreateFromTask(SaveColumnsSettingsAsync);
         OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenAboutUsWindowAsync);
         CheckForUpdatesCommand = ReactiveCommand.CreateFromTask<Window?>(CheckForUpdatesAsync);
+        DownloadBrowserExtensionCommand = ReactiveCommand.CreateFromTask<Window?>(DownloadBrowserExtensionAsync);
+        HowToInstallBrowserExtensionCommand = ReactiveCommand.CreateFromTask(HowToInstallBrowserExtensionAsync);
     }
 
     private void LoadDownloadQueues()
@@ -486,33 +500,43 @@ public class MainWindowViewModel : ViewModelBase
         await RemoveDownloadFilesAsync(dataGrid, excludeFilesInRunningQueues: false);
     }
 
+    /// <summary>
+    /// Asynchronously deletes all completed download files from the application.
+    /// This method checks for existing files, prompts the user for confirmation,
+    /// and then proceeds with deletion based on user's choice.
+    /// </summary>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     private async Task DeleteCompletedDownloadFilesAsync()
     {
         try
         {
+            // Get all download files that have been marked as completed
             var downloadFiles = AppService
                 .DownloadFileService
                 .DownloadFiles
                 .Where(df => df.IsCompleted)
                 .ToList();
 
+            // Filter files that have valid save locations and filenames, and actually exist on disk
             var existingDownloadFiles = downloadFiles
                 .Where(df => !df.SaveLocation.IsStringNullOrEmpty() && !df.FileName.IsStringNullOrEmpty())
                 .Select(df => Path.Combine(df.SaveLocation!, df.FileName!))
                 .Where(File.Exists)
                 .ToList();
 
-            var deleteFile = false;
-            if (existingDownloadFiles.Count > 0)
-            {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
-                    $"Do you want to delete the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your computer?",
-                    DialogButtons.YesNo);
+            // Show warning dialog to confirm deletion of files
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
+                $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
+                DialogButtons.YesNoCancel);
 
-                if (result == DialogResult.Yes)
-                    deleteFile = true;
-            }
+            // Return if user cancels the operation
+            if (result == DialogResult.Cancel)
+                return;
 
+            // Determine whether to actually delete files (Yes) or just remove from app (No)
+            var deleteFile = result == DialogResult.Yes;
+
+            // Process each download file
             foreach (var downloadFile in downloadFiles)
             {
                 await AppService
@@ -522,7 +546,9 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            // Log any errors that occur during the process
             Log.Error(ex, "An error occurred while trying to delete completed download files. Error message: {ErrorMessage}", ex.Message);
+            // Show error dialog to inform user about the failure
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -909,14 +935,26 @@ public class MainWindowViewModel : ViewModelBase
             // Convert response to AppVersion class
             var response = await request.Content.ReadAsStringAsync();
             var appVersion = response.ConvertFromJson<AppVersion?>();
-            // Make sure the AppVersion exists
-            if (appVersion == null)
+            // Make sure the AppVersion exists and has value
+            if (appVersion?.Version.IsStringNullOrEmpty() != false)
                 throw new InvalidOperationException("Unable to get version from server.");
 
             // Get the current version of the application
             var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            // Make sure current version is not null
+            if (currentVersion.IsStringNullOrEmpty())
+                throw new InvalidOperationException("Unable to get current version of the application.");
+
+            // Change the format of the versions
+            appVersion.Version = appVersion.Version.Replace("v", "").Replace(".", "");
+            currentVersion = currentVersion!.Substring(0, currentVersion.Length - 1).Replace(".", "");
+
+            // Convert versions to int
+            if (!int.TryParse(currentVersion, out var currentVer) || !int.TryParse(appVersion.Version, out var newVer))
+                throw new InvalidOperationException("Unable to compare versions.");
+
             // Compare the versions
-            if (currentVersion?.Equals($"{appVersion.Version.TrimStart('v')}.0") == true)
+            if (currentVer >= newVer)
             {
                 // If the versions are the same, show a dialog box to the user and inform them that they are using the latest version
                 if (owner != null)
@@ -943,6 +981,53 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to check for updates. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Downloads the latest version of the browser extension.
+    /// </summary>
+    /// <param name="owner">The owner window of the current command.</param>
+    private async Task DownloadBrowserExtensionAsync(Window? owner)
+    {
+        try
+        {
+            // Make sure the owner and the clipboard is not null
+            if (owner?.Clipboard == null)
+                return;
+
+            // Copy the latest download URL of the browser extension to the clipboard
+            await owner.Clipboard.SetTextAsync(Constants.LastestDownloadUrlOfBrowserExtension);
+            // Add the copied URL to the download list
+            await AddNewLinkAsync(owner);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to download browser extension. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Guides the user to the browser-extension page of the CDM website.
+    /// </summary>
+    private static async Task HowToInstallBrowserExtensionAsync()
+    {
+        try
+        {
+            // Open the browser-extension page of the CDM website
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = Constants.CdmBrowserExtensionUrl,
+                UseShellExecute = true
+            };
+
+            Process.Start(processStartInfo);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to show how to install browser extension. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 
@@ -1554,6 +1639,40 @@ public class MainWindowViewModel : ViewModelBase
         DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
         CalculateGlobalSpeedLimit();
         FilterDownloadList();
+        UpdateActiveProxy();
+    }
+
+    private void UpdateActiveProxy()
+    {
+        var proxyMode = AppService
+            .SettingsService
+            .Settings
+            .ProxyMode;
+
+        switch (proxyMode)
+        {
+            case ProxyMode.UseSystemProxySettings:
+            {
+                ActiveProxyTitle = "System proxy";
+                break;
+            }
+
+            case ProxyMode.UseCustomProxy:
+            {
+                var activeProxy = AppService.SettingsService.Settings.Proxies.FirstOrDefault(p => p.IsActive);
+                if (activeProxy != null)
+                    ActiveProxyTitle = activeProxy.Name;
+
+                break;
+            }
+
+            case ProxyMode.DisableProxy:
+            default:
+            {
+                ActiveProxyTitle = null;
+                break;
+            }
+        }
     }
 
     private void CalculateGlobalSpeedLimit()
@@ -1756,15 +1875,16 @@ public class MainWindowViewModel : ViewModelBase
                 .ToList();
 
             // Ask user if they want to remove the files from the system
-            var deleteFile = false;
-            if (existingDownloadFiles.Count > 0)
-            {
-                var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
-                    $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
-                    DialogButtons.YesNo);
+            var result = await DialogBoxManager.ShowWarningDialogAsync("Delete files",
+                $"Would you like to remove the downloaded file{(existingDownloadFiles.Count > 1 ? "s" : "")} from your system as well?",
+                DialogButtons.YesNoCancel);
 
-                deleteFile = result == DialogResult.Yes;
-            }
+            // Cancel delete operation if user pressed cancel
+            if (result == DialogResult.Cancel)
+                return;
+
+            // Set delete file flag to true if user pressed yes
+            var deleteFile = result == DialogResult.Yes;
 
             // Get all download files that are currently downloading
             var stopDownloadTasks = downloadFiles

@@ -98,7 +98,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Remove download files from list
         foreach (var downloadFile in deletedDownloadFiles)
-            await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: true, reloadData: false);
+            await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: false, reloadData: false);
 
         // Find primary keys
         primaryKeys = DownloadFiles.Select(df => df.Id).ToList();

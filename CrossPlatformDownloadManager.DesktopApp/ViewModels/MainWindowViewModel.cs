@@ -277,6 +277,10 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand CheckForUpdatesCommand { get; }
 
+    public ICommand DownloadBrowserExtensionCommand { get; }
+
+    public ICommand HowToInstallBrowserExtensionCommand { get; }
+
     #endregion
 
     public MainWindowViewModel(IAppService appService) : base(appService)
@@ -350,6 +354,8 @@ public class MainWindowViewModel : ViewModelBase
         SaveColumnsSettingsCommand = ReactiveCommand.CreateFromTask(SaveColumnsSettingsAsync);
         OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask<Window?>(OpenAboutUsWindowAsync);
         CheckForUpdatesCommand = ReactiveCommand.CreateFromTask<Window?>(CheckForUpdatesAsync);
+        DownloadBrowserExtensionCommand = ReactiveCommand.CreateFromTask<Window?>(DownloadBrowserExtensionAsync);
+        HowToInstallBrowserExtensionCommand = ReactiveCommand.CreateFromTask(HowToInstallBrowserExtensionAsync);
     }
 
     private void LoadDownloadQueues()
@@ -941,10 +947,7 @@ public class MainWindowViewModel : ViewModelBase
 
             // Change the format of the versions
             appVersion.Version = appVersion.Version.Replace("v", "").Replace(".", "");
-            currentVersion = currentVersion!.Replace(".", "");
-            // Make sure the versions have same length
-            while (appVersion.Version.Length < currentVersion.Length)
-                appVersion.Version += "0";
+            currentVersion = currentVersion!.Substring(0, currentVersion.Length - 1).Replace(".", "");
 
             // Convert versions to int
             if (!int.TryParse(currentVersion, out var currentVer) || !int.TryParse(appVersion.Version, out var newVer))
@@ -978,6 +981,53 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to check for updates. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Downloads the latest version of the browser extension.
+    /// </summary>
+    /// <param name="owner">The owner window of the current command.</param>
+    private async Task DownloadBrowserExtensionAsync(Window? owner)
+    {
+        try
+        {
+            // Make sure the owner and the clipboard is not null
+            if (owner?.Clipboard == null)
+                return;
+
+            // Copy the latest download URL of the browser extension to the clipboard
+            await owner.Clipboard.SetTextAsync(Constants.LastestDownloadUrlOfBrowserExtension);
+            // Add the copied URL to the download list
+            await AddNewLinkAsync(owner);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to download browser extension. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Guides the user to the browser-extension page of the CDM website.
+    /// </summary>
+    private static async Task HowToInstallBrowserExtensionAsync()
+    {
+        try
+        {
+            // Open the browser-extension page of the CDM website
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = Constants.CdmBrowserExtensionUrl,
+                UseShellExecute = true
+            };
+
+            Process.Start(processStartInfo);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while trying to show how to install browser extension. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

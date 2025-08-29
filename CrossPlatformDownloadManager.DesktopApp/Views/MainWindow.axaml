@@ -836,11 +836,14 @@
                                       Width="250">
                                 <MenuItem Header="Download"
                                           Classes="subMenuItem"
-                                          Width="250" />
+                                          Width="250"
+                                          Command="{Binding DownloadBrowserExtensionCommand}"
+                                          CommandParameter="{Binding $parent[Window]}" />
 
                                 <MenuItem Header="How to install?"
                                           Classes="subMenuItem"
-                                          Width="250" />
+                                          Width="250"
+                                          Command="{Binding HowToInstallBrowserExtensionCommand}" />
                             </MenuItem>
                         </MenuItem>
                     </Menu>

@@ -293,7 +293,7 @@ public static class ExtensionMethods
         if (time == TimeSpan.Zero)
             return "00 : 00";
 
-        return (time.Value.Hours > 1 ? $"{time.Value.Hours:00} : " : "") + $"{time.Value.Minutes:00} : {time.Value.Seconds:00}";
+        return (time.Value.Hours >= 1 ? $"{time.Value.Hours:00} : " : "") + $"{time.Value.Minutes:00} : {time.Value.Seconds:00}";
     }
 
     public static T? DeepCopy<T>(this T? obj, JsonSerializerSettings? serializerSettings = null)

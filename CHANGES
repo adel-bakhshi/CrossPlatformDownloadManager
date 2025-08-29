@@ -1,3 +1,20 @@
+- Version 0.10.0; 2025-08-29
+
+* New Features:
+  - Added Active Proxy Indicator: The application's active proxy status is now displayed in the Statusbar for better visibility.
+  - Added Download & Install Guide for Extension: New menu items provide a direct link to download the browser extension and a guide for its installation.
+* Technical Updates:
+  - Upgraded to Avalonia 11.3.4: Updated the UI framework to the latest version for enhanced performance and stability.
+  - Improved Application Update Mechanism: Optimized the process for checking and installing application updates.
+* User Interface & Usability Improvements:
+  - Improved Merge Progress Display: Enhanced the visual feedback for the file merging operation.
+  - Enhanced Chunk Progress Visualization: Improved the display of individual download chunk progress for better user insight.
+* Bug Fixes:
+  - Fixed Accidental File Deletion: Resolved a critical issue where files were being deleted even when the user cancelled the operation.
+  - Fixed File Size Display: Corrected the issue that caused inaccurate file size information to be shown.
+  - Fixed Time-Remaining Estimation: Addressed the problem with incorrect and fluctuating time estimates during downloads.
+  - General Fixes and Performance Improvements: Addressed various minor bugs and implemented overall performance enhancements.
+
 - Version 0.9.0; 2025-07-27
 
 * New Features:

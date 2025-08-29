@@ -103,9 +103,19 @@ public static class Constants
     public const string CdmApiUrl = $"{CdmWebsiteUrl}/api";
 
     /// <summary>
+    /// The URL of the CDM browser extension page.
+    /// </summary>
+    public const string CdmBrowserExtensionUrl = $"{CdmWebsiteUrl}/browser-extension";
+
+    /// <summary>
     /// The file path of the light theme data.
     /// </summary>
     public const string LightThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json";
+
+    /// <summary>
+    /// The lastest download url of the browser extension.
+    /// </summary>
+    public const string LastestDownloadUrlOfBrowserExtension = "https://github.com/adel-bakhshi/cdm-browser-extension/releases/latest/download/chromium-extension.zip";
 
     #endregion
 

@@ -855,8 +855,7 @@ public class FileDownloader
                 // If chunk info is not equal to "Completed", update it
                 chunkData.Info = "Completed";
                 // Update the chunk downloaded size and total size
-                chunkData.DownloadedSize = chunkProgress.ReceivedBytesSize;
-                chunkData.TotalSize = chunkProgress.TotalBytesToReceive;
+                chunkData.DownloadedSize = chunkData.TotalSize = chunkProgress.TotalBytesToReceive;
             }
             // Otherwise, if the download is paused change the chunk info to "Paused"
             else if (DownloadFile.IsPaused)

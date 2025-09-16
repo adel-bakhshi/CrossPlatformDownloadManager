@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -317,6 +320,40 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             Log.Error(ex, "An error occurred during handling pointer pressed. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    /// <summary>
+    /// Handles the LayoutUpdated event for the DownloadFilesDataGrid control.
+    /// This method adjusts the corner radius of the last visible column header.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">Event data.</param>
+    private void DownloadFilesDataGridOnLayoutUpdated(object? sender, EventArgs e)
+    {
+        // Get all column headers in the DataGrid
+        var columnHeaders = DownloadFilesDataGrid
+            .GetVisualDescendants()
+            .OfType<DataGridColumnHeader>()
+            .ToList();
+
+        // If no column headers are found, exit the method
+        if (columnHeaders.Count == 0)
+            return;
+
+        // Find the last visible column header and the scroll corner header
+        var lastColumnHeader = columnHeaders.LastOrDefault(c => c.IsVisible);
+        var scrollColumHeader = columnHeaders.Find(c => c.Name?.Equals("PART_TopRightCornerHeader") == true);
+        // If no last visible column header is found, exit the method
+        if (lastColumnHeader == null)
+            return;
+
+        // Post the UI update to the UI thread dispatcher
+        Dispatcher.UIThread.Post(() =>
+        {
+            // If scroll corner header is not visible or doesn't exist, set corner radius for the last column header
+            if (scrollColumHeader == null || scrollColumHeader.IsVisible == false)
+                lastColumnHeader.CornerRadius = new CornerRadius(0, 8, 8, 0);
+        });
     }
 
     #region Helpers

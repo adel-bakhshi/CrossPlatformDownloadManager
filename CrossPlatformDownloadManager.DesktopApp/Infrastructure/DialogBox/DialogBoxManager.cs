@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Views;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
@@ -25,24 +26,14 @@ public static class DialogBoxManager
     /// <param name="dialogHeader">The header of the dialog.</param>
     /// <param name="dialogMessage">The message of the dialog.</param>
     /// <param name="dialogButtons">The buttons of the dialog.</param>
-    /// <param name="showCopyToClipboard">Whether to show the copy to clipboard button.</param>
-    /// <param name="infoMessage">The additional message that shows in a tooltip.</param>
-    /// <param name="useMainWindowAsOwner">Whether to use the main window as the owner of the dialog.</param>
+    /// <param name="options">The options of the dialog.</param>
     /// <returns>The result of the dialog.</returns>
     public static async Task<DialogResult> ShowInfoDialogAsync(string dialogHeader,
         string dialogMessage,
         DialogButtons dialogButtons,
-        bool showCopyToClipboard = true,
-        string? infoMessage = null,
-        bool useMainWindowAsOwner = false)
+        DialogOptions? options = null)
     {
-        return await ShowDialogAsync(dialogHeader,
-            dialogMessage,
-            dialogButtons,
-            DialogType.Information,
-            showCopyToClipboard: showCopyToClipboard,
-            infoMessage: infoMessage,
-            useMainWindowAsOwner: useMainWindowAsOwner);
+        return await ShowDialogAsync(dialogHeader, dialogMessage, dialogButtons, DialogType.Information, options);
     }
 
     /// <summary>
@@ -51,24 +42,14 @@ public static class DialogBoxManager
     /// <param name="dialogHeader">The header of the dialog.</param>
     /// <param name="dialogMessage">The message of the dialog.</param>
     /// <param name="dialogButtons">The buttons of the dialog.</param>
-    /// <param name="showCopyToClipboard">Whether to show the copy to clipboard button.</param>
-    /// <param name="infoMessage">The additional message that shows in a tooltip.</param>
-    /// <param name="useMainWindowAsOwner">Whether to use the main window as the owner of the dialog.</param>
+    /// <param name="options">The options of the dialog.</param>
     /// <returns>The result of the dialog.</returns>
     public static async Task<DialogResult> ShowWarningDialogAsync(string dialogHeader,
         string dialogMessage,
         DialogButtons dialogButtons,
-        bool showCopyToClipboard = true,
-        string? infoMessage = null,
-        bool useMainWindowAsOwner = false)
+        DialogOptions? options = null)
     {
-        return await ShowDialogAsync(dialogHeader,
-            dialogMessage,
-            dialogButtons,
-            DialogType.Warning,
-            showCopyToClipboard: showCopyToClipboard,
-            infoMessage: infoMessage,
-            useMainWindowAsOwner: useMainWindowAsOwner);
+        return await ShowDialogAsync(dialogHeader, dialogMessage, dialogButtons, DialogType.Warning, options);
     }
 
     /// <summary>
@@ -77,24 +58,14 @@ public static class DialogBoxManager
     /// <param name="dialogHeader">The header of the dialog.</param>
     /// <param name="dialogMessage">The message of the dialog.</param>
     /// <param name="dialogButtons">The buttons of the dialog.</param>
-    /// <param name="showCopyToClipboard">Whether to show the copy to clipboard button.</param>
-    /// <param name="infoMessage">The additional message that shows in a tooltip.</param>
-    /// <param name="useMainWindowAsOwner">Whether to use the main window as the owner of the dialog.</param>
+    /// <param name="options">The options of the dialog.</param>
     /// <returns>The result of the dialog.</returns>
     public static async Task<DialogResult> ShowSuccessDialogAsync(string dialogHeader,
         string dialogMessage,
         DialogButtons dialogButtons,
-        bool showCopyToClipboard = true,
-        string? infoMessage = null,
-        bool useMainWindowAsOwner = false)
+        DialogOptions? options = null)
     {
-        return await ShowDialogAsync(dialogHeader,
-            dialogMessage,
-            dialogButtons,
-            DialogType.Success,
-            showCopyToClipboard: showCopyToClipboard,
-            infoMessage: infoMessage,
-            useMainWindowAsOwner: useMainWindowAsOwner);
+        return await ShowDialogAsync(dialogHeader, dialogMessage, dialogButtons, DialogType.Success, options);
     }
 
     /// <summary>
@@ -103,24 +74,14 @@ public static class DialogBoxManager
     /// <param name="dialogHeader">The header of the dialog.</param>
     /// <param name="dialogMessage">The message of the dialog.</param>
     /// <param name="dialogButtons">The buttons of the dialog.</param>
-    /// <param name="showCopyToClipboard">Whether to show the copy to clipboard button.</param>
-    /// <param name="infoMessage">The additional message that shows in a tooltip.</param>
-    /// <param name="useMainWindowAsOwner">Whether to use the main window as the owner of the dialog.</param>
+    /// <param name="options">The options of the dialog.</param>
     /// <returns>The result of the dialog.</returns>
     public static async Task<DialogResult> ShowDangerDialogAsync(string dialogHeader,
         string dialogMessage,
         DialogButtons dialogButtons,
-        bool showCopyToClipboard = true,
-        string? infoMessage = null,
-        bool useMainWindowAsOwner = false)
+        DialogOptions? options = null)
     {
-        return await ShowDialogAsync(dialogHeader,
-            dialogMessage,
-            dialogButtons,
-            DialogType.Danger,
-            showCopyToClipboard: showCopyToClipboard,
-            infoMessage: infoMessage,
-            useMainWindowAsOwner: useMainWindowAsOwner);
+        return await ShowDialogAsync(dialogHeader, dialogMessage, dialogButtons, DialogType.Danger, options);
     }
 
     /// <summary>
@@ -131,15 +92,19 @@ public static class DialogBoxManager
     /// <returns>The result of the dialog.</returns>
     public static async Task<DialogResult> ShowErrorDialogAsync(Exception exception, bool useMainWindowAsOwner = false)
     {
+        // Create dialog header and message
         const string dialogHeader = "Error";
         const string dialogMessage = "We ran into an unexpected issue. Please give it another try. If the problem continues, feel free to report it to us so we can help.";
 
-        return await ShowDangerDialogAsync(dialogHeader,
-            dialogMessage,
-            DialogButtons.Ok,
-            showCopyToClipboard: true,
-            infoMessage: exception.Message,
-            useMainWindowAsOwner: useMainWindowAsOwner);
+        // Create dialog options
+        var options = new DialogOptions
+        {
+            ShowCopyToClipboardButton = true,
+            InfoMessage = exception.Message,
+            UseMainWindowAsOwner = useMainWindowAsOwner
+        };
+
+        return await ShowDangerDialogAsync(dialogHeader, dialogMessage, DialogButtons.Ok, options);
     }
 
     #region Helpers
@@ -151,24 +116,23 @@ public static class DialogBoxManager
     /// <param name="dialogMessage">The message of the dialog.</param>
     /// <param name="dialogButtons">The buttons of the dialog.</param>
     /// <param name="dialogType">The type of the dialog.</param>
-    /// <param name="showCopyToClipboard">Whether to show the copy to clipboard button.</param>
-    /// <param name="infoMessage">The additional message that shows in a tooltip.</param>
-    /// <param name="useMainWindowAsOwner">Whether to use the main window as the owner of the dialog.</param>
+    /// <param name="options">The options of the dialog.</param>
     /// <returns>The result of the dialog.</returns>
     private static async Task<DialogResult> ShowDialogAsync(string dialogHeader,
         string dialogMessage,
         DialogButtons dialogButtons,
         DialogType dialogType,
-        bool showCopyToClipboard = true,
-        string? infoMessage = null,
-        bool useMainWindowAsOwner = false)
+        DialogOptions? options = null)
     {
         // Run the following code on the UI thread to avoid any cross-thread exceptions
         // If we use the UI thread to show the dialog window, we can show on every thread without any issues
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
+            // Initialize options if is null
+            options ??= new DialogOptions();
+
             // Try to find the owner of the dialog box window
-            var owner = useMainWindowAsOwner ? App.Desktop?.MainWindow : App.Desktop?.Windows.FirstOrDefault(w => w.IsFocused) ?? App.Desktop?.MainWindow;
+            var owner = options.UseMainWindowAsOwner ? App.Desktop?.MainWindow : App.Desktop?.Windows.FirstOrDefault(w => w.IsFocused) ?? App.Desktop?.MainWindow;
             if (App.Desktop?.MainWindow != null && owner == App.Desktop.MainWindow && !App.Desktop.MainWindow.IsVisible)
                 owner = App.Desktop.Windows.OfType<ManagerWindow>().FirstOrDefault();
 
@@ -183,14 +147,12 @@ public static class DialogBoxManager
                 return DialogResult.None;
 
             // Create view model for dialog window
-            var viewModel = new DialogWindowViewModel(appService)
+            var viewModel = new DialogWindowViewModel(appService, options)
             {
                 DialogHeader = dialogHeader,
                 DialogMessage = dialogMessage,
                 DialogButtons = dialogButtons,
-                DialogType = dialogType,
-                CopyToClipboardButtonIsVisible = showCopyToClipboard,
-                InfoMessage = infoMessage
+                DialogType = dialogType
             };
 
             // Create dialog window and set the view model as data context

@@ -25,6 +25,7 @@
         CanResize="False"
         ShowInTaskbar="False"
         Topmost="True"
+        FlowDirection="{Binding FlowDirection}"
         PointerPressed="WindowOnPointerPressed">
 
     <!-- Resources -->
@@ -290,6 +291,7 @@
                        FontWeight="Bold"
                        TextWrapping="Wrap"
                        Margin="20, 20, 20, 10"
+                       HorizontalAlignment="{Binding TitleAlignment}"
                        Foreground="{DynamicResource DialogTextColor}" />
 
             <!-- Dialog message -->
@@ -341,25 +343,25 @@
                                 Spacing="10"
                                 HorizontalAlignment="Right">
                         <!-- Ok button -->
-                        <Button Content="Ok"
+                        <Button Content="{Binding OkButtonText}"
                                 Classes="dialogButton okButton"
                                 IsVisible="{Binding IsOkButtonVisible}"
                                 Click="DialogButtonOnClick" />
 
                         <!-- Yes button -->
-                        <Button Content="Yes"
+                        <Button Content="{Binding YesButtonText}"
                                 Classes="dialogButton yesButton"
                                 IsVisible="{Binding IsYesButtonVisible}"
                                 Click="DialogButtonOnClick" />
 
                         <!-- No button -->
-                        <Button Content="No"
+                        <Button Content="{Binding NoButtonText}"
                                 Classes="dialogButton noButton"
                                 IsVisible="{Binding IsNoButtonVisible}"
                                 Click="DialogButtonOnClick" />
 
                         <!-- Cancel button -->
-                        <Button Content="Cancel"
+                        <Button Content="{Binding CancelButtonText}"
                                 Classes="dialogButton cancelButton"
                                 IsVisible="{Binding IsCancelButtonVisible}"
                                 Click="DialogButtonOnClick" />

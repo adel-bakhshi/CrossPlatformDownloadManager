@@ -89,7 +89,9 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
                        Text="{Binding DownloadFile.Url, FallbackValue='', TargetNullValue=''}"
-                       Margin="0, 0, 0, 10" />
+                       Margin="0, 0, 0, 10"
+                       TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding DownloadFile.Url, FallbackValue='', TargetNullValue=''}" />
 
             <!-- Name -->
             <TextBlock Grid.Row="1"
@@ -100,7 +102,9 @@
             <TextBlock Grid.Row="1"
                        Grid.Column="1"
                        Text="{Binding DownloadFile.FileName, FallbackValue='', TargetNullValue=''}"
-                       Margin="0, 0, 0, 10" />
+                       Margin="0, 0, 0, 10"
+                       TextTrimming="CharacterEllipsis"
+                       ToolTip.Tip="{Binding DownloadFile.FileName, FallbackValue='', TargetNullValue=''}" />
 
             <!-- Save Location -->
             <TextBlock Grid.Row="2"

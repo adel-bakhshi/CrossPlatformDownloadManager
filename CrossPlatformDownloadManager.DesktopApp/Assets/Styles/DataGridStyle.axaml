@@ -201,14 +201,19 @@
             <Setter Property="FontWeight"
                     Value="Bold" />
 
-            <Style Selector="^:nth-child(1)">
+            <Style Selector="^[IsVisible=True]:nth-child(1)">
                 <Setter Property="CornerRadius"
                         Value="8, 0, 0, 8" />
             </Style>
 
-            <Style Selector="^:nth-last-child(2)">
+            <Style Selector="^[IsVisible=True]:nth-last-child(1)">
                 <Setter Property="CornerRadius"
                         Value="0, 8, 8, 0" />
+            </Style>
+            
+            <Style Selector="^#PART_TopRightCornerHeader">
+                    <Setter Property="CornerRadius"
+                            Value="0, 8, 8, 0" />
             </Style>
         </Style>
 

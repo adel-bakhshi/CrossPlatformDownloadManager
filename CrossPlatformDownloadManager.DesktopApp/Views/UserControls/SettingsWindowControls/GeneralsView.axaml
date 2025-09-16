@@ -87,7 +87,7 @@
                                        Background="{DynamicResource MainBackgroundColor}"
                                        ToggleIconColor="{DynamicResource AccentColor}"
                                        OnHoverToggleIconColor="{DynamicResource MainTextColor}"
-                                       IconData="{DynamicResource FontSvgIcon}"
+                                       IconData="{DynamicResource PaletteSvgIcon}"
                                        IconColor="{DynamicResource IconColor}"
                                        IconSize="{DynamicResource SmallIconSize}"
                                        BorderThickness="0"

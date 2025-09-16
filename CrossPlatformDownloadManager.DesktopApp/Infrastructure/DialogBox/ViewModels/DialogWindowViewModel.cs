@@ -2,7 +2,10 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -20,6 +23,12 @@ public class DialogWindowViewModel : ViewModelBase
     private DialogType _dialogType = DialogType.Information;
     private bool _copyToClipboardButtonIsVisible;
     private string? _infoMessage;
+    private string _okButtonText = string.Empty;
+    private string _yesButtonText = string.Empty;
+    private string _noButtonText = string.Empty;
+    private string _cancelButtonText = string.Empty;
+    private HorizontalAlignment _titleAlignment = HorizontalAlignment.Left;
+    private FlowDirection _flowDirection = FlowDirection.RightToLeft;
 
     #endregion
 
@@ -99,6 +108,42 @@ public class DialogWindowViewModel : ViewModelBase
 
     public bool InfoMessageIsVisible => !InfoMessage.IsStringNullOrEmpty();
 
+    public string OkButtonText
+    {
+        get => _okButtonText;
+        set => this.RaiseAndSetIfChanged(ref _okButtonText, value);
+    }
+
+    public string YesButtonText
+    {
+        get => _yesButtonText;
+        set => this.RaiseAndSetIfChanged(ref _yesButtonText, value);
+    }
+
+    public string NoButtonText
+    {
+        get => _noButtonText;
+        set => this.RaiseAndSetIfChanged(ref _noButtonText, value);
+    }
+
+    public string CancelButtonText
+    {
+        get => _cancelButtonText;
+        set => this.RaiseAndSetIfChanged(ref _cancelButtonText, value);
+    }
+
+    public HorizontalAlignment TitleAlignment
+    {
+        get => _titleAlignment;
+        set => this.RaiseAndSetIfChanged(ref _titleAlignment, value);
+    }
+
+    public FlowDirection FlowDirection
+    {
+        get => _flowDirection;
+        set => this.RaiseAndSetIfChanged(ref _flowDirection, value);
+    }
+
     #endregion
 
     #region Commands
@@ -107,8 +152,18 @@ public class DialogWindowViewModel : ViewModelBase
 
     #endregion
 
-    public DialogWindowViewModel(IAppService appService) : base(appService)
+    public DialogWindowViewModel(IAppService appService, DialogOptions options) : base(appService)
     {
+        // Initialize required properties using options
+        CopyToClipboardButtonIsVisible = options.ShowCopyToClipboardButton;
+        InfoMessage = options.InfoMessage;
+        OkButtonText = options.OkButtonText;
+        YesButtonText = options.YesButtonText;
+        NoButtonText = options.NoButtonText;
+        CancelButtonText = options.CancelButtonText;
+        TitleAlignment = options.CenterTitle ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+        FlowDirection = options.FlowDirection;
+
         CopyToClipboardCommand = ReactiveCommand.CreateFromTask<Window?>(CopyToClipboardAsync);
     }
 

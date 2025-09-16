@@ -1010,7 +1010,8 @@
                               UnloadingRow="DownloadFilesDataGridOnUnloadingRow"
                               KeyDown="DownloadFilesDataGridOnKeyDown"
                               KeyUp="DownloadFilesDataGridOnKeyUp"
-                              CellPointerPressed="DownloadFilesDataGridOnCellPointerPressed">
+                              CellPointerPressed="DownloadFilesDataGridOnCellPointerPressed"
+                              LayoutUpdated="DownloadFilesDataGridOnLayoutUpdated">
                         <DataGrid.Columns>
                             <!-- Checkbox for select all rows -->
                             <DataGridTemplateColumn MinWidth="50">

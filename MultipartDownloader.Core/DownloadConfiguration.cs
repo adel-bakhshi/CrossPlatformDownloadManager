@@ -20,6 +20,7 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     private int _timeout = 1000; // timeout (millisecond) per stream block reader
     private bool _clearPackageOnCompletionWithFailure; // Clear package and downloaded data when download completed with failure
     private long _minimumSizeOfChunking = 512; // minimum size of chunking to download a file in multiple parts
+    private long _minimumChunkSize; // minimum size of a single chunk
     private bool _reserveStorageSpaceBeforeStartingDownload; // Before starting the download, reserve the storage space of the file as file size.
     private bool _enableLiveStreaming; // Get on demand downloaded data with ReceivedBytes on downloadProgressChanged event
     private string _chunkFilesOutputDirectory = string.Empty; // Directory to store downloaded data for each chunk for merging at the end of the download
@@ -170,12 +171,24 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Gets or sets the minimum size of chunking and multiple part downloading.
+    /// Gets or sets the minimum size of file to enable chunking and multiple part downloading.
     /// </summary>
     public long MinimumSizeOfChunking
     {
         get => _minimumSizeOfChunking;
         set => OnPropertyChanged(ref _minimumSizeOfChunking, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the minimum size of a single chunk.
+    /// If it is not 0 it dynamically reduces the chunk count to keep the chunk size above this value.
+    /// Keeps ChunkCount as a Maximum.
+    /// Default value is 0.
+    /// </summary>
+    public long MinimumChunkSize
+    {
+        get => _minimumChunkSize;
+        set => OnPropertyChanged(ref _minimumChunkSize, value);
     }
 
     /// <summary>

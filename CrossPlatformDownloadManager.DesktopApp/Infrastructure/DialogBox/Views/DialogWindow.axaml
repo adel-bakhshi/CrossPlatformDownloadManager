@@ -301,7 +301,8 @@
                           Margin="20, 0">
                 <TextBlock Text="{Binding DialogMessage}"
                            TextWrapping="Wrap"
-                           Foreground="{DynamicResource DialogTextColor}" />
+                           Foreground="{DynamicResource DialogTextColor}"
+                           xml:space="preserve" />
             </ScrollViewer>
 
             <!-- Dialog footer -->

@@ -1,4 +1,5 @@
 ﻿using MultipartDownloader.Core.CustomEventArgs;
+using MultipartDownloader.Core.Enums;
 using System.ComponentModel;
 
 namespace MultipartDownloader.Core;

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MultipartDownloader.Core.CustomEventArgs;
+using MultipartDownloader.Core.Enums;
 using System.ComponentModel;
 
 namespace MultipartDownloader.Core;
@@ -255,9 +256,11 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// Cancels the current download operation.
     /// </summary>
-    public virtual void Cancel()
+    public virtual async Task CancelAsync()
     {
-        GlobalCancellationTokenSource?.Cancel(true);
+        if (GlobalCancellationTokenSource != null)
+            await GlobalCancellationTokenSource.CancelAsync().ConfigureAwait(false);
+
         Status = DownloadStatus.Stopped;
         Resume();
     }
@@ -268,7 +271,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <returns>A task that represents the asynchronous cancellation operation.</returns>
     public virtual async Task CancelTaskAsync()
     {
-        Cancel();
+        await CancelAsync().ConfigureAwait(false);
         if (TaskCompletion != null)
             await TaskCompletion.Task.ConfigureAwait(false);
     }

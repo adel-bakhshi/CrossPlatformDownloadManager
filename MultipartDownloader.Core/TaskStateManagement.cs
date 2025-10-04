@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace MultipartDownloader.Core;
 
 /// <summary>
-/// Manages the state and exceptions to a task.
+/// Manages the state and exceptions of a task.
 /// </summary>
 public class TaskStateManagement
 {

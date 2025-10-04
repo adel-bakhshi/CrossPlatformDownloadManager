@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MultipartDownloader.Core.CustomEventArgs;
+using MultipartDownloader.Core.Enums;
 using System.ComponentModel;
 
 namespace MultipartDownloader.Core;
@@ -159,7 +160,8 @@ public interface IDownloadService
     /// <summary>
     /// Cancels the current download operation asynchronously.
     /// </summary>
-    void Cancel();
+    /// <returns>A Task object that represents the asynchronous cancellation operation.</returns>
+    Task CancelAsync();
 
     /// <summary>
     /// Cancels the current download operation asynchronously and returns a Task object that represents the cancellation operation.

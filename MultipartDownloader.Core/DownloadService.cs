@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using MultipartDownloader.Core.CustomEventArgs;
 using MultipartDownloader.Core.CustomExceptions;
+using MultipartDownloader.Core.Enums;
 using MultipartDownloader.Core.Extensions.Helpers;
 using System.ComponentModel;
 
@@ -51,7 +52,7 @@ public class DownloadService : AbstractDownloadService
             var firstRequest = RequestInstances[0];
             Logger?.LogDebug("Getting file size from first request");
             Package.TotalFileSize = await Client!.GetFileSizeAsync(firstRequest).ConfigureAwait(false);
-            Package.IsSupportDownloadInRange = await Client!.IsSupportDownloadInRange(firstRequest).ConfigureAwait(false);
+            Package.IsSupportDownloadInRange = await Client!.IsSupportDownloadInRangeAsync(firstRequest).ConfigureAwait(false);
             Logger?.LogInformation("File size: {TotalFileSize}, Supports range download: {IsSupportDownloadInRange}", Package.TotalFileSize, Package.IsSupportDownloadInRange);
 
             // Check if we need to rebuild storage

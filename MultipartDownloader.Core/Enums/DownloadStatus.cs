@@ -1,4 +1,4 @@
-﻿namespace MultipartDownloader.Core;
+﻿namespace MultipartDownloader.Core.Enums;
 
 /// <summary>
 /// Represents the status of a download operation.

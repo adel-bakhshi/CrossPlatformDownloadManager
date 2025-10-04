@@ -35,7 +35,7 @@ public class ChunkHub
                 long endPosition = startPosition + _chunkSize - 1;
                 package.Chunks[i] = GetChunk(i.ToString(), startPosition, endPosition);
             }
-            package.Chunks.Last().End += package.TotalFileSize % _chunkCount; // add remaining bytes to last chunk
+            package.Chunks[package.Chunks.Length - 1].End += package.TotalFileSize % _chunkCount; // add remaining bytes to last chunk
         }
         else
         {
@@ -53,18 +53,22 @@ public class ChunkHub
         _startOffset = 0;
 
         if (_startOffset < 0)
-        {
             _startOffset = 0;
-        }
 
         if (package.TotalFileSize < _chunkCount)
-        {
             _chunkCount = (int)package.TotalFileSize;
-        }
 
         if (_chunkCount < 1)
-        {
             _chunkCount = 1;
+
+        if (_config.MinimumChunkSize > 0)
+        {
+            int maxChunksByMinSize = (int)(package.TotalFileSize / _config.MinimumChunkSize);
+            if (maxChunksByMinSize < 1)
+                maxChunksByMinSize = 1;
+
+            // Respect both ChunkCount and MinChunkSize constraints
+            _chunkCount = Math.Min(_config.ChunkCount, maxChunksByMinSize);
         }
 
         _chunkSize = package.TotalFileSize / _chunkCount;

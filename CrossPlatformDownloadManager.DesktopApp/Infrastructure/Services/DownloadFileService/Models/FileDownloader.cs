@@ -632,9 +632,9 @@ public class FileDownloader
             MaximumBytesPerSecond = GetMaximumBytesPerSecond(),
             ParallelDownload = true,
             MaximumMemoryBufferBytes = GetMaximumMemoryBufferBytes(),
-            ReserveStorageSpaceBeforeStartingDownload = true,
+            ReserveStorageSpaceBeforeStartingDownload = false,
             ChunkFilesOutputDirectory = _appService.SettingsService.GetTemporaryFileLocation(),
-            MaxRestartWithoutClearTempFile = 1,
+            MaxRestartWithoutClearTempFile = 5,
             MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
 
@@ -936,6 +936,7 @@ public class FileDownloader
             // Update the chunk progress data
             chunkProgress.ReceivedBytesSize = chunk.IsDownloadCompleted() ? chunk.Length : chunk.Position;
             chunkProgress.TotalBytesToReceive = chunk.Length;
+            chunkProgress.IsCompleted = chunk.IsDownloadCompleted();
         }
     }
 

@@ -33,7 +33,7 @@ public partial class SocketClient : IDisposable
 
     private static SocketsHttpHandler GetSocketsHttpHandler(RequestConfiguration config)
     {
-        SocketsHttpHandler handler = new()
+        var handler = new SocketsHttpHandler()
         {
             AllowAutoRedirect = config.AllowAutoRedirect,
             MaxAutomaticRedirections = config.MaximumAutomaticRedirections,
@@ -50,9 +50,7 @@ public partial class SocketClient : IDisposable
 
         // Set up the SslClientAuthenticationOptions for custom certificate validation
         if (config.ClientCertificates.Count > 0)
-        {
             handler.SslOptions.ClientCertificates = config.ClientCertificates;
-        }
 
         handler.SslOptions.EnabledSslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12;
         handler.SslOptions.RemoteCertificateValidationCallback = ExceptionHelper.CertificateValidationCallBack;
@@ -103,7 +101,7 @@ public partial class SocketClient : IDisposable
         // Add custom headers
         if (config.Headers.Count > 0)
         {
-            foreach (var key in config.Headers.AllKeys.Where(k => !string.IsNullOrWhiteSpace(k.Trim())))
+            foreach (var key in config.Headers.AllKeys.Where(k => !string.IsNullOrWhiteSpace(k.Trim())).ToList())
                 AddHeaderIfNotEmpty(client.DefaultRequestHeaders, key, config.Headers[key]);
         }
 
@@ -214,7 +212,7 @@ public partial class SocketClient : IDisposable
     /// <returns>A task that represents the asynchronous operation. The task result contains the file size.</returns>
     public async ValueTask<long> GetFileSizeAsync(Request request)
     {
-        if (await IsSupportDownloadInRange(request).ConfigureAwait(false))
+        if (await IsSupportDownloadInRangeAsync(request).ConfigureAwait(false))
             return GetTotalSizeFromContentRange(_responseHeaders.ToDictionary());
 
         return GetTotalSizeFromContentLength(_responseHeaders.ToDictionary());
@@ -235,7 +233,7 @@ public partial class SocketClient : IDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask ThrowIfIsNotSupportDownloadInRange(Request request)
     {
-        var isSupport = await IsSupportDownloadInRange(request).ConfigureAwait(false);
+        var isSupport = await IsSupportDownloadInRangeAsync(request).ConfigureAwait(false);
         if (!isSupport)
             throw new NotSupportedException("The downloader cannot continue downloading because the network or server failed to download in range.");
     }
@@ -244,7 +242,7 @@ public partial class SocketClient : IDisposable
     /// Checks if the download in range is supported.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the download in range is supported.</returns>
-    public async ValueTask<bool> IsSupportDownloadInRange(Request request)
+    public async ValueTask<bool> IsSupportDownloadInRangeAsync(Request request)
     {
         if (_isSupportDownloadInRange.HasValue)
             return _isSupportDownloadInRange.Value;

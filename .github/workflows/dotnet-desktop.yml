@@ -8,16 +8,21 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        runtime: ["win-x64", "win-arm64"]
+
+    env:
+      currVer: ${{ github.ref_name }}
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 9.x.x
 
       - name: Install Inno Setup
         run: choco install innosetup -y
@@ -29,36 +34,53 @@ jobs:
         run: dotnet restore
 
       - name: Build Windows EXE File
-        run: pupnet -k setup -r win-x64 -y -o "Cross-platform.Download.Manager.win-x64.exe"
+        run: pupnet -k setup -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.exe"
 
       - name: Build Windows ZIP Portable
-        run: pupnet -k zip -r win-x64 -y -o "Cross-platform.Download.Manager.win-x64.zip"
+        run: pupnet -k zip -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.zip"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-Packages
+          name: Windows-${{ matrix.runtime }}-Packages
           path: ./Deploy/bin/*
 
   build-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runtime: ["linux-x64", "linux-arm64"]
+
+    env:
+      currVer: ${{ github.ref_name }}
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 9.x.x
 
       - name: Install Dependencies
         run: |
           sudo apt update
           sudo apt-get install -y zip rpm zstd fuse libfuse2
+
+      - name: Install x86_64 AppImageTool
+        if: matrix.runtime == 'linux-x64'
+        run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
+          echo "$PWD" >> $GITHUB_PATH
+
+      - name: Install arm64 AppImageTool
+        if: matrix.runtime == 'linux-arm64'
+        run: |
+          wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
+          chmod +x ./appimagetool-aarch64.AppImage
+          echo "$PWD" >> $GITHUB_PATH
 
       - name: Install Pupnet Deploy
         run: dotnet tool install -g KuiperZone.PupNet --version 1.8.*
@@ -67,13 +89,15 @@ jobs:
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: pupnet -k deb -r linux-amd64 -y -o "Cross-platform.Download.Manager.linux-amd64.deb"
+        run: pupnet -k deb -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.deb"
 
+      # Building RPM package for arm64 architecture with PupNet Deploy is failing, so I couldn't build RPM package for now.
       - name: Build Linux RPM File
-        run: pupnet -k rpm -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.rpm"
+        if: matrix.runtime == 'linux-x64'
+        run: pupnet -k rpm -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.rpm"
 
       - name: Build AppImage File
-        run: pupnet -k appimage -r linux-x64 -y -o "Cross-platform.Download.Manager.linux-x86_64.AppImage"
+        run: pupnet -k appimage -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.AppImage"
 
       # - name: Build Linux DEB File
       #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
@@ -84,33 +108,95 @@ jobs:
       # - name: Build AppImage File
       #   run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
 
+      # - name: Build Linux ZIP Portable
+      #   run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh
+
       - name: Build Linux ZIP Portable
-        run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh
+        run: |
+          chmod +x ./Deploy/linux/tarball/process.sh
+          ./Deploy/linux/tarball/process.sh ${{ matrix.runtime }} ${currVer#v}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-Packages
+          name: Linux-${{ matrix.runtime }}-Packages
+          path: ./Deploy/bin/*
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        runtime: ["osx-x64", "osx-arm64"]
+
+    env:
+      currVer: ${{ github.ref_name }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9.x.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build macOS App Bundle
+        run: |
+          chmod +x ./Deploy/macos/app/process.sh
+          ./Deploy/macos/app/process.sh ${{ matrix.runtime }} ${currVer#v}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-${{ matrix.runtime }}-Packages
           path: ./Deploy/bin/*
 
   release:
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Windows Artifacts
+      - name: Download Windows x64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Windows-Packages
+          name: Windows-win-x64-Packages
           path: artifacts/
 
-      - name: Download Linux Artifacts
+      - name: Download Windows ARM64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Linux-Packages
+          name: Windows-win-arm64-Packages
+          path: artifacts/
+
+      - name: Download Linux x64 Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-linux-x64-Packages
+          path: artifacts/
+
+      - name: Download Linux ARM64 Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-linux-arm64-Packages
+          path: artifacts/
+
+      - name: Download macOS x64 Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-osx-x64-Packages
+          path: artifacts/
+
+      - name: Download macOS ARM64 Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-osx-arm64-Packages
           path: artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: Cross platform Download Manager ${{ github.ref_name }}
           files: artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}

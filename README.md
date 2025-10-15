@@ -167,7 +167,7 @@ If you find **Cross Platform Download Manager (CDM)** useful and would like to s
         bc1qx3cyervg9wrrpqtr65ew5h7a9h2dnl5n7eul9k
       </td>
       <td align="center">
-        <img src="./Assets/Currency/Ethereum.jpeg" width="200px" alt="Donate via Tether">
+        <img src="./Assets/Currency/Ethereum.jpeg" width="200px" alt="Donate via Ethereum">
         <br>
         Ethereum Address:
         0x6D66BdD07EBA5876f1E4E96B96237C0F272c3F27

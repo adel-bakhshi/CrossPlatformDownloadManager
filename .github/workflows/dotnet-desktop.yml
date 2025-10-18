@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        runtime: ["win-x64", "win-arm64"]
+        rid: ["win-x64", "win-arm64"]
 
     env:
       currVer: ${{ github.ref_name }}
@@ -34,22 +34,22 @@ jobs:
         run: dotnet restore
 
       - name: Build Windows EXE File
-        run: pupnet -k setup -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.exe"
+        run: pupnet -k setup -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.exe"
 
       - name: Build Windows ZIP Portable
-        run: pupnet -k zip -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.zip"
+        run: pupnet -k zip -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.zip"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-${{ matrix.runtime }}-Packages
+          name: Windows-${{ matrix.rid }}-Packages
           path: ./Deploy/bin/*
 
   build-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        runtime: ["linux-x64", "linux-arm64"]
+        rid: ["linux-x64", "linux-arm64"]
 
     env:
       currVer: ${{ github.ref_name }}
@@ -69,14 +69,14 @@ jobs:
           sudo apt-get install -y zip rpm zstd fuse libfuse2
 
       - name: Install x86_64 AppImageTool
-        if: matrix.runtime == 'linux-x64'
+        if: matrix.rid == 'linux-x64'
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
           echo "$PWD" >> $GITHUB_PATH
 
       - name: Install arm64 AppImageTool
-        if: matrix.runtime == 'linux-arm64'
+        if: matrix.rid == 'linux-arm64'
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x ./appimagetool-aarch64.AppImage
@@ -89,15 +89,15 @@ jobs:
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: pupnet -k deb -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.deb"
+        run: pupnet -k deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.deb"
 
       # Building RPM package for arm64 architecture with PupNet Deploy is failing, so I couldn't build RPM package for now.
       - name: Build Linux RPM File
-        if: matrix.runtime == 'linux-x64'
-        run: pupnet -k rpm -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.rpm"
+        if: matrix.rid == 'linux-x64'
+        run: pupnet -k rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.rpm"
 
       - name: Build AppImage File
-        run: pupnet -k appimage -r ${{ matrix.runtime }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.runtime }}.AppImage"
+        run: pupnet -k appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.AppImage"
 
       # - name: Build Linux DEB File
       #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
@@ -114,19 +114,19 @@ jobs:
       - name: Build Linux ZIP Portable
         run: |
           chmod +x ./Deploy/linux/tarball/process.sh
-          ./Deploy/linux/tarball/process.sh ${{ matrix.runtime }} ${currVer#v}
+          ./Deploy/linux/tarball/process.sh ${{ matrix.rid }} ${currVer#v}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ matrix.runtime }}-Packages
+          name: Linux-${{ matrix.rid }}-Packages
           path: ./Deploy/bin/*
 
   build-macos:
     runs-on: macos-latest
     strategy:
       matrix:
-        runtime: ["osx-x64", "osx-arm64"]
+        rid: ["osx-x64", "osx-arm64"]
 
     env:
       currVer: ${{ github.ref_name }}
@@ -146,12 +146,12 @@ jobs:
       - name: Build macOS App Bundle
         run: |
           chmod +x ./Deploy/macos/app/process.sh
-          ./Deploy/macos/app/process.sh ${{ matrix.runtime }} ${currVer#v}
+          ./Deploy/macos/app/process.sh ${{ matrix.rid }} ${currVer#v}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-${{ matrix.runtime }}-Packages
+          name: macOS-${{ matrix.rid }}-Packages
           path: ./Deploy/bin/*
 
   release:

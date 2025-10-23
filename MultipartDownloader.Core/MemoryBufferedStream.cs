@@ -3,7 +3,7 @@
 /// <summary>
 /// This class is a wrapper around a <see cref="Stream"/> that provides a memory buffer for reading and writing data.
 /// </summary>
-public class MemoryBufferedStream
+public class MemoryBufferedStream : IAsyncDisposable
 {
     #region Private fields
 

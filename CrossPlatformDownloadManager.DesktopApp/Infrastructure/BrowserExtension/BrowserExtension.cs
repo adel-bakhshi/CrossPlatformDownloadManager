@@ -252,7 +252,7 @@ public class BrowserExtension : IBrowserExtension
 
         // Return the response
         response.IsSuccessful = true;
-        response.Message = $"{(extensionRequests.Count > 0 ? $"{extensionRequests.Count} Links" : "Link")} added to CDM.";
+        response.Message = $"{(extensionRequests.Count > 1 ? $"{extensionRequests.Count} Links" : "Link")} added to CDM.";
         return response;
     }
 

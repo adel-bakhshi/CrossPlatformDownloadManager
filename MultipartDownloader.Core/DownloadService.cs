@@ -56,7 +56,7 @@ public class DownloadService : AbstractDownloadService
             Logger?.LogInformation("File size: {TotalFileSize}, Supports range download: {IsSupportDownloadInRange}", Package.TotalFileSize, Package.IsSupportDownloadInRange);
 
             // Check if we need to rebuild storage
-            bool needToBuildStorage = forceBuildStorage || !Package.IsStorageExists() || Package.Chunks.Any(c => c.Position > 0);
+            var needToBuildStorage = forceBuildStorage || !Package.IsStorageExists() || Package.Chunks.Any(c => c.Position > 0);
             if (needToBuildStorage)
             {
                 Logger?.LogDebug("Building storage with ReserveStorageSpace={ReserveStorage}, MaxMemoryBuffer={MaxMemoryBuffer}",
@@ -137,6 +137,15 @@ public class DownloadService : AbstractDownloadService
         finalStream.Seek(0, SeekOrigin.Begin);
         // Order parts by Start value
         var sortedChunks = Package.Chunks.OrderBy(chunk => chunk.Start).ToList();
+
+        // Calculate total size of the chunks
+        var totalSize = sortedChunks.Sum(c => c.Length);
+        // Calculate available size of the drive
+        var availableSize = new DriveInfo(Path.GetDirectoryName(Package.FileName)!).AvailableFreeSpace;
+        // Make sure there is enough space on disk to merge the files
+        if (availableSize < totalSize)
+            throw new IOException($"Not enough space on disk to merge the file. Available: {availableSize} bytes, Required: {totalSize} bytes");
+        
         // Merge parts
         foreach (var chunk in sortedChunks)
             await MergeFileWithProgressAsync(finalStream, chunk).ConfigureAwait(false);

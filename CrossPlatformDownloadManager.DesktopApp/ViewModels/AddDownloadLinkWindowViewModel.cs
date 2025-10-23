@@ -11,17 +11,30 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Views;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
+/// <summary>
+/// ViewModel for the Add Download Link Window, handling the logic for adding new download links
+/// </summary>
 public class AddDownloadLinkWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
+    ///<summary>
+    /// The cancellation token source for the download link validation task.
+    /// </summary>
     private readonly CancellationTokenSource _cancellationTokenSource;
 
+    /// <summary>
+    /// The debouncer for handling the loading state of the URL validation.
+    /// </summary>
+    private readonly Debouncer _changeLoadingStateDebouncer;
+
+    // Private backing fields for properties
     private DownloadFileViewModel _downloadFile = new();
     private ObservableCollection<CategoryViewModel> _categories = [];
     private CategoryViewModel? _selectedCategory;
@@ -37,6 +50,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
 
     #region Properties
 
+    /// <summary>
+    /// Gets or sets a value that indicates the download file being added.
+    /// </summary>
     public DownloadFileViewModel DownloadFile
     {
         get => _downloadFile;
@@ -47,12 +63,18 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the collection of available categories.
+    /// </summary>
     public ObservableCollection<CategoryViewModel> Categories
     {
         get => _categories;
         set => this.RaiseAndSetIfChanged(ref _categories, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the currently selected category.
+    /// </summary>
     public CategoryViewModel? SelectedCategory
     {
         get => _selectedCategory;
@@ -65,75 +87,124 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the collection of available download queues.
+    /// </summary>
     public ObservableCollection<DownloadQueueViewModel> DownloadQueues
     {
         get => _downloadQueues;
         set => this.RaiseAndSetIfChanged(ref _downloadQueues, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the currently selected download queue.
+    /// </summary>
     public DownloadQueueViewModel? SelectedDownloadQueue
     {
         get => _selectedDownloadQueue;
         set => this.RaiseAndSetIfChanged(ref _selectedDownloadQueue, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if URL details are being loaded.
+    /// </summary>
     public bool IsLoadingUrl
     {
         get => _isLoadingUrl;
         set => this.RaiseAndSetIfChanged(ref _isLoadingUrl, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if user choice should be remembered.
+    /// </summary>
     public bool RememberMyChoice
     {
         get => _rememberMyChoice;
         set => this.RaiseAndSetIfChanged(ref _rememberMyChoice, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if download queue should be started.
+    /// </summary>
     public bool StartDownloadQueue
     {
         get => _startDownloadQueue;
         set => this.RaiseAndSetIfChanged(ref _startDownloadQueue, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if default download queue exists.
+    /// </summary>
     public bool DefaultDownloadQueueIsExist
     {
         get => _defaultDownloadQueueIsExist;
         set => this.RaiseAndSetIfChanged(ref _defaultDownloadQueueIsExist, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if categories are disabled.
+    /// </summary>
     public bool CategoriesAreDisabled
     {
         get => _categoriesAreDisabled;
         set => this.RaiseAndSetIfChanged(ref _categoriesAreDisabled, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value that indicates the flag indicating if file size should be visible.
+    /// </summary>
     public bool IsFileSizeVisible => DownloadFile.IsSizeUnknown || DownloadFile.Size > 0;
 
     #endregion
 
     #region Commands
 
+    /// <summary>
+    /// Gets or sets the command to add a new category.
+    /// </summary>
     public ICommand AddNewCategoryCommand { get; }
 
+    /// <summary>
+    /// Gets or sets the command to add a new download queue.
+    /// </summary>
     public ICommand AddNewQueueCommand { get; }
 
+    /// <summary>
+    /// Gets or sets the command to add a download file to a download queue.
+    /// </summary>
     public ICommand AddDownloadFileToDownloadQueueCommand { get; }
 
+    /// <summary>
+    /// Gets or sets the command to add a download file to the default download queue.
+    /// </summary>
     public ICommand AddDownloadFileToDefaultDownloadQueueCommand { get; }
 
+    /// <summary>
+    /// Gets or sets the command to start the download.
+    /// </summary>
     public ICommand StartDownloadCommand { get; }
 
+    /// <summary>
+    /// Gets or sets the command to cancel the operation.
+    /// </summary>
     public ICommand CancelCommand { get; }
 
     #endregion
 
+    /// <summary>
+    /// Constructor for the ViewModel.
+    /// </summary>
+    /// <param name="appService">Application service instance.</param>
     public AddDownloadLinkWindowViewModel(IAppService appService) : base(appService)
     {
+        // Initialize private fields
         _cancellationTokenSource = new CancellationTokenSource();
+        _changeLoadingStateDebouncer = new Debouncer(TimeSpan.FromSeconds(1.2));
 
         LoadCategories();
         LoadDownloadQueues();
 
+        // Initialize commands
         AddNewCategoryCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewCategoryAsync);
         AddNewQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewQueueAsync);
         AddDownloadFileToDownloadQueueCommand = ReactiveCommand.CreateFromTask<Window?>(AddDownloadFileToDownloadQueueAsync);
@@ -142,6 +213,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
 
+    /// <summary>
+    /// Asynchronously retrieves details from the provided URL.
+    /// </summary>
     public async Task GetUrlDetailsAsync()
     {
         try
@@ -160,11 +234,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
         finally
         {
-            // Set the loading flag to false
-            IsLoadingUrl = false;
+            _changeLoadingStateDebouncer.Run(() => IsLoadingUrl = false);
         }
     }
 
+    /// <summary>
+    /// Handles cancellation of the operation.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task CancelAsync(Window? owner)
     {
         try
@@ -179,6 +256,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Starts the download process.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task StartDownloadAsync(Window? owner)
     {
         try
@@ -204,6 +285,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Opens dialog to add a new category.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task AddNewCategoryAsync(Window? owner)
     {
         try
@@ -222,6 +307,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Opens dialog to add a new queue.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task AddNewQueueAsync(Window? owner)
     {
         try
@@ -240,6 +329,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Adds download file to the selected download queue.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task AddDownloadFileToDownloadQueueAsync(Window? owner)
     {
         try
@@ -313,6 +406,10 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Adds download file to the default download queue.
+    /// </summary>
+    /// <param name="owner">The owner window.</param>
     private async Task AddDownloadFileToDefaultDownloadQueueAsync(Window? owner)
     {
         try
@@ -352,12 +449,18 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Loads the download queues.
+    /// </summary>
     private void LoadDownloadQueues()
     {
         DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
         SelectedDownloadQueue = GetSelectedDownloadQueue();
     }
 
+    /// <summary>
+    /// Gets the selected download queue.
+    /// </summary>
     private DownloadQueueViewModel? GetSelectedDownloadQueue()
     {
         var defaultQueue = DownloadQueues.FirstOrDefault(dq => dq.IsDefault);
@@ -365,6 +468,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         return defaultQueue ?? lastChoice ?? DownloadQueues.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Loads the categories.
+    /// </summary>
     private void LoadCategories()
     {
         // Check if categories are disabled or not
@@ -378,18 +484,27 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == selectedCategoryId) ?? Categories.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Handles changes in download queue service data.
+    /// </summary>
     protected override void OnDownloadQueueServiceDataChanged()
     {
         base.OnDownloadQueueServiceDataChanged();
         LoadDownloadQueues();
     }
 
+    /// <summary>
+    /// Handles changes in category service data.
+    /// </summary>
     protected override void OnCategoryServiceCategoriesChanged()
     {
         base.OnCategoryServiceCategoriesChanged();
         LoadCategories();
     }
 
+    /// <summary>
+    /// Handles changes in settings service data.
+    /// </summary>
     protected override void OnSettingsServiceDataChanged()
     {
         base.OnSettingsServiceDataChanged();

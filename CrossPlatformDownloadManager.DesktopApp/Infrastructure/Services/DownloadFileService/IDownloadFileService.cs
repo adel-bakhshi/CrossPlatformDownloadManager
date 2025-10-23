@@ -111,7 +111,7 @@ public interface IDownloadFileService
     /// <param name="viewModel">The download file that should be limited.</param>
     /// <param name="speed">The speed to limit the download file in bytes.</param>
     void LimitDownloadFileSpeed(DownloadFileViewModel? viewModel, long speed);
-    
+
     /// <summary>
     /// Re-downloads the download file and clear the old data of it.
     /// </summary>

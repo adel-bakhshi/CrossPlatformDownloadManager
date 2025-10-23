@@ -634,7 +634,7 @@ public class FileDownloader
             MaximumMemoryBufferBytes = GetMaximumMemoryBufferBytes(),
             ReserveStorageSpaceBeforeStartingDownload = false,
             ChunkFilesOutputDirectory = _appService.SettingsService.GetTemporaryFileLocation(),
-            MaxRestartWithoutClearTempFile = 5,
+            MaxRestartWithoutClearTempFile = 10,
             MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
 

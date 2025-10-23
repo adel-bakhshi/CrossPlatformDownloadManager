@@ -52,7 +52,7 @@ public class DialogOptions
     /// <summary>
     /// Gets or sets a value that indicates the flow direction of the dialog box window (RightToLeft or LeftToRight).
     /// </summary>
-    public FlowDirection FlowDirection { get; set; } = FlowDirection.RightToLeft;
+    public FlowDirection FlowDirection { get; set; } = FlowDirection.LeftToRight;
 
     #endregion
 }

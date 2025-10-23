@@ -946,17 +946,14 @@ public class MainWindowViewModel : ViewModelBase
                 throw new InvalidOperationException("Unable to get current version of the application.");
 
             // Change the format of the versions
-            appVersion.Version = appVersion.Version.Replace("v", "").Replace(".", "");
-            currentVersion = currentVersion!.Substring(0, currentVersion.Length - 1).Replace(".", "");
-
-            // Convert versions to int
-            if (!int.TryParse(currentVersion, out var currentVer) || !int.TryParse(appVersion.Version, out var newVer))
-                throw new InvalidOperationException("Unable to compare versions.");
-
-            // Compare the versions
-            if (currentVer >= newVer)
+            appVersion.Version = appVersion.Version.Replace("v", "");
+            
+            // Compare versions and if current version is greater than or equal to the latest version,
+            // Show a dialog box to the user and inform them that they are using the latest version
+            if (CompareVersions(currentVersion!, appVersion.Version) >= 0)
             {
-                // If the versions are the same, show a dialog box to the user and inform them that they are using the latest version
+                // If owner is not null, this means that the user want to check for updates from the menu.
+                // So, we have to notify the user that they are using the latest version.
                 if (owner != null)
                 {
                     await DialogBoxManager.ShowInfoDialogAsync("No Updates Available",
@@ -982,6 +979,37 @@ public class MainWindowViewModel : ViewModelBase
         {
             Log.Error(ex, "An error occurred while trying to check for updates. Error message: {ErrorMessage}", ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Compares two version strings.
+    /// </summary>
+    /// <param name="versionA">The first version string.</param>
+    /// <param name="versionB">The second version string.</param>
+    /// <returns>A negative number if versionA is less than versionB, a positive number if versionA is greater than versionB, and 0 if they are equal.</returns>
+    private static int CompareVersions(string versionA, string versionB)
+    {
+        // Split the version strings into parts
+        var partsA = versionA.Split('.').Select(int.Parse).ToArray();
+        var partsB = versionB.Split('.').Select(int.Parse).ToArray();
+
+        // Get the maximum length of the two arrays
+        var maxLength = Math.Max(partsA.Length, partsB.Length);
+
+        // Compare each part of the version strings
+        for (var i = 0; i < maxLength; i++)
+        {
+            var partA = i < partsA.Length ? partsA[i] : 0;
+            var partB = i < partsB.Length ? partsB[i] : 0;
+
+            if (partA > partB)
+                return 1;
+
+            if (partA < partB)
+                return -1;
+        }
+        
+        return 0;
     }
 
     /// <summary>

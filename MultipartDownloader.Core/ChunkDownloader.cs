@@ -112,6 +112,19 @@ internal class ChunkDownloader
             _logger?.LogCritical(error, "Fatal error on download chunk {ChunkId}.", _chunk.Id);
             throw;
         }
+        finally
+        {
+            try
+            {
+                // Dispose storage when chunk download is completed
+                if (_storage != null)
+                    await _storage.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception error)
+            {
+                _logger?.LogError(error, "Error on dispose storage for chunk {ChunkId}.", _chunk.Id);
+            }
+        }
     }
 
     private async ValueTask<Chunk> ContinueWithDelayAsync(Request request, PauseToken pause, CancellationToken cancelToken)

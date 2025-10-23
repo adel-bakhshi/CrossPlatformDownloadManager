@@ -180,8 +180,17 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check if there is an existing download file with the same URL and handle it if its exists
         if (viewModel.IsUrlDuplicate || isUrlDuplicate)
         {
-            if (isUrlDuplicate)
-                result = await HandleDuplicateUrlAsync(downloadFile);
+            try
+            {
+                if (isUrlDuplicate)
+                    result = await HandleDuplicateUrlAsync(downloadFile);
+            }
+            catch (Exception ex)
+            {
+                // If an error occurs while trying to handle duplicate URL, log it and return null
+                Log.Error(ex, "An error occurred while trying to handle duplicate URL. Error message: {ErrorMessage}", ex.Message);
+                return null;
+            }
         }
 
         // If duplicate download action sets to ShowCompleteDialogOrResume, we have to pass the existing download file
@@ -728,11 +737,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         }
 
         // If the action is null, throw an exception
-        if (action == null)
-            throw new InvalidOperationException("Duplicate download link action is null.");
-
-        // Return the action
-        return action.Value;
+        return action ?? throw new InvalidOperationException("Duplicate download link action is null.");
     }
 
     public string GetNewFileName(string url, string fileName, string saveLocation)
@@ -987,43 +992,48 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                     _addCompletedBlocker.Release();
                 }
 
-                // Get the download file from the file downloader
-                var downloadFile = fileDownloader.DownloadFile;
-                // Remove DownloadFinished event from download file
-                downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
-                // Remove DownloadStopped event from download file
-                downloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
-
-                // Reset time left and transfer rate
-                downloadFile.TimeLeft = null;
-                downloadFile.TransferRate = null;
-                // Store the download queue id for next usage
-                // DownloadQueueId will be set to null but in the completed tasks (that is used below) we need it
-                // So we store it in TempDownloadQueueId and after using it, we set it to null
-                downloadFile.TempDownloadQueueId = downloadFile.DownloadQueueId;
-
-                // Check if download file is completed
-                if (downloadFile.IsCompleted)
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    // When download completed, set these properties to null
-                    // We don't need them anymore
-                    downloadFile.DownloadPackage = null;
-                    downloadFile.DownloadQueueId = null;
-                    downloadFile.DownloadQueueName = null;
-                    downloadFile.DownloadQueuePriority = null;
-
-                    // Play download completed sound
-                    if (_settingsService.Settings.UseDownloadCompleteSound)
-                        _ = AudioManager.PlayAsync(AppNotificationType.DownloadCompleted);
-
-                    // Show complete download dialog when user want's this
-                    if (_settingsService.Settings.ShowCompleteDownloadDialog && !downloadFile.IsRunningInQueue)
+                    try
                     {
-                        // Run this code on UI thread
-                        await Dispatcher.UIThread.InvokeAsync(async () =>
+                        // Get the download file from the file downloader
+                        var downloadFile = fileDownloader.DownloadFile;
+                        // Remove DownloadFinished event from download file
+                        downloadFile.DownloadFinished -= DownloadFileOnDownloadFinished;
+                        // Remove DownloadStopped event from download file
+                        downloadFile.DownloadStopped -= DownloadFileOnDownloadStopped;
+
+                        // Reset time left and transfer rate
+                        downloadFile.TimeLeft = null;
+                        downloadFile.TransferRate = null;
+                        // Store the download queue id for next usage
+                        // DownloadQueueId will be set to null but in the completed tasks (that is used below) we need it
+                        // So we store it in TempDownloadQueueId and after using it, we set it to null
+                        downloadFile.TempDownloadQueueId = downloadFile.DownloadQueueId;
+
+                        // Check if download file is completed
+                        if (downloadFile.IsCompleted)
                         {
-                            try
+                            // When download completed, set these properties to null
+                            // We don't need them anymore
+                            downloadFile.DownloadPackage = null;
+                            downloadFile.DownloadQueueId = null;
+                            downloadFile.DownloadQueueName = null;
+                            downloadFile.DownloadQueuePriority = null;
+
+                            // Check if download file size is unknown
+                            // Set download file size is unknown flag to false, because download file is completed and we know the size
+                            if (downloadFile.IsSizeUnknown)
+                                downloadFile.IsSizeUnknown = false;
+
+                            // Play download completed sound
+                            if (_settingsService.Settings.UseDownloadCompleteSound)
+                                _ = AudioManager.PlayAsync(AppNotificationType.DownloadCompleted);
+
+                            // Show complete download dialog when user want's this
+                            if (_settingsService.Settings.ShowCompleteDownloadDialog && !downloadFile.IsRunningInQueue)
                             {
+                                // Run this code on UI thread
                                 var serviceProvider = Application.Current?.GetServiceProvider();
                                 var appService = serviceProvider?.GetService<IAppService>();
                                 if (appService == null)
@@ -1033,92 +1043,91 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                                 var window = new CompleteDownloadWindow { DataContext = viewModel };
                                 window.Show();
                             }
-                            catch (Exception ex)
+                        }
+                        else if (downloadFile.IsError)
+                        {
+                            // Play download failed sound
+                            if (_settingsService.Settings.UseDownloadFailedSound)
+                                _ = AudioManager.PlayAsync(AppNotificationType.DownloadFailed);
+                        }
+                        else if (downloadFile.IsStopped)
+                        {
+                            // Play download stopped sound
+                            if (_settingsService.Settings.UseDownloadStoppedSound && downloadFile.PlayStopSound)
+                                _ = AudioManager.PlayAsync(AppNotificationType.DownloadStopped);
+
+                            downloadFile.PlayStopSound = true;
+                        }
+
+                        // Reset is running in queue flag
+                        downloadFile.IsRunningInQueue = false;
+                        // Get all completed tasks that should run when download file is completed.
+                        var completedAsyncTasks = fileDownloader.GetCompletedAsyncTasks();
+                        // Check if there is any completed tasks
+                        if (completedAsyncTasks.Count > 0)
+                        {
+                            // Iterate through all completed tasks and invoke them
+                            foreach (var completedTask in completedAsyncTasks)
                             {
-                                Log.Error(ex, "An error occurred while showing the complete download dialog. Error message: {ErrorMessage}", ex.Message);
-                                await DialogBoxManager.ShowErrorDialogAsync(ex);
+                                try
+                                {
+                                    await completedTask.Invoke(downloadFile);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "An error occurred while invoking the completed task. Error message: {ErrorMessage}", ex.Message);
+                                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                                }
                             }
-                        });
+
+                            // Clear all completed tasks
+                            fileDownloader.ClearCompletedAsyncTasks();
+                        }
+
+                        // Get all completed sync tasks that should run when download file is completed.
+                        var completedSyncTasks = fileDownloader.GetCompletedSyncTasks();
+                        // Check if there is any completed tasks
+                        if (completedSyncTasks.Count > 0)
+                        {
+                            // Iterate through all completed tasks and invoke them
+                            foreach (var completedTask in completedSyncTasks)
+                            {
+                                try
+                                {
+                                    completedTask.Invoke(downloadFile);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "An error occurred while invoking the completed task. Error message: {ErrorMessage}", ex.Message);
+                                    await DialogBoxManager.ShowErrorDialogAsync(ex);
+                                }
+                            }
+
+                            // Clear all completed tasks
+                            fileDownloader.ClearCompletedSyncTasks();
+                        }
+
+                        // Set temp download queue id to null
+                        downloadFile.TempDownloadQueueId = null;
+                        // Update download file
+                        await UpdateDownloadFileAsync(downloadFile);
+                        // Close the download window
+                        fileDownloader.DownloadWindow?.Close();
+
+                        // Set the completely stopped flag to true
+                        // With this flag we can use EnsureDownloadFileStoppedAsync without any problem
+                        downloadFile.IsCompletelyStopped = true;
+
+                        // Remove file downloader from the downloading files list
+                        var originalFileDownloader = _downloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
+                        if (originalFileDownloader != null)
+                            _downloadingFiles.Remove(originalFileDownloader);
                     }
-                }
-                else if (downloadFile.IsError)
-                {
-                    // Play download failed sound
-                    if (_settingsService.Settings.UseDownloadFailedSound)
-                        _ = AudioManager.PlayAsync(AppNotificationType.DownloadFailed);
-                }
-                else if (downloadFile.IsStopped)
-                {
-                    // Play download stopped sound
-                    if (_settingsService.Settings.UseDownloadStoppedSound && downloadFile.PlayStopSound)
-                        _ = AudioManager.PlayAsync(AppNotificationType.DownloadStopped);
-
-                    downloadFile.PlayStopSound = true;
-                }
-
-                // Reset is running in queue flag
-                downloadFile.IsRunningInQueue = false;
-                // Get all completed tasks that should run when download file is completed.
-                var completedAsyncTasks = fileDownloader.GetCompletedAsyncTasks();
-                // Check if there is any completed tasks
-                if (completedAsyncTasks.Count > 0)
-                {
-                    // Iterate through all completed tasks and invoke them
-                    foreach (var completedTask in completedAsyncTasks)
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            await completedTask.Invoke(downloadFile);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "An error occurred while invoking the completed task. Error message: {ErrorMessage}", ex.Message);
-                            await DialogBoxManager.ShowErrorDialogAsync(ex);
-                        }
+                        Log.Error(ex, "An error occurred while processing the download file. Error message: {ErrorMessage}", ex.Message);
                     }
-
-                    // Clear all completed tasks
-                    fileDownloader.ClearCompletedAsyncTasks();
-                }
-
-                // Get all completed sync tasks that should run when download file is completed.
-                var completedSyncTasks = fileDownloader.GetCompletedSyncTasks();
-                // Check if there is any completed tasks
-                if (completedSyncTasks.Count > 0)
-                {
-                    // Iterate through all completed tasks and invoke them
-                    foreach (var completedTask in completedSyncTasks)
-                    {
-                        try
-                        {
-                            completedTask.Invoke(downloadFile);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "An error occurred while invoking the completed task. Error message: {ErrorMessage}", ex.Message);
-                            await DialogBoxManager.ShowErrorDialogAsync(ex);
-                        }
-                    }
-
-                    // Clear all completed tasks
-                    fileDownloader.ClearCompletedSyncTasks();
-                }
-
-                // Set temp download queue id to null
-                downloadFile.TempDownloadQueueId = null;
-                // Update download file
-                await UpdateDownloadFileAsync(downloadFile);
-                // Close the download window
-                Dispatcher.UIThread.Post(() => fileDownloader.DownloadWindow?.Close());
-
-                // Set the completely stopped flag to true
-                // With this flag we can use EnsureDownloadFileStoppedAsync without any problem
-                downloadFile.IsCompletelyStopped = true;
-
-                // Remove file downloader from the downloading files list
-                var originalFileDownloader = _downloadingFiles.FirstOrDefault(downloader => downloader.DownloadFile.Id == downloadFile.Id);
-                if (originalFileDownloader != null)
-                    _downloadingFiles.Remove(originalFileDownloader);
+                });
             }
             catch (Exception ex)
             {

@@ -254,12 +254,12 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                         break;
 
                     // Get data object
-                    var dataObject = await GetFileDataObjectAsync();
-                    if (dataObject == null)
+                    var dataTransfer = await GetFileDataObjectAsync();
+                    if (dataTransfer == null)
                         break;
 
                     // Copy file to clipboard
-                    await Clipboard.SetDataObjectAsync(dataObject);
+                    await Clipboard.SetDataAsync(dataTransfer);
                     break;
                 }
             }
@@ -308,12 +308,12 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 return;
 
             // Get data object
-            var dataObject = await GetFileDataObjectAsync();
-            if (dataObject == null)
+            var dataTransfer = await GetFileDataObjectAsync();
+            if (dataTransfer == null)
                 return;
 
             // Do drag drop
-            await DragDrop.DoDragDrop(e.PointerPressedEventArgs, dataObject, DragDropEffects.Move);
+            await DragDrop.DoDragDropAsync(e.PointerPressedEventArgs, dataTransfer, DragDropEffects.Move);
         }
         catch (Exception ex)
         {
@@ -358,7 +358,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 
     #region Helpers
 
-    private async Task<DataObject?> GetFileDataObjectAsync()
+    private async Task<DataTransfer?> GetFileDataObjectAsync()
     {
         // Get selected download file
         var downloadFiles = DownloadFilesDataGrid
@@ -386,9 +386,16 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
 
         // Create data object
-        var dataObject = new DataObject();
-        dataObject.Set(DataFormats.Files, files);
-        return dataObject;
+        var dataTransfer = new DataTransfer();
+        foreach (var file in files)
+        {
+            var dataTransferItem = new DataTransferItem();
+            dataTransferItem.SetFile(file);
+            
+            dataTransfer.Add(dataTransferItem);
+        }
+
+        return dataTransfer;
     }
 
     #endregion

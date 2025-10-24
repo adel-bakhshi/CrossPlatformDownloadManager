@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.ReactiveUI;
 using System;
 using System.Globalization;
 using System.IO;
@@ -22,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 using CrossPlatformDownloadManager.Utils;
+using ReactiveUI.Avalonia;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
 

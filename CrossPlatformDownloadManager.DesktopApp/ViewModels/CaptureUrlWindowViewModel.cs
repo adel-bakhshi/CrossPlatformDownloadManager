@@ -23,10 +23,10 @@ public class CaptureUrlWindowViewModel : ViewModelBase
 {
     #region Private Fields
 
-    /// <summary>
-    /// Backing field for the DownloadAddress property.
-    /// </summary>
+    // Backing fields for properties
     private string? _downloadAddress;
+    private string? _username;
+    private string? _password;
 
     #endregion
 
@@ -39,6 +39,24 @@ public class CaptureUrlWindowViewModel : ViewModelBase
     {
         get => _downloadAddress;
         set => this.RaiseAndSetIfChanged(ref _downloadAddress, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value that indicates the username for credentials.
+    /// </summary>
+    public string? Username
+    {
+        get => _username;
+        set => this.RaiseAndSetIfChanged(ref _username, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value that indicates the password for credentials.
+    /// </summary>
+    public string? Password
+    {
+        get => _password;
+        set => this.RaiseAndSetIfChanged(ref _password, value);
     }
 
     #endregion
@@ -63,6 +81,7 @@ public class CaptureUrlWindowViewModel : ViewModelBase
     /// <param name="appService">Application service for accessing various services.</param>
     public CaptureUrlWindowViewModel(IAppService appService) : base(appService)
     {
+        // Initialize commands
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
     }
@@ -132,7 +151,12 @@ public class CaptureUrlWindowViewModel : ViewModelBase
                 var vm = new AddDownloadLinkWindowViewModel(AppService)
                 {
                     IsLoadingUrl = urlIsValid,
-                    DownloadFile = { Url = DownloadAddress }
+                    DownloadFile =
+                    {
+                        Url = DownloadAddress,
+                        Username = Username,
+                        Password = Password
+                    }
                 };
 
                 var window = new AddDownloadLinkWindow { DataContext = vm };
@@ -141,7 +165,13 @@ public class CaptureUrlWindowViewModel : ViewModelBase
             // Otherwise, add link to database and start it
             else
             {
-                var options = new DownloadFileOptions { StartDownloading = true };
+                var options = new DownloadFileOptions
+                {
+                    StartDownloading = true,
+                    Username = Username,
+                    Password = Password
+                };
+
                 await AppService.DownloadFileService.AddDownloadFileAsync(url: DownloadAddress, options);
             }
 

@@ -11,36 +11,81 @@
         x:DataType="vm:CaptureUrlWindowViewModel"
         Title="CDM - Capture Url"
         Width="450"
-        Height="200"
+        Height="240"
         MinWidth="450"
-        MinHeight="200"
+        MinHeight="240"
         MaxWidth="450"
-        MaxHeight="200"
+        MaxHeight="240"
         CanResize="False">
 
     <!-- Main content -->
     <Grid Margin="20"
           RowDefinitions="*, Auto">
-        <!-- Download address -->
-        <cc:CustomTextBox Grid.Row="0"
-                          Background="{DynamicResource SecondaryBackgroundColor}"
-                          Watermark="Download address"
-                          WatermarkForeground="{DynamicResource AccentColor}"
-                          CornerRadius="{DynamicResource DefaultCornerRadius}"
-                          IconData="{DynamicResource LinkSvgIcon}"
-                          IconColor="{DynamicResource IconColor}"
-                          IconSize="{DynamicResource SmallIconSize}"
-                          Padding="12, 10"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"
-                          OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
-                          OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
-                          BorderThickness="1"
-                          BorderBrush="{DynamicResource SecondaryBackgroundColor}"
-                          Text="{Binding DownloadAddress, FallbackValue='', TargetNullValue=''}"
-                          AcceptsReturn="True"
-                          TextWrapping="Wrap"
-                          VerticalIconAlignment="Top" />
+        <Grid Grid.Row="0"
+              RowDefinitions="*, Auto"
+              RowSpacing="10">
+            <!-- Download address -->
+            <cc:CustomTextBox Grid.Row="0"
+                              Background="{DynamicResource SecondaryBackgroundColor}"
+                              Watermark="Download address"
+                              WatermarkForeground="{DynamicResource AccentColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource LinkSvgIcon}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                              Text="{Binding DownloadAddress, FallbackValue='', TargetNullValue=''}"
+                              AcceptsReturn="True"
+                              TextWrapping="Wrap"
+                              VerticalIconAlignment="Top" />
+
+            <!-- Username and Password -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*, *"
+                  ColumnSpacing="10">
+                <!-- Username -->
+                <cc:CustomTextBox Grid.Column="0"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
+                                  Watermark="Username"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource UserSvgIcon}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource MainBackgroundColor}"
+                                  Text="{Binding Username}" />
+
+                <!-- Password -->
+                <cc:CustomTextBox Grid.Column="1"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
+                                  Watermark="Password"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource UnlockKeyholeSvgIcon}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource MainBackgroundColor}"
+                                  Text="{Binding Password}" />
+            </Grid>
+        </Grid>
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="1"

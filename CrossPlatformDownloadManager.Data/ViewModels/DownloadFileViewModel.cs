@@ -149,7 +149,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string LastTryDateAsString => LastTryDate?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+    public string LastTryDateAsString => LastTryDate?.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture) ?? "-";
 
     public DateTime DateAdded
     {
@@ -163,7 +163,7 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         }
     }
 
-    public string DateAddedAsString => DateAdded.ToString(CultureInfo.InvariantCulture);
+    public string DateAddedAsString => DateAdded.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
 
     public int? DownloadQueuePriority
     {

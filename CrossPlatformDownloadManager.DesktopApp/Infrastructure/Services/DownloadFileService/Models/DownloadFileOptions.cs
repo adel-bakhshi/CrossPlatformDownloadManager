@@ -21,11 +21,21 @@ public class DownloadFileOptions
     /// Gets or sets the description of the file to be downloaded.
     /// </summary>
     public string? Description { get; set; }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the download should be started immediately.
     /// </summary>
     public bool StartDownloading { get; set; }
+
+    /// <summary>
+    /// Gets or sets the username of the download file for credentials.
+    /// </summary>
+    public string? Username { get; set; }
+
+    /// <summary>
+    /// Gets or sets the password of the download file for credentials.
+    /// </summary>
+    public string? Password { get; set; }
 
     #endregion
 }

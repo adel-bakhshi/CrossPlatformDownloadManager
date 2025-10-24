@@ -228,7 +228,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             {
                 Referer = DownloadFile.Referer,
                 PageAddress = DownloadFile.PageAddress,
-                Description = DownloadFile.Description
+                Description = DownloadFile.Description,
+                Username = DownloadFile.Username,
+                Password = DownloadFile.Password
             };
 
             // Get the download file from URL

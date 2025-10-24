@@ -121,7 +121,9 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
             {
                 Referer = _downloadFile?.Referer,
                 PageAddress = _downloadFile?.PageAddress,
-                Description = _downloadFile?.Description
+                Description = _downloadFile?.Description,
+                Username = _downloadFile?.Username,
+                Password = _downloadFile?.Password
             };
 
             // Get url details

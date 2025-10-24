@@ -162,7 +162,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             DownloadQueueId = viewModel.DownloadQueueId,
             Size = viewModel.Size!.Value,
             IsSizeUnknown = viewModel.IsSizeUnknown,
-            Description = viewModel.Description,
+            Description = viewModel.Description ?? options?.Description,
             Status = viewModel.Status ?? DownloadFileStatus.None,
             LastTryDate = null,
             DateAdded = DateTime.Now,
@@ -171,8 +171,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             SaveLocation = saveLocation,
             DownloadProgress = viewModel.DownloadProgress is > 0 ? viewModel.DownloadProgress.Value : 0,
             DownloadPackage = viewModel.DownloadPackage,
-            Referer = viewModel.Referer,
-            PageAddress = viewModel.PageAddress
+            Referer = viewModel.Referer ?? options?.Referer,
+            PageAddress = viewModel.PageAddress ?? options?.PageAddress,
+            Username = viewModel.Username ?? options?.Username,
+            Password = viewModel.Password ?? options?.Password
         };
 
         // Handle duplicate download links
@@ -474,7 +476,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             Url = url?.Replace("\\", "/").Trim(),
             Referer = options?.Referer,
             PageAddress = options?.PageAddress,
-            Description = options?.Description
+            Description = options?.Description,
+            Username = options?.Username,
+            Password = options?.Password
         };
 
         // Check if the URL is valid

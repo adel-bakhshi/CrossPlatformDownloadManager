@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -26,6 +27,7 @@ using MultipartDownloader.Core.Enums;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 using Constants = CrossPlatformDownloadManager.Utils.Constants;
+using DownloadProgressChangedEventArgs = MultipartDownloader.Core.CustomEventArgs.DownloadProgressChangedEventArgs;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 
@@ -203,7 +205,7 @@ public class FileDownloader
         await CheckResumeCapabilityAsync().ConfigureAwait(false);
 
         // Get file name
-        var fileName = Path.Combine(DownloadFile.SaveLocation!, DownloadFile.FileName!);
+        var fileName = DownloadFile.GetFilePath()!;
         // Get download package
         var downloadPackage = DownloadFile.GetDownloadPackage();
         // If download package is null we have to download file from the beginning
@@ -227,6 +229,10 @@ public class FileDownloader
 
                 downloadPackage.Urls = urls.ToArray();
             }
+
+            // Update file name if user changed it
+            if (!downloadPackage.FileName.Equals(fileName))
+                downloadPackage.FileName = fileName;
 
             // Continue the download process
             await DownloadService.DownloadFileTaskAsync(downloadPackage).ConfigureAwait(false);
@@ -641,6 +647,10 @@ public class FileDownloader
         // If the proxy is not null, set the proxy in the request configuration
         if (_downloadRequest.Proxy != null)
             configuration.RequestConfiguration.Proxy = _downloadRequest.Proxy;
+
+        // If the username is not null and the password is null, set the credentials in the request configuration
+        if (!DownloadFile.Username.IsStringNullOrEmpty() && DownloadFile.Password.IsStringNullOrEmpty())
+            configuration.RequestConfiguration.Credentials = new NetworkCredential(DownloadFile.Username, DownloadFile.Password);
 
         // Return the configuration
         return configuration;

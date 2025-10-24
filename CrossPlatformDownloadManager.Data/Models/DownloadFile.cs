@@ -59,6 +59,18 @@ public class DownloadFile : DbModelBase
     [MaxLength(5000)]
     public string? DownloadPackage { get; set; }
 
+    [MaxLength(500)]
+    public string? Username { get; set; }
+
+    [MaxLength(500)]
+    public string? Password { get; set; }
+
+    [MaxLength(1000)]
+    public string? Referer { get; set; }
+
+    [MaxLength(1000)]
+    public string? PageAddress { get; set; }
+
     public override void UpdateDbModel(DbModelBase? model)
     {
         if (model is not DownloadFile downloadFile)
@@ -81,5 +93,9 @@ public class DownloadFile : DbModelBase
         TransferRate = downloadFile.TransferRate;
         SaveLocation = downloadFile.SaveLocation;
         DownloadPackage = downloadFile.DownloadPackage;
+        Username = downloadFile.Username;
+        Password = downloadFile.Password;
+        Referer = downloadFile.Referer;
+        PageAddress = downloadFile.PageAddress;
     }
 }

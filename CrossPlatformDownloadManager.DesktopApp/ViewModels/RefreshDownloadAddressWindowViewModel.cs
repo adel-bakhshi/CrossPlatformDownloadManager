@@ -8,6 +8,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
@@ -115,8 +116,16 @@ public class RefreshDownloadAddressWindowViewModel : ViewModelBase
                 restartDownloadFile = true;
             }
 
+            // Create download options
+            var options = new DownloadFileOptions
+            {
+                Referer = _downloadFile?.Referer,
+                PageAddress = _downloadFile?.PageAddress,
+                Description = _downloadFile?.Description
+            };
+
             // Get url details
-            var newDownloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(NewAddress);
+            var newDownloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(NewAddress, options);
             var isValid = await AppService.DownloadFileService.ValidateDownloadFileAsync(newDownloadFile);
             if (!isValid)
                 return;

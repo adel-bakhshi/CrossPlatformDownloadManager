@@ -13,6 +13,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
@@ -564,17 +565,24 @@ public class ManageLinksWindowViewModel : ViewModelBase
             // Change save button state
             SaveButtonIsEnabled = false;
             SaveButtonText = "Loading...";
-            // Get a list of URLs from the download file data list
-            var urls = _downloadFileDataList.Select(df => df.Url).ToList();
-            // Loop through each URL
-            foreach (var url in urls)
+
+            // Loop through each download file
+            foreach (var data in _downloadFileDataList)
             {
                 // Check if cancellation is requested
                 if (_cancelToken.IsCancellationRequested)
                     return;
 
+                // Create download options
+                var options = new DownloadFileOptions
+                {
+                    Referer = data.Referer,
+                    PageAddress = data.PageAddress,
+                    Description = data.Description
+                };
+
                 // Get the download file from the URL
-                var downloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(url, _cancelToken.Token);
+                var downloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(data.Url, options, _cancelToken.Token);
                 // Validate the download file
                 var isValid = await AppService.DownloadFileService.ValidateDownloadFileAsync(downloadFile, showMessage: false);
                 // If the download file is not valid, skip to the next URL

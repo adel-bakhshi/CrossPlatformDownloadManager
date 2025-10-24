@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
@@ -207,8 +208,9 @@ public class BrowserExtension : IBrowserExtension
 
         if (extensionRequests.Count == 1)
         {
+            var data = extensionRequests[0];
             // Check if URL is valid
-            var urlIsValid = extensionRequests[0].Url.CheckUrlValidation();
+            var urlIsValid = data.Url.CheckUrlValidation();
             if (!urlIsValid)
             {
                 response.Message = "CDM can't accept this URL.";
@@ -216,22 +218,22 @@ public class BrowserExtension : IBrowserExtension
             }
 
             // Change URL to correct format
-            extensionRequests[0].Url = extensionRequests[0].Url!.Replace('\\', '/').Trim();
+            data.Url = data.Url!.Replace('\\', '/').Trim();
             // Check for user option for showing start download dialog
             var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
             // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
             if (showStartDownloadDialog)
             {
-                ShowStartDownloadDialog(extensionRequests[0].Url!);
+                ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description);
             }
             // Otherwise, add link to database and start it
             else
             {
-                await AddNewDownloadFileAndStartItAsync(extensionRequests[0].Url!);
+                await AddNewDownloadFileAndStartItAsync(data.Url!, data.Referer, data.PageAddress, data.Description);
             }
 
             // Log captured URL
-            Log.Information("Captured URL: {Url}", extensionRequests[0].Url);
+            Log.Information("Captured URL: {Url}", data.Url);
         }
         else
         {
@@ -240,7 +242,14 @@ public class BrowserExtension : IBrowserExtension
                 .Where(er => er.Url.CheckUrlValidation())
                 .Select(er =>
                 {
-                    var result = new DownloadFileViewModel { Url = er.Url!.Replace('\\', '/').Trim() };
+                    var result = new DownloadFileViewModel
+                    {
+                        Url = er.Url!.Replace('\\', '/').Trim(),
+                        Referer = er.Referer,
+                        PageAddress = er.PageAddress,
+                        Description = er.Description
+                    };
+
                     Log.Information("Captured URL: {Url}", result.Url);
                     return result;
                 })
@@ -305,14 +314,20 @@ public class BrowserExtension : IBrowserExtension
     /// Shows the start download dialog.
     /// </summary>
     /// <param name="url">The URL of the file to download.</param>
-    private void ShowStartDownloadDialog(string url)
+    /// <param name="referer">The referer of the file to download.</param>
+    /// <param name="pageAddress">The web page address of the file to download.</param>
+    /// <param name="description">The description of the file to download.</param>
+    private void ShowStartDownloadDialog(string url, string? referer, string? pageAddress, string? description)
     {
         var vm = new AddDownloadLinkWindowViewModel(_appService)
         {
             IsLoadingUrl = true,
             DownloadFile =
             {
-                Url = url
+                Url = url,
+                Referer = referer,
+                PageAddress = pageAddress,
+                Description = description
             }
         };
 
@@ -324,9 +339,20 @@ public class BrowserExtension : IBrowserExtension
     /// Adds a new download file to database and starts it.
     /// </summary>
     /// <param name="url">The URL of the file to download.</param>
-    private async Task AddNewDownloadFileAndStartItAsync(string url)
+    /// <param name="referer">The referer of the file to download.</param>
+    /// <param name="pageAddress">The web page address of the file to download.</param>
+    /// <param name="description">The description of the file to download.</param>
+    private async Task AddNewDownloadFileAndStartItAsync(string url, string? referer, string? pageAddress, string? description)
     {
-        await _appService.DownloadFileService.AddDownloadFileAsync(url, startDownloading: true);
+        var options = new DownloadFileOptions
+        {
+            Referer = referer,
+            PageAddress = pageAddress,
+            Description = description,
+            StartDownloading = true
+        };
+
+        await _appService.DownloadFileService.AddDownloadFileAsync(url, options);
     }
 
     /// <summary>

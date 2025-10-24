@@ -7,6 +7,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -140,7 +141,8 @@ public class CaptureUrlWindowViewModel : ViewModelBase
             // Otherwise, add link to database and start it
             else
             {
-                await AppService.DownloadFileService.AddDownloadFileAsync(DownloadAddress, startDownloading: true);
+                var options = new DownloadFileOptions { StartDownloading = true };
+                await AppService.DownloadFileService.AddDownloadFileAsync(url: DownloadAddress, options);
             }
 
             owner.Close(true);

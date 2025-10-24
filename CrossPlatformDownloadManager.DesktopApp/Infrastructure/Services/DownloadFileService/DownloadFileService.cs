@@ -136,7 +136,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         Log.Information("Download files loaded successfully.");
     }
 
-    public async Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel, bool startDownloading = false)
+    public async Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel, DownloadFileOptions? options = null)
     {
         // Validate download file
         var isValid = await ValidateDownloadFileAsync(viewModel);
@@ -170,7 +170,9 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             CategoryId = category!.Id,
             SaveLocation = saveLocation,
             DownloadProgress = viewModel.DownloadProgress is > 0 ? viewModel.DownloadProgress.Value : 0,
-            DownloadPackage = viewModel.DownloadPackage
+            DownloadPackage = viewModel.DownloadPackage,
+            Referer = viewModel.Referer,
+            PageAddress = viewModel.PageAddress
         };
 
         // Handle duplicate download links
@@ -216,20 +218,20 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Find download file in data
         result = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
         // Start download when necessary
-        if (startDownloading)
+        if (options?.StartDownloading == true)
             _ = StartDownloadFileAsync(result);
 
         // Return new download file
         return result;
     }
 
-    public async Task<DownloadFileViewModel?> AddDownloadFileAsync(string? url, bool startDownloading = false)
+    public async Task<DownloadFileViewModel?> AddDownloadFileAsync(string? url, DownloadFileOptions? options = null)
     {
         if (url.IsStringNullOrEmpty() || !url.CheckUrlValidation())
             return null;
 
-        var downloadFile = await GetDownloadFileFromUrlAsync(url);
-        return await AddDownloadFileAsync(downloadFile, startDownloading);
+        var downloadFile = await GetDownloadFileFromUrlAsync(url, options);
+        return await AddDownloadFileAsync(downloadFile, options);
     }
 
     public async Task UpdateDownloadFileAsync(DownloadFileViewModel viewModel)
@@ -464,12 +466,15 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         return downloadSpeed.ToFileSize();
     }
 
-    public async Task<DownloadFileViewModel> GetDownloadFileFromUrlAsync(string? url, CancellationToken cancellationToken = default)
+    public async Task<DownloadFileViewModel> GetDownloadFileFromUrlAsync(string? url, DownloadFileOptions? options = null, CancellationToken cancellationToken = default)
     {
         var downloadFile = new DownloadFileViewModel
         {
             // Change the URL to correct format
-            Url = url?.Replace("\\", "/").Trim()
+            Url = url?.Replace("\\", "/").Trim(),
+            Referer = options?.Referer,
+            PageAddress = options?.PageAddress,
+            Description = options?.Description
         };
 
         // Check if the URL is valid

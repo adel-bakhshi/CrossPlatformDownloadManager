@@ -12,7 +12,7 @@
     <!-- Content -->
     <StackPanel Orientation="Vertical"
                 Spacing="15">
-        <!-- Duplicate download link action -->
+        <!-- Sounds -->
         <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                 Padding="15"
                 Background="{DynamicResource SecondaryBackgroundColor}">

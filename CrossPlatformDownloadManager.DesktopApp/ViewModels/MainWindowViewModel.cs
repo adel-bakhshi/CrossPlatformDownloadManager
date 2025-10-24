@@ -947,7 +947,7 @@ public class MainWindowViewModel : ViewModelBase
 
             // Change the format of the versions
             appVersion.Version = appVersion.Version.Replace("v", "");
-            
+
             // Compare versions and if current version is greater than or equal to the latest version,
             // Show a dialog box to the user and inform them that they are using the latest version
             if (CompareVersions(currentVersion!, appVersion.Version) >= 0)
@@ -1008,7 +1008,7 @@ public class MainWindowViewModel : ViewModelBase
             if (partA < partB)
                 return -1;
         }
-        
+
         return 0;
     }
 
@@ -1987,62 +1987,17 @@ public class MainWindowViewModel : ViewModelBase
         LoadCategories();
     }
 
-    public async Task DataGridRowDoubleTapActionAsync(DownloadFileViewModel? downloadFile)
+    public async Task DataGridRowDoubleTapActionAsync(DownloadFileViewModel? downloadFile, Window? owner)
     {
         try
         {
-            if (downloadFile == null || downloadFile.IsStopping)
+            // if (downloadFile == null || downloadFile.IsStopping)
+            if (downloadFile == null || owner == null)
                 return;
 
-            switch (downloadFile.Status)
-            {
-                case DownloadFileStatus.None:
-                {
-                    _ = AppService.DownloadFileService.StartDownloadFileAsync(downloadFile);
-                    break;
-                }
-
-                case DownloadFileStatus.Downloading:
-                case DownloadFileStatus.Paused:
-                {
-                    AppService.DownloadFileService.ShowOrFocusDownloadWindow(downloadFile);
-                    break;
-                }
-
-                default:
-                {
-                    if (downloadFile.SaveLocation.IsStringNullOrEmpty() || downloadFile.FileName.IsStringNullOrEmpty())
-                        break;
-
-                    var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
-                    if (!File.Exists(filePath) && !Directory.Exists(downloadFile.SaveLocation))
-                    {
-                        await DialogBoxManager.ShowInfoDialogAsync("Unable to Locate File or Folder",
-                            "We were unable to locate the file or folder you attempted to open. It is possible that the file or folder has been deleted.",
-                            DialogButtons.Ok);
-
-                        break;
-                    }
-
-                    if (File.Exists(filePath))
-                    {
-                        if (downloadFile.IsCompleted)
-                        {
-                            PlatformSpecificManager.OpenFile(filePath);
-                        }
-                        else
-                        {
-                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
-                        }
-                    }
-                    else
-                    {
-                        PlatformSpecificManager.OpenFolder(downloadFile.SaveLocation!);
-                    }
-
-                    break;
-                }
-            }
+            var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
+            var window = new DownloadDetailsWindow { DataContext = viewModel };
+            await window.ShowDialog(owner);
         }
         catch (Exception ex)
         {

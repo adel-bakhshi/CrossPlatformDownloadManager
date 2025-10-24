@@ -19,10 +19,18 @@
         MaxHeight="600"
         CanResize="False">
     <!-- Main content -->
-    <Grid RowDefinitions="*, Auto"
+    <Grid RowDefinitions="Auto, *, Auto"
           Margin="20">
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Manage links"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Stretch"
+                   Foreground="{DynamicResource MainTextColor}"
+                   Margin="0 0 0 15" />
+
         <!-- Download files and options -->
-        <ScrollViewer Grid.Row="0"
+        <ScrollViewer Grid.Row="1"
                       HorizontalAlignment="Stretch"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Auto">
@@ -124,12 +132,6 @@
                 <StackPanel Orientation="Vertical"
                             Spacing="15"
                             HorizontalAlignment="Stretch">
-                    <!-- Title -->
-                    <TextBlock Text="Manage links"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Stretch"
-                               Foreground="{DynamicResource MainTextColor}" />
-
                     <!-- Hide HTML files -->
                     <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
                             Padding="15"
@@ -315,7 +317,7 @@
         </ScrollViewer>
 
         <!-- Action buttons -->
-        <StackPanel Grid.Row="1"
+        <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     Spacing="10"
                     HorizontalAlignment="Right"

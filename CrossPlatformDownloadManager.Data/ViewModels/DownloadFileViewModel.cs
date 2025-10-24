@@ -37,6 +37,10 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     private int _countOfError;
     private bool? _canResumeDownload;
     private double _mergeProgress;
+    private string? _username;
+    private string? _password;
+    private string? _referer;
+    private string? _pageAddress;
 
     #endregion
 
@@ -293,6 +297,30 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
     public bool IsFileNameDuplicate { get; set; }
     public bool IsRunningInQueue { get; set; }
 
+    public string? Username
+    {
+        get => _username;
+        set => SetField(ref _username, value);
+    }
+
+    public string? Password
+    {
+        get => _password;
+        set => SetField(ref _password, value);
+    }
+
+    public string? Referer
+    {
+        get => _referer;
+        set => SetField(ref _referer, value);
+    }
+
+    public string? PageAddress
+    {
+        get => _pageAddress;
+        set => SetField(ref _pageAddress, value);
+    }
+
     #endregion
 
     #region Events
@@ -387,6 +415,18 @@ public sealed class DownloadFileViewModel : PropertyChangedBase
         IsUrlDuplicate = false;
         IsFileNameDuplicate = false;
         IsRunningInQueue = false;
+    }
+
+    /// <summary>
+    /// Gets the save path of the download file.
+    /// </summary>
+    /// <returns>Returns the save path of the download file.</returns>
+    public string? GetFilePath()
+    {
+        if (SaveLocation.IsStringNullOrEmpty() || FileName.IsStringNullOrEmpty())
+            return null;
+
+        return Path.Combine(SaveLocation!, FileName!);
     }
 
     #region Helpers

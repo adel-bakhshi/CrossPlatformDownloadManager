@@ -10,6 +10,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
@@ -222,8 +223,16 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         {
             // Set the loading flag to true
             IsLoadingUrl = true;
+            // Create download file options
+            var options = new DownloadFileOptions
+            {
+                Referer = DownloadFile.Referer,
+                PageAddress = DownloadFile.PageAddress,
+                Description = DownloadFile.Description
+            };
+
             // Get the download file from URL
-            DownloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(DownloadFile.Url, _cancellationTokenSource.Token);
+            DownloadFile = await AppService.DownloadFileService.GetDownloadFileFromUrlAsync(DownloadFile.Url, options, _cancellationTokenSource.Token);
             // Change the selected category based on the category of the download file
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == DownloadFile.CategoryId);
         }

@@ -14,18 +14,24 @@ public class ExtensionRequest
     /// </summary>
     [JsonProperty("url")]
     public string? Url { get; set; }
-    
+
     /// <summary>
     /// Gets or sets a value that indicates the referer of the download file.
     /// </summary>
     [JsonProperty("referer")]
     public string? Referer { get; set; }
-    
+
     /// <summary>
     /// Gets or sets a value that indicates the page address that download started from it.
     /// </summary>
     [JsonProperty("pageAddress")]
     public string? PageAddress { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value that indicates the description of the download file.
+    /// </summary>
+    [JsonProperty("description")]
+    public string? Description { get; set; }
 
     #endregion
 }

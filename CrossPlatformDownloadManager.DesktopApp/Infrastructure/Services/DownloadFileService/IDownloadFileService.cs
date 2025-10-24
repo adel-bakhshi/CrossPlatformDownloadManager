@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.Utils.Enums;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
@@ -41,17 +42,17 @@ public interface IDownloadFileService
     /// Adds a new download file to the database.
     /// </summary>
     /// <param name="viewModel">The download file to add.</param>
-    /// <param name="startDownloading">Indicates whether the download must be started or not.</param>
+    /// <param name="options">The options of the download file.</param>
     /// <returns>Returns the added download file if operation is successful, otherwise returns null.</returns>
-    Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel, bool startDownloading = false);
+    Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel, DownloadFileOptions? options = null);
 
     /// <summary>
     /// Adds a new download file to the database.
     /// </summary>
     /// <param name="url">The URL of the file to download.</param>
-    /// <param name="startDownloading">Indicates whether the download must be started or not.</param>
+    /// <param name="options">The options of the download file.</param>
     /// <returns>Returns the added download file if operation is successful, otherwise returns null.</returns>
-    Task<DownloadFileViewModel?> AddDownloadFileAsync(string? url, bool startDownloading = false);
+    Task<DownloadFileViewModel?> AddDownloadFileAsync(string? url, DownloadFileOptions? options = null);
 
     /// <summary>
     /// Updates the download file in the database.
@@ -130,9 +131,10 @@ public interface IDownloadFileService
     /// Creates and gets a new download file and fill required properties of it from the URL.
     /// </summary>
     /// <param name="url">The URL to create the download file from.</param>
+    /// <param name="options">The options for creating the download file.</param>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>Returns the download file.</returns>
-    Task<DownloadFileViewModel> GetDownloadFileFromUrlAsync(string? url, CancellationToken cancellationToken = default);
+    Task<DownloadFileViewModel> GetDownloadFileFromUrlAsync(string? url, DownloadFileOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Validates the download file and it's properties for adding to the database.

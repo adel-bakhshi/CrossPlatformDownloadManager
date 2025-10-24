@@ -212,7 +212,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             if (ViewModel == null || sender is not DataGridRow { DataContext: DownloadFileViewModel downloadFile })
                 return;
 
-            await ViewModel.DataGridRowDoubleTapActionAsync(downloadFile);
+            await ViewModel.DataGridRowDoubleTapActionAsync(downloadFile, this);
         }
         catch (Exception ex)
         {
@@ -351,7 +351,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         Dispatcher.UIThread.Post(() =>
         {
             // If scroll corner header is not visible or doesn't exist, set corner radius for the last column header
-            if (scrollColumHeader == null || scrollColumHeader.IsVisible == false)
+            if (scrollColumHeader is not { IsVisible: true })
                 lastColumnHeader.CornerRadius = new CornerRadius(0, 8, 8, 0);
         });
     }
@@ -391,7 +391,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         {
             var dataTransferItem = new DataTransferItem();
             dataTransferItem.SetFile(file);
-            
+
             dataTransfer.Add(dataTransferItem);
         }
 

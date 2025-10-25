@@ -529,6 +529,19 @@
                         IsEnabled="{Binding ContextFlyoutEnableState.CanRemoveFromQueue}"
                         Command="{Binding RemoveFromQueueContextMenuCommand}"
                         CommandParameter="{Binding #DownloadFilesDataGrid}" />
+
+                <!-- Separator -->
+                <Rectangle Height="1"
+                           HorizontalAlignment="Stretch"
+                           Margin="8, 4"
+                           Fill="{DynamicResource SecondaryBackgroundColor}" />
+
+                <!-- Open properties -->
+                <Button Content="Properties"
+                        Classes="contextMenuButton"
+                        IsEnabled="{Binding ContextFlyoutEnableState.CanOpenProperties}"
+                        Command="{Binding OpenPropertiesCommand}"
+                        CommandParameter="{Binding #DownloadFilesDataGrid}" />
             </StackPanel>
         </Flyout>
     </Window.Resources>
@@ -1107,7 +1120,7 @@
 
                                                 <ProgressBar Foreground="{DynamicResource InfoColor}"
                                                              Background="{DynamicResource MainTextColor}"
-                                                             Value="{Binding DownloadProgress}"
+                                                             Value="{Binding DownloadProgress, TargetNullValue=0, FallbackValue=0}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
@@ -1121,7 +1134,7 @@
 
                                                 <ProgressBar Foreground="{DynamicResource WarningColor}"
                                                              Background="{DynamicResource MainTextColor}"
-                                                             Value="{Binding DownloadProgress}"
+                                                             Value="{Binding DownloadProgress, TargetNullValue=0, FallbackValue=0}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
@@ -1135,7 +1148,7 @@
 
                                                 <ProgressBar Foreground="{DynamicResource WarningColor}"
                                                              Background="{DynamicResource MainTextColor}"
-                                                             Value="{Binding DownloadProgress}"
+                                                             Value="{Binding DownloadProgress, TargetNullValue=0, FallbackValue=0}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 
@@ -1149,7 +1162,7 @@
 
                                                 <ProgressBar Foreground="{DynamicResource DangerColor}"
                                                              Background="{DynamicResource MainTextColor}"
-                                                             Value="{Binding DownloadProgress}"
+                                                             Value="{Binding DownloadProgress, TargetNullValue=0, FallbackValue=0}"
                                                              Classes="customProgressBar dataGridProgressBar" />
                                             </StackPanel>
 

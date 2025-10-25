@@ -176,7 +176,7 @@ public class ChangeFileNameWindowViewModel : ViewModelBase
             }
         }
 
-        File.Move(filePath, newFilePath);
+        await filePath.MoveFileAsync(newFilePath);
 
         var categoryFileExtension = AppService
             .CategoryService

@@ -23,7 +23,12 @@ public class WindowsStartupManager : IStartupManager
     public bool IsRegistered()
     {
         var shortcutPath = GetShortcutPath();
-        return File.Exists(shortcutPath);
+        if (!File.Exists(shortcutPath))
+            return false;
+        
+        var exePath = GetExePath();
+        using var shortcut = WindowsShortcut.Load(shortcutPath);
+        return shortcut.Path?.Equals(exePath) == true;
     }
 
     public void Register()

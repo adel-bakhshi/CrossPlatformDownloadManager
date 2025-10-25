@@ -127,6 +127,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 Settings = viewModel;
             }
 
+            // Check the application startup
+            CheckApplicationStartup();
             // Set application font
             SetApplicationFont();
 
@@ -159,11 +161,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         if (reloadData)
             await LoadSettingsAsync();
 
-        // Register or delete the program from Startup
-        if (Settings.StartOnSystemStartup)
-            RegisterStartup();
-        else
-            DeleteStartup();
+        // Check the application startup
+        CheckApplicationStartup();
 
         // Show or hide the manager.
         if (Settings.UseManager)
@@ -363,6 +362,15 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
     #region Helpers
 
+    private void CheckApplicationStartup()
+    {
+        // Register or delete the program from Startup
+        if (Settings.StartOnSystemStartup)
+            RegisterStartup();
+        else
+            DeleteStartup();
+    }
+
     private static void RegisterStartup()
     {
         var isRegistered = PlatformSpecificManager.IsStartupRegistered();
@@ -374,10 +382,6 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
     private static void DeleteStartup()
     {
-        var isRegistered = PlatformSpecificManager.IsStartupRegistered();
-        if (!isRegistered)
-            return;
-
         PlatformSpecificManager.DeleteStartup();
     }
 

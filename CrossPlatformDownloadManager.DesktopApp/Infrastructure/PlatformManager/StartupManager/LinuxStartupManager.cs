@@ -74,8 +74,7 @@ public class LinuxStartupManager : IStartupManager
 
     private string GetDesktopEntryPath()
     {
-        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config",
-            "autostart");
+        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "autostart");
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 

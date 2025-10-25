@@ -89,7 +89,7 @@ mkdir -p "./Deploy/bin"
 # Create a zip file from the .app bundle
 echo "Creating zip file from .app bundle..."
 cd "$(dirname "$APP_DIR")"
-zip -r "$BUNDLE_NAME.$VERSION.$RUNTIME.app.zip" "$BUNDLE_NAME.app"
+ditto -c -k --sequesterRsrc --keepParent "$BUNDLE_NAME.app" "$BUNDLE_NAME.$VERSION.$RUNTIME.app.zip"
 
 # Check if zip was successful
 if [ $? -ne 0 ]; then

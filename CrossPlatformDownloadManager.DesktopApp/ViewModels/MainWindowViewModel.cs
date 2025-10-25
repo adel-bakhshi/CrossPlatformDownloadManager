@@ -231,6 +231,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand RemoveFromQueueContextMenuCommand { get; }
 
+    public ICommand OpenPropertiesCommand { get; }
+
     public ICommand AddDownloadFileToDownloadQueueContextMenuCommand { get; }
 
     public ICommand AddNewLinkMenuItemCommand { get; }
@@ -331,6 +333,7 @@ public class MainWindowViewModel : ViewModelBase
         RemoveContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveContextMenuAsync);
         AddToQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(AddToQueueContextMenuAsync);
         RemoveFromQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DataGrid?>(RemoveFromQueueContextMenuAsync);
+        OpenPropertiesCommand = ReactiveCommand.CreateFromTask<DataGrid?>(OpenPropertiesCommandAsync);
         AddDownloadFileToDownloadQueueContextMenuCommand = ReactiveCommand.CreateFromTask<DownloadQueueViewModel?>(AddDownloadFileToDownloadQueueContextMenuAsync);
         AddNewLinkMenuItemCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkMenuItemAsync);
         ExportCdmDataMenuItemCommand = ReactiveCommand.CreateFromTask(ExportCdmDataMenuItemAsync);
@@ -1237,8 +1240,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            File.Move(filePath, newFilePath);
-
+            await filePath.MoveFileAsync(newFilePath);
             downloadFile.SaveLocation = newSaveLocation;
 
             await AppService
@@ -1472,6 +1474,43 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to remove from queue. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously opens the properties window for the selected download file.
+    /// </summary>
+    /// <param name="dataGrid">The DataGrid control containing the download files.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    private async Task OpenPropertiesCommandAsync(DataGrid? dataGrid)
+    {
+        try
+        {
+            // Hide the context menu before opening properties window
+            await HideContextMenuAsync();
+
+            // Return if dataGrid is null, no items are selected, or main window is not available
+            if (dataGrid == null || dataGrid.SelectedItems.Count == 0 || _mainWindow == null)
+                return;
+
+            // Get the first selected item as a DownloadFileViewModel
+            var downloadFile = dataGrid
+                .SelectedItems
+                .OfType<DownloadFileViewModel>()
+                .FirstOrDefault();
+
+            // Return if no valid download file is selected
+            if (downloadFile == null)
+                return;
+
+            // Open properties window for the selected download file
+            await DataGridRowDoubleTapActionAsync(downloadFile, _mainWindow);
+        }
+        catch (Exception ex)
+        {
+            // Log the error and show error dialog to user
+            Log.Error(ex, "An error occurred while trying to open properties. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -1772,6 +1811,8 @@ public class MainWindowViewModel : ViewModelBase
             ContextFlyoutEnableState.CanRemoveFromQueue = downloadFiles
                 .Exists(df => df is { DownloadQueueId: not null, IsDownloading: false, IsPaused: false, IsCompleted: false, IsStopping: false } &&
                               downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId) != null);
+
+            ContextFlyoutEnableState.CanOpenProperties = downloadFiles.Count > 0;
         }
         catch (Exception ex)
         {
@@ -1815,7 +1856,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             await Task.Delay(100);
             _mainWindow?.HideDownloadFilesDataGridContextMenu();
-            _mainWindow = null;
         }
         catch (Exception ex)
         {
@@ -1991,7 +2031,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            // if (downloadFile == null || downloadFile.IsStopping)
             if (downloadFile == null || owner == null)
                 return;
 

@@ -18,6 +18,7 @@ public class ContextFlyoutEnableStateViewMode : PropertyChangedBase
     private bool _canRemove;
     private bool _canAddToQueue;
     private bool _canRemoveFromQueue;
+    private bool _canOpenProperties;
 
     #endregion
 
@@ -95,6 +96,12 @@ public class ContextFlyoutEnableStateViewMode : PropertyChangedBase
         set => SetField(ref _canRemoveFromQueue, value);
     }
 
+    public bool CanOpenProperties
+    {
+        get => _canOpenProperties;
+        set => SetField(ref _canOpenProperties, value);
+    }
+
     #endregion
 
     public void ChangeAllPropertiesToFalse()
@@ -111,5 +118,6 @@ public class ContextFlyoutEnableStateViewMode : PropertyChangedBase
         CanRemove = false;
         CanAddToQueue = false;
         CanRemoveFromQueue = false;
+        CanOpenProperties = false;
     }
 }

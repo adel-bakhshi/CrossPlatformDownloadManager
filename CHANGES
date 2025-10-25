@@ -1,148 +1,160 @@
-- Version 0.10.0; 2025-08-29
++ Version 0.11.0; 2025-10-25
+- UI/UX Improvements:
+- Improved DataGrid styling.
+- Enhanced Dialog Box with additional features.
+- Improved Download Status View for better visualization of file states.
+- Improved loading of file information before download.
+- New Download Details window added: Double-click a file or right-click and select "Properties" to open the details window.
+- Improved duplicate link management.
+- Application update checks enhanced for better reliability.
+- Technical Updates:
+- Upgraded to Avalonia 11.3.8.
+- Updated all related NuGet packages to their latest versions.
+- Updated Downloader package to version 4.0.3.
+- Added macOS .app bundle build support (experimental).
+- Improved Linux tarball packaging.
+- Added Bass libraries for multiple platforms (win-x64, win-arm64, linux-x64, linux-arm64, osx-x64, osx-arm64).
+- Implemented new Avalonia APIs for copying text/files and file transfer operations.
+- Downloading Improvements:
+- Improved file download operations.
+- Optimized file-saving mechanism to reduce disk usage.
+- New Features:
+- Added Username and Password fields for credentials when downloading protected files.
+- Bug Fixes:
+- General bug fixes and overall performance enhancements.
 
-* New Features:
-  - Added Active Proxy Indicator: The application's active proxy status is now displayed in the Statusbar for better visibility.
-  - Added Download & Install Guide for Extension: New menu items provide a direct link to download the browser extension and a guide for its installation.
-* Technical Updates:
-  - Upgraded to Avalonia 11.3.4: Updated the UI framework to the latest version for enhanced performance and stability.
-  - Improved Application Update Mechanism: Optimized the process for checking and installing application updates.
-* User Interface & Usability Improvements:
-  - Improved Merge Progress Display: Enhanced the visual feedback for the file merging operation.
-  - Enhanced Chunk Progress Visualization: Improved the display of individual download chunk progress for better user insight.
-* Bug Fixes:
-  - Fixed Accidental File Deletion: Resolved a critical issue where files were being deleted even when the user cancelled the operation.
-  - Fixed File Size Display: Corrected the issue that caused inaccurate file size information to be shown.
-  - Fixed Time-Remaining Estimation: Addressed the problem with incorrect and fluctuating time estimates during downloads.
-  - General Fixes and Performance Improvements: Addressed various minor bugs and implemented overall performance enhancements.
++ Version 0.10.0; 2025-08-29
+- New Features:
+- Added Active Proxy Indicator: The application's active proxy status is now displayed in the Statusbar for better visibility.
+- Added Download & Install Guide for Extension: New menu items provide a direct link to download the browser extension and a guide for its installation.
+- Technical Updates:
+- Upgraded to Avalonia 11.3.4: Updated the UI framework to the latest version for enhanced performance and stability.
+- Improved Application Update Mechanism: Optimized the process for checking and installing application updates.
+- User Interface & Usability Improvements:
+- Improved Merge Progress Display: Enhanced the visual feedback for the file merging operation.
+- Enhanced Chunk Progress Visualization: Improved the display of individual download chunk progress for better user insight.
+- Bug Fixes:
+- Fixed Accidental File Deletion: Resolved a critical issue where files were being deleted even when the user cancelled the operation.
+- Fixed File Size Display: Corrected the issue that caused inaccurate file size information to be shown.
+- Fixed Time-Remaining Estimation: Addressed the problem with incorrect and fluctuating time estimates during downloads.
+- General Fixes and Performance Improvements: Addressed various minor bugs and implemented overall performance enhancements.
 
-- Version 0.9.0; 2025-07-27
++ Version 0.9.0; 2025-07-27
+- New Features:
+- Added New Themes: Introduced new themes that can be changed from the settings section.
+- Multiple URL Downloads via Browser Extension: Added capability to download multiple URLs using the browser extension. Please install the latest version of the extension.
+- Technical Updates:
+- Upgraded MultipartDownloader Package: Updated the Downloader package to version 4.0.2 for improved functionality.
+- Improved Export/Import Operations: Optimized and enhanced the Export/Import functionality.
+- Bug Fixes:
+- Fixed Theme Loading Failure Issue: Resolved the problem preventing the application from running when a theme fails to load.
+- Improved Color Naming for Better Readability: Modified color names for better consistency and easier theme creation.
+- General Fixes and Performance Improvements: Addressed minor bugs and enhanced overall performance.
 
-* New Features:
-  - Added New Themes: Introduced new themes that can be changed from the settings section.
-  - Multiple URL Downloads via Browser Extension: Added capability to download multiple URLs using the browser extension. Please install the latest version of the extension.
-* Technical Updates:
-  - Upgraded MultipartDownloader Package: Updated the Downloader package to version 4.0.2 for improved functionality.
-  - Improved Export/Import Operations: Optimized and enhanced the Export/Import functionality.
-* Bug Fixes:
-  - Fixed Theme Loading Failure Issue: Resolved the problem preventing the application from running when a theme fails to load.
-  - Improved Color Naming for Better Readability: Modified color names for better consistency and easier theme creation.
-  - General Fixes and Performance Improvements: Addressed minor bugs and enhanced overall performance.
++ Version 0.8.0; 2025-07-15
+- New Features:
+- Added Version Check Feature: Implemented a new feature to check for available updates of the application.
+- Bug Fixes:
+- Fixed Theme Loading Issues: Resolved problems related to loading themes properly.
+- General Fixes and Performance Improvements: Addressed various minor bugs and enhanced overall performance.
 
-- Version 0.8.0; 2025-07-15
++ Version 0.7.1; 2025-07-01
+- Technical Updates:
+- Upgraded to Avalonia 11.3.2: Updated the Avalonia UI framework package to version 11.3.2 for improved performance and stability.
+- Bug Fixes:
+- Fixed Download List Issues: Resolved problems with files not downloading properly in download lists.
+- Improved Download List Stability: Addressed various minor issues in download list functionality.
+- General Fixes: Fixed several other minor bugs and stability improvements.
 
-* New Features:
-  - Added Version Check Feature: Implemented a new feature to check for available updates of the application.
-* Bug Fixes:
-  - Fixed Theme Loading Issues: Resolved problems related to loading themes properly.
-  - General Fixes and Performance Improvements: Addressed various minor bugs and enhanced overall performance.
++ Version 0.7.0; 2025-06-13
+- Technical Updates:
+- Enhanced Disk Space Checks: Improved logic to handle unknown file sizes and ensure adequate space in both the final destination and temporary file paths, considering already downloaded temporary chunks.
+- Core Download Library Improvements: Refactored internal logic for better nullability handling and made minor enhancements to chunk merging and resource cleanup.
+- Temporary File Handling: Delegated temporary file path resolution to Settings and improved Memory buffer operation behavior for seeking and flushing data.
 
-- Version 0.7.1; 2025-07-01
++ Version 0.6.0; 2025-05-24
+- Technical Updates:
+- Core Download Logic Refactoring: The primary download management functionality has been extracted into a new library (MultipartDownloader.Core) for better modularity and maintainability.
+- Database Schema Updates: Added new Entity Framework Core migrations to support additional settings properties.
+- Dependency Updates: Upgraded various NuGet packages including Avalonia, Entity Framework Core, and Serilog to their latest versions.
+- New Features:
+- New Download Settings: Added controls for merge speed limits, maximum memory buffer size, and temporary download file locations.
+- Enhanced Theming Options: Replaced dark mode toggle with a flexible theme selection system supporting custom themes from files.
+- UI/UX Improvements:
+- Updated DataGrid styling with smoother transitions.
+- Added dedicated progress bar for file merging phase in download window.
+- Implemented drag-and-drop functionality for completed files in main window.
+- Bug Fixes:
+- Various minor bug fixes and stability improvements.
 
-* Technical Updates:
-  - Upgraded to Avalonia 11.3.2: Updated the Avalonia UI framework package to version 11.3.2 for improved performance and stability.
-* Bug Fixes:
-  - Fixed Download List Issues: Resolved problems with files not downloading properly in download lists.
-  - Improved Download List Stability: Addressed various minor issues in download list functionality.
-  - General Fixes: Fixed several other minor bugs and stability improvements.
++ Version 0.5.0; 2025-03-23
+- New Features:
+- Added Light Theme to the application.
+- Bug Fixes:
+- Fixed the issue of proxies not being displayed in the settings.
+- Various minor bug fixes.
 
-- Version 0.7.0; 2025-06-13
++ Version 0.4.0; 2025-03-14
+- New Features:
+- Added backup functionality for ongoing downloads.
+- Implemented a memory caching mechanism to store downloaded data in RAM before writing to the hard disk, reducing disk load.
+- Enabled downloading files without a Content-Length header.
+- Added the ability to disable categories.
+- Introduced a font customization option for the application.
+- Bug Fixes:
+- Fixed the issue where the program accepted all file types. Now, only predefined file types can be downloaded.
+- Resolved export/import bugs.
+- Fixed the issue where active queues were not displayed in the status bar.
+- Addressed crashes and execution issues on Linux.
+- Fixed the issue where deleting files would remove them completely; now, deleted files are moved to the trash.
+- Various minor bug fixes.
+- Technical Updates:
+- Changed the storage location of additional program files. Before using this version, please back up your data.
 
-* Technical Updates:
-  - Enhanced Disk Space Checks: Improved logic to handle unknown file sizes and ensure adequate space in both the final destination and temporary file paths, considering already downloaded temporary chunks.
-  - Core Download Library Improvements: Refactored internal logic for better nullability handling and made minor enhancements to chunk merging and resource cleanup.
-  - Temporary File Handling: Delegated temporary file path resolution to Settings and improved Memory buffer operation behavior for seeking and flushing data.
++ Version 0.3.0; 2025-02-21
+- Performance Improvements:
+- Increased overall speed and efficiency.
+- Enhanced accuracy in calculating remaining download time.
+- Faster link retrieval from the browser extension.
+- Bug Fixes:
+- Fixed file corruption issues after canceling and resuming downloads.
+- Resolved the download completion window display issue when the related option was disabled.
+- Addressed the problem of file type settings not applying after saving.
+- Fixed the crash occurring when double-clicking on rows in the file table.
+- Solved the issue of the "Add Download Link" window not displaying when links were transferred from the browser extension.
+- Corrected spelling errors throughout the application.
+- New Features:
+- Added support for new file types: .iso, .dmg, .pkg, .deb, and .rpm.
+- Introduced the ability to delete downloaded files using the Delete key.
+- Technical Updates:
+- Upgraded to Avalonia version 11.2.4.
+- Improved the process of deleting downloaded files from the program.
 
-- Version 0.6.0; 2025-05-24
++ Version 0.2.2; 2025-02-14
+- Fixed Bugs:
+- Resolved the issue where the save location for categories was not updating. You can now successfully set and change the save location for your categories.
+- Fixed minor bugs to improve overall stability and performance.
+- Changes:
+- Updated the styling of scrollbars for a smoother and more modern user experience.
+- Performance Improvements:
+- Enhanced the overall performance of the application for faster and more efficient operation.
 
-* Technical Updates:
-  - Core Download Logic Refactoring: The primary download management functionality has been extracted into a new library (MultipartDownloader.Core) for better modularity and maintainability.
-  - Database Schema Updates: Added new Entity Framework Core migrations to support additional settings properties.
-  - Dependency Updates: Upgraded various NuGet packages including Avalonia, Entity Framework Core, and Serilog to their latest versions.
-* New Features:
-  - New Download Settings: Added controls for merge speed limits, maximum memory buffer size, and temporary download file locations.
-  - Enhanced Theming Options: Replaced dark mode toggle with a flexible theme selection system supporting custom themes from files.
-* UI/UX Improvements:
-  - Updated DataGrid styling with smoother transitions.
-  - Added dedicated progress bar for file merging phase in download window.
-  - Implemented drag-and-drop functionality for completed files in main window.
-* Bug Fixes:
-  - Various minor bug fixes and stability improvements.
++ Version 0.2.1; 2025-02-10
+- Bug Fixes:
+- Fixed an issue where files would not open correctly from the right-click menu in the download list.
+- Resolved a problem with the application failing to start on Windows startup.
+- Enhancements:
+- Updated color scheme: Improved the app's visual design by adjusting some colors for better user experience.
+- Added Firefox support: The extension is now fully compatible with Firefox, in addition to Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera.
 
-- Version 0.5.0; 2025-03-23
++ Version 0.2.0; 2025-02-06
+- Updated Application Icon: The application now features a new, modern icon.
+- User Interface Enhancements:
+- Added the ability to choose between using the Manager or the System Tray for better flexibility.
+- Introduced a Global Speed Limit indicator in the status bar for easier monitoring of download speeds.
+- You can now close the download window without interrupting active downloads.
+- Added multiple functions triggered by double-clicking on the download table for improved usability.
+- Bug Fixes: Resolved several minor bugs to improve overall stability and performance.
 
-* New Features:
-  - Added Light Theme to the application.
-* Bug Fixes:
-  - Fixed the issue of proxies not being displayed in the settings.
-  - Various minor bug fixes.
-
-- Version 0.4.0; 2025-03-14
-
-* New Features:
-  - Added backup functionality for ongoing downloads.
-  - Implemented a memory caching mechanism to store downloaded data in RAM before writing to the hard disk, reducing disk load.
-  - Enabled downloading files without a Content-Length header.
-  - Added the ability to disable categories.
-  - Introduced a font customization option for the application.
-* Bug Fixes:
-  - Fixed the issue where the program accepted all file types. Now, only predefined file types can be downloaded.
-  - Resolved export/import bugs.
-  - Fixed the issue where active queues were not displayed in the status bar.
-  - Addressed crashes and execution issues on Linux.
-  - Fixed the issue where deleting files would remove them completely; now, deleted files are moved to the trash.
-  - Various minor bug fixes.
-* Technical Updates:
-  - Changed the storage location of additional program files. Before using this version, please back up your data.
-
-- Version 0.3.0; 2025-02-21
-
-* Performance Improvements:
-  - Increased overall speed and efficiency.
-  - Enhanced accuracy in calculating remaining download time.
-  - Faster link retrieval from the browser extension.
-* Bug Fixes:
-  - Fixed file corruption issues after canceling and resuming downloads.
-  - Resolved the download completion window display issue when the related option was disabled.
-  - Addressed the problem of file type settings not applying after saving.
-  - Fixed the crash occurring when double-clicking on rows in the file table.
-  - Solved the issue of the "Add Download Link" window not displaying when links were transferred from the browser extension.
-  - Corrected spelling errors throughout the application.
-* New Features:
-  - Added support for new file types: .iso, .dmg, .pkg, .deb, and .rpm.
-  - Introduced the ability to delete downloaded files using the Delete key.
-* Technical Updates:
-  - Upgraded to Avalonia version 11.2.4.
-  - Improved the process of deleting downloaded files from the program.
-
-- Version 0.2.2; 2025-02-14
-
-* Fixed Bugs:
-  - Resolved the issue where the save location for categories was not updating. You can now successfully set and change the save location for your categories.
-  - Fixed minor bugs to improve overall stability and performance.
-* Changes:
-  - Updated the styling of scrollbars for a smoother and more modern user experience.
-* Performance Improvements:
-  - Enhanced the overall performance of the application for faster and more efficient operation.
-
-- Version 0.2.1; 2025-02-10
-
-* Bug Fixes:
-  - Fixed an issue where files would not open correctly from the right-click menu in the download list.
-  - Resolved a problem with the application failing to start on Windows startup.
-* Enhancements:
-  - Updated color scheme: Improved the app's visual design by adjusting some colors for better user experience.
-  - Added Firefox support: The extension is now fully compatible with Firefox, in addition to Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera.
-
-- Version 0.2.0; 2025-02-06
-
-* Updated Application Icon: The application now features a new, modern icon.
-* User Interface Enhancements:
-  - Added the ability to choose between using the Manager or the System Tray for better flexibility.
-  - Introduced a Global Speed Limit indicator in the status bar for easier monitoring of download speeds.
-  - You can now close the download window without interrupting active downloads.
-  - Added multiple functions triggered by double-clicking on the download table for improved usability.
-* Bug Fixes: Resolved several minor bugs to improve overall stability and performance.
-
-- Version 0.1.0; 2025-01-31
-
-* Initial release
++ Version 0.1.0; 2025-01-31
+- Initial release

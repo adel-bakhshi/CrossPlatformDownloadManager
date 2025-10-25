@@ -1,217 +1,218 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-    <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-    <AssemblyVersion>0.10.0</AssemblyVersion>
-    <LangVersion>default</LangVersion>
-    <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
+        <AssemblyVersion>0.11.0</AssemblyVersion>
+        <FileVersion>0.11.0</FileVersion>
+        <LangVersion>default</LangVersion>
+        <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <!-- Bass files for Windowx x64 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <Content Include="Bass\win-x64\bass.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bass.dll</Link>
-    </Content>
-  </ItemGroup>
+    <!-- Bass files for Windowx x64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <Content Include="Bass\win-x64\bass.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bass.dll</Link>
+        </Content>
+    </ItemGroup>
 
-  <!-- Bass files for Windows ARM64 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
-    <Content Include="Bass\win-arm64\bass.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bass.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassape.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassape.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\basscd.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>basscd.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassdsd.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassdsd.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassenc.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassenc.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassenc_flac.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassenc_flac.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassenc_mp3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassenc_mp3.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassenc_ogg.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassenc_ogg.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassenc_opus.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassenc_opus.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassflac.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassflac.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\basshls.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>basshls.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassloud.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassloud.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassmidi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassmidi.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassmix.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassmix.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\bassopus.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>bassopus.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\basswasapi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>basswasapi.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\basswebm.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>basswebm.dll</Link>
-    </Content>
-    <Content Include="Bass\win-arm64\basswv.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>basswv.dll</Link>
-    </Content>
-  </ItemGroup>
+    <!-- Bass files for Windows ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
+        <Content Include="Bass\win-arm64\bass.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bass.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassape.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassape.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basscd.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basscd.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassdsd.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassdsd.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_flac.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_flac.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_mp3.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_mp3.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_ogg.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_ogg.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_opus.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_opus.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassflac.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassflac.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basshls.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basshls.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassloud.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassloud.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassmidi.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassmidi.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassmix.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassmix.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassopus.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassopus.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswasapi.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswasapi.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswebm.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswebm.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswv.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswv.dll</Link>
+        </Content>
+    </ItemGroup>
 
-  <!-- Bass files for Linux x64 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <Content Include="Bass\linux-x86_64\libbass.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>libbass.so</Link>
-    </Content>
-  </ItemGroup>
+    <!-- Bass files for Linux x64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <Content Include="Bass\linux-x86_64\libbass.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.so</Link>
+        </Content>
+    </ItemGroup>
 
-  <!-- Bass files for Linux ARM64 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
-    <Content Include="Bass\linux-aarch64\libbass.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>libbass.so</Link>
-    </Content>
-  </ItemGroup>
+    <!-- Bass files for Linux ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+        <Content Include="Bass\linux-aarch64\libbass.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.so</Link>
+        </Content>
+    </ItemGroup>
 
-  <!-- Bass files for macOS x64 and ARM64 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
-    <Content Include="Bass\libbass.dylib">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>libbass.dylib</Link>
-    </Content>
-  </ItemGroup>
+    <!-- Bass files for macOS x64 and ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
+        <Content Include="Bass\libbass.dylib">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.dylib</Link>
+        </Content>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="14.0.0" />
-    <PackageReference Include="Avalonia" Version="11.3.8" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.8" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.8" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.8" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.8" />
-    <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.8" />
-    <PackageReference Include="Emik.Rubbish" Version="1.1.0" />
-    <PackageReference Include="ManagedBass" Version="4.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0" />
-    <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.8" />
-    <PackageReference Include="Serilog" Version="4.3.1-dev-02387" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="WindowsShortcutFactory" Version="1.2.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="14.0.0"/>
+        <PackageReference Include="Avalonia" Version="11.3.8"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.8"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.8"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.8"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.8"/>
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.8"/>
+        <PackageReference Include="Emik.Rubbish" Version="1.1.0"/>
+        <PackageReference Include="ManagedBass" Version="4.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0"/>
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.8"/>
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02387"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+        <PackageReference Include="WindowsShortcutFactory" Version="1.2.0"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="CustomControls\CustomTextBox.axaml.cs">
-      <DependentUpon>CustomTextBox.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\UserControls\DownloadWindowControls\DownloadOptionsView.axaml.cs">
-      <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\UserControls\DownloadWindowControls\DownloadSpeedLimiterView.axaml.cs">
-      <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\UserControls\DownloadWindowControls\DownloadStatusView.axaml.cs">
-      <DependentUpon>DownloadStatusView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Infrastructure\DialogBox\Views\DialogWindow.axaml.cs">
-      <DependentUpon>DialogWindow.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Update="CustomControls\CustomTextBox.axaml.cs">
+            <DependentUpon>CustomTextBox.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadOptionsView.axaml.cs">
+            <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadSpeedLimiterView.axaml.cs">
+            <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadStatusView.axaml.cs">
+            <DependentUpon>DownloadStatusView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Infrastructure\DialogBox\Views\DialogWindow.axaml.cs">
+            <DependentUpon>DialogWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CrossPlatformDownloadManager.Data\CrossPlatformDownloadManager.Data.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\CrossPlatformDownloadManager.Data\CrossPlatformDownloadManager.Data.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
-  </ItemGroup>
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Assets\Fonts\Ubuntu\" />
-    <Folder Include="Assets\Songs\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Assets\Fonts\Ubuntu\"/>
+        <Folder Include="Assets\Songs\"/>
+    </ItemGroup>
 </Project>

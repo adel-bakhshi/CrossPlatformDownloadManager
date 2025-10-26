@@ -25,10 +25,14 @@ public class WindowsStartupManager : IStartupManager
         var shortcutPath = GetShortcutPath();
         if (!File.Exists(shortcutPath))
             return false;
-        
+
+#if !DEBUG
         var exePath = GetExePath();
         using var shortcut = WindowsShortcut.Load(shortcutPath);
         return shortcut.Path?.Equals(exePath) == true;
+#else
+        return true;
+#endif
     }
 
     public void Register()

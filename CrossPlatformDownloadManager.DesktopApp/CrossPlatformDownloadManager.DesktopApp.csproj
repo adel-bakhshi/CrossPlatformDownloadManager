@@ -8,8 +8,8 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-        <AssemblyVersion>0.11.0</AssemblyVersion>
-        <FileVersion>0.11.0</FileVersion>
+        <AssemblyVersion>0.11.1</AssemblyVersion>
+        <FileVersion>0.11.1</FileVersion>
         <LangVersion>default</LangVersion>
         <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     </PropertyGroup>

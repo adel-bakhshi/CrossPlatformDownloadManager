@@ -6,14 +6,29 @@ on:
       - "v*"
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    env:
+      currVer: ${{ github.ref_name }}
+
+    steps:
+      - name: Extract Version Number
+        id: get_version
+        shell: bash
+        run: |
+          version="${currVer#v}"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Extracted version: $version"
+
   build-windows:
+    needs: setup
     runs-on: windows-latest
     strategy:
       matrix:
         rid: ["win-x64", "win-arm64"]
-
-    env:
-      currVer: ${{ github.ref_name }}
 
     steps:
       - name: Checkout Repository
@@ -34,10 +49,10 @@ jobs:
         run: dotnet restore
 
       - name: Build Windows EXE File
-        run: pupnet -k setup -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.exe"
+        run: pupnet -k setup -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.exe"
 
       - name: Build Windows ZIP Portable
-        run: pupnet -k zip -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.zip"
+        run: pupnet -k zip -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.zip"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -46,13 +61,11 @@ jobs:
           path: ./Deploy/bin/*
 
   build-linux:
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rid: ["linux-x64", "linux-arm64"]
-
-    env:
-      currVer: ${{ github.ref_name }}
 
     steps:
       - name: Checkout Repository
@@ -89,15 +102,15 @@ jobs:
         run: dotnet restore
 
       - name: Build Linux DEB File
-        run: pupnet -k deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.deb"
+        run: pupnet -k deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
 
       # Building RPM package for arm64 architecture with PupNet Deploy is failing, so I couldn't build RPM package for now.
       - name: Build Linux RPM File
         if: matrix.rid == 'linux-x64'
-        run: pupnet -k rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.rpm"
+        run: pupnet -k rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
 
       - name: Build AppImage File
-        run: pupnet -k appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${currVer#v}.${{ matrix.rid }}.AppImage"
+        run: pupnet -k appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
 
       # - name: Build Linux DEB File
       #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
@@ -114,7 +127,7 @@ jobs:
       - name: Build Linux ZIP Portable
         run: |
           chmod +x ./Deploy/linux/tarball/process.sh
-          ./Deploy/linux/tarball/process.sh ${{ matrix.rid }} ${currVer#v}
+          ./Deploy/linux/tarball/process.sh ${{ matrix.rid }} ${{ needs.setup.outputs.version }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -123,13 +136,11 @@ jobs:
           path: ./Deploy/bin/*
 
   build-macos:
+    needs: setup
     runs-on: macos-latest
     strategy:
       matrix:
         rid: ["osx-x64", "osx-arm64"]
-
-    env:
-      currVer: ${{ github.ref_name }}
 
     steps:
       - name: Checkout Repository
@@ -146,7 +157,7 @@ jobs:
       - name: Build macOS App Bundle
         run: |
           chmod +x ./Deploy/macos/app/process.sh
-          ./Deploy/macos/app/process.sh ${{ matrix.rid }} ${currVer#v}
+          ./Deploy/macos/app/process.sh ${{ matrix.rid }} ${{ needs.setup.outputs.version }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -155,7 +166,7 @@ jobs:
           path: ./Deploy/bin/*
 
   release:
-    needs: [build-windows, build-linux, build-macos]
+    needs: [setup, build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows x64 Artifacts

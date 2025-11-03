@@ -1,6 +1,4 @@
-using System;
 using Avalonia.Controls;
-using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 

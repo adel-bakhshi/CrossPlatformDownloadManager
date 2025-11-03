@@ -81,6 +81,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         _mapper = mapper;
 
         Settings = new SettingsViewModel();
+
+        Log.Debug("SettingsService initialized successfully");
     }
 
     public async Task LoadSettingsAsync()
@@ -94,6 +96,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 .SettingsRepository
                 .GetAllAsync(includeProperties: "Proxies");
 
+            Log.Debug("Retrieved {SettingsCount} settings records from database", settingsList.Count);
+
             // Create settings if not exists, otherwise use current settings
             Settings? settings;
             if (settingsList.Count == 0)
@@ -105,26 +109,40 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 var assetsUri = new Uri(assetName);
                 settings = assetsUri.OpenJsonAsset<Settings>();
                 if (settings == null)
+                {
+                    Log.Error("Failed to load default settings from asset: {AssetName}", assetName);
                     throw new InvalidOperationException("An error occurred while loading settings.");
+                }
+
+                Log.Debug("Loaded default settings from asset successfully");
 
                 // The first time the settings are saved, the program must be added to Startup.
                 if (settings.StartOnSystemStartup)
+                {
+                    Log.Debug("Registering application for system startup as per default settings");
                     RegisterStartup();
+                }
 
                 // Set the default temporary file location
                 settings.TemporaryFileLocation = Constants.TempDownloadDirectory;
+                Log.Debug("Set temporary file location to: {TempLocation}", Constants.TempDownloadDirectory);
+
                 // Save settings
                 await _unitOfWork.SettingsRepository.AddAsync(settings);
                 await _unitOfWork.SaveAsync();
+
+                Log.Debug("New settings created and saved to database with ID: {SettingsId}", settings.Id);
             }
             else
             {
                 Log.Debug("Settings found, using current settings...");
                 settings = settingsList.First();
+                Log.Debug("Using existing settings with ID: {SettingsId}", settings.Id);
             }
 
             // Convert to view model
             var viewModel = _mapper.Map<SettingsViewModel>(settings);
+            Log.Debug("Mapped settings to view model successfully");
 
             // Check if the settings are set for first time
             if (_isSettingsSets)
@@ -137,8 +155,13 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                     .Where(p => viewModel.Proxies.FirstOrDefault(vp => vp.Id == p.Id) == null)
                     .ToList();
 
+                Log.Debug("Found {RemovedProxyCount} proxies to remove", removedProxies.Count);
+
                 foreach (var proxy in removedProxies)
+                {
                     Settings.Proxies.Remove(proxy);
+                    Log.Debug("Removed proxy with ID: {ProxyId}", proxy.Id);
+                }
 
                 // These proxies are new so they should be added.
                 var newProxies = viewModel
@@ -146,9 +169,14 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                     .Where(vp => Settings.Proxies.FirstOrDefault(p => p.Id == vp.Id) == null)
                     .ToList();
 
+                Log.Debug("Found {NewProxyCount} new proxies to add", newProxies.Count);
+
                 // Add proxies to view model
                 foreach (var proxy in newProxies)
+                {
                     Settings.Proxies.Add(proxy);
+                    Log.Debug("Added new proxy with ID: {ProxyId}", proxy.Id);
+                }
             }
             else
             {
@@ -160,6 +188,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 // The proxy must be disabled each time the program is run
                 viewModel.ProxyMode = ProxyMode.DisableProxy;
                 Settings = viewModel;
+
+                Log.Debug("Initial settings applied with {ProxyCount} proxies", viewModel.Proxies.Count);
             }
 
             // Check the application startup
@@ -170,24 +200,31 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             // Raise changed event
             DataChanged?.Invoke(this, EventArgs.Empty);
             // Log information
-            Log.Information("Settings loaded successfully.");
+            Log.Information("Settings loaded successfully. Total proxies: {ProxyCount}", Settings.Proxies.Count);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while loading settings. Error message: {ErrorMessage}", ex.Message);
+            throw;
         }
     }
 
     public async Task SaveSettingsAsync(SettingsViewModel viewModel, bool reloadData = true)
     {
         Log.Information("Saving application settings...");
+        Log.Debug("Settings ID: {SettingsId}, Reload data: {ReloadData}", viewModel.Id, reloadData);
 
         var settingsInDb = await _unitOfWork
             .SettingsRepository
             .GetAsync(where: s => s.Id == viewModel.Id);
 
         if (settingsInDb == null)
+        {
+            Log.Warning("Settings with ID {SettingsId} not found in database", viewModel.Id);
             return;
+        }
+
+        Log.Debug("Found settings in database, updating...");
 
         var settings = _mapper.Map<Settings>(viewModel);
         settingsInDb.UpdateDbModel(settings);
@@ -195,17 +232,30 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         await _unitOfWork.SettingsRepository.UpdateAsync(settingsInDb);
         await _unitOfWork.SaveAsync();
 
+        Log.Debug("Settings updated successfully in database");
+
         if (reloadData)
+        {
+            Log.Debug("Reloading settings after save");
             await LoadSettingsAsync();
+        }
 
         // Show or hide the manager.
         if (Settings.UseManager)
         {
             if (_managerWindow == null)
+            {
+                Log.Debug("Manager is enabled but window is null, showing manager...");
                 ShowManager();
+            }
+            else
+            {
+                Log.Debug("Manager is already enabled and window exists");
+            }
         }
         else
         {
+            Log.Debug("Manager is disabled, hiding manager...");
             HideManager();
         }
 
@@ -215,17 +265,25 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         ChangeApplicationTheme();
         // Set application font
         SetApplicationFont();
+
+        Log.Information("Settings saved successfully");
     }
 
     public async Task<int> AddProxySettingsAsync(ProxySettings? proxySettings)
     {
         if (proxySettings == null)
+        {
+            Log.Warning("Attempted to add null proxy settings");
             return 0;
+        }
 
-        Log.Debug("Adding proxy settings to database...");
+        Log.Information("Adding proxy settings to database...");
+        Log.Debug("Proxy name: {ProxyName}, Type: {ProxyType}", proxySettings.Name, proxySettings.Type);
 
         await _unitOfWork.ProxySettingsRepository.AddAsync(proxySettings);
         await _unitOfWork.SaveAsync();
+
+        Log.Debug("Proxy settings added successfully with ID: {ProxyId}", proxySettings.Id);
 
         await LoadSettingsAsync();
         return proxySettings.Id;
@@ -234,7 +292,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     public async Task<int> AddProxySettingsAsync(ProxySettingsViewModel? viewModel)
     {
         if (viewModel == null)
+        {
+            Log.Warning("Attempted to add null proxy settings view model");
             return 0;
+        }
+
+        Log.Debug("Adding proxy settings from view model...");
 
         viewModel.SettingsId = Settings.Id;
         var proxySettings = _mapper.Map<ProxySettings>(viewModel);
@@ -244,9 +307,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     public async Task UpdateProxySettingsAsync(ProxySettings? proxySettings)
     {
         if (proxySettings == null)
+        {
+            Log.Warning("Attempted to update null proxy settings");
             return;
+        }
 
-        Log.Debug("Getting proxy settings with ID {Id} from database to update...", proxySettings.Id);
+        Log.Information("Updating proxy settings with ID: {ProxyId}", proxySettings.Id);
 
         var proxySettingsInDb = await _unitOfWork
             .ProxySettingsRepository
@@ -254,27 +320,40 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         if (proxySettingsInDb == null)
         {
-            Log.Debug("There is no roxy settings in database to update.");
+            Log.Warning("Proxy settings with ID {ProxyId} not found in database", proxySettings.Id);
             return;
         }
 
-        Log.Debug("Updating proxy settings in database...");
+        Log.Debug("Found proxy settings in database, updating...");
 
         proxySettingsInDb.UpdateDbModel(proxySettings);
         await _unitOfWork.ProxySettingsRepository.UpdateAsync(proxySettings);
         await _unitOfWork.SaveAsync();
+
+        Log.Debug("Proxy settings updated successfully");
 
         await LoadSettingsAsync();
     }
 
     public async Task UpdateProxySettingsAsync(ProxySettingsViewModel? viewModel)
     {
+        if (viewModel == null)
+        {
+            Log.Warning("Attempted to update null proxy settings view model");
+            return;
+        }
+
+        Log.Debug("Updating proxy settings from view model with ID: {ProxyId}", viewModel.Id);
+
         var proxySettingsViewModel = Settings
             .Proxies
-            .FirstOrDefault(p => p.Id == viewModel?.Id);
+            .FirstOrDefault(p => p.Id == viewModel.Id);
 
         if (proxySettingsViewModel == null)
+        {
+            Log.Warning("Proxy settings with ID {ProxyId} not found in current settings", viewModel.Id);
             return;
+        }
 
         var proxySettings = _mapper.Map<ProxySettings>(proxySettingsViewModel);
         await UpdateProxySettingsAsync(proxySettings);
@@ -283,9 +362,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     public async Task DeleteProxySettingsAsync(ProxySettings? proxySettings)
     {
         if (proxySettings == null)
+        {
+            Log.Warning("Attempted to delete null proxy settings");
             return;
+        }
 
-        Log.Debug("Getting proxy settings with ID {Id} from database to remove...", proxySettings.Id);
+        Log.Information("Deleting proxy settings with ID: {ProxyId}", proxySettings.Id);
 
         var proxySettingsInDb = await _unitOfWork
             .ProxySettingsRepository
@@ -293,26 +375,39 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         if (proxySettingsInDb == null)
         {
-            Log.Debug("There is no proxy settings in database to remove.");
+            Log.Warning("Proxy settings with ID {ProxyId} not found in database", proxySettings.Id);
             return;
         }
 
-        Log.Debug("Removing proxy settings from database...");
+        Log.Debug("Found proxy settings in database, deleting...");
 
         await _unitOfWork.ProxySettingsRepository.DeleteAsync(proxySettingsInDb);
         await _unitOfWork.SaveAsync();
+
+        Log.Debug("Proxy settings deleted successfully");
 
         await LoadSettingsAsync();
     }
 
     public async Task DeleteProxySettingsAsync(ProxySettingsViewModel? viewModel)
     {
+        if (viewModel == null)
+        {
+            Log.Warning("Attempted to delete null proxy settings view model");
+            return;
+        }
+
+        Log.Debug("Deleting proxy settings from view model with ID: {ProxyId}", viewModel.Id);
+
         var proxySettingsViewModel = Settings
             .Proxies
-            .FirstOrDefault(p => p.Id == viewModel?.Id);
+            .FirstOrDefault(p => p.Id == viewModel.Id);
 
         if (proxySettingsViewModel == null)
+        {
+            Log.Warning("Proxy settings with ID {ProxyId} not found in current settings", viewModel.Id);
             return;
+        }
 
         var proxySettings = _mapper.Map<ProxySettings>(proxySettingsViewModel);
         await DeleteProxySettingsAsync(proxySettings);
@@ -324,6 +419,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         Settings.ProxyMode = ProxyMode.DisableProxy;
         await SaveSettingsAsync(Settings);
+
+        Log.Information("Proxy disabled successfully");
     }
 
     public async Task UseSystemProxySettingsAsync()
@@ -332,37 +429,54 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
         Settings.ProxyMode = ProxyMode.UseSystemProxySettings;
         await SaveSettingsAsync(Settings);
+
+        Log.Information("System proxy settings applied successfully");
     }
 
     public async Task UseCustomProxyAsync(ProxySettingsViewModel? viewModel)
     {
         Log.Information("Using custom proxy settings...");
 
-        var proxySettings = Settings
-            .Proxies
-            .FirstOrDefault(p => p.Id == viewModel?.Id);
-
-        if (proxySettings == null)
+        if (viewModel == null)
         {
-            Log.Debug("There is no proxy settings with ID {Id} to activate.", viewModel?.Id.ToString());
+            Log.Warning("Attempted to use null custom proxy settings");
             return;
         }
 
-        Log.Debug("Setting proxy settings with ID {Id} as active...", proxySettings.Id);
+        Log.Debug("Activating custom proxy with ID: {ProxyId}", viewModel.Id);
 
+        var proxySettings = Settings
+            .Proxies
+            .FirstOrDefault(p => p.Id == viewModel.Id);
+
+        if (proxySettings == null)
+        {
+            Log.Warning("Proxy settings with ID {ProxyId} not found in current settings", viewModel.Id);
+            return;
+        }
+
+        Log.Debug("Setting proxy settings with ID {ProxyId} as active...", proxySettings.Id);
+
+        // Trim all proxy settings values
         proxySettings.Type = proxySettings.Type?.Trim();
         proxySettings.Host = proxySettings.Host?.Trim();
         proxySettings.Port = proxySettings.Port?.Trim();
         proxySettings.Username = proxySettings.Username?.Trim();
         proxySettings.Password = proxySettings.Password?.Trim();
 
+        Log.Debug("Trimmed proxy settings - Type: {ProxyType}, Host: {ProxyHost}, Port: {ProxyPort}",
+            proxySettings.Type, proxySettings.Host, proxySettings.Port);
+
+        // Validate proxy settings
         if (proxySettings.Host.IsStringNullOrEmpty()
             || proxySettings.Port.IsStringNullOrEmpty()
             || !int.TryParse(proxySettings.Port, out _))
         {
+            Log.Error("Invalid proxy settings - Host: {Host}, Port: {Port}", proxySettings.Host, proxySettings.Port);
             throw new InvalidOperationException("The proxy you selected to activate is not valid. Please go to the Settings window, Proxy section and edit the proxy.");
         }
 
+        // Determine proxy type
         var proxyType = proxySettings.Type?.ToLower() switch
         {
             "http" => ProxyType.Http,
@@ -371,28 +485,41 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             _ => throw new InvalidOperationException("Invalid proxy type.")
         };
 
+        Log.Debug("Determined proxy type: {ProxyType}", proxyType);
+
+        // Deactivate all other proxies
         var activeProxies = Settings
             .Proxies
             .Where(p => p.IsActive)
             .ToList();
 
-        foreach (var proxy in activeProxies)
-            proxy.IsActive = false;
+        Log.Debug("Found {ActiveProxyCount} active proxies to deactivate", activeProxies.Count);
 
+        foreach (var proxy in activeProxies)
+        {
+            proxy.IsActive = false;
+            Log.Debug("Deactivated proxy with ID: {ProxyId}", proxy.Id);
+        }
+
+        // Find and activate the target proxy
         proxySettings = Settings
             .Proxies
             .FirstOrDefault(p => p.Id == proxySettings.Id);
 
         if (proxySettings == null)
+        {
+            Log.Warning("Proxy settings with ID {ProxyId} not found after deactivating other proxies", viewModel.Id);
             return;
+        }
 
         proxySettings.IsActive = true;
+        Log.Debug("Activated proxy with ID: {ProxyId}", proxySettings.Id);
 
         Settings.ProxyMode = ProxyMode.UseCustomProxy;
         Settings.ProxyType = proxyType;
         await SaveSettingsAsync(Settings);
 
-        Log.Information("Custom proxy settings activated successfully.");
+        Log.Information("Custom proxy settings activated successfully for proxy: {ProxyName}", proxySettings.Name);
     }
 
     public void ShowManager()
@@ -413,14 +540,22 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 var trayMenuWindow = serviceProvider?.GetService<TrayMenuWindow>();
                 // Check if app service and tray menu window are not null
                 if (appService == null || trayMenuWindow == null)
+                {
+                    Log.Error("App service or tray menu window not found in service provider");
                     throw new InvalidOperationException("App service or tray menu window not found.");
+                }
+
+                Log.Debug("Creating manager window view model and window...");
 
                 // Create and show manager window
                 var vm = new ManagerWindowViewModel(appService, trayMenuWindow);
                 _managerWindow = new ManagerWindow { DataContext = vm };
+
+                Log.Debug("Manager window created successfully");
             }
 
             _managerWindow!.Show();
+            Log.Information("Manager window shown successfully");
         });
     }
 
@@ -433,16 +568,25 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
             _managerWindow?.Close();
             _managerWindow = null;
+
+            Log.Information("Manager window closed successfully");
         });
     }
 
     public string GetTemporaryFileLocation()
     {
-        Log.Information("Getting temporary file location...");
+        Log.Debug("Getting temporary file location...");
 
         var location = Settings.TemporaryFileLocation;
         if (location.IsStringNullOrEmpty())
+        {
             location = Constants.TempDownloadDirectory;
+            Log.Debug("Using default temporary file location: {TempLocation}", location);
+        }
+        else
+        {
+            Log.Debug("Using configured temporary file location: {TempLocation}", location);
+        }
 
         return location;
     }
@@ -462,10 +606,12 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         // Otherwise, remove the application from startup.
         if (Settings.StartOnSystemStartup)
         {
+            Log.Debug("Start on system startup is enabled, registering startup...");
             RegisterStartup();
         }
         else
         {
+            Log.Debug("Start on system startup is disabled, deleting startup...");
             DeleteStartup();
         }
     }
@@ -477,6 +623,8 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     /// </summary>
     private static void RegisterStartup()
     {
+        Log.Debug("Registering application for system startup...");
+
         // Check if the application is already registered as a startup item
         var isRegistered = PlatformSpecificManager.IsStartupRegistered();
         if (isRegistered)
@@ -485,7 +633,9 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             return;
         }
 
+        Log.Debug("Application is not registered for startup, registering now...");
         PlatformSpecificManager.RegisterStartup();
+        Log.Information("Application registered for system startup successfully");
     }
 
     /// <summary>
@@ -494,7 +644,10 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     /// </summary>
     private static void DeleteStartup()
     {
+        Log.Debug("Deleting application from system startup...");
+
         PlatformSpecificManager.DeleteStartup();
+        Log.Information("Application removed from system startup successfully");
     }
 
     /// <summary>
@@ -515,10 +668,17 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         var serviceProvider = Application.Current?.GetServiceProvider();
         var appThemeService = serviceProvider?.GetService<IAppThemeService>();
         if (appThemeService == null)
+        {
+            Log.Error("App theme service not found in service provider");
             throw new InvalidOperationException("Can't find app theme service.");
+        }
+
+        Log.Debug("App theme service found, loading theme data...");
 
         // Load and apply the theme data
         appThemeService.LoadThemeData();
+
+        Log.Debug("Application theme changed successfully");
     }
 
     /// <summary>
@@ -530,14 +690,34 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         Log.Debug("Changing application font...");
 
         // Find the specified font name in available fonts, or default to the first available font if not found
-        var font = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
-        // Try to find the font in application resources
-        if (Application.Current?.TryFindResource(font!, out var resource) != true || resource == null)
+        var fontName = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
+        if (fontName.IsStringNullOrEmpty())
+        {
+            Log.Warning("No available fonts found");
             return;
+        }
+
+        Log.Debug("Selected font: {FontName}", fontName);
+
+        // Try to find the font in application resources
+        if (Application.Current?.TryFindResource(fontName!, out var resource) != true || resource == null)
+        {
+            Log.Warning("Font resource '{FontName}' not found in application resources", fontName);
+            return;
+        }
+
+        Log.Debug("Font resource found for: {FontName}", fontName);
 
         // Check if primary font resource exists and is different from the current font resource
         if (Application.Current.TryFindResource("PrimaryFont", out var primaryFont) && primaryFont?.Equals(resource) != true)
+        {
             Application.Current.Resources["PrimaryFont"] = resource;
+            Log.Debug("Primary font resource updated to: {FontName}", fontName);
+        }
+        else
+        {
+            Log.Debug("Primary font resource is already set to: {FontName}", fontName);
+        }
     }
 
     #endregion

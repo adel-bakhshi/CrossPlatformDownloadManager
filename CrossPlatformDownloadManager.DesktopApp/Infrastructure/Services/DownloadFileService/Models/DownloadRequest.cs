@@ -70,6 +70,7 @@ public class DownloadRequest
     /// <param name="url">The url of the request.</param>
     public DownloadRequest(string url) : this(url, new DownloadRequestOptions())
     {
+        Log.Debug("DownloadRequest initialized with URL: {Url}", url);
     }
 
     /// <summary>
@@ -79,10 +80,14 @@ public class DownloadRequest
     /// <param name="options">The options of the request.</param>
     public DownloadRequest(string url, DownloadRequestOptions options)
     {
+        Log.Debug("Initializing DownloadRequest with URL: {Url} and custom options", url);
+
         _settingsService = GetSettingsService();
 
         Url = url.CheckUrlValidation() ? new Uri(url) : new Uri(new Uri("http://localhost"), url);
         Options = options;
+
+        Log.Debug("DownloadRequest initialized successfully. Final URL: {FinalUrl}", Url);
     }
 
     /// <summary>
@@ -91,6 +96,8 @@ public class DownloadRequest
     /// <returns>A dictionary contains response headers.</returns>
     public async Task<HttpStatusCode?> FetchResponseHeadersAsync(CancellationToken cancelToken = default)
     {
+        Log.Debug("Fetching response headers for URL: {Url}", Url);
+
         HttpStatusCode? statusCode = null;
         // Try to get the response headers from the URL
         try
@@ -104,15 +111,20 @@ public class DownloadRequest
             // Set the status code
             statusCode = response.StatusCode;
 
+            Log.Debug("Response received with status code: {StatusCode}", statusCode);
+
             // Ensure that the redirect URI is the same as the origin
             EnsureRedirectUriIsTheSameAsTheOrigin(response);
             // Store the response headers in the ResponseHeaders property
             ResponseHeaders = response.Content.Headers.ToDictionary(x => x.Key, x => x.Value.First());
+
+            Log.Debug("Retrieved {HeaderCount} response headers", ResponseHeaders.Count);
         }
-        catch
+        catch (Exception ex)
         {
             // If an exception is thrown, clear the ResponseHeaders property
             ResponseHeaders.Clear();
+            Log.Error(ex, "Failed to fetch response headers for URL: {Url}", Url);
         }
 
         // Return the ResponseHeaders property
@@ -126,6 +138,7 @@ public class DownloadRequest
     /// <param name="end">The end value of the range.</param>
     public void AddRange(long start = 0, long end = 0)
     {
+        Log.Debug("Adding range header: {Start}-{End}", start, end);
         RequestClient.DefaultRequestHeaders.Range = new RangeHeaderValue(start, end);
     }
 
@@ -134,15 +147,18 @@ public class DownloadRequest
     /// </summary>
     public void RemoveRange()
     {
+        Log.Debug("Removing range header");
         RequestClient.DefaultRequestHeaders.Range = null;
     }
 
     /// <summary>
     /// Checks that the URL supports downloading in range.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True if the URL supports range downloads, otherwise false.</returns>
     public async Task<bool> CheckSupportsDownloadInRangeAsync(CancellationToken cancelToken = default)
     {
+        Log.Debug("Checking if URL supports download in range: {Url}", Url);
+
         try
         {
             // Add range to request
@@ -154,18 +170,26 @@ public class DownloadRequest
             if (ResponseHeaders.TryGetValue("Accept-Ranges", out var acceptRanges))
             {
                 if (acceptRanges.Contains("bytes"))
+                {
+                    Log.Debug("URL supports range downloads (Accept-Ranges header found)");
                     return true;
+                }
             }
 
             // Some servers don't include Accept-Ranges but still support partial content.
             // If Range request succeeds with Partial Content status:
             if (statusCode == HttpStatusCode.PartialContent)
+            {
+                Log.Debug("URL supports range downloads (Partial Content status received)");
                 return true;
+            }
+
+            Log.Debug("URL does not support range downloads");
         }
         catch (Exception ex)
         {
             // Log error
-            Log.Error("An error occurred while trying to check download in range capability. Error message: {ErrorMessage},", ex.Message);
+            Log.Error(ex, "An error occurred while trying to check download in range capability. Error message: {ErrorMessage}", ex.Message);
         }
 
         return false;
@@ -183,11 +207,14 @@ public class DownloadRequest
         if (_httpClient != null)
             return _httpClient;
 
+        Log.Debug("Creating new HttpClient instance");
+
         // Create a SocketsHttpHandler for the request
         var handler = GetHandler();
         // Create a HttpClient with the SocketsHttpHandler
         _httpClient = new HttpClient(handler);
 
+        Log.Debug("HttpClient created successfully with proxy: {HasProxy}", handler.Proxy != null);
         return _httpClient;
     }
 
@@ -198,14 +225,20 @@ public class DownloadRequest
     /// <exception cref="InvalidOperationException">Throw an InvalidOperationException if the service is not found.</exception>
     private static ISettingsService GetSettingsService()
     {
+        Log.Debug("Retrieving settings service from service provider");
+
         // Get service provider
         var serviceProvider = Application.Current?.TryGetServiceProvider();
         // Get settings service
         var settingsService = serviceProvider?.GetService<ISettingsService>();
         // Make sure settings service has value
         if (settingsService == null)
+        {
+            Log.Error("Settings service not found in service provider");
             throw new InvalidOperationException("Settings service is null.");
+        }
 
+        Log.Debug("Settings service retrieved successfully");
         return settingsService;
     }
 
@@ -216,6 +249,8 @@ public class DownloadRequest
     /// <returns>Returns a SocketsHttpHandler.</returns>
     private SocketsHttpHandler GetHandler()
     {
+        Log.Debug("Creating SocketsHttpHandler with proxy and timeout configuration");
+
         // Create a SocketsHttpHandler for handling HttpClient requests
         var handler = new SocketsHttpHandler();
         // Add proxy to the handler
@@ -228,6 +263,9 @@ public class DownloadRequest
         handler.AllowAutoRedirect = Options.AllowAutoRedirect;
         handler.MaxAutomaticRedirections = Options.MaxAutomaticRedirections;
 
+        Log.Debug("SocketsHttpHandler created with AutoRedirect: {AllowAutoRedirect}, MaxRedirections: {MaxRedirections}",
+            handler.AllowAutoRedirect, handler.MaxAutomaticRedirections);
+
         return handler;
     }
 
@@ -238,6 +276,8 @@ public class DownloadRequest
     /// <exception cref="InvalidOperationException">Throw an InvalidOperationException if the proxy mode is invalid.</exception>
     private IWebProxy? GetProxy()
     {
+        Log.Debug("Retrieving proxy configuration. Proxy mode: {ProxyMode}", _settingsService.Settings.ProxyMode);
+
         IWebProxy? proxy = null;
         switch (_settingsService.Settings.ProxyMode)
         {
@@ -245,6 +285,7 @@ public class DownloadRequest
             case ProxyMode.DisableProxy:
             {
                 proxy = null;
+                Log.Debug("Proxy disabled");
                 break;
             }
 
@@ -253,9 +294,13 @@ public class DownloadRequest
             {
                 var systemProxy = WebRequest.DefaultWebProxy;
                 if (systemProxy == null)
+                {
+                    Log.Debug("System proxy is not available");
                     break;
+                }
 
                 proxy = systemProxy;
+                Log.Debug("Using system proxy settings");
                 break;
             }
 
@@ -266,7 +311,10 @@ public class DownloadRequest
                 var activeProxy = _settingsService.Settings.Proxies.FirstOrDefault(p => p.IsActive);
                 // Make sure active proxy is not null
                 if (activeProxy == null)
+                {
+                    Log.Debug("No active custom proxy found");
                     break;
+                }
 
                 // Create a proxy with the active proxy settings
                 proxy = new WebProxy
@@ -275,10 +323,12 @@ public class DownloadRequest
                     Credentials = new NetworkCredential(activeProxy.Username, activeProxy.Password)
                 };
 
+                Log.Debug("Using custom proxy: {ProxyAddress}", activeProxy.GetProxyUri());
                 break;
             }
 
             default:
+                Log.Error("Invalid proxy mode: {ProxyMode}", _settingsService.Settings.ProxyMode);
                 throw new InvalidOperationException("Invalid proxy mode.");
         }
 
@@ -299,7 +349,10 @@ public class DownloadRequest
         var finalUrl = response.RequestMessage.RequestUri?.AbsoluteUri;
         // If the base address has changed, update the URL property
         if (!finalUrl.IsStringNullOrEmpty() && !finalUrl!.Equals(Url?.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Debug("URL redirected from {OriginalUrl} to {FinalUrl}", Url?.AbsoluteUri, finalUrl);
             Url = new Uri(finalUrl);
+        }
     }
 
     #endregion

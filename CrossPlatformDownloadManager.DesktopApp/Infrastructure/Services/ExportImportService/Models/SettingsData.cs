@@ -4,9 +4,13 @@ using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService.Models;
 
+/// <summary>
+/// Represents application settings data for export/import operations.
+/// </summary>
 public class SettingsData
 {
     #region Properties
@@ -100,8 +104,17 @@ public class SettingsData
 
     #endregion
 
+    /// <summary>
+    /// Creates an export file from application settings and proxies.
+    /// </summary>
+    /// <param name="settings">The application settings view model.</param>
+    /// <param name="proxies">The list of proxy settings view models.</param>
+    /// <returns>A new instance of <see cref="SettingsData"/> containing export data.</returns>
     public static SettingsData CreateExportFile(SettingsViewModel settings, List<ProxySettingsViewModel> proxies)
     {
+        Log.Information("Creating settings export file");
+        Log.Debug("Processing {ProxyCount} proxies for export", proxies.Count);
+
         var exportProxies = proxies
             .Where(p => !p.Name.IsStringNullOrEmpty() && !p.Type.IsStringNullOrEmpty() && !p.Host.IsStringNullOrEmpty() && !p.Port.IsStringNullOrEmpty())
             .Select(p => new ProxySettingsData
@@ -115,7 +128,9 @@ public class SettingsData
             })
             .ToList();
 
-        return new SettingsData
+        Log.Debug("Filtered to {ValidProxyCount} valid proxies for export", exportProxies.Count);
+
+        var settingsData = new SettingsData
         {
             StartOnSystemStartup = settings.StartOnSystemStartup,
             UseBrowserExtension = settings.UseBrowserExtension,
@@ -147,5 +162,11 @@ public class SettingsData
             DataGridColumnsSettings = settings.DataGridColumnSettings.ConvertToJson(),
             Proxies = exportProxies
         };
+
+        Log.Information("Settings export file created successfully with {ProxyCount} proxies", exportProxies.Count);
+        Log.Debug("Export settings summary - StartOnSystemStartup: {StartOnStartup}, UseManager: {UseManager}, ProxyMode: {ProxyMode}",
+            settingsData.StartOnSystemStartup, settingsData.UseManager, settingsData.ProxyMode);
+
+        return settingsData;
     }
 }

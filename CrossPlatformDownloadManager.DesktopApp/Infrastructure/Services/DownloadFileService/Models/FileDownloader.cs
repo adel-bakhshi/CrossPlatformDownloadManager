@@ -139,12 +139,16 @@ public class FileDownloader
     /// <param name="downloadFile">The file to be downloaded.</param>
     public FileDownloader(DownloadFileViewModel downloadFile)
     {
+        Log.Debug("Initializing FileDownloader for download file: {FileName}", downloadFile.FileName);
+
         _appService = GetAppService();
         _downloadRequest = new DownloadRequest(downloadFile.Url ?? string.Empty);
 
         DownloadFile = downloadFile;
         DownloadConfiguration = GetDownloadConfiguration();
         DownloadService = GetDownloadService();
+
+        Log.Debug("FileDownloader initialized successfully for: {FileName}", downloadFile.FileName);
     }
 
     /// <summary>
@@ -152,6 +156,8 @@ public class FileDownloader
     /// </summary>
     public async Task StartDownloadFileAsync()
     {
+        Log.Information("Starting download process for: {FileName}", DownloadFile.FileName);
+
         // Subscribe to events
         DownloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
         DownloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
@@ -161,11 +167,15 @@ public class FileDownloader
         DownloadService.MergeProgressChanged += DownloadServiceOnMergeProgressChanged;
         DownloadService.ChunkDownloadRestarted += DownloadServiceOnChunkDownloadRestarted;
 
+        Log.Debug("Event handlers subscribed successfully");
+
         // Get save location of the file
         var downloadPath = DownloadFile.SaveLocation;
         // Check if save location is null or empty
         if (downloadPath.IsStringNullOrEmpty())
         {
+            Log.Debug("Save location is empty, using general category directory");
+
             // Get general category
             var generalDirectory = _appService
                 .CategoryService
@@ -176,7 +186,10 @@ public class FileDownloader
             downloadPath = generalDirectory?.CategorySaveDirectory?.SaveDirectory;
             // Check if downloadPath still is null or empty, return
             if (downloadPath.IsStringNullOrEmpty())
+            {
+                Log.Error("General category directory not found. Cannot proceed with download.");
                 return;
+            }
         }
 
         // Check if the file name and url are valid
@@ -184,16 +197,23 @@ public class FileDownloader
             || DownloadFile.Url.IsStringNullOrEmpty()
             || !DownloadFile.Url.CheckUrlValidation())
         {
+            Log.Error("Invalid file name or URL. FileName: {FileName}, URL: {Url}", DownloadFile.FileName, DownloadFile.Url);
             return;
         }
 
         // Make sure that the download path is exists
         if (!Directory.Exists(downloadPath!))
+        {
+            Log.Debug("Creating download directory: {DownloadPath}", downloadPath);
             Directory.CreateDirectory(downloadPath!);
+        }
 
         // Update save location if not equal to download path
         if (DownloadFile.SaveLocation?.Equals(downloadPath) != true)
+        {
+            Log.Debug("Updating save location to: {DownloadPath}", downloadPath);
             DownloadFile.SaveLocation = downloadPath;
+        }
 
         // Create chunk data for showing in the UI
         CreateChunksData(DownloadConfiguration.ChunkCount);
@@ -211,11 +231,14 @@ public class FileDownloader
         // If download package is null we have to download file from the beginning
         if (downloadPackage == null)
         {
+            Log.Debug("Starting new download from URL: {Url}", DownloadFile.Url);
             await DownloadService.DownloadFileTaskAsync(address: DownloadFile.Url!, fileName: fileName).ConfigureAwait(false);
         }
         // Otherwise, use the download package to continue the download process
         else
         {
+            Log.Debug("Resuming download from existing package. Chunks: {ChunkCount}", downloadPackage.Chunks.Length);
+
             // Load previous chunks data
             LoadChunksData(downloadPackage.Chunks);
 
@@ -224,6 +247,7 @@ public class FileDownloader
             var currentUrl = urls.FirstOrDefault(u => u.Equals(DownloadFile.Url!));
             if (currentUrl.IsStringNullOrEmpty())
             {
+                Log.Debug("Updating download URL in package");
                 urls.Clear();
                 urls.Add(DownloadFile.Url!);
 
@@ -232,7 +256,10 @@ public class FileDownloader
 
             // Update file name if user changed it
             if (!downloadPackage.FileName.Equals(fileName))
+            {
+                Log.Debug("Updating file name in package: {FileName}", fileName);
                 downloadPackage.FileName = fileName;
+            }
 
             // Continue the download process
             await DownloadService.DownloadFileTaskAsync(downloadPackage).ConfigureAwait(false);
@@ -244,6 +271,8 @@ public class FileDownloader
     /// </summary>
     public async Task StopDownloadFileAsync()
     {
+        Log.Information("Stopping download process for: {FileName}", DownloadFile.FileName);
+
         // Reset download options
         ResetDownload();
         // Change download status to stopping
@@ -252,6 +281,8 @@ public class FileDownloader
         DownloadFile.RaiseDownloadStoppedEvent(new DownloadFileEventArgs(DownloadFile.Id));
         // Cancel download
         await DownloadService.CancelTaskAsync().ConfigureAwait(false);
+
+        Log.Debug("Download stopped successfully");
     }
 
     /// <summary>
@@ -259,6 +290,8 @@ public class FileDownloader
     /// </summary>
     public void ResumeDownloadFile()
     {
+        Log.Information("Resuming download process for: {FileName}", DownloadFile.FileName);
+
         // Resume the download
         DownloadService.Resume();
         // Start the downloader timer to resume processes
@@ -267,6 +300,8 @@ public class FileDownloader
         DownloadFile.Status = DownloadFileStatus.Downloading;
         // Invoke DownloadResumed event
         DownloadFile.RaiseDownloadResumedEvent(new DownloadFileEventArgs(DownloadFile.Id));
+
+        Log.Debug("Download resumed successfully");
     }
 
     /// <summary>
@@ -274,6 +309,8 @@ public class FileDownloader
     /// </summary>
     public void PauseDownloadFile()
     {
+        Log.Information("Pausing download process for: {FileName}", DownloadFile.FileName);
+
         // Pause the download
         DownloadService.Pause();
         // Stop the downloader timer to stop processes
@@ -286,6 +323,8 @@ public class FileDownloader
         SaveDownloadPackage(DownloadService.Package);
         // Invoke DownloadPaused event
         DownloadFile.RaiseDownloadPausedEvent(new DownloadFileEventArgs(DownloadFile.Id));
+
+        Log.Debug("Download paused successfully");
     }
 
     /// <summary>
@@ -294,6 +333,8 @@ public class FileDownloader
     /// <param name="showWindow">This parameter indicates whether the created window should be opened and showed to the user or not.</param>
     public void CreateDownloadWindow(bool showWindow = true)
     {
+        Log.Debug("Creating download window for: {FileName}, ShowWindow: {ShowWindow}", DownloadFile.FileName, showWindow);
+
         Dispatcher.UIThread.Post(() =>
         {
             var viewModel = new DownloadWindowViewModel(_appService, DownloadFile);
@@ -301,7 +342,10 @@ public class FileDownloader
             DownloadWindow.Closing += DownloadWindowOnClosing;
 
             if (showWindow)
+            {
                 DownloadWindow.Show();
+                Log.Debug("Download window shown successfully");
+            }
         });
     }
 
@@ -311,14 +355,25 @@ public class FileDownloader
     public void ShowOrFocusWindow()
     {
         if (DownloadWindow == null)
+        {
+            Log.Debug("Download window is null, cannot show or focus");
             return;
+        }
+
+        Log.Debug("Showing or focusing download window");
 
         Dispatcher.UIThread.Post(() =>
         {
             if (!DownloadWindow.IsVisible)
+            {
                 DownloadWindow.Show();
+                Log.Debug("Download window shown");
+            }
             else
+            {
                 DownloadWindow.Focus();
+                Log.Debug("Download window focused");
+            }
         });
     }
 
@@ -329,6 +384,7 @@ public class FileDownloader
     /// <param name="completedTask">The task that is to be executed when the download is finished.</param>
     public void AddAsyncCompletedTask(Func<DownloadFileViewModel?, Task> completedTask)
     {
+        Log.Debug("Adding async completed task");
         _completedAsyncTasks.Add(completedTask);
     }
 
@@ -339,6 +395,7 @@ public class FileDownloader
     /// <param name="completedTask">The task that is to be executed when the download is finished.</param>
     public void AddSyncCompletedTask(Action<DownloadFileViewModel?> completedTask)
     {
+        Log.Debug("Adding sync completed task");
         _completedSyncTasks.Add(completedTask);
     }
 
@@ -348,6 +405,7 @@ public class FileDownloader
     /// <returns>Returns a list of completed async tasks.</returns>
     public List<Func<DownloadFileViewModel?, Task>> GetCompletedAsyncTasks()
     {
+        Log.Debug("Retrieving {Count} async completed tasks", _completedAsyncTasks.Count);
         return _completedAsyncTasks;
     }
 
@@ -357,6 +415,7 @@ public class FileDownloader
     /// <returns>Returns a list of completed sync tasks.</returns>
     public List<Action<DownloadFileViewModel?>> GetCompletedSyncTasks()
     {
+        Log.Debug("Retrieving {Count} sync completed tasks", _completedSyncTasks.Count);
         return _completedSyncTasks;
     }
 
@@ -365,6 +424,7 @@ public class FileDownloader
     /// </summary>
     public void ClearCompletedAsyncTasks()
     {
+        Log.Debug("Clearing {Count} async completed tasks", _completedAsyncTasks.Count);
         _completedAsyncTasks.Clear();
     }
 
@@ -373,6 +433,7 @@ public class FileDownloader
     /// </summary>
     public void ClearCompletedSyncTasks()
     {
+        Log.Debug("Clearing {Count} sync completed tasks", _completedSyncTasks.Count);
         _completedSyncTasks.Clear();
     }
 
@@ -385,10 +446,14 @@ public class FileDownloader
     /// <param name="e">The arguments of the event.</param>
     private void DownloadServiceOnDownloadStarted(object? sender, DownloadStartedEventArgs e)
     {
+        Log.Debug("Download started for: {FileName}", DownloadFile.FileName);
+
         // Change the status of the download to downloading
         DownloadFile.Status = DownloadFileStatus.Downloading;
         // Update the last try date of the download
         DownloadFile.LastTryDate = DateTime.Now;
+
+        Log.Debug("Download status updated to Downloading");
     }
 
     /// <summary>
@@ -398,6 +463,9 @@ public class FileDownloader
     /// <param name="e">The arguments of the event.</param> 
     private void DownloadServiceOnDownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
     {
+        Log.Debug("Download file completed for: {FileName}. Cancelled: {Cancelled}, Error: {HasError}",
+            DownloadFile.FileName, e.Cancelled, e.Error != null);
+
         var isSuccess = true;
         Exception? error = null;
 
@@ -414,10 +482,12 @@ public class FileDownloader
             DownloadFile.Status = DownloadFileStatus.Error;
             isSuccess = false;
             error = e.Error;
+            Log.Error(e.Error, "Download completed with error for: {FileName}", DownloadFile.FileName);
         }
         else
         {
             DownloadFile.Status = e.Cancelled ? DownloadFileStatus.Stopped : DownloadFileStatus.Completed;
+            Log.Information("Download completed successfully for: {FileName}. Status: {Status}", DownloadFile.FileName, DownloadFile.Status);
         }
 
         // Raise download finished event
@@ -481,10 +551,14 @@ public class FileDownloader
     /// <param name="e">The arguments of the event.</param>
     private void DownloadServiceOnMergeStarted(object? sender, MergeStartedEventArgs e)
     {
+        Log.Debug("Merge started for: {FileName}", DownloadFile.FileName);
+
         // Change the status of the download to merging
         DownloadFile.Status = DownloadFileStatus.Merging;
         // Stop the download timer
         _downloaderTimer?.Stop();
+
+        Log.Debug("Download status updated to Merging");
     }
 
     /// <summary>
@@ -505,12 +579,15 @@ public class FileDownloader
     /// <param name="e">The arguments of the event.</param>
     private static async void DownloadServiceOnChunkDownloadRestarted(object? sender, ChunkDownloadRestartedEventArgs e)
     {
+        Log.Warning("Chunk download restarted. Reason: {Reason}, ChunkId: {ChunkId}", e.Reason, e.ChunkId);
+
         try
         {
             switch (e.Reason)
             {
                 case RestartReason.FileSizeIsNotMatchWithChunkLength:
                 {
+                    Log.Debug("Showing file size mismatch warning dialog");
                     await DialogBoxManager.ShowWarningDialogAsync("Part Size Mismatch Detected",
                         "A problem was detected while downloading a part of the file. the received size does not match the expected size. This part will be re-downloaded to maintain data integrity and ensure a complete file.",
                         DialogButtons.Ok);
@@ -520,6 +597,7 @@ public class FileDownloader
 
                 case RestartReason.TempFileCorruption:
                 {
+                    Log.Debug("Showing temp file corruption warning dialog");
                     await DialogBoxManager.ShowWarningDialogAsync("Corrupted Temporary File Detected",
                         "The temporary file for a part of the download appears to be corrupted or unreadable. To ensure data integrity and a successful download, this part will be re-downloaded from the server.",
                         DialogButtons.Ok);
@@ -528,11 +606,15 @@ public class FileDownloader
                 }
 
                 default:
+                {
+                    Log.Error("Unknown restart reason: {Reason}", e.Reason);
                     throw new InvalidOperationException("We detected that the chunk download was restarted, but we don't know why. Please report this issue to the developer.");
+                }
             }
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Error handling chunk download restart");
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
@@ -571,20 +653,28 @@ public class FileDownloader
     /// <param name="e">The <see cref="WindowClosingEventArgs"/> event arguments.</param>
     private async void DownloadWindowOnClosing(object? sender, WindowClosingEventArgs e)
     {
+        Log.Debug("Download window closing for: {FileName}", DownloadFile.FileName);
+
         try
         {
             // Check if download window is not null and has data context of type DownloadWindowViewModel
             if (DownloadWindow is not { DataContext: DownloadWindowViewModel viewModel })
+            {
+                Log.Debug("Download window or view model is null");
                 return;
+            }
 
             // Check if download window can be closed
             if (!viewModel.CanCloseWindow)
             {
+                Log.Debug("Download window cannot be closed, hiding instead");
                 // Cancel the closing of the window
                 e.Cancel = true;
                 Dispatcher.UIThread.Post(() => DownloadWindow!.Hide());
                 return;
             }
+
+            Log.Debug("Closing download window");
 
             // Unsubscribe from Closing event
             DownloadWindow.Closing -= DownloadWindowOnClosing;
@@ -594,7 +684,10 @@ public class FileDownloader
             viewModel.RemoveEventHandlers();
             // Stop download if it's not stopped yet
             if (viewModel.DownloadFile.IsDownloading || viewModel.DownloadFile.IsPaused)
+            {
+                Log.Debug("Stopping download before closing window");
                 await viewModel.StopDownloadAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -617,11 +710,14 @@ public class FileDownloader
     /// <exception cref="InvalidOperationException">If AppService not found.</exception>
     private static IAppService GetAppService()
     {
+        Log.Debug("Retrieving AppService from service provider");
+
         // Get the current application's service provider
         var serviceProvider = Application.Current?.TryGetServiceProvider();
         // Get the service of type IAppService from the service provider
         var appService = serviceProvider?.GetService<IAppService>() ?? throw new InvalidOperationException("App service not found.");
-        // Return the app service
+
+        Log.Debug("AppService retrieved successfully");
         return appService;
     }
 
@@ -631,6 +727,8 @@ public class FileDownloader
     /// <returns>Returns download configuration for download service.</returns>
     private DownloadConfiguration GetDownloadConfiguration()
     {
+        Log.Debug("Creating download configuration");
+
         // Create a new DownloadConfiguration object
         var configuration = new DownloadConfiguration
         {
@@ -644,13 +742,22 @@ public class FileDownloader
             MaximumBytesPerSecondForMerge = GetMaximumBytesPerSecondForMerge()
         };
 
+        Log.Debug("Download configuration created: ChunkCount={ChunkCount}, MaxSpeed={MaxSpeed}, MaxMemoryBuffer={MaxMemoryBuffer}",
+            configuration.ChunkCount, configuration.MaximumBytesPerSecond, configuration.MaximumMemoryBufferBytes);
+
         // If the proxy is not null, set the proxy in the request configuration
         if (_downloadRequest.Proxy != null)
+        {
             configuration.RequestConfiguration.Proxy = _downloadRequest.Proxy;
+            Log.Debug("Proxy configured in download configuration");
+        }
 
         // If the username is not null and the password is null, set the credentials in the request configuration
         if (!DownloadFile.Username.IsStringNullOrEmpty() && DownloadFile.Password.IsStringNullOrEmpty())
+        {
             configuration.RequestConfiguration.Credentials = new NetworkCredential(DownloadFile.Username, DownloadFile.Password);
+            Log.Debug("Credentials configured in download configuration");
+        }
 
         // Return the configuration
         return configuration;
@@ -664,7 +771,10 @@ public class FileDownloader
     {
         // Check if the speed limiter is enabled
         if (!_appService.SettingsService.Settings.IsSpeedLimiterEnabled)
+        {
+            Log.Debug("Speed limiter disabled");
             return 0;
+        }
 
         // Get the limit speed from the settings
         var limitSpeed = (long)(_appService.SettingsService.Settings.LimitSpeed ?? 0);
@@ -673,8 +783,11 @@ public class FileDownloader
             ? Constants.KiloByte
             : Constants.MegaByte;
 
-        // Return the limit speed multiplied by the limit unit
-        return limitSpeed * limitUnit;
+        var result = limitSpeed * limitUnit;
+        Log.Debug("Maximum bytes per second: {LimitSpeed} {Unit} = {Result} bytes/sec",
+            limitSpeed, _appService.SettingsService.Settings.LimitUnit, result);
+
+        return result;
     }
 
     /// <summary>
@@ -685,7 +798,10 @@ public class FileDownloader
     {
         // Check if the speed limiter is enabled
         if (!_appService.SettingsService.Settings.IsMergeSpeedLimitEnabled)
+        {
+            Log.Debug("Merge speed limiter disabled");
             return 0;
+        }
 
         // Get the limit speed from the settings
         var limitSpeed = (long)(_appService.SettingsService.Settings.MergeLimitSpeed ?? 0);
@@ -694,8 +810,11 @@ public class FileDownloader
             ? Constants.KiloByte
             : Constants.MegaByte;
 
-        // Return the limit speed multiplied by the limit unit
-        return limitSpeed * limitUnit;
+        var result = limitSpeed * limitUnit;
+        Log.Debug("Maximum merge bytes per second: {LimitSpeed} {Unit} = {Result} bytes/sec",
+            limitSpeed, _appService.SettingsService.Settings.MergeLimitUnit, result);
+
+        return result;
     }
 
     /// <summary>
@@ -711,8 +830,11 @@ public class FileDownloader
             ? Constants.KiloByte
             : Constants.MegaByte;
 
-        // Return the limit speed multiplied by the limit unit
-        return maximumMemoryBufferBytes * unit;
+        var result = maximumMemoryBufferBytes * unit;
+        Log.Debug("Maximum memory buffer: {BufferSize} {Unit} = {Result} bytes",
+            maximumMemoryBufferBytes, _appService.SettingsService.Settings.MaximumMemoryBufferBytesUnit, result);
+
+        return result;
     }
 
     /// <summary>
@@ -721,6 +843,7 @@ public class FileDownloader
     /// <returns>Returns an instance of DownloadService.</returns>
     private DownloadService GetDownloadService()
     {
+        Log.Debug("Creating DownloadService");
         return new DownloadService(DownloadConfiguration);
     }
 
@@ -729,12 +852,15 @@ public class FileDownloader
     /// </summary>
     private void ResetDownload()
     {
+        Log.Debug("Resetting download options for: {FileName}", DownloadFile.FileName);
+
         // Clear elapsed time timer
         if (_downloaderTimer != null)
         {
             _downloaderTimer.Stop();
             _downloaderTimer.Tick -= DownloaderTimerOnTick;
             _downloaderTimer = null;
+            Log.Debug("Download timer stopped and disposed");
         }
 
         // If resume capability cancellation token source is not null
@@ -743,6 +869,7 @@ public class FileDownloader
             // Make sure resume capability cancelled
             _checkResumeCancelToken.Cancel();
             _checkResumeCancelToken = null;
+            Log.Debug("Resume capability check cancelled");
         }
 
         // Reset elapsed time of starting download
@@ -757,6 +884,8 @@ public class FileDownloader
         _medianDownloadSpeeds.Clear();
         // Reset resume capability
         DownloadFile.CanResumeDownload = null;
+
+        Log.Debug("Download options reset completed");
     }
 
     /// <summary>
@@ -765,6 +894,8 @@ public class FileDownloader
     /// <param name="count">The count of chunks.</param>
     private void CreateChunksData(int count)
     {
+        Log.Debug("Creating chunks data for {Count} chunks", count);
+
         // Create a list of chunk data
         var chunks = new List<ChunkDataViewModel>();
         // Create a list of chunk progresses
@@ -781,6 +912,8 @@ public class FileDownloader
 
         // Set the chunks data of the download file to the list of chunk data
         DownloadFile.ChunksData = chunks.ToObservableCollection();
+
+        Log.Debug("Chunks data created successfully for {Count} chunks", count);
     }
 
     /// <summary>
@@ -788,9 +921,13 @@ public class FileDownloader
     /// </summary>
     private void StartDownloaderTimer()
     {
+        Log.Debug("Starting downloader timer");
+
         _downloaderTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0.25) };
         _downloaderTimer.Tick += DownloaderTimerOnTick;
         _downloaderTimer.Start();
+
+        Log.Debug("Downloader timer started with 0.25 second interval");
     }
 
     /// <summary>
@@ -895,6 +1032,7 @@ public class FileDownloader
     private void SaveDownloadPackage(DownloadPackage? downloadPackage)
     {
         DownloadFile.DownloadPackage = downloadPackage?.ConvertToJson();
+        Log.Debug("Download package saved successfully");
     }
 
     /// <summary>
@@ -902,12 +1040,15 @@ public class FileDownloader
     /// </summary>
     private async Task CheckResumeCapabilityAsync()
     {
+        Log.Debug("Checking resume capability for: {FileName}", DownloadFile.FileName);
+
         try
         {
             // Check url
             if (DownloadFile.Url.IsStringNullOrEmpty() || !DownloadFile.Url.CheckUrlValidation())
             {
                 DownloadFile.CanResumeDownload = false;
+                Log.Debug("Invalid URL, resume capability set to false");
                 return;
             }
 
@@ -915,6 +1056,8 @@ public class FileDownloader
             _checkResumeCancelToken = new CancellationTokenSource();
             // Check if URL supports download in range
             DownloadFile.CanResumeDownload = await _downloadRequest.CheckSupportsDownloadInRangeAsync(_checkResumeCancelToken.Token).ConfigureAwait(false);
+
+            Log.Debug("Resume capability check completed: {CanResume}", DownloadFile.CanResumeDownload);
         }
         catch (Exception ex)
         {
@@ -922,6 +1065,7 @@ public class FileDownloader
             Log.Error(ex, "An error occurred while checking resume capability. Error message: {ErrorMessage}", ex.Message);
             // Set resume capability to false
             DownloadFile.CanResumeDownload = false;
+            Log.Debug("Resume capability set to false due to error");
         }
     }
 
@@ -932,6 +1076,8 @@ public class FileDownloader
     /// <param name="chunks">The chunks that we want to load.</param>
     private void LoadChunksData(Chunk[] chunks)
     {
+        Log.Debug("Loading chunks data for {ChunkCount} chunks", chunks.Length);
+
         if (chunks.Length == 0)
             return;
 
@@ -948,6 +1094,8 @@ public class FileDownloader
             chunkProgress.TotalBytesToReceive = chunk.Length;
             chunkProgress.IsCompleted = chunk.IsDownloadCompleted();
         }
+
+        Log.Debug("Chunks data loaded successfully");
     }
 
     #endregion

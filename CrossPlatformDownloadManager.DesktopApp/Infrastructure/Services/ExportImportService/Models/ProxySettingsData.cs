@@ -2,6 +2,9 @@ using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService.Models;
 
+/// <summary>
+/// Represents proxy settings data for export/import operations.
+/// </summary>
 public class ProxySettingsData
 {
     #region Properties

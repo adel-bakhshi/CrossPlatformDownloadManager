@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.Models;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.Data.ViewModels;
@@ -332,23 +333,37 @@ public class SettingsService : PropertyChangedBase, ISettingsService
 
     public void ShowManager()
     {
-        var serviceProvider = Application.Current?.GetServiceProvider();
-        var appService = serviceProvider?.GetService<IAppService>();
-        var trayMenuWindow = serviceProvider?.GetService<TrayMenuWindow>();
-        if (appService == null || trayMenuWindow == null)
-            throw new InvalidOperationException("App service or tray menu window not found.");
+        // Run on UI thread
+        Dispatcher.UIThread.Post(() =>
+        {
+            // Check if manager window is null
+            if (_managerWindow == null)
+            {
+                // Get service provider
+                var serviceProvider = Application.Current?.GetServiceProvider();
+                var appService = serviceProvider?.GetService<IAppService>();
+                var trayMenuWindow = serviceProvider?.GetService<TrayMenuWindow>();
+                // Check if app service and tray menu window are not null
+                if (appService == null || trayMenuWindow == null)
+                    throw new InvalidOperationException("App service or tray menu window not found.");
 
-        var vm = new ManagerWindowViewModel(appService, trayMenuWindow);
-        var window = new ManagerWindow { DataContext = vm };
-        window.Show();
+                // Create and show manager window
+                var vm = new ManagerWindowViewModel(appService, trayMenuWindow);
+                _managerWindow = new ManagerWindow { DataContext = vm };
+            }
 
-        _managerWindow = window;
+            _managerWindow!.Show();
+        });
     }
 
     public void HideManager()
     {
-        _managerWindow?.Close();
-        _managerWindow = null;
+        // Run on UI thread
+        Dispatcher.UIThread.Post(() =>
+        {
+            _managerWindow?.Close();
+            _managerWindow = null;
+        });
     }
 
     public string GetTemporaryFileLocation()

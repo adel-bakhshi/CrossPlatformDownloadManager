@@ -27,28 +27,70 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 {
     #region Private Fields
 
-    private Flyout? _downloadFilesDataGridContextMenuFlyout;
+    private Flyout? _mainContextMenu;
     private bool _isCtrlKeyPressed;
     private bool _isAltKeyPressed;
 
     #endregion
 
-    public MainWindow(MainWindowViewModel mainWindowViewModel)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainWindow"/> class.
+    /// </summary>
+    public MainWindow()
     {
         InitializeComponent();
-        DataContext = mainWindowViewModel;
-
-        // Find AddToQueueFlyout and manage show/hide of it
-        if (this.FindResource("AddToQueueFlyout") is Flyout addToQueueFlyout)
-            ViewModel!.AddToQueueFlyout = addToQueueFlyout;
     }
 
+    /// <summary>
+    /// Hides the context menu flyout of the download files data grid.
+    /// </summary>
     public void HideDownloadFilesDataGridContextMenu()
     {
-        _downloadFilesDataGridContextMenuFlyout?.Hide();
-        _downloadFilesDataGridContextMenuFlyout = null;
+        _mainContextMenu?.Hide();
+        _mainContextMenu = null;
     }
 
+    protected override async void OnLoaded(RoutedEventArgs e)
+    {
+        try
+        {
+            base.OnLoaded(e);
+
+            // Make sure ViewModel is not null
+            if (ViewModel == null)
+                return;
+
+            // Find AddToQueueFlyout and manage show/hide of it
+            if (this.FindResource("AddToQueueFlyout") is Flyout addToQueueFlyout)
+                ViewModel.AddToQueueFlyout = addToQueueFlyout;
+        }
+        catch (Exception ex)
+        {
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occurred while trying to open manager window. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        try
+        {
+            base.OnClosing(e);
+            e.Cancel = true;
+            Hide();
+        }
+        catch (Exception ex)
+        {
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+            Log.Error(ex, "An error occurred during closing window. Error message: {ErrorMessage}", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Handles the SelectionChanged event for the DownloadFilesDataGrid.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="SelectionChangedEventArgs"/> class that contains the event data.</param>
     private async void DownloadFilesDataGridOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         try
@@ -87,45 +129,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
-    protected override async void OnLoaded(RoutedEventArgs e)
-    {
-        try
-        {
-            base.OnLoaded(e);
-
-            // Get settings service and show manager if needed
-            var serviceProvider = this.GetServiceProvider();
-            var settingsService = serviceProvider.GetService<ISettingsService>() ?? throw new InvalidOperationException("Settings service not found");
-            if (settingsService.Settings.UseManager)
-                settingsService.ShowManager();
-
-            // Start download queues manager timer to manage queues
-            var downloadQueueService = serviceProvider.GetService<IDownloadQueueService>();
-            downloadQueueService!.StartScheduleManagerTimer();
-
-            // Check if application has been run yet.
-            // If application has been run before, hide window
-            if (settingsService.Settings.HasApplicationBeenRunYet)
-            {
-                Hide();
-            }
-            else
-            {
-                settingsService.Settings.HasApplicationBeenRunYet = true;
-                await settingsService.SaveSettingsAsync(settingsService.Settings, reloadData: true);
-            }
-
-            // Check for updates
-            if (ViewModel != null)
-                _ = ViewModel.CheckForUpdatesAsync(null);
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occurred while trying to open manager window. Error message: {ErrorMessage}", ex.Message);
-        }
-    }
-
+    /// <summary>
+    /// Handles the Opening event for the context menu of the download files data grid.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="EventArgs"/> class that contains the event data.</param>
     private async void DownloadQueuesDataGridContextMenuOnOpening(object? sender, EventArgs e)
     {
         try
@@ -134,7 +142,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 return;
 
             await ViewModel.ChangeContextFlyoutEnableStateAsync(this);
-            _downloadFilesDataGridContextMenuFlyout = flyout;
+            _mainContextMenu = flyout;
         }
         catch (Exception ex)
         {
@@ -143,42 +151,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
-    public async Task<string?> ChangeSaveLocationAsync(string startDirectory)
-    {
-        var topLevel = GetTopLevel(this);
-        if (topLevel == null)
-            return null;
-
-        var options = new FolderPickerOpenOptions
-        {
-            Title = "Select Directory",
-            AllowMultiple = false,
-            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync(startDirectory),
-        };
-
-        var directories = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
-        return !directories.Any()
-            ? null
-            : directories[0].Path.IsAbsoluteUri
-                ? directories[0].Path.AbsolutePath
-                : directories[0].Path.OriginalString;
-    }
-
-    protected override async void OnClosing(WindowClosingEventArgs e)
-    {
-        try
-        {
-            base.OnClosing(e);
-            e.Cancel = true;
-            Hide();
-        }
-        catch (Exception ex)
-        {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-            Log.Error(ex, "An error occurred during closing window. Error message: {ErrorMessage}", ex.Message);
-        }
-    }
-
+    /// <summary>
+    /// Handles the Opened event for the file menu item sub menu.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="RoutedEventArgs"/> class that contains the event data.</param>
     private async void FileMenuItemOnSubmenuOpened(object? sender, RoutedEventArgs e)
     {
         try
@@ -195,16 +172,31 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
+    /// <summary>
+    /// Handles the OnLoadingRow event for the DownloadFilesDataGrid control.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="DataGridRowEventArgs"/> class that contains the event data.</param>
     private void DownloadFilesDataGridOnLoadingRow(object? sender, DataGridRowEventArgs e)
     {
         e.Row.DoubleTapped += DownloadFilesDataGridRowOnDoubleTapped;
     }
 
+    /// <summary>
+    /// Handles the OnUnloadingRow event for the DownloadFilesDataGridRow control.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="DataGridRowEventArgs"/> class that contains the event data.</param>
     private void DownloadFilesDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs e)
     {
         e.Row.DoubleTapped -= DownloadFilesDataGridRowOnDoubleTapped;
     }
 
+    /// <summary>
+    /// Handles the DoubleTapped event for the DownloadFilesDataGridRow control.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="TappedEventArgs"/> class that contains the event data.</param>
     private async void DownloadFilesDataGridRowOnDoubleTapped(object? sender, TappedEventArgs e)
     {
         try
@@ -221,6 +213,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
+    /// <summary>
+    /// Handles the KeyDown event for the DownloadFilesDataGrid control.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">An instance of the <see cref="KeyEventArgs"/> class that contains the event data.</param>
     private async void DownloadFilesDataGridOnKeyDown(object? sender, KeyEventArgs e)
     {
         try
@@ -254,7 +251,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                         break;
 
                     // Get data object
-                    var dataTransfer = await GetFileDataObjectAsync();
+                    var dataTransfer = await GetFileDataTransferAsync();
                     if (dataTransfer == null)
                         break;
 
@@ -271,6 +268,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
+    /// <summary>
+    /// Handles the KeyUp event for the DownloadFilesDataGrid control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An object of <see cref="KeyEventArgs"/> that contains the event data.</param>
     private async void DownloadFilesDataGridOnKeyUp(object? sender, KeyEventArgs e)
     {
         try
@@ -299,6 +301,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         }
     }
 
+    /// <summary>
+    /// Handles the DragOver event for the DownloadFilesDataGrid control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An object of <see cref="DataGridCellPointerPressedEventArgs"/> that contains the event data.</param>
     private async void DownloadFilesDataGridOnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
     {
         try
@@ -308,7 +315,7 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
                 return;
 
             // Get data object
-            var dataTransfer = await GetFileDataObjectAsync();
+            var dataTransfer = await GetFileDataTransferAsync();
             if (dataTransfer == null)
                 return;
 
@@ -358,7 +365,11 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
 
     #region Helpers
 
-    private async Task<DataTransfer?> GetFileDataObjectAsync()
+    /// <summary>
+    /// Gets the <see cref="DataTransfer"/> object for the selected items in data grid.
+    /// </summary>
+    /// <returns>Returns the <see cref="DataTransfer"/> object for the selected items in data grid.</returns>
+    private async Task<DataTransfer?> GetFileDataTransferAsync()
     {
         // Get selected download file
         var downloadFiles = DownloadFilesDataGrid

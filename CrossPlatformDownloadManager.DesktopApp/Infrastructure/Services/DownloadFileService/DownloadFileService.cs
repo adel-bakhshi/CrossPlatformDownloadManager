@@ -82,6 +82,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task LoadDownloadFilesAsync()
     {
+        Log.Debug("Loading download file and updating data...");
+
         // Get all download files from database
         var downloadFiles = await _unitOfWork
             .DownloadFileRepository
@@ -98,7 +100,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Remove download files from list
         foreach (var downloadFile in deletedDownloadFiles)
+        {
+            Log.Debug("Some download files are no longer in database. Removing them...");
             await DeleteDownloadFileAsync(downloadFile, alsoDeleteFile: false, reloadData: false);
+        }
 
         // Find primary keys
         primaryKeys = DownloadFiles.Select(df => df.Id).ToList();
@@ -106,7 +111,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var addedDownloadFiles = viewModels.Where(df => !primaryKeys.Contains(df.Id)).ToList();
         // Add new download files
         foreach (var downloadFile in addedDownloadFiles)
+        {
+            Log.Debug("Adding new download files to the list...");
             DownloadFiles.Add(downloadFile);
+        }
 
         // Find old download files
         var previousDownloadFiles = viewModels.Except(addedDownloadFiles).ToList();
@@ -119,10 +127,14 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
                 continue;
 
             // Update data
+            Log.Debug("Download file with ID {DownloadFileId} is already exists. Updating it...", downloadFile.Id);
+
             previousDownloadFile.DownloadQueueId = downloadFile.DownloadQueueId;
             previousDownloadFile.DownloadQueueName = downloadFile.DownloadQueueName;
             previousDownloadFile.DownloadQueuePriority = downloadFile.DownloadQueuePriority;
         }
+
+        Log.Debug("Updating the type of the download files...");
 
         // Set file type for each download file
         foreach (var downloadFile in DownloadFiles)
@@ -138,21 +150,27 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
     public async Task<DownloadFileViewModel?> AddDownloadFileAsync(DownloadFileViewModel viewModel, DownloadFileOptions? options = null)
     {
+        Log.Information("Trying to add new download file with URL '{URL}'", viewModel.Url);
+
         // Validate download file
         var isValid = await ValidateDownloadFileAsync(viewModel);
         if (!isValid)
+        {
+            Log.Information("The validation of the download file failed. CDM can't process this download file.");
             return null;
+        }
 
         // Find category
         var category = _categoryService.Categories.FirstOrDefault(c => c.Id == viewModel.CategoryId);
-        // Set save location
-        // Check if the save location has value, use it
-        // Otherwise, get the save location from the categories
+
+        // Get save location from view model.
+        // If view model save location is empty and categories are disabled, get save location from settings.
+        // Otherwise, get save location from category.
         var saveLocation = viewModel.SaveLocation.IsStringNullOrEmpty()
-            ? _settingsService.Settings.DisableCategories
-                ? _settingsService.Settings.GlobalSaveLocation!
-                : category!.CategorySaveDirectory!.SaveDirectory
+            ? _settingsService.Settings.DisableCategories ? _settingsService.Settings.GlobalSaveLocation! : category!.CategorySaveDirectory!.SaveDirectory
             : viewModel.SaveLocation!;
+
+        Log.Debug("Save location for the download file is '{SaveLocation}'.", saveLocation);
 
         // Create an instance of DownloadFile
         var downloadFile = new DownloadFile
@@ -187,7 +205,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             try
             {
                 if (isUrlDuplicate)
+                {
+                    Log.Debug("URL is duplicate. Handling duplicate URL...");
                     result = await HandleDuplicateUrlAsync(downloadFile);
+                }
             }
             catch (Exception ex)
             {
@@ -199,7 +220,12 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // If duplicate download action sets to ShowCompleteDialogOrResume, we have to pass the existing download file
         if (result != null)
+        {
+            Log.Information("Duplicate download action is set to {Action}. Returning existing download file...",
+                nameof(DuplicateDownloadLinkAction.ShowCompleteDialogOrResume));
+
             return result;
+        }
 
         // Check if the file name is duplicate and handle it if its exists
         var isFileNameDuplicate = CheckIsFileNameDuplicate(downloadFile.FileName, downloadFile.SaveLocation);
@@ -207,12 +233,17 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         if (viewModel.IsFileNameDuplicate || isFileNameDuplicate)
         {
             if (isFileNameDuplicate)
+            {
+                Log.Debug("File name is duplicate. Handling duplicate file name...");
                 HandleDuplicateFileName(downloadFile);
+            }
         }
 
         // Add new download file and save it
         await _unitOfWork.DownloadFileRepository.AddAsync(downloadFile);
         await _unitOfWork.SaveAsync();
+
+        Log.Information("New download file added. Download file ID: {DownloadFileId}", downloadFile.Id);
 
         // Reload data
         await LoadDownloadFilesAsync();
@@ -221,7 +252,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         result = DownloadFiles.FirstOrDefault(df => df.Id == downloadFile.Id);
         // Start download when necessary
         if (options?.StartDownloading == true)
+        {
+            Log.Information("Starting download file...");
             _ = StartDownloadFileAsync(result);
+        }
 
         // Return new download file
         return result;
@@ -481,19 +515,34 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             Password = options?.Password
         };
 
+        Log.Debug("Trying to get download file details from URL: {Url}", downloadFile.Url);
+
         // Check if the URL is valid
         if (!downloadFile.Url.CheckUrlValidation())
+        {
+            Log.Debug("It seems that the URL is not valid. URL: {Url}", downloadFile.Url);
             return downloadFile;
+        }
 
         // Create an instance of the DownloadRequest class.
         var request = new DownloadRequest(downloadFile.Url!);
-        // Subscribe to the PropertyChanged event and watch the Url property.
-        // When the URL is changed, update the URL of the download file.
-        request.PropertyChanged += (_, e) => UpdateDownloadFileUrl(downloadFile, request, e.PropertyName);
+        // Fetch response headers
         await request.FetchResponseHeadersAsync(cancellationToken);
+
+        // Update download file url if it's different
+        var requestUrl = request.Url?.AbsoluteUri.Trim() ?? string.Empty;
+        if (!downloadFile.Url!.Equals(requestUrl) && !requestUrl.IsStringNullOrEmpty())
+        {
+            downloadFile.Url = requestUrl;
+            Log.Debug("Download file URL updated to '{FinalUrl}'. Original URL was '{OriginalUrl}'.", downloadFile.Url, url);
+        }
+
         // Check if response headers fetched successfully
         if (request.ResponseHeaders.Count == 0)
+        {
+            Log.Debug("Failed to fetch response headers for URL: {Url}", downloadFile.Url);
             return downloadFile;
+        }
 
         var isFile = true;
         string? contentDisposition;
@@ -513,7 +562,10 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Make sure the url point to a file
         if (!isFile)
+        {
+            Log.Debug("URL does not point to a file. URL: {Url}", downloadFile.Url);
             return downloadFile;
+        }
 
         string? fileName = null;
         // Get file name from header if possible
@@ -530,13 +582,20 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Set file name
         downloadFile.FileName = fileName?.Trim() ?? string.Empty;
+        Log.Debug("The download file name is '{FileName}'.", downloadFile.FileName);
+
         // Check if the URL has Content-Length header
         downloadFile.IsSizeUnknown = !request.ResponseHeaders.TryGetValue("Content-Length", out var contentLength);
+        Log.Debug("The download file size is {FileSize}.", downloadFile.IsSizeUnknown ? "Unknown" : "Known");
+
         // Set file size
         downloadFile.Size = downloadFile.IsSizeUnknown ? 0 : long.TryParse(contentLength, out var size) ? size : 0;
+        Log.Debug("The size of the download file is {FileSize} byte(s).", downloadFile.Size);
 
         // find category item by file extension
         var extension = Path.GetExtension(downloadFile.FileName);
+        Log.Debug("The file extension is '{Extension}'.", extension);
+
         // Get all custom categories
         var customCategories = _categoryService
             .Categories
@@ -552,6 +611,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Custom categories have higher priority than default categories.
         if (customCategory != null)
         {
+            Log.Debug("Custom category found for file extension '{Extension}'.", extension);
+
             fileExtension = customCategory
                 .FileExtensions
                 .FirstOrDefault(fe => fe.Extension.Equals(extension, StringComparison.CurrentCultureIgnoreCase));
@@ -559,6 +620,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Otherwise, there is no custom category, so we need to find the default category.
         else
         {
+            Log.Debug("Using default category for file extension '{Extension}'...", extension);
+
             fileExtension = _categoryService
                 .Categories
                 .SelectMany(c => c.FileExtensions)
@@ -570,6 +633,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         var siteDomain = downloadFile.Url.GetDomainFromUrl();
         if (!siteDomain.IsStringNullOrEmpty())
         {
+            Log.Debug("Checking if there is a category for the domain '{SiteDomain}'...", siteDomain);
+
             category = _categoryService
                 .Categories
                 .FirstOrDefault(c => c.AutoAddedLinksFromSitesList.Contains(siteDomain!));
@@ -578,6 +643,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Find category by file extension
         if (category == null)
         {
+            Log.Debug("Category is null. Finding category...");
+
             // Find category by category file extension or choose general category
             if (fileExtension != null)
             {
@@ -593,19 +660,29 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
 
         // Set category id
         downloadFile.CategoryId = category?.Id;
+        Log.Debug("The category id is '{CategoryId}'.", downloadFile.CategoryId);
+
         // Find a download file with the same url
         downloadFile.IsUrlDuplicate = CheckIsUrlDuplicate(downloadFile.Url);
+        Log.Debug("The download file url is {DuplicateState}.", downloadFile.IsUrlDuplicate ? "duplicate" : "not duplicate");
+
         // Find a download file with the same name
         downloadFile.IsFileNameDuplicate = CheckIsFileNameDuplicate(downloadFile.FileName, category?.CategorySaveDirectory?.SaveDirectory);
+        Log.Debug("The download file name is {DuplicateState}.", downloadFile.IsFileNameDuplicate ? "duplicate" : "not duplicate");
+
         // Return the download file
         return downloadFile;
     }
 
     public async Task<bool> ValidateDownloadFileAsync(DownloadFileViewModel downloadFile, bool showMessage = true)
     {
+        Log.Debug("Validating download file...");
+
         // Check url validation
         if (downloadFile.Url.IsStringNullOrEmpty() || !downloadFile.Url.CheckUrlValidation())
         {
+            Log.Debug("The URL of the download file is invalid. CDM can't process this download file.");
+
             if (showMessage)
                 await DialogBoxManager.ShowDangerDialogAsync("Url", "Please provide a valid URL to continue.", DialogButtons.Ok);
 
@@ -615,6 +692,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check if the categories already disabled or not
         if (_settingsService.Settings.DisableCategories && _settingsService.Settings.GlobalSaveLocation.IsStringNullOrEmpty())
         {
+            Log.Debug("The categories are disabled and the global save location is not set. The global save location is required to download files.");
+
             if (showMessage)
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Save location",
@@ -630,6 +709,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check category
         if (category == null)
         {
+            Log.Debug("Category is null. The specified file category could not be located.");
+
             if (showMessage)
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Category",
@@ -643,6 +724,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check category save directory
         if (category.CategorySaveDirectory == null || category.CategorySaveDirectory.SaveDirectory.IsStringNullOrEmpty())
         {
+            Log.Debug("The save location for '{CategoryTitle}' category could not be found.", category.Title);
+
             if (showMessage)
             {
                 await DialogBoxManager.ShowDangerDialogAsync("Save location",
@@ -656,6 +739,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check file name
         if (downloadFile.FileName.IsStringNullOrEmpty())
         {
+            Log.Debug("The file name is null or empty. CDM can't process this download file.");
+
             if (showMessage)
             {
                 await DialogBoxManager.ShowDangerDialogAsync("File name",
@@ -669,6 +754,8 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
         // Check file extension
         if (!downloadFile.FileName.HasFileExtension())
         {
+            Log.Debug("The file name does not have a valid file extension.");
+
             if (showMessage)
             {
                 await DialogBoxManager.ShowDangerDialogAsync("File name",
@@ -679,13 +766,14 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             return false;
         }
 
-        // Check Url point to a file and file size is greater than 0
-        if (downloadFile.Size is not (null or <= 0))
+        // Check Url point to a file and file size is greater than 0 or is unknown
+        if (downloadFile.Size is not (null or <= 0) || downloadFile.IsSizeUnknown)
+        {
+            Log.Information("It's look like the download file is valid and can be added to database.");
             return true;
+        }
 
-        // Check is file size unknown
-        if (downloadFile.IsSizeUnknown)
-            return true;
+        Log.Debug("The size of the download file is not provided or invalid.");
 
         if (showMessage)
         {
@@ -1326,20 +1414,6 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
             DialogButtons.Ok);
 
         return false;
-    }
-
-    /// <summary>
-    /// Updates the URL of a download file with the new one.
-    /// </summary>
-    /// <param name="downloadFile">The download file to update.</param>
-    /// <param name="request">The download request sent to the server to retrieve URL information.</param>
-    /// <param name="propertyName">The property name to check if it is the URL.</param>
-    private static void UpdateDownloadFileUrl(DownloadFileViewModel downloadFile, DownloadRequest request, string? propertyName)
-    {
-        if (propertyName?.Equals(nameof(DownloadRequest.Url)) != true)
-            return;
-
-        downloadFile.Url = request.Url?.AbsoluteUri.Trim();
     }
 
     /// <summary>

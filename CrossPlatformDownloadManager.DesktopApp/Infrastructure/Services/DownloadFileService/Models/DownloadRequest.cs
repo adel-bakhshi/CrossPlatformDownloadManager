@@ -10,7 +10,6 @@ using Avalonia;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
-using CrossPlatformDownloadManager.Utils.PropertyChanged;
 using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
@@ -20,7 +19,7 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.Downlo
 /// <summary>
 /// Configure a request for downloading a file.
 /// </summary>
-public class DownloadRequest : PropertyChangedBase
+public class DownloadRequest
 {
     #region Private Fields
 
@@ -33,11 +32,6 @@ public class DownloadRequest : PropertyChangedBase
     /// The HttpClient for sending the request.
     /// </summary>
     private HttpClient? _httpClient;
-
-    /// <summary>
-    /// The url of the request.
-    /// </summary>
-    private Uri? _url;
 
     #endregion
 
@@ -56,11 +50,7 @@ public class DownloadRequest : PropertyChangedBase
     /// <summary>
     /// Gets the url of the request.
     /// </summary>
-    public Uri? Url
-    {
-        get => _url;
-        private set => SetField(ref _url, value);
-    }
+    public Uri? Url { get; private set; }
 
     /// <summary>
     /// Gets the request options.
@@ -113,9 +103,6 @@ public class DownloadRequest : PropertyChangedBase
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancelToken);
             // Set the status code
             statusCode = response.StatusCode;
-            // Ensure that the request was successful
-            if (!response.IsSuccessStatusCode)
-                return statusCode;
 
             // Ensure that the redirect URI is the same as the origin
             EnsureRedirectUriIsTheSameAsTheOrigin(response);

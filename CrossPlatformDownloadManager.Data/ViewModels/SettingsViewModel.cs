@@ -41,7 +41,7 @@ public class SettingsViewModel : PropertyChangedBase
     private bool _useSystemNotifications;
     private PointViewModel? _managerPoint;
     private bool _showCategoriesPanel = true;
-    private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
+    private MainGridColumnSettings _dataGridColumnSettings = new();
     private bool _hasApplicationBeenRunYet;
     private ObservableCollection<ProxySettingsViewModel> _proxies = [];
 
@@ -247,10 +247,10 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _showCategoriesPanel, value);
     }
 
-    public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
+    public MainGridColumnSettings DataGridColumnSettings
     {
-        get => _dataGridColumnsSettings;
-        set => SetField(ref _dataGridColumnsSettings, value);
+        get => _dataGridColumnSettings;
+        set => SetField(ref _dataGridColumnSettings, value);
     }
 
     public bool HasApplicationBeenRunYet

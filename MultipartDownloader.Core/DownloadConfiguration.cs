@@ -244,13 +244,6 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Gets the maximum memory buffer bytes per chunk through download chunk.
-    /// This property indicates how many bytes can be saved in memory before write on disk operation.
-    /// This property is read-only.
-    /// </summary>
-    public long MaximumMemoryBufferBytesPerChunk => GetMaximumMemoryBufferBytesPerChunk();
-
-    /// <summary>
     /// <para>
     /// Gets or sets a value indicating whether live-streaming is enabled or not. If it's enabled, get the on-demand downloaded data
     /// with ReceivedBytes on the downloadProgressChanged event.
@@ -307,22 +300,4 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     {
         return MemberwiseClone();
     }
-
-    #region Helpers
-
-    /// <summary>
-    /// Gets the maximum memory buffer bytes per chunk.
-    /// </summary>
-    /// <returns>The maximum memory buffer bytes per chunk. </returns>
-    private long GetMaximumMemoryBufferBytesPerChunk()
-    {
-        if (MaximumMemoryBufferBytes <= 0)
-            return 0;
-
-        return ParallelDownload
-            ? MaximumMemoryBufferBytes / Math.Max(Math.Min(Math.Min(ChunkCount, ParallelCount), ActiveChunks), 1)
-            : MaximumMemoryBufferBytes;
-    }
-
-    #endregion Helpers
 }

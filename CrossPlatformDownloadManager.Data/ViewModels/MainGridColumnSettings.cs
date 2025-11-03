@@ -3,10 +3,14 @@ using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Data.ViewModels;
 
-public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
+/// <summary>
+/// Represents the column settings for the main data grid.
+/// </summary>
+public class MainGridColumnSettings : PropertyChangedBase
 {
     #region Private Fields
 
+    // Backing fields for properties
     private bool _isNameColumnVisible = true;
     private bool _isUrlColumnVisible;
     private bool _isDescriptionColumnVisible;
@@ -25,6 +29,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
 
     #region Properties
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Name column is visible.
+    /// </summary>
     [JsonProperty("isNameColumnVisible")]
     public bool IsNameColumnVisible
     {
@@ -32,6 +39,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isNameColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the URL column is visible.
+    /// </summary>
     [JsonProperty("isUrlColumnVisible")]
     public bool IsUrlColumnVisible
     {
@@ -39,6 +49,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isUrlColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Description column is visible.
+    /// </summary>
     [JsonProperty("isDescriptionColumnVisible")]
     public bool IsDescriptionColumnVisible
     {
@@ -46,6 +59,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isDescriptionColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Queue column is visible.
+    /// </summary>
     [JsonProperty("isQueueColumnVisible")]
     public bool IsQueueColumnVisible
     {
@@ -53,6 +69,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isQueueColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Priority In Queue column is visible.
+    /// </summary>
     [JsonProperty("isPriorityInQueueColumnVisible")]
     public bool IsPriorityInQueueColumnVisible
     {
@@ -60,6 +79,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isPriorityInQueueColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Size column is visible.
+    /// </summary>
     [JsonProperty("isSizeColumnVisible")]
     public bool IsSizeColumnVisible
     {
@@ -67,6 +89,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isSizeColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Status column is visible.
+    /// </summary>
     [JsonProperty("isStatusColumnVisible")]
     public bool IsStatusColumnVisible
     {
@@ -74,6 +99,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isStatusColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Time Left column is visible.
+    /// </summary>
     [JsonProperty("isTimeLeftColumnVisible")]
     public bool IsTimeLeftColumnVisible
     {
@@ -81,6 +109,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isTimeLeftColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Elapsed Time column is visible.
+    /// </summary>
     [JsonProperty("isElapsedTimeColumnVisible")]
     public bool IsElapsedTimeColumnVisible
     {
@@ -88,6 +119,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isElapsedTimeColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Transfer Rate column is visible.
+    /// </summary>
     [JsonProperty("isTransferRateColumnVisible")]
     public bool IsTransferRateColumnVisible
     {
@@ -95,6 +129,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isTransferRateColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Last Try Date column is visible.
+    /// </summary>
     [JsonProperty("isLastTryDateColumnVisible")]
     public bool IsLastTryDateColumnVisible
     {
@@ -102,6 +139,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isLastTryDateColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Date Added column is visible.
+    /// </summary>
     [JsonProperty("isDateAddedColumnVisible")]
     public bool IsDateAddedColumnVisible
     {
@@ -109,6 +149,9 @@ public class MainDownloadFilesDataGridColumnsSettings : PropertyChangedBase
         set => SetField(ref _isDateAddedColumnVisible, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the Save Location column is visible.
+    /// </summary>
     [JsonProperty("isSaveLocationColumnVisible")]
     public bool IsSaveLocationColumnVisible
     {

@@ -139,6 +139,7 @@
                                       Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
                                       Text="{Binding DownloadFile.Url}"
+                                      MaxLines="1"
                                       TextChanged="UrlTextBoxOnTextChanged" />
 
                     <!-- Category -->
@@ -192,7 +193,8 @@
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
-                                      Text="{Binding DownloadFile.FileName}" />
+                                      Text="{Binding DownloadFile.FileName}"
+                                      MaxLines="1" />
 
                     <!-- Description -->
                     <cc:CustomTextBox IconData="{DynamicResource QuoteLeftSvgIcon}"
@@ -205,7 +207,8 @@
                                       CornerRadius="{DynamicResource DefaultCornerRadius}"
                                       Background="{DynamicResource SecondaryBackgroundColor}"
                                       BorderThickness="0"
-                                      Text="{Binding DownloadFile.Description}" />
+                                      Text="{Binding DownloadFile.Description}"
+                                      MaxLines="1" />
                 </StackPanel>
 
                 <!-- File Details -->

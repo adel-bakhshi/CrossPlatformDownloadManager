@@ -144,7 +144,7 @@ public class SettingsData
             UseQueueFinishedSound = settings.UseQueueFinishedSound,
             UseSystemNotifications = settings.UseSystemNotifications,
             ShowCategoriesPanel = settings.ShowCategoriesPanel,
-            DataGridColumnsSettings = settings.DataGridColumnsSettings.ConvertToJson(),
+            DataGridColumnsSettings = settings.DataGridColumnSettings.ConvertToJson(),
             Proxies = exportProxies
         };
     }

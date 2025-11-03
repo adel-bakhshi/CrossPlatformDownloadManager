@@ -48,7 +48,7 @@ public abstract class ViewModelBase : ReactiveObject
     private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e) => OnDownloadQueueServiceDataChanged();
 
     private void SettingsServiceOnDataChanged(object? sender, EventArgs e) => OnSettingsServiceDataChanged();
-    
+
     private void CategoryServiceOnCategoriesChanged(object? sender, EventArgs e) => OnCategoryServiceCategoriesChanged();
 
     #endregion

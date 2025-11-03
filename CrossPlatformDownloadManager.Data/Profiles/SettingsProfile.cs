@@ -12,11 +12,11 @@ public class SettingsProfile : Profile
         CreateMap<Settings, SettingsViewModel>()
             .ForMember(dest => dest.ManagerPoint, opt => opt.MapFrom(src => MapPoint(src.ManagerPoint)))
             .ForMember(dest => dest.Proxies, opt => opt.MapFrom(src => src.Proxies.ToObservableCollection()))
-            .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => MapDataGridColumnsSettings(src.DataGridColumnsSettings)));
+            .ForMember(dest => dest.DataGridColumnSettings, opt => opt.MapFrom(src => MapDataGridColumnsSettings(src.DataGridColumnsSettings)));
 
         CreateMap<SettingsViewModel, Settings>()
             .ForMember(dest => dest.ManagerPoint, opt => opt.MapFrom(src => src.ManagerPoint.ConvertToJson(null)))
-            .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => src.DataGridColumnsSettings.ConvertToJson(null)));
+            .ForMember(dest => dest.DataGridColumnsSettings, opt => opt.MapFrom(src => src.DataGridColumnSettings.ConvertToJson(null)));
     }
 
     private static PointViewModel? MapPoint(string? point)
@@ -24,12 +24,12 @@ public class SettingsProfile : Profile
         return point.IsStringNullOrEmpty() ? null : point.ConvertFromJson<PointViewModel?>();
     }
 
-    private MainDownloadFilesDataGridColumnsSettings MapDataGridColumnsSettings(string? columnsSettings)
+    private static MainGridColumnSettings MapDataGridColumnsSettings(string? columnsSettings)
     {
         if (columnsSettings.IsStringNullOrEmpty())
-            return new MainDownloadFilesDataGridColumnsSettings();
+            return new MainGridColumnSettings();
 
-        var settings = columnsSettings!.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>();
-        return settings ?? new MainDownloadFilesDataGridColumnsSettings();
+        var settings = columnsSettings!.ConvertFromJson<MainGridColumnSettings?>();
+        return settings ?? new MainGridColumnSettings();
     }
 }

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
@@ -51,7 +52,7 @@ public class MainWindowViewModel : ViewModelBase
     private ContextFlyoutEnableStateViewMode _contextFlyoutEnableState = new();
     private MainMenuItemsEnabledState _mainMenuItemsEnabledState = new();
     private bool _showCategoriesPanel = true;
-    private MainDownloadFilesDataGridColumnsSettings _dataGridColumnsSettings = new();
+    private MainGridColumnSettings _dataGridColumnSettings = new();
     private string _globalSpeedLimit = "0 KB";
     private bool _isGlobalSpeedLimitVisible;
     private string? _activeProxyTitle;
@@ -63,7 +64,11 @@ public class MainWindowViewModel : ViewModelBase
     public CategoriesTreeViewModel? CategoriesTreeViewModel
     {
         get => _categoriesTreeViewModel;
-        set => this.RaiseAndSetIfChanged(ref _categoriesTreeViewModel, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _categoriesTreeViewModel, value);
+            this.RaisePropertyChanged(nameof(CategoriesTreeView));
+        }
     }
 
     public CategoriesTreeView CategoriesTreeView => new CategoriesTreeView { DataContext = CategoriesTreeViewModel };
@@ -155,10 +160,10 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public MainDownloadFilesDataGridColumnsSettings DataGridColumnsSettings
+    public MainGridColumnSettings DataGridColumnSettings
     {
-        get => _dataGridColumnsSettings;
-        set => this.RaiseAndSetIfChanged(ref _dataGridColumnsSettings, value);
+        get => _dataGridColumnSettings;
+        private set => this.RaiseAndSetIfChanged(ref _dataGridColumnSettings, value);
     }
 
     public string GlobalSpeedLimit
@@ -304,7 +309,7 @@ public class MainWindowViewModel : ViewModelBase
         DownloadSpeed = "0 KB";
         SelectedFilesTotalSize = "0 KB";
         ShowCategoriesPanel = AppService.SettingsService.Settings.ShowCategoriesPanel;
-        DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
+        DataGridColumnSettings = AppService.SettingsService.Settings.DataGridColumnSettings;
 
         CalculateGlobalSpeedLimit();
         UpdateActiveProxy();
@@ -1214,38 +1219,62 @@ public class MainWindowViewModel : ViewModelBase
             if (dataGrid?.SelectedItem is not DownloadFileViewModel { IsCompleted: true } downloadFile ||
                 downloadFile.FileName.IsStringNullOrEmpty() ||
                 downloadFile.SaveLocation.IsStringNullOrEmpty() ||
-                _mainWindow == null)
+                _mainWindow?.StorageProvider == null)
             {
                 return;
             }
 
-            var filePath = Path.Combine(downloadFile.SaveLocation!, downloadFile.FileName!);
+            // Check if file exists
+            var filePath = downloadFile.GetFilePath();
             if (!File.Exists(filePath))
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File not found.", DialogButtons.Ok);
                 return;
             }
 
-            var newSaveLocation = await _mainWindow.ChangeSaveLocationAsync(downloadFile.SaveLocation!);
+            // Get storage provider
+            var storageProvider = _mainWindow!.StorageProvider;
+            // Create folder picker options
+            var options = new FolderPickerOpenOptions
+            {
+                Title = "Select Directory",
+                AllowMultiple = false,
+                SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(downloadFile.SaveLocation!)
+            };
+
+            string? newSaveLocation = null;
+            // Open folder picker window and let user choose a folder
+            var directories = await storageProvider.OpenFolderPickerAsync(options);
+            // Check if user chose a folder
+            if (directories.Any())
+            {
+                newSaveLocation = directories[0].Path.IsAbsoluteUri
+                    ? directories[0].Path.AbsolutePath
+                    : directories[0].Path.OriginalString;
+            }
+
+            // Check if new save location is null or empty
             if (newSaveLocation.IsStringNullOrEmpty())
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found.", DialogButtons.Ok);
                 return;
             }
 
+            // Create new file path
             var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
+            // Check if new file path already exists
             if (File.Exists(newFilePath))
             {
                 await DialogBoxManager.ShowInfoDialogAsync("Change folder", "File already exists.", DialogButtons.Ok);
                 return;
             }
 
+            // Move file to new location
             await filePath.MoveFileAsync(newFilePath);
-            downloadFile.SaveLocation = newSaveLocation;
 
-            await AppService
-                .DownloadFileService
-                .UpdateDownloadFileAsync(downloadFile);
+            // Update download file save location
+            downloadFile.SaveLocation = newSaveLocation;
+            await AppService.DownloadFileService.UpdateDownloadFileAsync(downloadFile);
         }
         catch (Exception ex)
         {
@@ -1703,7 +1732,7 @@ public class MainWindowViewModel : ViewModelBase
 
     protected override void OnSettingsServiceDataChanged()
     {
-        DataGridColumnsSettings = AppService.SettingsService.Settings.DataGridColumnsSettings;
+        DataGridColumnSettings = AppService.SettingsService.Settings.DataGridColumnSettings;
         CalculateGlobalSpeedLimit();
         FilterDownloadList();
         UpdateActiveProxy();
@@ -2011,7 +2040,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             var settings = AppService.SettingsService.Settings;
-            settings.DataGridColumnsSettings = DataGridColumnsSettings;
+            settings.DataGridColumnSettings = DataGridColumnSettings;
             await AppService.SettingsService.SaveSettingsAsync(settings);
         }
         catch (Exception ex)
@@ -2027,6 +2056,12 @@ public class MainWindowViewModel : ViewModelBase
         LoadCategories();
     }
 
+    /// <summary>
+    /// Handles the double tap action on a data grid row for a download file.
+    /// </summary>
+    /// <param name="downloadFile">The download file item that was double-tapped.</param>
+    /// <param name="owner">The window that owns the details dialog to be opened.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     public async Task DataGridRowDoubleTapActionAsync(DownloadFileViewModel? downloadFile, Window? owner)
     {
         try
@@ -2034,13 +2069,27 @@ public class MainWindowViewModel : ViewModelBase
             if (downloadFile == null || owner == null)
                 return;
 
-            var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
-            var window = new DownloadDetailsWindow { DataContext = viewModel };
-            await window.ShowDialog(owner);
+            // Get download file path
+            var filePath = downloadFile.GetFilePath() ?? string.Empty;
+            // Check if download is completed and file exists
+            if (downloadFile.IsCompleted && File.Exists(filePath))
+            {
+                // Open file
+                PlatformSpecificManager.OpenFile(filePath);
+            }
+            else
+            {
+                // Create a new download details window and show it
+                var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
+                var window = new DownloadDetailsWindow { DataContext = viewModel };
+                await window.ShowDialog(owner);
+            }
         }
         catch (Exception ex)
         {
+            // Log the error with detailed information
             Log.Error(ex, "An error occurred while trying to handle double click event on data grid. Error message: {ErrorMessage}", ex.Message);
+            // Show an error dialog to the user
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

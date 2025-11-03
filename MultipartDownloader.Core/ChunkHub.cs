@@ -29,13 +29,15 @@ public class ChunkHub
         if (package.Chunks.Length == 0)
         {
             package.Chunks = new Chunk[_chunkCount];
-            for (int i = 0; i < _chunkCount; i++)
+            for (var i = 0; i < _chunkCount; i++)
             {
-                long startPosition = _startOffset + (i * _chunkSize);
-                long endPosition = startPosition + _chunkSize - 1;
+                var startPosition = _startOffset + i * _chunkSize;
+                var endPosition = startPosition + _chunkSize - 1;
                 package.Chunks[i] = GetChunk(i.ToString(), startPosition, endPosition);
             }
-            package.Chunks[package.Chunks.Length - 1].End += package.TotalFileSize % _chunkCount; // add remaining bytes to last chunk
+
+            // add remaining bytes to last chunk
+            package.Chunks[package.Chunks.Length - 1].End += package.TotalFileSize % _chunkCount;
         }
         else
         {

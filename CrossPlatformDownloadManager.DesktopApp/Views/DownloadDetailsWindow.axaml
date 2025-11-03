@@ -163,7 +163,8 @@
                                               BorderThickness="1"
                                               BorderBrush="{DynamicResource MainBackgroundColor}"
                                               Text="{Binding SaveLocation, FallbackValue='', TargetNullValue=''}"
-                                              IsReadOnly="True" />
+                                              IsReadOnly="True"
+                                              MaxLines="1" />
 
                             <!-- Browse button -->
                             <Button Grid.Column="1"
@@ -279,7 +280,8 @@
                                               OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
                                               BorderBrush="{DynamicResource MainBackgroundColor}"
-                                              Text="{Binding Username}" />
+                                              Text="{Binding Username}"
+                                              MaxLines="1" />
 
                             <!-- Password -->
                             <cc:CustomTextBox Grid.Column="2"
@@ -297,7 +299,8 @@
                                               OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                               BorderThickness="1"
                                               BorderBrush="{DynamicResource MainBackgroundColor}"
-                                              Text="{Binding Password}" />
+                                              Text="{Binding Password}"
+                                              MaxLines="1" />
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -330,7 +333,8 @@
                                           OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
                                           BorderThickness="1"
                                           BorderBrush="{DynamicResource MainBackgroundColor}"
-                                          Text="{Binding Description}" />
+                                          Text="{Binding Description}"
+                                          MaxLines="1" />
                     </StackPanel>
                 </Border>
             </StackPanel>

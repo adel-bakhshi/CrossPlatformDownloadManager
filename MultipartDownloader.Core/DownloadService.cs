@@ -44,6 +44,8 @@ public class DownloadService : AbstractDownloadService
     /// <returns>A task that represents the asynchronous download operation. The task result contains the downloaded stream.</returns>
     protected override async Task<Stream?> StartDownloadAsync(bool forceBuildStorage = true)
     {
+        var isStorageDisposed = false;
+
         try
         {
             Logger?.LogInformation("Starting download process with forceBuildStorage={ForceBuildStorage}", forceBuildStorage);
@@ -82,6 +84,11 @@ public class DownloadService : AbstractDownloadService
                 await SerialDownloadAsync(PauseTokenSource.Token).ConfigureAwait(false);
             }
 
+            // Dispose shared memory
+            await Storage!.DisposeAsync().ConfigureAwait(false);
+            // Set storage disposed flag to true
+            isStorageDisposed = true;
+
             // Check if download is completed
             if (Status == DownloadStatus.Running)
             {
@@ -104,6 +111,10 @@ public class DownloadService : AbstractDownloadService
         }
         finally
         {
+            // Dispose shared memory if it is not disposed yet
+            if (!isStorageDisposed)
+                await Storage!.DisposeAsync().ConfigureAwait(false);
+
             SingleInstanceSemaphore.Release();
             Logger?.LogDebug("Download process completed, semaphore released");
         }
@@ -145,7 +156,7 @@ public class DownloadService : AbstractDownloadService
         // Make sure there is enough space on disk to merge the files
         if (availableSize < totalSize)
             throw new IOException($"Not enough space on disk to merge the file. Available: {availableSize} bytes, Required: {totalSize} bytes");
-        
+
         // Merge parts
         foreach (var chunk in sortedChunks)
             await MergeFileWithProgressAsync(finalStream, chunk).ConfigureAwait(false);
@@ -327,12 +338,12 @@ public class DownloadService : AbstractDownloadService
         try
         {
             var chunkTasks = GetChunksTasks(pauseToken).ToList();
-            int maxConcurrentTasks = Math.Min(Options.ParallelCount, chunkTasks.Count);
+            var maxConcurrentTasks = Math.Min(Options.ParallelCount, chunkTasks.Count);
 
             Logger?.LogDebug("Starting parallel download with {MaxConcurrentTasks} concurrent tasks", maxConcurrentTasks);
 
             // Process tasks in batches to prevent overwhelming the system
-            for (int i = 0; i < chunkTasks.Count; i += maxConcurrentTasks)
+            for (var i = 0; i < chunkTasks.Count; i += maxConcurrentTasks)
             {
                 var batch = chunkTasks.Skip(i).Take(maxConcurrentTasks).ToList();
                 await Task.WhenAll(batch).ConfigureAwait(false);
@@ -390,7 +401,7 @@ public class DownloadService : AbstractDownloadService
     /// <returns>An enumerable collection of tasks representing the chunk downloads.</returns>
     private IEnumerable<Task> GetChunksTasks(PauseToken pauseToken)
     {
-        for (int i = 0; i < Package.Chunks.Length; i++)
+        for (var i = 0; i < Package.Chunks.Length; i++)
         {
             var request = RequestInstances[i % RequestInstances.Count];
             yield return DownloadChunkAsync(Package.Chunks[i], request, pauseToken, GlobalCancellationTokenSource!);
@@ -417,14 +428,8 @@ public class DownloadService : AbstractDownloadService
             cancellationTokenSource.Token.ThrowIfCancellationRequested();
             return await chunkDownloader.DownloadAsync(request, pause, cancellationTokenSource.Token).ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch
         {
-            SendDownloadCompletionSignal(DownloadStatus.Stopped);
-            throw;
-        }
-        catch (Exception exp)
-        {
-            SendDownloadCompletionSignal(DownloadStatus.Failed, exp);
             cancellationTokenSource.Cancel(false);
             throw;
         }
@@ -447,6 +452,6 @@ public class DownloadService : AbstractDownloadService
             chunk.TempFilePath = Path.Combine(Package.TemporarySavePath, fileName);
         }
 
-        return new(chunk, Options, Client!, Logger);
+        return new ChunkDownloader(chunk, Options, Client!, Storage!, Logger);
     }
 }

@@ -111,12 +111,11 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-            
-            var mainWindow = App.Desktop?.MainWindow;
-            if (mainWindow == null)
-                throw new InvalidOperationException("Could not find main window.");
 
-            mainWindow.Show();
+            // Check if the startup window exists and view model is not null,
+            // If so, show the main window
+            if (App.Desktop?.MainWindow?.DataContext is StartupWindowViewModel viewModel)
+                viewModel.ShowMainWindow();
         }
         catch (Exception ex)
         {

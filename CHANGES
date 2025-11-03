@@ -1,3 +1,10 @@
++ Version 0.12.0; 2025-10-29
+- Performance Improvements:
+- Optimized memory usage during downloads for better stability and lower resource consumption.
+- Improved Manager visibility handling with safer show/hide.
+- Bug Fixes:
+- Various minor bug fixes and overall performance enhancements.
+
 + Version 0.11.1; 2025-10-26
 - Bug Fixes:
 - Fixed an issue causing the application to fail during startup on Windows.

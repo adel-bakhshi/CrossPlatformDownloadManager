@@ -12,13 +12,14 @@ internal class ChunkDownloader
 {
     #region Private fields
 
+    private const int TimeoutIncrement = 10;
+
     private readonly Chunk _chunk;
     private readonly DownloadConfiguration _configuration;
     private readonly SocketClient _client;
+    private readonly SharedMemoryBufferedStream _storage;
     private readonly ILogger? _logger;
-    private readonly int _timeoutIncrement = 10;
     private ThrottledStream? _sourceStream;
-    private MemoryBufferedStream? _storage;
 
     #endregion Private fields
 
@@ -36,11 +37,12 @@ internal class ChunkDownloader
 
     #endregion Events
 
-    public ChunkDownloader(Chunk chunk, DownloadConfiguration config, SocketClient client, ILogger? logger = null)
+    public ChunkDownloader(Chunk chunk, DownloadConfiguration config, SocketClient client, SharedMemoryBufferedStream storage, ILogger? logger = null)
     {
         _chunk = chunk;
         _configuration = config;
         _client = client;
+        _storage = storage;
         _logger = logger;
         _configuration.PropertyChanged += ConfigurationPropertyChanged;
     }
@@ -51,10 +53,6 @@ internal class ChunkDownloader
         // Change maximum speed per second value
         if (e.PropertyName is nameof(_configuration.MaximumBytesPerSecond) or nameof(_configuration.ActiveChunks) && _sourceStream?.CanRead == true)
             _sourceStream.BandwidthLimit = _configuration.MaximumSpeedPerChunk;
-
-        // Change maximum memory buffer bytes value
-        if (e.PropertyName is nameof(_configuration.MaximumMemoryBufferBytes) or nameof(_configuration.ActiveChunks) && _storage != null)
-            _storage.MaxMemoryBuffer = _configuration.MaximumMemoryBufferBytesPerChunk;
     }
 
     public async ValueTask<Chunk> DownloadAsync(Request downloadRequest, PauseToken pause, CancellationToken cancelToken)
@@ -112,19 +110,6 @@ internal class ChunkDownloader
             _logger?.LogCritical(error, "Fatal error on download chunk {ChunkId}.", _chunk.Id);
             throw;
         }
-        finally
-        {
-            try
-            {
-                // Dispose storage when chunk download is completed
-                if (_storage != null)
-                    await _storage.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception error)
-            {
-                _logger?.LogError(error, "Error on dispose storage for chunk {ChunkId}.", _chunk.Id);
-            }
-        }
     }
 
     private async ValueTask<Chunk> ContinueWithDelayAsync(Request request, PauseToken pause, CancellationToken cancelToken)
@@ -136,7 +121,7 @@ internal class ChunkDownloader
         await _client.ThrowIfIsNotSupportDownloadInRange(request).ConfigureAwait(false);
         await Task.Delay(_chunk.Timeout, cancelToken).ConfigureAwait(false);
         // Increasing reading timeout to reduce stress and conflicts
-        _chunk.Timeout += _timeoutIncrement;
+        _chunk.Timeout += TimeoutIncrement;
         // re-request and continue downloading
         return await DownloadAsync(request, pause, cancelToken).ConfigureAwait(false);
     }
@@ -146,10 +131,12 @@ internal class ChunkDownloader
         if (cancelToken.IsCancellationRequested || _chunk.IsDownloadCompleted())
             return;
 
+        // Create buffer for chunk
+        await _storage.CreateBufferAsync(_chunk.Id, _chunk.TempFilePath, _chunk.FilePosition, SeekOrigin.Begin, cancelToken).ConfigureAwait(false);
         _logger?.LogDebug("Memory buffered stream created for chunk {ChunkId}.", _chunk.Id);
-        // Open or create temp stream for saving chunk data
-        _storage = new MemoryBufferedStream(_chunk.TempFilePath, _configuration.MaximumMemoryBufferBytesPerChunk, _chunk.FilePosition);
+
         // Sync storage with chunk position
+        _logger?.LogDebug("Syncing chunk {ChunkId} position with storage...", _chunk.Id);
         SyncPositionWithStorage();
 
         _logger?.LogDebug("DownloadChunk of the chunk {ChunkId}.", _chunk.Id);
@@ -182,7 +169,7 @@ internal class ChunkDownloader
         try
         {
             // close stream on cancellation because, it doesn't work on .Net Framework
-            await using CancellationTokenRegistration _ = cancelToken.Register(stream.Close);
+            await using var _ = cancelToken.Register(stream.Close);
 
             while (readSize > 0 && _chunk.CanWrite)
             {
@@ -200,29 +187,25 @@ internal class ChunkDownloader
                 }
 
                 readSize = (int)Math.Min(_chunk.EmptyLength, readSize);
-                if (readSize > 0)
+                if (readSize <= 0)
+                    continue;
+
+                // ReSharper disable once PossiblyMistakenUseOfCancellationToken
+                await _storage.WriteAsync(_chunk.Id, buffer, 0, readSize, cancelToken).ConfigureAwait(false);
+
+                _logger?.LogDebug("Write {ReadSize} bytes in the chunk {ChunkId}", readSize, _chunk.Id);
+                _chunk.Position += readSize;
+                _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
+                _logger?.LogDebug("The chunk {ChunkId} current position is: {ChunkPosition} of {ChunkLength}", _chunk.Id, _chunk.Position, _chunk.Length);
+
+                OnDownloadProgressChanged(new DownloadProgressChangedEventArgs(_chunk.Id)
                 {
-                    // ReSharper disable once PossiblyMistakenUseOfCancellationToken
-                    await _storage!.WriteAsync(buffer, 0, readSize, cancelToken).ConfigureAwait(false);
-
-                    _logger?.LogDebug("Write {ReadSize} bytes in the chunk {ChunkId}", readSize, _chunk.Id);
-                    _chunk.Position += readSize;
-                    _chunk.FilePosition = _storage.Position;
-                    _logger?.LogDebug("The chunk {ChunkId} current position is: {ChunkPosition} of {ChunkLength}", _chunk.Id, _chunk.Position, _chunk.Length);
-
-                    OnDownloadProgressChanged(new DownloadProgressChangedEventArgs(_chunk.Id)
-                    {
-                        TotalBytesToReceive = _chunk.Length,
-                        ReceivedBytesSize = _chunk.Position,
-                        ProgressedByteSize = readSize,
-                        ReceivedBytes = _configuration.EnableLiveStreaming ? buffer.Take(readSize).ToArray() : []
-                    });
-                }
+                    TotalBytesToReceive = _chunk.Length,
+                    ReceivedBytesSize = _chunk.Position,
+                    ProgressedByteSize = readSize,
+                    ReceivedBytes = _configuration.EnableLiveStreaming ? buffer.Take(readSize).ToArray() : []
+                });
             }
-
-            // Flush storage and update file position for last time
-            if (_storage!.MemoryLength > 0)
-                _chunk.FilePosition = await FlushStorageAsync(dispose: false).ConfigureAwait(false);
 
             // Compare file size with chunk length and throw exception if not match
             ThrowIfFileSizeNotMatchWithChunkLength();
@@ -231,50 +214,45 @@ internal class ChunkDownloader
         {
             _logger?.LogError(exp, "ReadAsync of the chunk {ChunkId} stream was canceled or closed forcibly from server", _chunk.Id);
             cancelToken.ThrowIfCancellationRequested();
-            if (innerToken?.IsCancellationRequested == true)
-            {
-                _logger?.LogError(exp, "ReadAsync of the chunk {ChunkId} stream has been timed out", _chunk.Id);
-                throw new TaskCanceledException($"ReadAsync of the chunk {_chunk.Id} stream has been timed out", exp);
-            }
+            // throw origin stack trace of exception
+            if (innerToken?.IsCancellationRequested != true)
+                throw;
 
-            throw; // throw origin stack trace of exception
+            _logger?.LogError(exp, "ReadAsync of the chunk {ChunkId} stream has been timed out", _chunk.Id);
+            throw new TaskCanceledException($"ReadAsync of the chunk {_chunk.Id} stream has been timed out", exp);
         }
         finally
         {
-            // Flush storage and dispose it
-            // Update file position
-            _chunk.FilePosition = await FlushStorageAsync(dispose: true).ConfigureAwait(false);
+            // Flush storage and update file position
+            await FlushChunkAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         _logger?.LogDebug("ReadStream of the chunk {ChunkId} completed successfully", _chunk.Id);
     }
-
-    #region Helpers
 
     /// <summary>
     /// Syncs the position of the chunk with the position of the file.
     /// </summary>
     private void SyncPositionWithStorage()
     {
-        if (_storage == null)
-            return;
-
+        // Get chunk file length
+        var storageLength = _storage.GetChunkFileLength(_chunk.Id);
         // When the length of storage is greater than the chunk position and less than or equal to the chunk length
         // or when the length of storage is less than the chunk position
         // Change chunk position and file position based on the length of storage
-        if ((_storage.Length > _chunk.Position && _storage.Length <= _chunk.Length) || (_storage.Length < _chunk.Position))
+        if ((storageLength > _chunk.Position && storageLength <= _chunk.Length) || storageLength < _chunk.Position)
         {
-            var length = _storage.Length >= _configuration.BufferBlockSize ? _storage.Length - _configuration.BufferBlockSize : 0;
-            _storage.Seek(length, SeekOrigin.Begin);
+            var length = storageLength >= _configuration.BufferBlockSize ? storageLength - _configuration.BufferBlockSize : 0;
+            _storage.SetChunkFilePosition(_chunk.Id, length, SeekOrigin.Begin);
             _chunk.Position = _chunk.FilePosition = length;
         }
         // When the length of storage is greater than the chunk position and greater than the chunk length
         // maybe file is corrupted and download must start from the beginning
-        else if (_storage.Length > _chunk.Position && _storage.Length > _chunk.Length)
+        else if (storageLength > _chunk.Position && storageLength > _chunk.Length)
         {
             // Remove all data stored in file
-            _storage.SetLength(0);
-            _storage.Seek(0, SeekOrigin.Begin);
+            _storage.SetChunkFileLength(_chunk.Id, 0);
+            _storage.SetChunkFilePosition(_chunk.Id, 0, SeekOrigin.Begin);
             // If Position is greater than 0 (i.e. the download has not yet started), restart the Chunk download.
             if (_chunk.Position > 0)
                 OnDownloadRestarted(RestartReason.TempFileCorruption);
@@ -303,46 +281,18 @@ internal class ChunkDownloader
     }
 
     /// <summary>
-    /// Flushes the temp storage and writes all data that stored in the memory to the storage.
+    /// Flushes the storage and updates the file position.
     /// </summary>
-    /// <param name="dispose">Whether the storage should be disposed or not.</param>
-    /// <returns>Returns the position of the temp file after release memory and flush storage.</returns>
-    private async Task<long> FlushStorageAsync(bool dispose)
+    /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation.</param>
+    private async Task FlushChunkAsync(CancellationToken cancellationToken)
     {
-        if (_storage == null)
-            return 0;
+        if (cancellationToken.IsCancellationRequested)
+            return;
 
-        long position;
-        // Dispose storage
-        if (dispose)
-        {
-            // Disposing storage, like flushing it, writes the remaining data in RAM to the hard drive.
-            // Refer to MemoryBufferedStream class.
-            await _storage.DisposeAsync().ConfigureAwait(false);
-            // Wait for some times to ensure the data is written to the disk
-            await Task.Delay(100).ConfigureAwait(false);
-            // Get file position from storage
-            position = _storage.Position;
-            _storage = null;
-        }
-        // Flush storage
-        else
-        {
-            // Write last bytes received from server to the disk.
-            // Refer to MemoryBufferedStream class.
-            await _storage.FlushAsync(CancellationToken.None).ConfigureAwait(false);
-            // Wait for some times to ensure the data is written to the disk
-            await Task.Delay(100).ConfigureAwait(false);
-            // Get file position from storage
-            position = _storage.Position;
-        }
-
-        // Log information
-        _logger?.LogDebug("Chunk {ChunkId} flushed to disk", _chunk.Id);
-        if (dispose)
-            _logger?.LogDebug("Chunk {ChunkId} successfully disposed", _chunk.Id);
-
-        return position;
+        await _storage.FlushChunkAsync(_chunk.Id, cancellationToken).ConfigureAwait(false);
+        // Add a small delay to ensure file is fully written
+        await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+        _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
     }
 
     /// <summary>
@@ -354,9 +304,7 @@ internal class ChunkDownloader
         // If the chunk has a length, the file size should be compared to the chunk length
         // Otherwise, the file size should be compared to the chunk position
         var chunkLength = _chunk.Length > 0 ? _chunk.Length : _chunk.Position;
-        if (_storage?.Length != chunkLength)
+        if (_storage.GetChunkFileLength(_chunk.Id) != chunkLength)
             throw DownloadException.CreateDownloadException(DownloadException.FileSizeNotMatchWithChunkLength);
     }
-
-    #endregion Helpers
 }

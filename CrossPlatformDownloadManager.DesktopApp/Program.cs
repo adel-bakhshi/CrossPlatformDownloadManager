@@ -7,7 +7,6 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
@@ -40,14 +39,6 @@ sealed class Program
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while starting the application. Error message: {ErrorMessage}", ex.Message);
-            try
-            {
-                _ = DialogBoxManager.ShowErrorDialogAsync(ex);
-            }
-            catch
-            {
-                // Ignore exceptions
-            }
         }
     }
 
@@ -61,10 +52,14 @@ sealed class Program
         const string fileName = "logs.txt";
         var logFilePath = Path.Combine(Constants.ApplicationDataDirectory, fileName);
 
+        // Initialize logger
         Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
             .WriteTo.Console()
             .WriteTo.File(logFilePath)
             .CreateLogger();
+
+        Log.Debug("Building Avalonia app...");
 
         var appBuilder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
@@ -102,11 +97,11 @@ sealed class Program
 
                 // Add ViewModels to services
                 services.AddSingleton<AppViewModel>();
-                services.AddSingleton<MainWindowViewModel>();
+                services.AddSingleton<StartupWindowViewModel>();
                 services.AddSingleton<TrayMenuWindowViewModel>();
 
                 // Add Windows to services
-                services.AddSingleton<MainWindow>();
+                services.AddSingleton<StartupWindow>();
                 services.AddSingleton<TrayMenuWindow>();
 
                 // Add BrowserExtension to services

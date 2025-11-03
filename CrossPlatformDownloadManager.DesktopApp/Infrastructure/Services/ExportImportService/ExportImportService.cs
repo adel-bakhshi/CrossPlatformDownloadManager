@@ -446,8 +446,7 @@ public class ExportImportService : IExportImportService
         settings.UseQueueFinishedSound = exportSettings.UseQueueFinishedSound;
         settings.UseSystemNotifications = exportSettings.UseSystemNotifications;
         settings.ShowCategoriesPanel = exportSettings.ShowCategoriesPanel;
-        settings.DataGridColumnsSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainDownloadFilesDataGridColumnsSettings?>()
-                                           ?? settings.DataGridColumnsSettings;
+        settings.DataGridColumnSettings = exportSettings.DataGridColumnsSettings?.ConvertFromJson<MainGridColumnSettings?>() ?? settings.DataGridColumnSettings;
 
         // Save settings
         await _settingsService.SaveSettingsAsync(settings);

@@ -221,6 +221,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         try
         {
+            Log.Debug("Getting url details from {Class}...", nameof(AddDownloadLinkWindowViewModel));
+
             // Set the loading flag to true
             IsLoadingUrl = true;
             // Create download file options
@@ -257,6 +259,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     {
         try
         {
+            Log.Debug("Trying to cancel the operation...");
+
+            // Cancel the operation
             await _cancellationTokenSource.CancelAsync();
             owner?.Close();
         }
@@ -278,6 +283,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // Check if the owner window is null and if it is, throw an error.
             if (owner == null)
                 throw new InvalidOperationException("An error occurred while trying to start download.");
+
+            Log.Information("Starting download for {Url}...", DownloadFile.Url);
 
             // Add download file to database
             var downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile);
@@ -307,6 +314,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occurred while trying to add new category.");
 
+            Log.Debug("Trying to open add new category window...");
+
             var vm = new AddEditCategoryWindowViewModel(AppService);
             var window = new AddEditCategoryWindow { DataContext = vm };
             await window.ShowDialog(owner);
@@ -328,6 +337,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
         {
             if (owner == null)
                 throw new InvalidOperationException("An error occurred while trying to add new queue.");
+
+            Log.Debug("Trying to open add new queue window...");
 
             var vm = new AddEditQueueWindowViewModel(AppService, null);
             var window = new AddEditQueueWindow { DataContext = vm };
@@ -368,6 +379,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // Make sure download queue exists
             if (downloadQueue == null)
             {
+                Log.Debug("Download queue not found. Download queue ID: {DownloadQueueId}, Download queue title: {DownloadQueueTitle}",
+                    SelectedDownloadQueue.Id, SelectedDownloadQueue.Title);
+
                 await DialogBoxManager.ShowInfoDialogAsync("Queue not found",
                     "Queue not found. Maybe it was deleted or changed. Please try again or contact support team.",
                     DialogButtons.Ok);
@@ -375,10 +389,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
                 return;
             }
 
+            Log.Debug("Trying to add download file to database...");
+
             // Add download file to database
             var downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile);
             if (downloadFile == null)
                 return;
+
+            Log.Debug("Adding download file with ID {DownloadFileId} to queue with ID {DownloadQueueId}...", downloadFile.Id, downloadQueue.Id);
 
             // Add download file to selected download queue
             await AppService
@@ -389,10 +407,14 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // Change the default download queue
             if (RememberMyChoice)
             {
+                Log.Debug("Saving the selected download queue as the default download queue...");
+
                 await AppService
                     .DownloadQueueService
                     .ChangeDefaultDownloadQueueAsync(downloadQueue, reloadData: false);
             }
+
+            Log.Debug("Saving the selected download queue as the last selected download queue...");
 
             // Change the last selected download queue
             await AppService
@@ -402,6 +424,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // Check if the user wants to start the download queue
             if (StartDownloadQueue)
             {
+                Log.Debug("Starting the download queue...");
+
+                // Start downloading the queue
                 _ = AppService
                     .DownloadQueueService
                     .StartDownloadQueueAsync(downloadQueue);
@@ -429,6 +454,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             if (owner == null)
                 throw new InvalidOperationException("An error occurred while trying to add file to default queue.");
 
+            Log.Debug("Getting the default download queue...");
+
             // Find the default download queue
             var defaultDownloadQueue = AppService
                 .DownloadQueueService
@@ -438,12 +465,19 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
             // Check if default download queue is exists
             DefaultDownloadQueueIsExist = defaultDownloadQueue != null;
             if (!DefaultDownloadQueueIsExist)
+            {
+                Log.Debug("The default download queue does not exist. Returning...");
                 return;
+            }
+
+            Log.Debug("Trying to add download file to database...");
 
             // Add download file to database
             var downloadFile = await AppService.DownloadFileService.AddDownloadFileAsync(DownloadFile);
             if (downloadFile == null)
                 return;
+
+            Log.Debug("Adding download file with ID {DownloadFileId} to queue with ID {DownloadQueueId}...", downloadFile.Id, defaultDownloadQueue!.Id);
 
             // Add download file to default download queue
             await AppService
@@ -465,6 +499,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     /// </summary>
     private void LoadDownloadQueues()
     {
+        Log.Debug("Loading download queues...");
+
         DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
         SelectedDownloadQueue = GetSelectedDownloadQueue();
     }
@@ -474,6 +510,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     /// </summary>
     private DownloadQueueViewModel? GetSelectedDownloadQueue()
     {
+        Log.Debug("Getting the selected download queue...");
+
         var defaultQueue = DownloadQueues.FirstOrDefault(dq => dq.IsDefault);
         var lastChoice = DownloadQueues.FirstOrDefault(dq => dq.IsLastChoice);
         return defaultQueue ?? lastChoice ?? DownloadQueues.FirstOrDefault();
@@ -484,6 +522,8 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     /// </summary>
     private void LoadCategories()
     {
+        Log.Debug("Loading the categories...");
+
         // Check if categories are disabled or not
         CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
 
@@ -519,7 +559,9 @@ public class AddDownloadLinkWindowViewModel : ViewModelBase
     protected override void OnSettingsServiceDataChanged()
     {
         base.OnSettingsServiceDataChanged();
+
         // Check if categories are disabled or not
         CategoriesAreDisabled = AppService.SettingsService.Settings.DisableCategories;
+        Log.Debug("Categories are disabled: {CategoriesAreDisabled}", CategoriesAreDisabled ? "Yes" : "No");
     }
 }

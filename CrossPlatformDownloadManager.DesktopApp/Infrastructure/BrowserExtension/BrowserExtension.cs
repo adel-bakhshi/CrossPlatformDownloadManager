@@ -16,6 +16,9 @@ using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
 
+/// <summary>
+/// Represents the browser extension.
+/// </summary>
 public class BrowserExtension : IBrowserExtension
 {
     #region Private Fields
@@ -34,9 +37,13 @@ public class BrowserExtension : IBrowserExtension
 
     public BrowserExtension(IAppService appService)
     {
+        // Initialize the browser extension with the provided app service
+        Log.Debug("Initializing browser extension...");
+
+        // Store the app service instance
         _appService = appService;
 
-        // Initialize HttpListener
+        // Initialize HttpListener for handling browser extension requests
         _httpListener = new HttpListener();
         _httpListener.Prefixes.Add(Constants.GetFileTypesUrl);
         _httpListener.Prefixes.Add(Constants.AddDownloadFileUrl);
@@ -46,17 +53,23 @@ public class BrowserExtension : IBrowserExtension
     {
         try
         {
-            _httpListener.Start();
+            // Start listening for incoming requests
             Log.Information("Start listening for requests...");
+            _httpListener.Start();
 
+            // Continuously listen for requests
             while (true)
             {
+                // Process each request asynchronously
                 var context = await _httpListener.GetContextAsync();
+                Log.Debug("Received request from browser extension. Request URL: {RequestUrl}", context.Request.Url);
+
                 _ = ProcessRequestAsync(context);
             }
         }
         catch (HttpListenerException ex) when (ex.ErrorCode != 995)
         {
+            // Handle listener exceptions (excluding normal shutdown errors)
             // The I/O operation has been aborted because of either a thread exit or an application request.
             // This error occurs when the HttpListener is stopped and as a result the GetContextAsync method fails because it cannot find any Listener.
             // This error does not need to be written to the application logs.
@@ -64,6 +77,7 @@ public class BrowserExtension : IBrowserExtension
         }
         catch (Exception ex)
         {
+            // Handle any other exceptions that might occur during listening
             Log.Error(ex, "Failed to start listening for requests.");
         }
     }
@@ -72,11 +86,17 @@ public class BrowserExtension : IBrowserExtension
     {
         try
         {
+            // Stop the HTTP listener
             _httpListener.Stop();
             Log.Information("Stop listening for requests...");
         }
+        catch (HttpListenerException)
+        {
+            // Ignore exceptions that occur when the listener is already stopped
+        }
         catch (Exception ex)
         {
+            // Handle any exceptions that might occur during listener shutdown
             Log.Error(ex, "Failed to stop listening for requests.");
         }
     }
@@ -98,11 +118,15 @@ public class BrowserExtension : IBrowserExtension
 
         try
         {
+            Log.Debug("Processing request from browser extension...");
+
             // Check if browser extension is enabled
             var useBrowserExtension = _appService.SettingsService.Settings.UseBrowserExtension;
             if (!useBrowserExtension)
             {
                 response.Message = "Browser extension is disabled. Please enable it and try again.";
+                Log.Debug("{Message}", response.Message);
+
                 await SendResponseAsync(context, response);
                 return;
             }
@@ -118,10 +142,12 @@ public class BrowserExtension : IBrowserExtension
         }
         catch (Exception ex)
         {
+            // Handle any exceptions that occur during request processing
             response.Message = $"An error occurred while trying to add link to CDM. Error message: {ex.Message}";
-            Log.Error(ex, response.Message);
+            Log.Error(ex, "{Message}", response.Message);
         }
 
+        // Send the response back to the client
         await SendResponseAsync(context, response);
     }
 
@@ -132,6 +158,8 @@ public class BrowserExtension : IBrowserExtension
     /// <returns>Returns the response object containing the file types.</returns>
     private ExtensionResponse<List<string>> GetFileTypes(HttpListenerContext context)
     {
+        Log.Debug("Getting file types from the database...");
+
         // Create a response object
         var response = new ExtensionResponse<List<string>>
         {
@@ -158,6 +186,8 @@ public class BrowserExtension : IBrowserExtension
             .Select(fe => fe.Extension)
             .ToList();
 
+        Log.Debug("File types retrieved successfully. Count: {Count}", fileExtensions.Count);
+
         response.IsSuccessful = true;
         response.Data = fileExtensions;
         return response;
@@ -170,6 +200,8 @@ public class BrowserExtension : IBrowserExtension
     /// <returns>Returns the response object containing the result of the operation.</returns>
     private async Task<ExtensionResponse> AddDownloadFileUrlAsync(HttpListenerContext context)
     {
+        Log.Debug("Adding download file url to the application that received from browser extension...");
+
         // Create a response object
         var response = new ExtensionResponse
         {
@@ -194,7 +226,10 @@ public class BrowserExtension : IBrowserExtension
         // Make sure the JSON data is not null or empty
         if (json.IsStringNullOrEmpty())
         {
-            response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            const string message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            Log.Debug("{Message}", message);
+
+            response.Message = message;
             return response;
         }
 
@@ -202,41 +237,75 @@ public class BrowserExtension : IBrowserExtension
         var extensionRequests = json.ConvertFromJson<List<ExtensionRequest>?>();
         if (extensionRequests == null || extensionRequests.Count == 0)
         {
-            response.Message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            const string message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
+            Log.Debug("{Message}", message);
+
+            response.Message = message;
             return response;
         }
 
+        Log.Debug("Received {Count} URLs from browser extension.", extensionRequests.Count);
+
+        // Define a list of tasks to get the details of the requests
+        var updateTasks = new List<Task>();
+
+        // Prepare all requests
+        foreach (var extensionRequest in extensionRequests)
+        {
+            // Check format
+            extensionRequest.CheckFormat();
+
+            // Get update task and add it to the list
+            var updateTask = extensionRequest.UpdateRequestUrlAsync(_appService);
+            updateTasks.Add(updateTask);
+        }
+
+        // Wait for all update tasks to complete
+        Log.Debug("Awaiting all update tasks to complete...");
+        await Task.WhenAll(updateTasks);
+        Log.Debug("All update tasks completed.");
+
+        // Check the count of the requests.
+        // If the count is equal to 1, open start download dialog or add the URL to the database and start it.
         if (extensionRequests.Count == 1)
         {
             var data = extensionRequests[0];
+
+            // Change URL to correct format
+            data.Url = data.Url!.Replace('\\', '/').Trim();
+            Log.Information("The URL that received from browser extension is '{Url}'.", data.Url);
+
             // Check if URL is valid
             var urlIsValid = data.Url.CheckUrlValidation();
             if (!urlIsValid)
             {
-                response.Message = "CDM can't accept this URL.";
+                const string message = "CDM can't accept this URL.";
+                Log.Debug("{Message}", message);
+
+                response.Message = message;
                 return response;
             }
 
-            // Change URL to correct format
-            data.Url = data.Url!.Replace('\\', '/').Trim();
             // Check for user option for showing start download dialog
             var showStartDownloadDialog = _appService.SettingsService.Settings.ShowStartDownloadDialog;
             // Go to AddDownloadLinkWindow (Start download dialog) and let user choose what he/she want
             if (showStartDownloadDialog)
             {
+                Log.Debug("Showing start download dialog...");
                 ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description);
             }
             // Otherwise, add link to database and start it
             else
             {
+                Log.Debug("Adding download file url to database and starting it...");
                 await AddNewDownloadFileAndStartItAsync(data.Url!, data.Referer, data.PageAddress, data.Description);
             }
-
-            // Log captured URL
-            Log.Information("Captured URL: {Url}", data.Url);
         }
+        // Otherwise, show manage links window
         else
         {
+            Log.Debug("Trying to add multiple URLs to database...");
+
             // Convert received URLs to DownloadFileViewModel
             var downloadFiles = extensionRequests
                 .Where(er => er.Url.CheckUrlValidation())
@@ -250,7 +319,7 @@ public class BrowserExtension : IBrowserExtension
                         Description = er.Description
                     };
 
-                    Log.Information("Captured URL: {Url}", result.Url);
+                    Log.Information("The URL that received from browser extension is '{Url}'.", result.Url);
                     return result;
                 })
                 .ToList();
@@ -273,6 +342,8 @@ public class BrowserExtension : IBrowserExtension
     /// <returns>Returns the response object containing the result of the operation.</returns>
     private static ExtensionResponse ValidateRequestMethod(HttpListenerContext context, string? httpMethod)
     {
+        Log.Debug("Validating request method...");
+
         var response = new ExtensionResponse
         {
             IsSuccessful = false,
@@ -284,7 +355,10 @@ public class BrowserExtension : IBrowserExtension
         // Validate request method
         if (!context.Request.HttpMethod.Equals(httpMethod, StringComparison.OrdinalIgnoreCase))
         {
-            response.Message = "We encountered an issue while processing your request. Please try again. If the problem persists, report it to be investigated.";
+            const string message = "We encountered an issue while processing your request. Please try again. If the problem persists, report it to be investigated.";
+            Log.Debug("{Message}", message);
+
+            response.Message = message;
         }
         else
         {
@@ -301,8 +375,10 @@ public class BrowserExtension : IBrowserExtension
     /// <param name="extensionResponse">The response to send.</param>
     private static async Task SendResponseAsync(HttpListenerContext context, ExtensionResponse extensionResponse)
     {
-        var json = extensionResponse.ConvertToJson();
+        Log.Debug("Sending response to browser...");
 
+        // Create buffer from response object and send it to browser
+        var json = extensionResponse.ConvertToJson();
         var buffer = Encoding.UTF8.GetBytes(json);
         context.Response.ContentLength64 = buffer.Length;
 
@@ -319,6 +395,8 @@ public class BrowserExtension : IBrowserExtension
     /// <param name="description">The description of the file to download.</param>
     private void ShowStartDownloadDialog(string url, string? referer, string? pageAddress, string? description)
     {
+        Log.Debug("Opening add download link window for further steps...");
+
         var vm = new AddDownloadLinkWindowViewModel(_appService)
         {
             IsLoadingUrl = true,
@@ -344,6 +422,8 @@ public class BrowserExtension : IBrowserExtension
     /// <param name="description">The description of the file to download.</param>
     private async Task AddNewDownloadFileAndStartItAsync(string url, string? referer, string? pageAddress, string? description)
     {
+        Log.Debug("Adding new download file and starting it...");
+
         var options = new DownloadFileOptions
         {
             Referer = referer,
@@ -363,6 +443,8 @@ public class BrowserExtension : IBrowserExtension
     {
         if (downloadFiles.Count == 0)
             return;
+
+        Log.Debug("Opening manage links window...");
 
         var viewModel = new ManageLinksWindowViewModel(_appService, downloadFiles);
         var window = new ManageLinksWindow { DataContext = viewModel };

@@ -19,7 +19,7 @@ public static class AppBuilderExtensions
             if (serviceProvider == null)
                 throw new NullReferenceException(nameof(serviceProvider));
             
-            serviceProvider.GetRequiredService<IAppInitializer>().InitializeAsync().GetAwaiter();
+            serviceProvider.GetRequiredService<IAppInitializer>().InitializeAsync().Wait();
         });
         
         return appBuilder;

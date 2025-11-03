@@ -10,7 +10,7 @@
         <PackageReference Include="Avalonia" Version="11.3.8"/>
         <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta2"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
-        <PackageReference Include="Serilog" Version="4.3.1-dev-02387"/>
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02390" />
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
     </ItemGroup>
 

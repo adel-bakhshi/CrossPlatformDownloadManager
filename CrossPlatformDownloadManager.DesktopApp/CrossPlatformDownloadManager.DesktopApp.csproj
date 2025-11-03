@@ -152,7 +152,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoMapper" Version="14.0.0"/>
         <PackageReference Include="Avalonia" Version="11.3.8"/>
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.8"/>
         <PackageReference Include="Avalonia.Desktop" Version="11.3.8"/>
@@ -162,6 +161,8 @@
         <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.8"/>
         <PackageReference Include="Emik.Rubbish" Version="1.1.0"/>
         <PackageReference Include="ManagedBass" Version="4.0.2"/>
+        <PackageReference Include="Mapster" Version="9.0.0-pre01" />
+        <PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
             <PrivateAssets>all</PrivateAssets>
@@ -172,10 +173,10 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.0"/>
+        <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
         <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.8"/>
-        <PackageReference Include="Serilog" Version="4.3.1-dev-02387"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953"/>
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02390" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
         <PackageReference Include="WindowsShortcutFactory" Version="1.2.0"/>

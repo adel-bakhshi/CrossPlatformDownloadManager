@@ -1,4 +1,3 @@
-using AutoMapper;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategoryService;
@@ -6,6 +5,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFi
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using MapsterMapper;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 

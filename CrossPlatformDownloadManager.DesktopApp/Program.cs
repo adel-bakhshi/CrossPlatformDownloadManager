@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 using CrossPlatformDownloadManager.Utils;
+using Mapster;
 using ReactiveUI.Avalonia;
 
 namespace CrossPlatformDownloadManager.DesktopApp;
@@ -68,8 +69,9 @@ sealed class Program
             .UseReactiveUI()
             .UseDependencyInjection(services =>
             {
-                // Add AutoMapper to services
-                services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+                // Add mapper to services
+                TypeAdapterConfig.GlobalSettings.Scan(AppDomain.CurrentDomain.GetAssemblies());
+                services.AddMapster();
 
                 // Add UnitOfWork to services
                 services.AddTransient<IUnitOfWork, UnitOfWork>();

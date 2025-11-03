@@ -2,9 +2,13 @@ using System;
 using System.Linq;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models.ThemeBrush;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models;
 
+/// <summary>
+/// Represents an application theme with various color properties.
+/// </summary>
 public class AppTheme
 {
     #region Properties
@@ -95,10 +99,18 @@ public class AppTheme
 
     #endregion
 
+    /// <summary>
+    /// Validates the theme data to ensure all required properties are set and valid.
+    /// </summary>
+    /// <returns>Returns true if the theme is valid, otherwise false.</returns>
     public bool Validate()
     {
+        Log.Debug("Validating app theme: {ThemeName}", ThemeName);
+
         // Get all properties that are of type IThemeBrush
         var properties = GetType().GetProperties().Where(p => p.PropertyType == typeof(IThemeBrush)).ToList();
+        Log.Debug("Found {PropertyCount} theme brush properties to validate.", properties.Count);
+
         // Validate properties
         foreach (var property in properties)
         {
@@ -106,21 +118,31 @@ public class AppTheme
             switch (value)
             {
                 case null:
+                {
+                    Log.Warning("Theme brush property {PropertyName} is null.", property.Name);
                     return false;
+                }
 
                 case IThemeBrush themeBrush:
                 {
                     if (!themeBrush.Validate())
+                    {
+                        Log.Warning("Theme brush property {PropertyName} failed validation.", property.Name);
                         return false;
+                    }
 
                     break;
                 }
 
                 default:
+                {
+                    Log.Error("Invalid type for property {PropertyName}. Expected IThemeBrush.", property.Name);
                     throw new InvalidOperationException($"The type of {property.Name} is invalid.");
+                }
             }
         }
 
+        Log.Debug("App theme validation successful: {ThemeName}", ThemeName);
         return true;
     }
 }

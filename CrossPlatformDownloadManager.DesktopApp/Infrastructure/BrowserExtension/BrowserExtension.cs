@@ -35,6 +35,10 @@ public class BrowserExtension : IBrowserExtension
 
     #endregion
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BrowserExtension"/> class.
+    /// </summary>
+    /// <param name="appService">The app service instance.</param>
     public BrowserExtension(IAppService appService)
     {
         // Initialize the browser extension with the provided app service
@@ -47,6 +51,8 @@ public class BrowserExtension : IBrowserExtension
         _httpListener = new HttpListener();
         _httpListener.Prefixes.Add(Constants.GetFileTypesUrl);
         _httpListener.Prefixes.Add(Constants.AddDownloadFileUrl);
+
+        Log.Debug("Browser extension initialized successfully.");
     }
 
     public async Task StartListeningAsync()
@@ -93,6 +99,7 @@ public class BrowserExtension : IBrowserExtension
         catch (HttpListenerException)
         {
             // Ignore exceptions that occur when the listener is already stopped
+            Log.Debug("HttpListener was already stopped.");
         }
         catch (Exception ex)
         {
@@ -139,6 +146,8 @@ public class BrowserExtension : IBrowserExtension
                 Constants.AddDownloadFileUrl => await AddDownloadFileUrlAsync(context),
                 _ => response
             };
+
+            Log.Debug("Request processed successfully. Success: {IsSuccessful}", response.IsSuccessful);
         }
         catch (Exception ex)
         {
@@ -175,6 +184,7 @@ public class BrowserExtension : IBrowserExtension
         {
             response.IsSuccessful = validateResult.IsSuccessful;
             response.Message = validateResult.Message;
+            Log.Debug("Request validation failed: {Message}", response.Message);
             return response;
         }
 
@@ -216,6 +226,7 @@ public class BrowserExtension : IBrowserExtension
         {
             response.IsSuccessful = validateResult.IsSuccessful;
             response.Message = validateResult.Message;
+            Log.Debug("Request validation failed: {Message}", response.Message);
             return response;
         }
 
@@ -331,6 +342,7 @@ public class BrowserExtension : IBrowserExtension
         // Return the response
         response.IsSuccessful = true;
         response.Message = $"{(extensionRequests.Count > 1 ? $"{extensionRequests.Count} Links" : "Link")} added to CDM.";
+        Log.Debug("Add download file URL operation completed: {Message}", response.Message);
         return response;
     }
 
@@ -363,6 +375,7 @@ public class BrowserExtension : IBrowserExtension
         else
         {
             response.IsSuccessful = true;
+            Log.Debug("Request method validation successful.");
         }
 
         return response;
@@ -384,6 +397,8 @@ public class BrowserExtension : IBrowserExtension
 
         await context.Response.OutputStream.WriteAsync(buffer);
         context.Response.OutputStream.Close();
+
+        Log.Debug("Response sent successfully to browser.");
     }
 
     /// <summary>
@@ -411,6 +426,8 @@ public class BrowserExtension : IBrowserExtension
 
         var window = new AddDownloadLinkWindow { DataContext = vm };
         window.Show();
+
+        Log.Debug("Start download dialog shown successfully.");
     }
 
     /// <summary>
@@ -433,6 +450,8 @@ public class BrowserExtension : IBrowserExtension
         };
 
         await _appService.DownloadFileService.AddDownloadFileAsync(url, options);
+
+        Log.Debug("Download file added to database and started successfully.");
     }
 
     /// <summary>
@@ -442,13 +461,18 @@ public class BrowserExtension : IBrowserExtension
     private void ShowManageLinksWindow(List<DownloadFileViewModel> downloadFiles)
     {
         if (downloadFiles.Count == 0)
+        {
+            Log.Debug("No valid download files to show in manage links window.");
             return;
+        }
 
         Log.Debug("Opening manage links window...");
 
         var viewModel = new ManageLinksWindowViewModel(_appService, downloadFiles);
         var window = new ManageLinksWindow { DataContext = viewModel };
         window.Show();
+
+        Log.Debug("Manage links window shown successfully with {Count} download files.", downloadFiles.Count);
     }
 
     #endregion

@@ -12,21 +12,21 @@ namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.Downlo
 /// </summary>
 public interface IDownloadQueueService
 {
-    #region Events
-
-    /// <summary>
-    /// An event that is raised when the data is changed.
-    /// </summary>
-    event EventHandler? DataChanged;
-
-    #endregion
-
     #region Properties
 
     /// <summary>
     /// Gets the value that indicates the collection of download queues.
     /// </summary>
     ObservableCollection<DownloadQueueViewModel> DownloadQueues { get; }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// An event that is raised when the data is changed.
+    /// </summary>
+    event EventHandler? DataChanged;
 
     #endregion
 

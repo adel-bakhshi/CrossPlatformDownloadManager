@@ -19,29 +19,49 @@ public class AppThemeService : IAppThemeService
 {
     #region Private Fields
 
+    /// <summary>
+    /// The settings service instance to access application settings.
+    /// </summary>
     private readonly ISettingsService _settingsService;
+
+    /// <summary>
+    /// The path of the last theme that loaded.
+    /// </summary>
     private string? _lastThemePath;
 
     #endregion
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppThemeService"/> class.
+    /// </summary>
+    /// <param name="settingsService">The settings service instance.</param>
     public AppThemeService(ISettingsService settingsService)
     {
         _settingsService = settingsService;
+        Log.Debug("AppThemeService initialized successfully.");
     }
 
     public void LoadThemeData()
     {
+        Log.Information("Loading theme data...");
+
         // Get the theme file path and set default light theme file path if it's empty or theme file not found
         var themeFilePath = _settingsService.Settings.ThemeFilePath;
+        Log.Debug("Current theme file path from settings: {ThemeFilePath}", themeFilePath);
+
         if (themeFilePath.IsStringNullOrEmpty()
             || (themeFilePath?.Contains("avares://", StringComparison.OrdinalIgnoreCase) == false && !File.Exists(themeFilePath)))
         {
+            Log.Debug("Theme file path is invalid or file not found. Using default light theme.");
             themeFilePath = Constants.LightThemeFilePath;
         }
 
         // Check if current theme is equal to last theme
         if (themeFilePath!.Equals(_lastThemePath))
+        {
+            Log.Debug("Theme is already loaded. Skipping reload.");
             return;
+        }
 
         // Read JSON data
         string? jsonData;
@@ -50,19 +70,27 @@ public class AppThemeService : IAppThemeService
             jsonData = themeFilePath.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
                 ? LoadThemeDataFromAssets(themeFilePath)
                 : LoadThemeDataFromStorage(themeFilePath);
+
+            Log.Debug("Theme data loaded successfully from: {ThemeFilePath}", themeFilePath);
         }
-        catch
+        catch (Exception ex)
         {
             // Log error
-            Log.Error("Failed to load theme data from {ThemeFilePath}.", themeFilePath);
+            Log.Error(ex, "Failed to load theme data from {ThemeFilePath}.", themeFilePath);
             // Load light theme
+            Log.Debug("Loading default light theme as fallback.");
             jsonData = LoadThemeDataFromAssets(Constants.LightThemeFilePath);
         }
 
         // Convert JSON data to AppTheme object
         var appTheme = ConvertJsonToAppTheme(jsonData);
         if (appTheme == null)
+        {
+            Log.Error("Failed to convert JSON data to AppTheme object.");
             throw new InvalidCastException("App theme data is null or undefined.");
+        }
+
+        Log.Debug("AppTheme object created successfully. Theme name: {ThemeName}", appTheme.ThemeName);
 
         // Apply theme data
         ApplyAppTheme(appTheme);
@@ -74,11 +102,19 @@ public class AppThemeService : IAppThemeService
 
     public bool ValidateAppTheme(string? json)
     {
+        Log.Debug("Validating app theme JSON data...");
+
         if (json.IsStringNullOrEmpty())
+        {
+            Log.Debug("JSON data is null or empty. Validation failed.");
             return false;
+        }
 
         var appTheme = ConvertJsonToAppTheme(json);
-        return appTheme != null && appTheme.Validate();
+        var isValid = appTheme != null && appTheme.Validate();
+
+        Log.Debug("App theme validation result: {IsValid}", isValid);
+        return isValid;
     }
 
     #region Helpers
@@ -90,7 +126,12 @@ public class AppThemeService : IAppThemeService
     /// <returns>Returns the theme data as JSON string.</returns>
     private static string? LoadThemeDataFromAssets(string themeFilePath)
     {
-        return themeFilePath.OpenTextAsset();
+        Log.Debug("Loading theme data from assets: {ThemeFilePath}", themeFilePath);
+
+        var data = themeFilePath.OpenTextAsset();
+        Log.Debug("Theme data loaded from assets successfully. Length: {Length}", data?.Length ?? 0);
+
+        return data;
     }
 
     /// <summary>
@@ -100,7 +141,18 @@ public class AppThemeService : IAppThemeService
     /// <returns>Returns the theme data as JSON string.</returns>
     private static string? LoadThemeDataFromStorage(string themeFilePath)
     {
-        return !File.Exists(themeFilePath) ? null : File.ReadAllText(themeFilePath);
+        Log.Debug("Loading theme data from storage: {ThemeFilePath}", themeFilePath);
+
+        if (!File.Exists(themeFilePath))
+        {
+            Log.Debug("Theme file not found in storage: {ThemeFilePath}", themeFilePath);
+            return null;
+        }
+
+        var data = File.ReadAllText(themeFilePath);
+        Log.Debug("Theme data loaded from storage successfully. Length: {Length}", data.Length);
+
+        return data;
     }
 
     /// <summary>
@@ -110,8 +162,13 @@ public class AppThemeService : IAppThemeService
     /// <returns>Returns the AppTheme object.</returns>
     private static AppTheme? ConvertJsonToAppTheme(string? jsonData)
     {
+        Log.Debug("Converting JSON data to AppTheme object...");
+
         if (jsonData.IsStringNullOrEmpty())
+        {
+            Log.Debug("JSON data is null or empty. Conversion failed.");
             return null;
+        }
 
         // Json serializer settings for converting IThemeBrush
         var settings = new JsonSerializerSettings
@@ -120,7 +177,18 @@ public class AppThemeService : IAppThemeService
             Culture = CultureInfo.InvariantCulture
         };
 
-        return jsonData.ConvertFromJson<AppTheme?>(settings);
+        var appTheme = jsonData.ConvertFromJson<AppTheme?>(settings);
+
+        if (appTheme != null)
+        {
+            Log.Debug("JSON data converted to AppTheme successfully. Theme name: {ThemeName}", appTheme.ThemeName);
+        }
+        else
+        {
+            Log.Debug("Failed to convert JSON data to AppTheme.");
+        }
+
+        return appTheme;
     }
 
     /// <summary>
@@ -130,10 +198,15 @@ public class AppThemeService : IAppThemeService
     /// <exception cref="InvalidOperationException">Thrown when the theme data is corrupted or invalid.</exception>
     private static void ApplyAppTheme(AppTheme appTheme)
     {
+        Log.Debug("Applying app theme: {ThemeName}", appTheme.ThemeName);
+
         // Get and validate resources
         var resources = Application.Current?.Resources;
         if (resources == null)
+        {
+            Log.Warning("Application resources are not available. Cannot apply theme.");
             return;
+        }
 
         // Validate app theme
         if (!appTheme.Validate())
@@ -141,8 +214,11 @@ public class AppThemeService : IAppThemeService
             const string message = "The theme data appears to be corrupted or invalid. Please try again. " +
                                    "If the problem continues, please reach out to the developers for assistance.";
 
+            Log.Error("Theme validation failed: {Message}", message);
             throw new InvalidOperationException(message);
         }
+
+        Log.Debug("Theme validation successful. Applying theme resources...");
 
         // Load theme data
         resources["MainBackgroundColor"] = appTheme.MainBackgroundColor!.GetBrush();
@@ -172,9 +248,18 @@ public class AppThemeService : IAppThemeService
         resources["ChunkProgressColor"] = appTheme.ChunkProgressColor!.GetBrush();
         resources["GridRowColor"] = appTheme.GridRowColor!.GetBrush();
 
+        Log.Debug("All theme resources applied successfully.");
+
+        // Check if the RequestedThemeVariant exists
+        if (Application.Current?.RequestedThemeVariant == null)
+        {
+            Log.Warning("RequestedThemeVariant is null. Cannot apply theme variant.");
+            return;
+        }
+
         // Set application theme variant
-        if (Application.Current?.RequestedThemeVariant != null)
-            Application.Current.RequestedThemeVariant = appTheme.IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
+        Application.Current.RequestedThemeVariant = appTheme.IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
+        Log.Debug("Application theme variant set to: {ThemeVariant}", appTheme.IsDarkTheme ? "Dark" : "Light");
     }
 
     #endregion

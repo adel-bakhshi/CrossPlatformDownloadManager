@@ -235,21 +235,31 @@ internal class ChunkDownloader
     /// </summary>
     private void SyncPositionWithStorage()
     {
+        _logger?.LogDebug("Sync position of the chunk {ChunkId} with the position of the file", _chunk.Id);
+
         // Get chunk file length
         var storageLength = _storage.GetChunkFileLength(_chunk.Id);
+
         // When the length of storage is greater than the chunk position and less than or equal to the chunk length
         // or when the length of storage is less than the chunk position
         // Change chunk position and file position based on the length of storage
         if ((storageLength > _chunk.Position && storageLength <= _chunk.Length) || storageLength < _chunk.Position)
         {
             var length = storageLength >= _configuration.BufferBlockSize ? storageLength - _configuration.BufferBlockSize : 0;
+            _logger?.LogDebug("The length of the chunk file {ChunkId} is {StorageLength} and the chunk position is {ChunkPosition}", _chunk.Id, storageLength, _chunk.Position);
+
             _storage.SetChunkFilePosition(_chunk.Id, length, SeekOrigin.Begin);
             _chunk.Position = _chunk.FilePosition = length;
+
+            _logger?.LogDebug("The chunk {ChunkId} current position is: {ChunkPosition} of {ChunkLength}", _chunk.Id, _chunk.Position, _chunk.Length);
         }
         // When the length of storage is greater than the chunk position and greater than the chunk length
         // maybe file is corrupted and download must start from the beginning
         else if (storageLength > _chunk.Position && storageLength > _chunk.Length)
         {
+            _logger?.LogWarning("The length of the chunk file {ChunkId} is {StorageLength} and the chunk position is {ChunkPosition}", _chunk.Id, storageLength, _chunk.Position);
+            _logger?.LogWarning("The chunk {ChunkId} file is corrupted, download must start from the beginning", _chunk.Id);
+
             // Remove all data stored in file
             _storage.SetChunkFileLength(_chunk.Id, 0);
             _storage.SetChunkFilePosition(_chunk.Id, 0, SeekOrigin.Begin);
@@ -259,6 +269,8 @@ internal class ChunkDownloader
 
             // Clear chunk data for re-downloading
             _chunk.Clear();
+
+            _logger?.LogDebug("The chunk {ChunkId} cleared and restarted.", _chunk.Id);
         }
     }
 
@@ -289,10 +301,14 @@ internal class ChunkDownloader
         if (cancellationToken.IsCancellationRequested)
             return;
 
+        _logger?.LogDebug("Flush chunk {ChunkId} storage", _chunk.Id);
+
         await _storage.FlushChunkAsync(_chunk.Id, cancellationToken).ConfigureAwait(false);
         // Add a small delay to ensure file is fully written
         await Task.Delay(100, cancellationToken).ConfigureAwait(false);
         _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
+
+        _logger?.LogDebug("Chunk {ChunkId} storage flushed and file position updated to {FilePosition}", _chunk.Id, _chunk.FilePosition);
     }
 
     /// <summary>
@@ -301,6 +317,8 @@ internal class ChunkDownloader
     /// <exception cref="InvalidOperationException">If file size not match with chunk length</exception>
     private void ThrowIfFileSizeNotMatchWithChunkLength()
     {
+        _logger?.LogDebug("Compare file size with chunk length for chunk {ChunkId}", _chunk.Id);
+
         // If the chunk has a length, the file size should be compared to the chunk length
         // Otherwise, the file size should be compared to the chunk position
         var chunkLength = _chunk.Length > 0 ? _chunk.Length : _chunk.Position;

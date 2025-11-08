@@ -85,7 +85,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// </summary>
     public DownloadStatus Status
     {
-        get => Package?.Status ?? DownloadStatus.None;
+        get => Package.Status;
         set => Package.Status = value;
     }
 
@@ -144,7 +144,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
         Bandwidth = new Bandwidth();
         Options = options ?? new DownloadConfiguration();
         Package = new DownloadPackage();
-        Storage = new SharedMemoryBufferedStream(Options);
+        Storage = new SharedMemoryBufferedStream(Options, Logger);
     }
 
     /// <summary>
@@ -330,7 +330,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
         }
         finally
         {
-            SingleInstanceSemaphore?.Release();
+            SingleInstanceSemaphore.Release();
         }
     }
 

@@ -195,6 +195,10 @@
         "alias": "Application"
       },
       {
+        "extension": ".msix",
+        "alias": "Application"
+      },
+      {
         "extension": ".apk",
         "alias": "Android Application"
       },

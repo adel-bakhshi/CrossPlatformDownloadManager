@@ -13,12 +13,8 @@ using Avalonia.VisualTree;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.Utils;
-using Microsoft.Extensions.DependencyInjection;
-using RolandK.AvaloniaExtensions.DependencyInjection;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Views;
@@ -98,14 +94,6 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
             // Make sure ViewModel is not null
             if (ViewModel == null)
                 return;
-
-            // For some reason, when updating download files, selected items will be changed
-            // We must remove the added items from selected items when updating download files
-            if (ViewModel.IsUpdatingDownloadFiles)
-            {
-                foreach (var addedItem in e.AddedItems)
-                    DownloadFilesDataGrid.SelectedItems.Remove(addedItem);
-            }
 
             // Get selected download files
             var downloadFiles = DownloadFilesDataGrid

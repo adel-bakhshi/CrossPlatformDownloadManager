@@ -107,6 +107,17 @@ public class FileDownloader
     /// </summary>
     private readonly List<Action<DownloadFileViewModel?>> _completedSyncTasks = [];
 
+    /// <summary>
+    /// Sometimes the progress value sent while downloading a file may be less than the current progress value.
+    /// To fix this problem, you should use the following variable to prevent this from happening.
+    /// </summary>
+    private bool _canReverseProgress;
+
+    /// <summary>
+    /// The debouncer to reset the value of <see cref="_canReverseProgress"/> field.
+    /// </summary>
+    private Debouncer? _reverseProgressDebouncer;
+
     #endregion
 
     #region Properties
@@ -159,15 +170,7 @@ public class FileDownloader
         Log.Information("Starting download process for: {FileName}", DownloadFile.FileName);
 
         // Subscribe to events
-        DownloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
-        DownloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
-        DownloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
-        DownloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
-        DownloadService.MergeStarted += DownloadServiceOnMergeStarted;
-        DownloadService.MergeProgressChanged += DownloadServiceOnMergeProgressChanged;
-        DownloadService.ChunkDownloadRestarted += DownloadServiceOnChunkDownloadRestarted;
-
-        Log.Debug("Event handlers subscribed successfully");
+        SubscribeEvents();
 
         // Get save location of the file
         var downloadPath = DownloadFile.SaveLocation;
@@ -341,11 +344,14 @@ public class FileDownloader
             DownloadWindow = new DownloadWindow { DataContext = viewModel };
             DownloadWindow.Closing += DownloadWindowOnClosing;
 
-            if (showWindow)
+            if (!showWindow)
             {
-                DownloadWindow.Show();
-                Log.Debug("Download window shown successfully");
+                Log.Debug("There is no need to show download window");
+                return;
             }
+
+            DownloadWindow.Show();
+            Log.Debug("Download window shown successfully");
         });
     }
 
@@ -490,6 +496,8 @@ public class FileDownloader
             Log.Information("Download completed successfully for: {FileName}. Status: {Status}", DownloadFile.FileName, DownloadFile.Status);
         }
 
+        // Unsubscribe from events
+        UnsubscribeEvents();
         // Raise download finished event
         DownloadFile.RaiseDownloadFinishedEvent(new DownloadFileEventArgs(DownloadFile.Id, isSuccess, error));
     }
@@ -501,6 +509,10 @@ public class FileDownloader
     /// <param name="e">The arguments of the event.</param> 
     private void DownloadServiceOnDownloadProgressChanged(object? sender, DownloadProgressChangedEventArgs e)
     {
+        // Check if progress is reversed and if it's not allowed to reverse progress
+        if (e.ProgressPercentage < DownloadFile.DownloadProgress && !_canReverseProgress)
+            return;
+
         // Update download progress
         DownloadFile.DownloadProgress = (float)e.ProgressPercentage;
         // Update transfer rate
@@ -577,12 +589,12 @@ public class FileDownloader
     /// </summary>
     /// <param name="sender">The source of the event.</param>
     /// <param name="e">The arguments of the event.</param>
-    private static async void DownloadServiceOnChunkDownloadRestarted(object? sender, ChunkDownloadRestartedEventArgs e)
+    private async void DownloadServiceOnChunkDownloadRestarted(object? sender, ChunkDownloadRestartedEventArgs e)
     {
-        Log.Warning("Chunk download restarted. Reason: {Reason}, ChunkId: {ChunkId}", e.Reason, e.ChunkId);
-
         try
         {
+            Log.Warning("Chunk download restarted. Reason: {Reason}, ChunkId: {ChunkId}", e.Reason, e.ChunkId);
+
             switch (e.Reason)
             {
                 case RestartReason.FileSizeIsNotMatchWithChunkLength:
@@ -611,6 +623,13 @@ public class FileDownloader
                     throw new InvalidOperationException("We detected that the chunk download was restarted, but we don't know why. Please report this issue to the developer.");
                 }
             }
+
+            // Set reverse progress flag to true
+            _canReverseProgress = true;
+
+            // Reset reverse progress by debouncer
+            _reverseProgressDebouncer ??= new Debouncer(TimeSpan.FromSeconds(3));
+            _reverseProgressDebouncer.Run(() => _canReverseProgress = false);
         }
         catch (Exception ex)
         {
@@ -653,10 +672,10 @@ public class FileDownloader
     /// <param name="e">The <see cref="WindowClosingEventArgs"/> event arguments.</param>
     private async void DownloadWindowOnClosing(object? sender, WindowClosingEventArgs e)
     {
-        Log.Debug("Download window closing for: {FileName}", DownloadFile.FileName);
-
         try
         {
+            Log.Debug("Download window closing for: {FileName}", DownloadFile.FileName);
+
             // Check if download window is not null and has data context of type DownloadWindowViewModel
             if (DownloadWindow is not { DataContext: DownloadWindowViewModel viewModel })
             {
@@ -1096,6 +1115,42 @@ public class FileDownloader
         }
 
         Log.Debug("Chunks data loaded successfully");
+    }
+
+    /// <summary>
+    /// Subscribes to download service events.
+    /// </summary>
+    private void SubscribeEvents()
+    {
+        Log.Debug("Subscribing to download service events");
+
+        DownloadService.DownloadStarted += DownloadServiceOnDownloadStarted;
+        DownloadService.DownloadFileCompleted += DownloadServiceOnDownloadFileCompleted;
+        DownloadService.DownloadProgressChanged += DownloadServiceOnDownloadProgressChanged;
+        DownloadService.ChunkDownloadProgressChanged += DownloadServiceOnChunkDownloadProgressChanged;
+        DownloadService.MergeStarted += DownloadServiceOnMergeStarted;
+        DownloadService.MergeProgressChanged += DownloadServiceOnMergeProgressChanged;
+        DownloadService.ChunkDownloadRestarted += DownloadServiceOnChunkDownloadRestarted;
+
+        Log.Debug("Event handlers subscribed successfully");
+    }
+
+    /// <summary>
+    /// Unsubscribes from the download service events.
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        Log.Debug("Unsubscribing from download service events");
+
+        DownloadService.DownloadStarted -= DownloadServiceOnDownloadStarted;
+        DownloadService.DownloadFileCompleted -= DownloadServiceOnDownloadFileCompleted;
+        DownloadService.DownloadProgressChanged -= DownloadServiceOnDownloadProgressChanged;
+        DownloadService.ChunkDownloadProgressChanged -= DownloadServiceOnChunkDownloadProgressChanged;
+        DownloadService.MergeStarted -= DownloadServiceOnMergeStarted;
+        DownloadService.MergeProgressChanged -= DownloadServiceOnMergeProgressChanged;
+        DownloadService.ChunkDownloadRestarted -= DownloadServiceOnChunkDownloadRestarted;
+
+        Log.Debug("Event handlers unsubscribed successfully");
     }
 
     #endregion

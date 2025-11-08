@@ -247,7 +247,7 @@ public class DownloadWindowViewModel : ViewModelBase
         DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
         DownloadFile.PropertyChanged += DownloadFileOnPropertyChanged;
 
-        CreateViews();
+        CreateViewsAsync().Wait();
 
         TabItems =
         [
@@ -395,18 +395,29 @@ public class DownloadWindowViewModel : ViewModelBase
     /// <summary>
     /// Creates the views for the download window.
     /// </summary>
-    private void CreateViews()
+    private async Task CreateViewsAsync()
     {
-        var downloadStatusViewModel = new DownloadStatusViewModel(AppService, DownloadFile);
-        DownloadStatusView = new DownloadStatusView { DataContext = downloadStatusViewModel };
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            try
+            {
+                var downloadStatusViewModel = new DownloadStatusViewModel(AppService, DownloadFile);
+                DownloadStatusView = new DownloadStatusView { DataContext = downloadStatusViewModel };
 
-        var downloadSpeedLimiterView = new DownloadSpeedLimiterViewModel(AppService);
-        downloadSpeedLimiterView.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
-        DownloadSpeedLimiterView = new DownloadSpeedLimiterView { DataContext = downloadSpeedLimiterView };
+                var downloadSpeedLimiterView = new DownloadSpeedLimiterViewModel(AppService);
+                downloadSpeedLimiterView.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
+                DownloadSpeedLimiterView = new DownloadSpeedLimiterView { DataContext = downloadSpeedLimiterView };
 
-        var downloadOptionsView = new DownloadOptionsViewModel(AppService);
-        downloadOptionsView.OptionsChanged += DownloadOptionsViewModelOnOptionsChanged;
-        DownloadOptionsView = new DownloadOptionsView { DataContext = downloadOptionsView };
+                var downloadOptionsView = new DownloadOptionsViewModel(AppService);
+                downloadOptionsView.OptionsChanged += DownloadOptionsViewModelOnOptionsChanged;
+                DownloadOptionsView = new DownloadOptionsView { DataContext = downloadOptionsView };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to create the views. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     #endregion
@@ -511,7 +522,7 @@ public class DownloadWindowViewModel : ViewModelBase
     {
         if (e.PropertyName?.Equals(nameof(DownloadFile.CanResumeDownload)) == true || e.PropertyName?.Equals(nameof(DownloadFile.Status)) == true)
             this.RaisePropertyChanged(nameof(IsPauseResumeButtonEnabled));
-        
+
         if (e.PropertyName?.Equals(nameof(DownloadFile.DownloadProgress)) == true)
             this.RaisePropertyChanged(nameof(Title));
     }

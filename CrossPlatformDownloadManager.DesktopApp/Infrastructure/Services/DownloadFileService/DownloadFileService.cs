@@ -656,9 +656,7 @@ public class DownloadFileService : PropertyChangedBase, IDownloadFileService
     public string GetDownloadSpeed()
     {
         var downloadSpeed = DownloadFiles.Where(df => df.IsDownloading).Sum(df => df.TransferRate ?? 0);
-        var speedString = downloadSpeed.ToFileSize();
-        Log.Debug("Current total download speed: {DownloadSpeed}", speedString);
-        return speedString;
+        return downloadSpeed.ToFileSize();
     }
 
     public async Task<DownloadFileViewModel> GetDownloadFileFromUrlAsync(string? url, DownloadFileOptions? options = null, CancellationToken cancellationToken = default)

@@ -693,8 +693,6 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
     {
         try
         {
-            Log.Debug("Schedule manager timer tick. Processing scheduled queues.");
-
             // Stop timer until operation is finished
             _scheduleManagerTimer.Stop();
 
@@ -702,8 +700,6 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
             var startScheduledQueues = DownloadQueues
                 .Where(dq => dq is { StartDownloadSchedule: not null, IsScheduleEnabled: false })
                 .ToList();
-
-            Log.Debug("Found {StartCount} queues scheduled to start", startScheduledQueues.Count);
 
             // Start download queue based on it's a daily schedule or just for date schedule
             foreach (var downloadQueue in startScheduledQueues)
@@ -714,16 +710,12 @@ public class DownloadQueueService : PropertyChangedBase, IDownloadQueueService
                 .Where(dq => dq.StopDownloadSchedule != null && (dq.IsScheduleEnabled || dq.IsRunning))
                 .ToList();
 
-            Log.Debug("Found {StopCount} queues scheduled to stop", stopScheduledQueues.Count);
-
             // Stop download queue based on it's a daily schedule or just for date schedule
             foreach (var downloadQueue in stopScheduledQueues)
                 _ = downloadQueue.IsDaily ? StopDailyScheduleAsync(downloadQueue) : StopJustForDateScheduleAsync(downloadQueue);
 
             // Restart the timer to check for scheduled download queues again
             _scheduleManagerTimer.Start();
-
-            Log.Debug("Schedule manager tick completed successfully.");
         }
         catch (Exception ex)
         {

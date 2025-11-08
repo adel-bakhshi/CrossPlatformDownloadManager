@@ -35,6 +35,7 @@ public class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer _updateDownloadSpeedTimer;
     private readonly DispatcherTimer _updateActiveDownloadQueuesTimer;
     private readonly Debouncer _saveColumnsSettingsDebouncer;
+    private readonly Debouncer _loadDownloadFilesDebouncer;
 
     private Views.MainWindow? _mainWindow;
     private List<DownloadFileViewModel> _selectedDownloadFilesToAddToQueue = [];
@@ -147,8 +148,6 @@ public class MainWindowViewModel : ViewModelBase
         get => _mainMenuItemsEnabledState;
         set => this.RaiseAndSetIfChanged(ref _mainMenuItemsEnabledState, value);
     }
-
-    public bool IsUpdatingDownloadFiles { get; private set; }
 
     public bool ShowCategoriesPanel
     {
@@ -301,6 +300,7 @@ public class MainWindowViewModel : ViewModelBase
         _updateActiveDownloadQueuesTimer.Start();
 
         _saveColumnsSettingsDebouncer = new Debouncer(TimeSpan.FromSeconds(5));
+        _loadDownloadFilesDebouncer = new Debouncer(TimeSpan.FromSeconds(0.5));
 
         LoadCategories();
         FilterDownloadList();
@@ -1657,67 +1657,61 @@ public class MainWindowViewModel : ViewModelBase
 
     private void FilterDownloadList()
     {
-        try
-        {
-            if (IsUpdatingDownloadFiles)
-                return;
-
-            IsUpdatingDownloadFiles = true;
-
-            var downloadFiles = AppService
-                .DownloadFileService
-                .DownloadFiles
-                .ToList();
-
-            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel != null)
-            {
-                downloadFiles = CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.Title switch
-                {
-                    Constants.UnfinishedCategoryHeaderTitle => downloadFiles
-                        .Where(df => !df.IsCompleted)
-                        .ToList(),
-
-                    Constants.FinishedCategoryHeaderTitle => downloadFiles
-                        .Where(df => df.IsCompleted)
-                        .ToList(),
-
-                    _ => downloadFiles
-                };
-            }
-
-            if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel?.SelectedCategory != null)
-            {
-                downloadFiles = downloadFiles
-                    .Where(df => df.CategoryId == CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.SelectedCategory.Id)
-                    .ToList();
-            }
-
-            if (!SearchText.IsStringNullOrEmpty())
-            {
-                downloadFiles = downloadFiles
-                    .Where(df => df.Url?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false ||
-                                 df.FileName?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false ||
-                                 df.SaveLocation?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false)
-                    .ToList();
-            }
-
-            DownloadFiles = downloadFiles.ToObservableCollection();
-        }
-        catch
+        _loadDownloadFilesDebouncer.Run(() =>
         {
             try
             {
-                DownloadFiles = AppService.DownloadFileService.DownloadFiles;
+                var downloadFiles = AppService
+                    .DownloadFileService
+                    .DownloadFiles
+                    .ToList();
+
+                if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel != null)
+                {
+                    downloadFiles = CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.Title switch
+                    {
+                        Constants.UnfinishedCategoryHeaderTitle => downloadFiles
+                            .Where(df => !df.IsCompleted)
+                            .ToList(),
+
+                        Constants.FinishedCategoryHeaderTitle => downloadFiles
+                            .Where(df => df.IsCompleted)
+                            .ToList(),
+
+                        _ => downloadFiles
+                    };
+                }
+
+                if (CategoriesTreeViewModel?.SelectedCategoriesTreeItemViewModel?.SelectedCategory != null)
+                {
+                    downloadFiles = downloadFiles
+                        .Where(df => df.CategoryId == CategoriesTreeViewModel.SelectedCategoriesTreeItemViewModel.SelectedCategory.Id)
+                        .ToList();
+                }
+
+                if (!SearchText.IsStringNullOrEmpty())
+                {
+                    downloadFiles = downloadFiles
+                        .Where(df => df.Url?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false ||
+                                     df.FileName?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false ||
+                                     df.SaveLocation?.Contains(SearchText!, StringComparison.OrdinalIgnoreCase) != false)
+                        .ToList();
+                }
+
+                DownloadFiles = downloadFiles.ToObservableCollection();
             }
             catch
             {
-                DownloadFiles = [];
+                try
+                {
+                    DownloadFiles = AppService.DownloadFileService.DownloadFiles;
+                }
+                catch
+                {
+                    DownloadFiles = [];
+                }
             }
-        }
-        finally
-        {
-            IsUpdatingDownloadFiles = false;
-        }
+        });
     }
 
     protected override void OnDownloadFileServiceDataChanged()

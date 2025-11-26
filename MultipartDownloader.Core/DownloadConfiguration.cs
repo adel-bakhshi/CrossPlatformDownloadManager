@@ -9,7 +9,7 @@ namespace MultipartDownloader.Core;
 public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
 {
     private int _activeChunks = 1; // number of active chunks
-    private int _bufferBlockSize = 1024; // usually, hosts support max to 8000 bytes
+    private int _bufferBlockSize = 65536;
     private int _chunkCount = 1; // file parts to download
     private long _maximumBytesPerSecond = ThrottledStream.Infinite; // No-limitation in download speed
     private int _maximumTryAgainOnFailure = int.MaxValue; // the maximum number of times to fail.
@@ -17,7 +17,8 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     private bool _checkDiskSizeBeforeDownload = true; // check disk size for temp and file path
     private bool _parallelDownload; // download parts of file as parallel or not
     private int _parallelCount; // number of parallel downloads
-    private int _timeout = 1000; // timeout (millisecond) per stream block reader
+    private int _readTimeout = 10000; // timeout (millisecond) per stream block reader
+    private int _retryDelay = 1000; // timeout (millisecond) per chunk download retry
     private bool _clearPackageOnCompletionWithFailure; // Clear package and downloaded data when download completed with failure
     private long _minimumSizeOfChunking = 512; // minimum size of chunking to download a file in multiple parts
     private long _minimumChunkSize; // minimum size of a single chunk
@@ -58,7 +59,7 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     /// </summary>
     public int BufferBlockSize
     {
-        get => (int)Math.Min(MaximumSpeedPerChunk, _bufferBlockSize);
+        get => _bufferBlockSize;
         set
         {
             if (value is < 1 or > 1048576) // 1MB = 1024 * 1024 bytes
@@ -147,17 +148,32 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     public RequestConfiguration RequestConfiguration { get; set; } = new(); // default requests configuration
 
     /// <summary>
-    /// Gets or sets the download timeout per stream file blocks.
+    /// Gets or sets the read timeout for each ReadAsync operation.
     /// </summary>
-    public int Timeout
+    public int ReadTimeout
     {
-        get => _timeout;
+        get => _readTimeout;
+        set
+        {
+            if (value < 1000)
+                throw new ArgumentOutOfRangeException(nameof(ReadTimeout), "Read timeout must be at least 1000 milliseconds.");
+
+            OnPropertyChanged(ref _readTimeout, value);
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the delay before retrying a failed chunk download.
+    /// </summary>
+    public int RetryDelay
+    {
+        get => _retryDelay;
         set
         {
             if (value < 100)
-                throw new ArgumentOutOfRangeException(nameof(Timeout), "Timeout must be at least 100 milliseconds.");
+                throw new ArgumentOutOfRangeException(nameof(RetryDelay), "Retry delay must be at least 100 milliseconds.");
 
-            OnPropertyChanged(ref _timeout, value);
+            OnPropertyChanged(ref _retryDelay, value);
         }
     }
 

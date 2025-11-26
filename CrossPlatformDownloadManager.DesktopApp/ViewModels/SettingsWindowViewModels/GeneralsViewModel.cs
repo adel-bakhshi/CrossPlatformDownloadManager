@@ -231,7 +231,9 @@ public class GeneralsViewModel : ViewModelBase
             "forest-green-theme",
             "sunset-orange-theme",
             "dreamy-pink-theme",
-            "modern-gray-theme"
+            "modern-gray-theme",
+            "gruvbox-dark-theme",
+            "gruvbox-light-theme"
         ];
 
         // Convert theme names to ThemeData
@@ -250,6 +252,8 @@ public class GeneralsViewModel : ViewModelBase
                     "sunset-orange-theme" => "Sunset Orange",
                     "dreamy-pink-theme" => "Dreamy Pink",
                     "modern-gray-theme" => "Modern Gray",
+                    "gruvbox-dark-theme" => "Gruvbox Dark",
+                    "gruvbox-light-theme" => "Gruvbox Light",
                     _ => themeData.ThemeName
                 };
 

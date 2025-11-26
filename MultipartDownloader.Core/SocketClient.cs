@@ -84,7 +84,7 @@ public partial class SocketClient : IDisposable
         return handler;
     }
 
-    private HttpClient GetHttpClientWithSocketHandler(RequestConfiguration config)
+    private static HttpClient GetHttpClientWithSocketHandler(RequestConfiguration config)
     {
         var handler = GetSocketsHttpHandler(config);
         HttpClient client = new(handler);

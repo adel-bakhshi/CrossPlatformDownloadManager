@@ -119,9 +119,11 @@ internal class ChunkDownloader
 
         _logger?.LogDebug("ContinueWithDelay of the chunk {ChunkId}", _chunk.Id);
         await _client.ThrowIfIsNotSupportDownloadInRange(request).ConfigureAwait(false);
-        await Task.Delay(_chunk.Timeout, cancelToken).ConfigureAwait(false);
+        await Task.Delay(_chunk.RetryDelay, cancelToken).ConfigureAwait(false);
         // Increasing reading timeout to reduce stress and conflicts
-        _chunk.Timeout += TimeoutIncrement;
+        _chunk.ReadTimeout += 5000;
+        // Increasing delay between each retry
+        _chunk.RetryDelay = Math.Min(_chunk.RetryDelay + TimeoutIncrement, 2000);
         // re-request and continue downloading
         return await DownloadAsync(request, pause, cancelToken).ConfigureAwait(false);
     }
@@ -132,7 +134,7 @@ internal class ChunkDownloader
             return;
 
         // Create buffer for chunk
-        await _storage.CreateBufferAsync(_chunk.Id, _chunk.TempFilePath, _chunk.FilePosition, SeekOrigin.Begin, cancelToken).ConfigureAwait(false);
+        _storage.CreateBuffer(_chunk.Id, _chunk.TempFilePath, _chunk.FilePosition, SeekOrigin.Begin, cancelToken);
         _logger?.LogDebug("Memory buffered stream created for chunk {ChunkId}.", _chunk.Id);
 
         // Sync storage with chunk position
@@ -178,7 +180,13 @@ internal class ChunkDownloader
                 var buffer = new byte[_configuration.BufferBlockSize];
                 using var innerCts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
                 innerToken = innerCts.Token;
-                innerCts.CancelAfter(_chunk.Timeout);
+
+                // Calculate dynamic timeout based on current conditions
+                var dynamicTimeout = CalculateDynamicTimeout();
+                innerCts.CancelAfter(dynamicTimeout);
+
+                _logger?.LogDebug("Chunk {ChunkId} read timeout set to {Timeout}ms", _chunk.Id, dynamicTimeout);
+
                 await using (innerToken.Value.Register(stream.Close))
                 {
                     // if innerToken timeout occurs, close the stream just during the reading stream
@@ -207,6 +215,9 @@ internal class ChunkDownloader
                 });
             }
 
+            // Flush chunk to storage
+            await FlushChunkAsync(cancelToken).ConfigureAwait(false);
+
             // Compare file size with chunk length and throw exception if not match
             ThrowIfFileSizeNotMatchWithChunkLength();
         }
@@ -223,8 +234,9 @@ internal class ChunkDownloader
         }
         finally
         {
-            // Flush storage and update file position
-            await FlushChunkAsync(CancellationToken.None).ConfigureAwait(false);
+            // Flush chunk to storage if there is any data in the memory
+            if (_storage.GetChunkMemoryLength(_chunk.Id) > 0)
+                await FlushChunkAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         _logger?.LogDebug("ReadStream of the chunk {ChunkId} completed successfully", _chunk.Id);
@@ -305,7 +317,7 @@ internal class ChunkDownloader
 
         await _storage.FlushChunkAsync(_chunk.Id, cancellationToken).ConfigureAwait(false);
         // Add a small delay to ensure file is fully written
-        await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+        await Task.Delay(10, cancellationToken).ConfigureAwait(false);
         _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
 
         _logger?.LogDebug("Chunk {ChunkId} storage flushed and file position updated to {FilePosition}", _chunk.Id, _chunk.FilePosition);
@@ -324,5 +336,57 @@ internal class ChunkDownloader
         var chunkLength = _chunk.Length > 0 ? _chunk.Length : _chunk.Position;
         if (_storage.GetChunkFileLength(_chunk.Id) != chunkLength)
             throw DownloadException.CreateDownloadException(DownloadException.FileSizeNotMatchWithChunkLength);
+    }
+
+    /// <summary>
+    /// Calculates a dynamic timeout value based on current download speed and buffer size.
+    /// This helps prevent unnecessary timeouts on slow connections while quickly detecting frozen servers.
+    /// </summary>
+    /// <returns>The calculated timeout in milliseconds, bounded between min and max values.</returns>
+    private int CalculateDynamicTimeout()
+    {
+        // Minimum timeout: 5 seconds
+        // This ensures we don't timeout too quickly even on fast connections
+        const int minTimeout = 5000;
+
+        // Maximum timeout: 30 seconds
+        // This prevents waiting too long for frozen/unresponsive servers
+        const int maxTimeout = 30000;
+
+        // Default timeout: 10 seconds
+        // Used when we can't calculate based on speed (e.g., unlimited bandwidth)
+        const int defaultTimeout = 10000;
+
+        // Check if we have bandwidth limiting enabled and can calculate based on speed
+        if (_sourceStream?.BandwidthLimit > 0 && _sourceStream.BandwidthLimit != long.MaxValue)
+        {
+            // Calculate expected time to read one buffer block at current speed
+            // Formula: (BufferSize / BytesPerSecond) * 1000 to convert to milliseconds
+            var expectedTimeMs = (_configuration.BufferBlockSize * 1000.0) / _sourceStream.BandwidthLimit;
+
+            // Add 100% safety margin to account for:
+            // - Network latency fluctuations
+            // - TCP overhead
+            // - Temporary slowdowns
+            // - Operating system scheduling delays
+            var timeoutWithMargin = expectedTimeMs * 2.0;
+
+            // Round up to nearest integer
+            var calculatedTimeout = (int)Math.Ceiling(timeoutWithMargin);
+
+            // Ensure the timeout is within acceptable bounds
+            return Math.Max(minTimeout, Math.Min(calculatedTimeout, maxTimeout));
+        }
+
+        // If bandwidth limiting is disabled or set to infinite,
+        // check if we have a configured ReadTimeout
+        if (_chunk.ReadTimeout > 0)
+        {
+            // Use the configured timeout, but ensure it's within bounds
+            return Math.Max(minTimeout, Math.Min(_chunk.ReadTimeout, maxTimeout));
+        }
+
+        // Fallback to default timeout if no other value is available
+        return defaultTimeout;
     }
 }

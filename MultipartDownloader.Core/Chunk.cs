@@ -43,7 +43,12 @@ public class Chunk
     /// <summary>
     /// Gets or sets the timeout in milliseconds to wait for a response from the server.
     /// </summary>
-    public int Timeout { get; set; }
+    public int ReadTimeout { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timeout in milliseconds to wait for a response from the server.
+    /// </summary>
+    public int RetryDelay { get; set; }
 
     /// <summary>
     /// Gets the number of times downloading the chunk has failed.
@@ -89,7 +94,7 @@ public class Chunk
     /// </summary>
     public Chunk()
     {
-        Timeout = DefaultTimeout;
+        RetryDelay = DefaultTimeout;
         Id = Guid.NewGuid().ToString("N");
     }
 
@@ -122,7 +127,7 @@ public class Chunk
         FilePosition = 0;
         FailureCount = 0;
         RestartCount = 0;
-        Timeout = DefaultTimeout;
+        RetryDelay = DefaultTimeout;
     }
 
     /// <summary>

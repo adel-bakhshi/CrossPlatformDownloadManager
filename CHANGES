@@ -1,9 +1,11 @@
-+ Version 0.12.0; 2025-10-29
++ Version 0.12.1; 2025-10-29
 - Performance Improvements:
 - Optimized memory usage during downloads for better stability and lower resource consumption.
 - Improved Manager visibility handling with safer show/hide.
 - Bug Fixes:
 - Various minor bug fixes and overall performance enhancements.
+- Upgrade to Avalonia 11.3.9
+- Added Gruvbox dark and light theme
 
 + Version 0.11.1; 2025-10-26
 - Bug Fixes:

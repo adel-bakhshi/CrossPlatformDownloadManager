@@ -49,6 +49,9 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
             _updateChunksDataTimer.Start();
             // Start focus window timer
             _focusWindowTimer.Start();
+
+            // Create views for the download window
+            await ViewModel.CreateViewsAsync();
         }
         catch (Exception ex)
         {

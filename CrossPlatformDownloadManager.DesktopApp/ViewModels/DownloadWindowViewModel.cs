@@ -247,8 +247,6 @@ public class DownloadWindowViewModel : ViewModelBase
         DownloadFile.DownloadFinished += DownloadFileOnDownloadFinished;
         DownloadFile.PropertyChanged += DownloadFileOnPropertyChanged;
 
-        CreateViewsAsync().Wait();
-
         TabItems =
         [
             "Status",
@@ -304,6 +302,34 @@ public class DownloadWindowViewModel : ViewModelBase
         // Remove event handlers from DownloadOptionsViewModel
         if (DownloadOptionsViewModel != null)
             DownloadOptionsViewModel.OptionsChanged -= DownloadOptionsViewModelOnOptionsChanged;
+    }
+
+    /// <summary>
+    /// Creates the views for the download window.
+    /// </summary>
+    public async Task CreateViewsAsync()
+    {
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            try
+            {
+                var downloadStatusViewModel = new DownloadStatusViewModel(AppService, DownloadFile);
+                DownloadStatusView = new DownloadStatusView { DataContext = downloadStatusViewModel };
+
+                var downloadSpeedLimiterView = new DownloadSpeedLimiterViewModel(AppService);
+                downloadSpeedLimiterView.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
+                DownloadSpeedLimiterView = new DownloadSpeedLimiterView { DataContext = downloadSpeedLimiterView };
+
+                var downloadOptionsView = new DownloadOptionsViewModel(AppService);
+                downloadOptionsView.OptionsChanged += DownloadOptionsViewModelOnOptionsChanged;
+                DownloadOptionsView = new DownloadOptionsView { DataContext = downloadOptionsView };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to create the views. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     #region Command actions
@@ -386,38 +412,6 @@ public class DownloadWindowViewModel : ViewModelBase
             Log.Error(ex, "An error occurred while trying to show/hide the details. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
-    }
-
-    #endregion
-
-    #region Helpers
-
-    /// <summary>
-    /// Creates the views for the download window.
-    /// </summary>
-    private async Task CreateViewsAsync()
-    {
-        await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            try
-            {
-                var downloadStatusViewModel = new DownloadStatusViewModel(AppService, DownloadFile);
-                DownloadStatusView = new DownloadStatusView { DataContext = downloadStatusViewModel };
-
-                var downloadSpeedLimiterView = new DownloadSpeedLimiterViewModel(AppService);
-                downloadSpeedLimiterView.SpeedLimiterChanged += DownloadSpeedLimiterViewModelOnSpeedLimiterChanged;
-                DownloadSpeedLimiterView = new DownloadSpeedLimiterView { DataContext = downloadSpeedLimiterView };
-
-                var downloadOptionsView = new DownloadOptionsViewModel(AppService);
-                downloadOptionsView.OptionsChanged += DownloadOptionsViewModelOnOptionsChanged;
-                DownloadOptionsView = new DownloadOptionsView { DataContext = downloadOptionsView };
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "An error occurred while trying to create the views. Error message: {ErrorMessage}", ex.Message);
-                await DialogBoxManager.ShowErrorDialogAsync(ex);
-            }
-        });
     }
 
     #endregion

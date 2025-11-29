@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -61,7 +60,6 @@ public partial class App : Application
                 // Set desktop-specific properties and event handlers
                 Desktop = desktop;
                 Desktop.MainWindow = startupWindow;
-                Desktop.Startup += ApplicationOnStartup;
                 Desktop.Exit += ApplicationOnExit;
             }
 
@@ -106,34 +104,6 @@ public partial class App : Application
         {
             Log.Error(ex, "An error occurred while trying to show main window. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
-    }
-
-    /// <summary>
-    /// Handles the application startup event, checking if another instance of the application is already running.
-    /// If an instance is found, the application will exit to prevent multiple instances from running simultaneously.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">A <see cref="ControlledApplicationLifetimeStartupEventArgs"/> that contains the event data.</param>
-    private static void ApplicationOnStartup(object? sender, ControlledApplicationLifetimeStartupEventArgs e)
-    {
-        try
-        {
-            // Check if the application is already running
-            var runningInstanceExists = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1;
-            if (!runningInstanceExists)
-                return;
-
-            // Exit the application
-            Log.Information("Application is already running. Exiting...");
-            Environment.Exit(0);
-        }
-        catch (Exception ex)
-        {
-            // Log any exception that occurs during the application finishing process
-            Log.Error(ex, "An error occurred while starting the application. Error message: {ErrorMessage}", ex.Message);
-            // Force exit the application if an error occurs during startup
-            Environment.Exit(0);
         }
     }
 

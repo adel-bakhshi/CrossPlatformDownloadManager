@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ${PUBLISHER_COPYRIGHT} -->
+<component type="desktop-application">
+  <metadata_license>CC0-1.0</metadata_license>
+
+  <!-- All ${MACRO} placeholders will be replaced with actual values during build -->
+
+  <id>${APP_ID}</id>
+  <name>${APP_FRIENDLY_NAME}</name>
+  <summary>${APP_SHORT_SUMMARY}</summary>
+  <developer id="${PUBLISHER_ID}">
+    <name>${PUBLISHER_NAME}</name>
+  </developer>
+  <url type="homepage">${PUBLISHER_LINK_URL}</url>
+  <project_license>${APP_LICENSE_ID}</project_license>
+  <content_rating type="oars-1.1" />
+
+  <launchable type="desktop-id">${APP_ID}.desktop</launchable>
+
+  <description>
+    <!-- See AppDescription in configuration -->
+    ${APPSTREAM_DESCRIPTION_XML}
+  </description>
+
+  <!-- Freedesktop Categories -->
+  <categories>
+    <!-- Add appropriate categories for your app -->
+    <category>${PRIME_CATEGORY}</category>
+  </categories>
+
+  <!-- Uncomment and add keywords for better discoverability -->
+  <!-- <keywords> -->
+  <!--   <keyword>example</keyword> -->
+  <!--   <keyword>app</keyword> -->
+  <!-- </keywords> -->
+
+  <!-- Uncomment and add screenshots -->
+  <!-- <screenshots> -->
+  <!--   <screenshot type="default"> -->
+  <!--     <image>https://example.com/screenshot1.png</image> -->
+  <!--     <caption>Main window</caption> -->
+  <!--   </screenshot> -->
+  <!-- </screenshots> -->
+
+  <releases>
+      <!-- See AppChangeFile in configuration -->
+      ${APPSTREAM_CHANGELOG_XML}
+      <!-- Or, uncomment below and delete macro directly above to specify changes yourself
+      <release version="1.0.0" date="2023-05-04">
+          <description>
+              <ul>
+                  <li>Added feature 1</li>
+                  <li>Added feature 2</li>
+              </ul>
+          </description>
+      </release>
+      -->
+  </releases>
+
+</component>

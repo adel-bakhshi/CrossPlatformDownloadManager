@@ -1247,26 +1247,16 @@ public class MainWindowViewModel : ViewModelBase
                 SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(downloadFile.SaveLocation!)
             };
 
-            string? newSaveLocation = null;
             // Open folder picker window and let user choose a folder
             var directories = await storageProvider.OpenFolderPickerAsync(options);
-            // Check if user chose a folder
-            if (directories.Any())
-            {
-                newSaveLocation = directories[0].Path.IsAbsoluteUri
-                    ? directories[0].Path.AbsolutePath
-                    : directories[0].Path.OriginalString;
-            }
-
-            // Check if new save location is null or empty
-            if (newSaveLocation.IsStringNullOrEmpty())
-            {
-                await DialogBoxManager.ShowInfoDialogAsync("Change folder", "Folder not found.", DialogButtons.Ok);
+            // Check if user canceled the operation
+            if (!directories.Any())
                 return;
-            }
 
+            // Use first path as new path
+            var newSaveLocation = directories[0].Path.IsAbsoluteUri ? directories[0].Path.AbsolutePath : directories[0].Path.OriginalString;
             // Create new file path
-            var newFilePath = Path.Combine(newSaveLocation!, downloadFile.FileName!);
+            var newFilePath = Path.Combine(newSaveLocation, downloadFile.FileName!);
             // Check if new file path already exists
             if (File.Exists(newFilePath))
             {
@@ -1459,7 +1449,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
 
             // Open properties window for the selected download file
-            await DataGridRowDoubleTapActionAsync(downloadFile, _mainWindow);
+            await ShowDownloadDetailsAsync(downloadFile, _mainWindow);
         }
         catch (Exception ex)
         {
@@ -2085,11 +2075,7 @@ public class MainWindowViewModel : ViewModelBase
 
                 default:
                 {
-                    // Create a new download details window and show it
-                    var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
-                    var window = new DownloadDetailsWindow { DataContext = viewModel };
-                    await window.ShowDialog(owner);
-
+                    await ShowDownloadDetailsAsync(downloadFile, owner);
                     break;
                 }
             }
@@ -2099,6 +2085,33 @@ public class MainWindowViewModel : ViewModelBase
             // Log the error with detailed information
             Log.Error(ex, "An error occurred while trying to handle double click event on data grid. Error message: {ErrorMessage}", ex.Message);
             // Show an error dialog to the user
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Shows the download details window.
+    /// </summary>
+    /// <param name="downloadFile">The download file to show details for.</param>
+    /// <param name="owner">The owner window of the download details window.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task ShowDownloadDetailsAsync(DownloadFileViewModel? downloadFile, Window? owner)
+    {
+        try
+        {
+            if (downloadFile == null || owner == null)
+                return;
+
+            // Create a new download details window and show it
+            var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
+            var window = new DownloadDetailsWindow { DataContext = viewModel };
+            await window.ShowDialog(owner);
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Log.Error(ex, "An error occurred while trying to open download details window. Error message: {ErrorMessage}", ex.Message);
+            // Show error dialog
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }

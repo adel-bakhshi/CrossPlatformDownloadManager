@@ -34,7 +34,7 @@ internal class ChunkBuffer
     /// </summary>
     public long FilePosition { get; set; }
 
-    #endregion
+    #endregion Properties
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ChunkBuffer"/> class.
@@ -70,13 +70,9 @@ internal class ChunkBuffer
     /// <param name="origin">Specifies the beginning, the end, or the current position as the reference point for offset.</param>
     public void Seek(long offset, SeekOrigin origin)
     {
-        CreateStreamIfNull();
-
-        FilePosition = offset;
-        if (FilePosition > FileStream!.Length)
-            FilePosition = FileStream.Length;
-
-        FileStream.Seek(FilePosition, origin);
+        // Seek the underlying FileStream using the given origin and offset,
+        // then set FilePosition to the actual stream position.
+        FilePosition = FileStream!.Seek(offset, origin);
     }
 
     /// <summary>
@@ -85,7 +81,6 @@ internal class ChunkBuffer
     /// <param name="length">The desired length of the current stream in bytes.</param>
     public void SetLength(long length)
     {
-        CreateStreamIfNull();
         if (FilePosition > length)
             FilePosition = length;
 
@@ -101,8 +96,6 @@ internal class ChunkBuffer
             return;
 
         await FileStream.DisposeAsync().ConfigureAwait(false);
-        // Wait for the file stream to be disposed before setting it to null.
-        await Task.Delay(100).ConfigureAwait(false);
         FileStream = null;
     }
 }

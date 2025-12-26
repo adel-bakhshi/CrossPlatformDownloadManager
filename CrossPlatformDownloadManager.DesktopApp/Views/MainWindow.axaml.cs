@@ -351,6 +351,20 @@ public partial class MainWindow : MyWindowBase<MainWindowViewModel>
         });
     }
 
+    /// <summary>
+    /// Handles the pointer entered event for the AddToQueueFlyoutButton.
+    /// Opens the flyout menu to choose a download queue.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void AddToQueueFlyoutButtonOnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is not Button button || ViewModel?.AddToQueueFlyout == null)
+            return;
+        
+        ViewModel.AddToQueueFlyout.ShowAt(button);
+    }
+
     #region Helpers
 
     /// <summary>

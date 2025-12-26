@@ -97,7 +97,7 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
     /// <summary>
     /// The shared memory buffered stream for all chunks.
     /// </summary>
-    protected SharedMemoryBufferedStream? Storage { get; }
+    protected SharedMemoryBufferedStream? Storage { get; set; }
 
     /// <summary>
     /// Event triggered when the download file operation is completed.
@@ -144,7 +144,6 @@ public abstract class AbstractDownloadService : IDownloadService, IDisposable, I
         Bandwidth = new Bandwidth();
         Options = options ?? new DownloadConfiguration();
         Package = new DownloadPackage();
-        Storage = new SharedMemoryBufferedStream(Options, Logger);
     }
 
     /// <summary>

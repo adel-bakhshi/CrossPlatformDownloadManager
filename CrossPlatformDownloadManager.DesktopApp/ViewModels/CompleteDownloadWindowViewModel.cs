@@ -80,7 +80,7 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenFile(filePath);
+            PlatformSpecificManager.Current.OpenFile(filePath);
             owner?.Close();
         }
         catch (Exception ex)
@@ -109,7 +109,7 @@ public class CompleteDownloadWindowViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+            PlatformSpecificManager.Current.OpenContainingFolderAndSelectFile(filePath);
             owner?.Close();
         }
         catch (Exception ex)

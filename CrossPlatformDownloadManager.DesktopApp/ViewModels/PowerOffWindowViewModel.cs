@@ -159,19 +159,19 @@ public class PowerOffWindowViewModel : ViewModelBase
                 {
                     case "shut down":
                     {
-                        PlatformSpecificManager.Shutdown();
+                        PlatformSpecificManager.Current.Shutdown();
                         break;
                     }
 
                     case "sleep":
                     {
-                        PlatformSpecificManager.Sleep();
+                        PlatformSpecificManager.Current.Sleep();
                         break;
                     }
 
                     case "hibernate":
                     {
-                        PlatformSpecificManager.Hibernate();
+                        PlatformSpecificManager.Current.Hibernate();
                         break;
                     }
                 }

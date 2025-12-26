@@ -485,7 +485,7 @@ public class DownloadWindowViewModel : ViewModelBase
                 return;
 
             // Open the folder and select the file
-            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+            PlatformSpecificManager.Current.OpenContainingFolderAndSelectFile(filePath);
         }
 
         // Check if the user wants to exit the program

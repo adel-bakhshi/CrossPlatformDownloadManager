@@ -17,7 +17,7 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     private bool _checkDiskSizeBeforeDownload = true; // check disk size for temp and file path
     private bool _parallelDownload; // download parts of file as parallel or not
     private int _parallelCount; // number of parallel downloads
-    private int _readTimeout = 10000; // timeout (millisecond) per stream block reader
+    private int _readTimeout = 30000; // timeout (millisecond) per stream block reader
     private int _retryDelay = 1000; // timeout (millisecond) per chunk download retry
     private bool _clearPackageOnCompletionWithFailure; // Clear package and downloaded data when download completed with failure
     private long _minimumSizeOfChunking = 512; // minimum size of chunking to download a file in multiple parts
@@ -163,7 +163,7 @@ public class DownloadConfiguration : ICloneable, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Gets or sets the delay before retrying a failed chunk download.
+    /// Gets or sets the delay in milliseconds before retrying a failed chunk download.
     /// </summary>
     public int RetryDelay
     {

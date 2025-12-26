@@ -1,164 +1,223 @@
 using System;
+using System.IO;
+using AutoLaunch;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.FileExplorerManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.PowerManager;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager.StartupManager;
 using CrossPlatformDownloadManager.Utils;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 
-using System.IO;
-
 /// <summary>
-/// A static class that manages platform-specific operations for the application.
+/// A class that manages platform-specific operations for the application.
 /// This class provides methods for handling startup registration, file operations, and power management.
 /// </summary>
-public static class PlatformSpecificManager
+public class PlatformSpecificManager
 {
-    #region Private Fields
+    #region Constants
 
     /// <summary>
     /// The name of the application used for startup registration.
     /// </summary>
     private const string AppName = "CrossPlatformDownloadManager.DesktopApp";
 
+    #endregion
+
+    #region Private Fields
+
     /// <summary>
-    /// Manager for handling startup operations on different operating systems.
+    /// Singleton instance of <see cref="PlatformSpecificManager"/>.
     /// </summary>
-    private static IStartupManager? _startupManager;
+    private static PlatformSpecificManager? _current;
+
+    /// <summary>
+    /// The <see cref="AutoLauncher"/> instance to manage the application's startup configuration.
+    /// </summary>
+    private readonly AutoLauncher _autoLauncher;
+
+    // /// <summary>
+    // /// Manager for handling startup operations on different operating systems.
+    // /// </summary>
+    // private IStartupManager? _startupManager;
 
     /// <summary>
     /// Manager for handling file explorer operations on different operating systems.
     /// </summary>
-    private static IFileExplorerManager? _fileExplorerManager;
+    private IFileExplorerManager? _fileExplorerManager;
 
     /// <summary>
     /// Manager for handling power management operations on different operating systems.
     /// </summary>
-    private static IPowerManager? _powerManager;
+    private IPowerManager? _powerManager;
 
     #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets the singleton instance of <see cref="PlatformSpecificManager"/>.
+    /// </summary>
+    public static PlatformSpecificManager Current => GetOrCreateInstance();
+
+    #endregion
+
+    private PlatformSpecificManager()
+    {
+        var appExecutable = AppName + (OperatingSystem.IsWindows() ? ".exe" : "");
+        var appPath = Path.Combine(Constants.MainDirectory, appExecutable);
+
+        _autoLauncher = new AutoLaunchBuilder()
+            .SetAppName("Cross platform Download Manager (CDM)")
+            .SetAppPath(appPath)
+            .SetWorkScope(WorkScope.CurrentUser)
+            .SetWindowsEngine(WindowsEngine.Registry)
+            .SetLinuxEngine(LinuxEngine.Freedesktop)
+            .SetMacOSEngine(MacOSEngine.AppleScript)
+            .Build();
+    }
 
     /// <summary>
     /// Checks if the application is registered as a startup item.
     /// </summary>
     /// <returns>True if the application is registered as a startup item, otherwise false.</returns>
-    public static bool IsStartupRegistered()
+    public bool IsStartupRegistered()
     {
-        Log.Debug("Checking if application is registered as a startup item...");
+        // Log.Debug("Checking if application is registered as a startup item...");
+        //
+        // IStartupManager startupManager;
+        // if (OperatingSystem.IsWindows())
+        // {
+        //     // For Windows, create or use existing WindowsStartupManager
+        //     startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+        // }
+        // else if (OperatingSystem.IsMacOS())
+        // {
+        //     var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
+        //     // For macOS, create or use existing MacStartupManager with app path
+        //     startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
+        // }
+        // else if (OperatingSystem.IsLinux())
+        // {
+        //     var appExec = Path.Combine(Constants.MainDirectory, AppName);
+        //     // For Linux, create or use existing LinuxStartupManager with executable path
+        //     startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
+        // }
+        // else
+        // {
+        //     Log.Fatal("Unsupported operating system.");
+        //     return false;
+        // }
+        //
+        // if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
+        //     // Update the startup manager if needed
+        //     _startupManager = startupManager;
+        //
+        // return startupManager.IsRegistered();
 
-        IStartupManager startupManager;
-        if (OperatingSystem.IsWindows())
-        {
-            // For Windows, create or use existing WindowsStartupManager
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
-            // For macOS, create or use existing MacStartupManager with app path
-            startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            var appExec = Path.Combine(Constants.MainDirectory, AppName);
-            // For Linux, create or use existing LinuxStartupManager with executable path
-            startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
-        }
-        else
-        {
-            Log.Fatal("Unsupported operating system.");
-            return false;
-        }
+        if (AutoLauncher.IsSupported())
+            return _autoLauncher.GetStatus();
 
-        if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
-            // Update the startup manager if needed
-            _startupManager = startupManager;
-
-        return startupManager.IsRegistered();
+        Log.Fatal("Unsupported operating system.");
+        return false;
     }
 
     /// <summary>
     /// Registers the application as a startup item.
     /// </summary>
-    public static void RegisterStartup()
+    public void RegisterStartup()
     {
         Log.Debug("Registering application as a startup item...");
 
-        IStartupManager startupManager;
-        if (OperatingSystem.IsWindows())
-        {
-            // For Windows, create or use existing WindowsStartupManager
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            // For macOS, create or use existing MacStartupManager with app path
-            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
-            startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            // For Linux, create or use existing LinuxStartupManager with executable path
-            var appExec = Path.Combine(Constants.MainDirectory, AppName);
-            startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
-        }
-        else
+        // IStartupManager startupManager;
+        // if (OperatingSystem.IsWindows())
+        // {
+        //     // For Windows, create or use existing WindowsStartupManager
+        //     startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+        // }
+        // else if (OperatingSystem.IsMacOS())
+        // {
+        //     // For macOS, create or use existing MacStartupManager with app path
+        //     var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
+        //     startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
+        // }
+        // else if (OperatingSystem.IsLinux())
+        // {
+        //     // For Linux, create or use existing LinuxStartupManager with executable path
+        //     var appExec = Path.Combine(Constants.MainDirectory, AppName);
+        //     startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
+        // }
+        // else
+        // {
+        //     Log.Fatal("Unsupported operating system.");
+        //     return;
+        // }
+        //
+        // // Update the startup manager if needed
+        // if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
+        //     _startupManager = startupManager;
+        //
+        // startupManager.Register();
+
+        if (!AutoLauncher.IsSupported())
         {
             Log.Fatal("Unsupported operating system.");
             return;
         }
 
-        // Update the startup manager if needed
-        if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
-            _startupManager = startupManager;
-
-        startupManager.Register();
+        _autoLauncher.Enable();
     }
 
     /// <summary>
     /// Deletes the application's startup configuration.
     /// </summary>
-    public static void DeleteStartup()
+    public void DeleteStartup()
     {
-        Log.Debug("Deleting application startup configuration...");
+        // Log.Debug("Deleting application startup configuration...");
+        //
+        // IStartupManager startupManager;
+        // if (OperatingSystem.IsWindows())
+        // {
+        //     // For Windows, create or use existing WindowsStartupManager
+        //     startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
+        // }
+        // else if (OperatingSystem.IsMacOS())
+        // {
+        //     // For macOS, create or use existing MacStartupManager with app path
+        //     var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
+        //     startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
+        // }
+        // else if (OperatingSystem.IsLinux())
+        // {
+        //     // For Linux, create or use existing LinuxStartupManager with executable path
+        //     var appExec = Path.Combine(Constants.MainDirectory, AppName);
+        //     startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
+        // }
+        // else
+        // {
+        //     Log.Fatal("Unsupported operating system.");
+        //     return;
+        // }
+        //
+        // // Update the startup manager if needed
+        // if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
+        //     _startupManager = startupManager;
+        //
+        // startupManager.Delete();
 
-        IStartupManager startupManager;
-        if (OperatingSystem.IsWindows())
-        {
-            // For Windows, create or use existing WindowsStartupManager
-            startupManager = _startupManager is WindowsStartupManager ? _startupManager : new WindowsStartupManager(AppName);
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            // For macOS, create or use existing MacStartupManager with app path
-            var appPath = Path.Combine(Constants.MainDirectory, $"{AppName}.app");
-            startupManager = _startupManager is MacStartupManager ? _startupManager : new MacStartupManager(AppName, appPath);
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            // For Linux, create or use existing LinuxStartupManager with executable path
-            var appExec = Path.Combine(Constants.MainDirectory, AppName);
-            startupManager = _startupManager is LinuxStartupManager ? _startupManager : new LinuxStartupManager(AppName, appExec);
-        }
-        else
+        if (!AutoLauncher.IsSupported())
         {
             Log.Fatal("Unsupported operating system.");
             return;
         }
 
-        // Update the startup manager if needed
-        if (_startupManager == null || _startupManager.GetType() != startupManager.GetType())
-            _startupManager = startupManager;
-
-        startupManager.Delete();
+        _autoLauncher.Disable();
     }
 
     /// <summary>
     /// Opens a folder in the system's default file explorer.
     /// </summary>
     /// <param name="folderPath">The path to the folder to open.</param>
-    public static void OpenFolder(string folderPath)
+    public void OpenFolder(string folderPath)
     {
         Log.Debug("Opening folder with path '{FolderPath}'...", folderPath);
 
@@ -195,7 +254,7 @@ public static class PlatformSpecificManager
     /// Opens the folder containing the specified file and selects the file.
     /// </summary>
     /// <param name="filePath">The path to the file.</param>
-    public static void OpenContainingFolderAndSelectFile(string filePath)
+    public void OpenContainingFolderAndSelectFile(string filePath)
     {
         Log.Debug("Opening containing folder and selecting file with path '{FilePath}'...", filePath);
 
@@ -232,7 +291,7 @@ public static class PlatformSpecificManager
     /// Opens a file with the system's default application for that file type.
     /// </summary>
     /// <param name="filePath">The path to the file to open.</param>
-    public static void OpenFile(string filePath)
+    public void OpenFile(string filePath)
     {
         Log.Debug("Opening file with path '{FilePath}'...", filePath);
 
@@ -268,7 +327,7 @@ public static class PlatformSpecificManager
     /// <summary>
     /// Shuts down the computer.
     /// </summary>
-    public static void Shutdown()
+    public void Shutdown()
     {
         Log.Debug("Shutting down the computer...");
 
@@ -304,7 +363,7 @@ public static class PlatformSpecificManager
     /// <summary>
     /// Puts the computer to sleep.
     /// </summary>
-    public static void Sleep()
+    public void Sleep()
     {
         Log.Debug("Putting the computer to sleep...");
 
@@ -340,7 +399,7 @@ public static class PlatformSpecificManager
     /// <summary>
     /// Hibernates the computer.
     /// </summary>
-    public static void Hibernate()
+    public void Hibernate()
     {
         Log.Debug("Hibernating the computer...");
 
@@ -377,7 +436,7 @@ public static class PlatformSpecificManager
     /// Checks if hibernation is enabled on the system.
     /// </summary>
     /// <returns>True if hibernation is enabled, otherwise false.</returns>
-    public static bool IsHibernateEnabled()
+    public bool IsHibernateEnabled()
     {
         Log.Debug("Checking if hibernation is enabled...");
 
@@ -409,4 +468,18 @@ public static class PlatformSpecificManager
 
         return powerManager.IsHibernateEnabled();
     }
+
+    #region Helpers
+
+    /// <summary>
+    /// Gets if exists or creates a new instance of the <see cref="PlatformSpecificManager"/> class.
+    /// </summary>
+    /// <returns>Returns the instance of the <see cref="PlatformSpecificManager"/> class.</returns>
+    private static PlatformSpecificManager GetOrCreateInstance()
+    {
+        _current ??= new PlatformSpecificManager();
+        return _current;
+    }
+
+    #endregion
 }

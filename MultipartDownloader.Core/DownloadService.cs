@@ -29,6 +29,7 @@ public class DownloadService : AbstractDownloadService
     public DownloadService(DownloadConfiguration? options, ILoggerFactory? loggerFactory = null) : base(options)
     {
         Logger = loggerFactory?.CreateLogger<DownloadService>();
+        Storage = new SharedMemoryBufferedStream(Options, Logger);
     }
 
     /// <summary>

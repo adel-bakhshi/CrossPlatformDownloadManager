@@ -626,7 +626,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         Log.Debug("Registering application for system startup...");
 
         // Check if the application is already registered as a startup item
-        var isRegistered = PlatformSpecificManager.IsStartupRegistered();
+        var isRegistered = PlatformSpecificManager.Current.IsStartupRegistered();
         if (isRegistered)
         {
             Log.Debug("Application is already registered as a startup item.");
@@ -634,7 +634,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         }
 
         Log.Debug("Application is not registered for startup, registering now...");
-        PlatformSpecificManager.RegisterStartup();
+        PlatformSpecificManager.Current.RegisterStartup();
         Log.Information("Application registered for system startup successfully");
     }
 
@@ -646,7 +646,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     {
         Log.Debug("Deleting application from system startup...");
 
-        PlatformSpecificManager.DeleteStartup();
+        PlatformSpecificManager.Current.DeleteStartup();
         Log.Information("Application removed from system startup successfully");
     }
 

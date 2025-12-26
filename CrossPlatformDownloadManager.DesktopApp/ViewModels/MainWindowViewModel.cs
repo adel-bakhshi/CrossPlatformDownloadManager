@@ -18,6 +18,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.PlatformManager;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.Models;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels.MainWindow;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using CrossPlatformDownloadManager.DesktopApp.Views.UserControls.MainWindow;
@@ -57,6 +58,7 @@ public class MainWindowViewModel : ViewModelBase
     private string _globalSpeedLimit = "0 KB";
     private bool _isGlobalSpeedLimitVisible;
     private string? _activeProxyTitle;
+    private ObservableCollection<DownloadFilesDataGridShortcut> _downloadFilesDataGridShortcuts = [];
 
     #endregion
 
@@ -181,6 +183,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _activeProxyTitle;
         set => this.RaiseAndSetIfChanged(ref _activeProxyTitle, value);
+    }
+
+    public ObservableCollection<DownloadFilesDataGridShortcut> DownloadFilesDataGridShortcuts
+    {
+        get => _downloadFilesDataGridShortcuts;
+        set => this.RaiseAndSetIfChanged(ref _downloadFilesDataGridShortcuts, value);
     }
 
     #endregion
@@ -314,6 +322,8 @@ public class MainWindowViewModel : ViewModelBase
         CalculateGlobalSpeedLimit();
         UpdateActiveProxy();
 
+        LoadDownloadFilesDataGridShortcuts();
+
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
         AddNewLinkCommand = ReactiveCommand.CreateFromTask<Window?>(AddNewLinkAsync);
         ResumeDownloadFileCommand = ReactiveCommand.CreateFromTask<DataGrid?>(ResumeDownloadFileAsync);
@@ -364,11 +374,6 @@ public class MainWindowViewModel : ViewModelBase
         CheckForUpdatesCommand = ReactiveCommand.CreateFromTask<Window?>(CheckForUpdatesAsync);
         DownloadBrowserExtensionCommand = ReactiveCommand.CreateFromTask<Window?>(DownloadBrowserExtensionAsync);
         HowToInstallBrowserExtensionCommand = ReactiveCommand.CreateFromTask(HowToInstallBrowserExtensionAsync);
-    }
-
-    private void LoadDownloadQueues()
-    {
-        DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
     }
 
     private void SelectAllRows(DataGrid? dataGrid)
@@ -1104,7 +1109,7 @@ public class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            PlatformSpecificManager.OpenFile(filePath);
+            PlatformSpecificManager.Current.OpenFile(filePath);
         }
         catch (Exception ex)
         {
@@ -1149,7 +1154,7 @@ public class MainWindowViewModel : ViewModelBase
                         if (openedFolders.Contains(directoryPath))
                             continue;
 
-                        PlatformSpecificManager.OpenFolder(directoryPath);
+                        PlatformSpecificManager.Current.OpenFolder(directoryPath);
                         openedFolders.Add(directoryPath);
                     }
                     else
@@ -1160,11 +1165,11 @@ public class MainWindowViewModel : ViewModelBase
                         var filePath = Path.Combine(directoryPath, downloadFile.FileName!);
                         if (File.Exists(filePath))
                         {
-                            PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                            PlatformSpecificManager.Current.OpenContainingFolderAndSelectFile(filePath);
                         }
                         else
                         {
-                            PlatformSpecificManager.OpenFolder(directoryPath);
+                            PlatformSpecificManager.Current.OpenFolder(directoryPath);
                         }
 
                         openedFolders.Add(directoryPath);
@@ -1360,97 +1365,17 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            // Clear previous data stored in AddToQueueDownloadQueues
-            AddToQueueDownloadQueues.Clear();
-            if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+            if (dataGrid == null ||
+                dataGrid.SelectedItems.Count == 0 ||
+                AppService.DownloadQueueService.DownloadQueues.Count == 0 ||
+                _selectedDownloadFilesToAddToQueue.Count == 0)
             {
                 await HideContextMenuAsync();
                 return;
             }
 
-            // Get selected download files that are not completed
-            var downloadFiles = dataGrid
-                .SelectedItems
-                .OfType<DownloadFileViewModel>()
-                .Where(df => df is { IsCompleted: false, IsStopping: false })
-                .ToList();
-
-            var downloadQueues = AppService
-                .DownloadQueueService
-                .DownloadQueues;
-
-            if (downloadQueues.Count == 0)
-            {
-                await HideContextMenuAsync();
-                return;
-            }
-
-            switch (downloadFiles.Count)
-            {
-                // If count of selected download files is equal to 0 then hide context menu
-                case 0:
-                {
-                    await HideContextMenuAsync();
-                    return;
-                }
-
-                // If count of selected download files is equal to 1 then show all download queues except the one that currently in use
-                case 1:
-                {
-                    var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFiles[0].DownloadQueueId);
-                    if (downloadQueue == null)
-                    {
-                        AddToQueueDownloadQueues = downloadQueues;
-                    }
-                    else
-                    {
-                        AddToQueueDownloadQueues = downloadQueues
-                            .Where(dq => dq.Id != downloadQueue.Id)
-                            .ToObservableCollection();
-
-                        if (AddToQueueDownloadQueues.Count == 0)
-                            AddToQueueFlyout?.Hide();
-                    }
-
-                    break;
-                }
-
-                default:
-                {
-                    var primaryKeys = downloadFiles
-                        .Where(df => df is { DownloadQueueId: not null })
-                        .Select(df => df.DownloadQueueId!.Value)
-                        .Distinct()
-                        .ToList();
-
-                    switch (primaryKeys.Count)
-                    {
-                        // If count of primary keys is equal to 1 then show all download queues except the one with primary key
-                        case 1:
-                        {
-                            AddToQueueDownloadQueues = downloadQueues
-                                .Where(dq => !primaryKeys.Contains(dq.Id))
-                                .ToObservableCollection();
-
-                            if (AddToQueueDownloadQueues.Count == 0)
-                                AddToQueueFlyout?.Hide();
-
-                            break;
-                        }
-
-                        // If count of primary keys is 0 or more than 1 then show all download queues
-                        default:
-                        {
-                            AddToQueueDownloadQueues = downloadQueues;
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-            }
-
-            _selectedDownloadFilesToAddToQueue = downloadFiles;
+            if (AddToQueueDownloadQueues.Count == 0)
+                AddToQueueFlyout?.Hide();
         }
         catch (Exception ex)
         {
@@ -1719,6 +1644,11 @@ public class MainWindowViewModel : ViewModelBase
         FilterDownloadList();
     }
 
+    private void LoadDownloadQueues()
+    {
+        DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
+    }
+
     protected override void OnDownloadQueueServiceDataChanged()
     {
         LoadDownloadQueues();
@@ -1763,6 +1693,16 @@ public class MainWindowViewModel : ViewModelBase
                 break;
             }
         }
+    }
+
+    private void LoadDownloadFilesDataGridShortcuts()
+    {
+        DownloadFilesDataGridShortcuts =
+        [
+            new DownloadFilesDataGridShortcut { Title = "Copy", Shortcut = "Ctrl + Alt + C", IsEven = true },
+            new DownloadFilesDataGridShortcut { Title = "Delete", Shortcut = "Delete", IsEven = false },
+            new DownloadFilesDataGridShortcut { Title = "Open file", Shortcut = "Double click", IsEven = true }
+        ];
     }
 
     private void CalculateGlobalSpeedLimit()
@@ -1836,12 +1776,72 @@ public class MainWindowViewModel : ViewModelBase
                               downloadQueues.FirstOrDefault(dq => dq.Id == df.DownloadQueueId) != null);
 
             ContextFlyoutEnableState.CanOpenProperties = downloadFiles.Count > 0;
+
+            LoadAvailableQueuesForContextMenu(dataGrid);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while trying to change context flyout enable state. Error message: {ErrorMessage}", ex.Message);
             await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
+    }
+
+    private void LoadAvailableQueuesForContextMenu(DataGrid? dataGrid)
+    {
+        // Clear previous data stored in AddToQueueDownloadQueues
+        AddToQueueDownloadQueues = [];
+        _selectedDownloadFilesToAddToQueue = [];
+
+        // If no download files are selected then return
+        if (dataGrid == null || dataGrid.SelectedItems.Count == 0)
+            return;
+
+        // Get download queues
+        var downloadQueues = AppService.DownloadQueueService.DownloadQueues;
+        if (downloadQueues.Count == 0)
+            return;
+
+        // Get selected download files that are not completed
+        var downloadFiles = dataGrid
+            .SelectedItems
+            .OfType<DownloadFileViewModel>()
+            .Where(df => df is { IsCompleted: false, IsStopping: false })
+            .ToList();
+
+        switch (downloadFiles.Count)
+        {
+            // If count of selected download files is equal to 1 then show all download queues except the one that currently in use
+            case 1:
+            {
+                var downloadQueue = downloadQueues.FirstOrDefault(dq => dq.Id == downloadFiles[0].DownloadQueueId);
+                AddToQueueDownloadQueues = downloadQueue != null
+                    ? downloadQueues.Where(dq => dq.Id != downloadQueue.Id).ToObservableCollection()
+                    : downloadQueues;
+
+                break;
+            }
+
+            default:
+            {
+                // Get primary keys of download queues from the download files
+                var primaryKeys = downloadFiles
+                    .Where(df => df is { DownloadQueueId: not null })
+                    .Select(df => df.DownloadQueueId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                AddToQueueDownloadQueues = primaryKeys.Count switch
+                {
+                    // If count of primary keys is equal to 1 then show all download queues except the one with primary key
+                    1 => downloadQueues.Where(dq => !primaryKeys.Contains(dq.Id)).ToObservableCollection(),
+                    _ => downloadQueues
+                };
+
+                break;
+            }
+        }
+
+        _selectedDownloadFilesToAddToQueue = downloadFiles;
     }
 
     public void ChangeFileSubMenusEnableState(DataGrid? dataGrid)
@@ -2063,20 +2063,35 @@ public class MainWindowViewModel : ViewModelBase
             if (downloadFile == null || owner == null)
                 return;
 
-            // Get download file path
-            var filePath = downloadFile.GetFilePath() ?? string.Empty;
-            // Check if download is completed and file exists
-            if (downloadFile.IsCompleted && File.Exists(filePath))
+            switch (downloadFile.Status)
             {
-                // Open file
-                PlatformSpecificManager.OpenFile(filePath);
-            }
-            else
-            {
-                // Create a new download details window and show it
-                var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
-                var window = new DownloadDetailsWindow { DataContext = viewModel };
-                await window.ShowDialog(owner);
+                case DownloadFileStatus.Downloading:
+                case DownloadFileStatus.Paused:
+                {
+                    AppService.DownloadFileService.ShowOrFocusDownloadWindow(downloadFile);
+                    break;
+                }
+
+                case DownloadFileStatus.Completed:
+                {
+                    // Get download file path
+                    var filePath = downloadFile.GetFilePath() ?? string.Empty;
+                    // Check if download is completed and file exists, then open it
+                    if (File.Exists(filePath))
+                        PlatformSpecificManager.Current.OpenFile(filePath);
+
+                    break;
+                }
+
+                default:
+                {
+                    // Create a new download details window and show it
+                    var viewModel = new DownloadDetailsWindowViewModel(AppService, downloadFile);
+                    var window = new DownloadDetailsWindow { DataContext = viewModel };
+                    await window.ShowDialog(owner);
+
+                    break;
+                }
             }
         }
         catch (Exception ex)

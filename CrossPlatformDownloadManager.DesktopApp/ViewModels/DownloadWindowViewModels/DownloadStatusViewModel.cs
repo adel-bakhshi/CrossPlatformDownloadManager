@@ -96,11 +96,11 @@ public class DownloadStatusViewModel : ViewModelBase
 
             if (!filePath.IsStringNullOrEmpty() && File.Exists(filePath))
             {
-                PlatformSpecificManager.OpenContainingFolderAndSelectFile(filePath);
+                PlatformSpecificManager.Current.OpenContainingFolderAndSelectFile(filePath);
             }
             else
             {
-                PlatformSpecificManager.OpenFolder(DownloadFile.SaveLocation);
+                PlatformSpecificManager.Current.OpenFolder(DownloadFile.SaveLocation);
             }
         }
         catch (Exception ex)

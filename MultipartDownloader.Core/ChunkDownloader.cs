@@ -108,7 +108,8 @@ internal class ChunkDownloader
             cancelToken.ThrowIfCancellationRequested();
             // Can't handle this exception
             _logger?.LogCritical(error, "Fatal error on download chunk {ChunkId}.", _chunk.Id);
-            throw;
+
+            throw new InvalidOperationException($"Fatal error on download chunk {_chunk.Id}", error);
         }
     }
 
@@ -134,12 +135,12 @@ internal class ChunkDownloader
             return;
 
         // Create buffer for chunk
-        _storage.CreateBuffer(_chunk.Id, _chunk.TempFilePath, _chunk.FilePosition, SeekOrigin.Begin, cancelToken);
+        _storage.CreateBuffer(_chunk.Id, _chunk.TempFilePath, _chunk.FilePosition, SeekOrigin.Begin);
         _logger?.LogDebug("Memory buffered stream created for chunk {ChunkId}.", _chunk.Id);
 
         // Sync storage with chunk position
         _logger?.LogDebug("Syncing chunk {ChunkId} position with storage...", _chunk.Id);
-        SyncPositionWithStorage();
+        await SyncPositionWithStorageAsync();
 
         _logger?.LogDebug("DownloadChunk of the chunk {ChunkId}.", _chunk.Id);
         var requestMsg = request.GetRequest();
@@ -175,9 +176,14 @@ internal class ChunkDownloader
 
             while (readSize > 0 && _chunk.CanWrite)
             {
+                // Create buffer
+                var dynamicBlockSize = CalculateDynamicBlockSize();
+                var buffer = new byte[dynamicBlockSize];
+
+                _logger?.LogDebug("Chunk {ChunkId} read buffer size set to {BufferSize}", _chunk.Id, dynamicBlockSize);
+
                 cancelToken.ThrowIfCancellationRequested();
                 await pauseToken.WaitWhilePausedAsync().ConfigureAwait(false);
-                var buffer = new byte[_configuration.BufferBlockSize];
                 using var innerCts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
                 innerToken = innerCts.Token;
 
@@ -203,7 +209,6 @@ internal class ChunkDownloader
 
                 _logger?.LogDebug("Write {ReadSize} bytes in the chunk {ChunkId}", readSize, _chunk.Id);
                 _chunk.Position += readSize;
-                _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
                 _logger?.LogDebug("The chunk {ChunkId} current position is: {ChunkPosition} of {ChunkLength}", _chunk.Id, _chunk.Position, _chunk.Length);
 
                 OnDownloadProgressChanged(new DownloadProgressChangedEventArgs(_chunk.Id)
@@ -219,7 +224,7 @@ internal class ChunkDownloader
             await FlushChunkAsync(cancelToken).ConfigureAwait(false);
 
             // Compare file size with chunk length and throw exception if not match
-            ThrowIfFileSizeNotMatchWithChunkLength();
+            await ThrowIfFileSizeNotMatchWithChunkLengthAsync();
         }
         catch (ObjectDisposedException exp) // When closing stream manually, ObjectDisposedException will be thrown
         {
@@ -235,7 +240,8 @@ internal class ChunkDownloader
         finally
         {
             // Flush chunk to storage if there is any data in the memory
-            if (_storage.GetChunkMemoryLength(_chunk.Id) > 0)
+            var memoryLength = await _storage.GetChunkMemoryLengthAsync(_chunk.Id);
+            if (memoryLength > 0)
                 await FlushChunkAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -245,23 +251,23 @@ internal class ChunkDownloader
     /// <summary>
     /// Syncs the position of the chunk with the position of the file.
     /// </summary>
-    private void SyncPositionWithStorage()
+    private async Task SyncPositionWithStorageAsync()
     {
         _logger?.LogDebug("Sync position of the chunk {ChunkId} with the position of the file", _chunk.Id);
 
         // Get chunk file length
-        var storageLength = _storage.GetChunkFileLength(_chunk.Id);
+        var storageLength = await _storage.GetChunkFileLengthAsync(_chunk.Id);
 
         // When the length of storage is greater than the chunk position and less than or equal to the chunk length
         // or when the length of storage is less than the chunk position
         // Change chunk position and file position based on the length of storage
         if ((storageLength > _chunk.Position && storageLength <= _chunk.Length) || storageLength < _chunk.Position)
         {
-            var length = storageLength >= _configuration.BufferBlockSize ? storageLength - _configuration.BufferBlockSize : 0;
             _logger?.LogDebug("The length of the chunk file {ChunkId} is {StorageLength} and the chunk position is {ChunkPosition}", _chunk.Id, storageLength, _chunk.Position);
 
-            _storage.SetChunkFilePosition(_chunk.Id, length, SeekOrigin.Begin);
-            _chunk.Position = _chunk.FilePosition = length;
+            await _storage.SetChunkFilePositionAsync(_chunk.Id, storageLength, SeekOrigin.Begin);
+            _chunk.Position = storageLength;
+            _chunk.FilePosition = storageLength;
 
             _logger?.LogDebug("The chunk {ChunkId} current position is: {ChunkPosition} of {ChunkLength}", _chunk.Id, _chunk.Position, _chunk.Length);
         }
@@ -273,8 +279,8 @@ internal class ChunkDownloader
             _logger?.LogWarning("The chunk {ChunkId} file is corrupted, download must start from the beginning", _chunk.Id);
 
             // Remove all data stored in file
-            _storage.SetChunkFileLength(_chunk.Id, 0);
-            _storage.SetChunkFilePosition(_chunk.Id, 0, SeekOrigin.Begin);
+            await _storage.SetChunkFileLengthAsync(_chunk.Id, 0);
+            await _storage.SetChunkFilePositionAsync(_chunk.Id, 0, SeekOrigin.Begin);
             // If Position is greater than 0 (i.e. the download has not yet started), restart the Chunk download.
             if (_chunk.Position > 0)
                 OnDownloadRestarted(RestartReason.TempFileCorruption);
@@ -313,29 +319,50 @@ internal class ChunkDownloader
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        _logger?.LogDebug("Flush chunk {ChunkId} storage", _chunk.Id);
+        _logger?.LogDebug("Flush chunk {ChunkId} to storage", _chunk.Id);
 
         await _storage.FlushChunkAsync(_chunk.Id, cancellationToken).ConfigureAwait(false);
-        // Add a small delay to ensure file is fully written
-        await Task.Delay(10, cancellationToken).ConfigureAwait(false);
-        _chunk.FilePosition = _storage.GetChunkFilePosition(_chunk.Id);
+        _chunk.FilePosition = await _storage.GetChunkFilePositionAsync(_chunk.Id);
 
-        _logger?.LogDebug("Chunk {ChunkId} storage flushed and file position updated to {FilePosition}", _chunk.Id, _chunk.FilePosition);
+        _logger?.LogDebug("Flush chunk {ChunkId} to storage completed successfully. File position: {Position}", _chunk.Id, _chunk.FilePosition);
     }
 
     /// <summary>
     /// Compare file size with chunk length and make sure file size is equal to chunk length
     /// </summary>
-    /// <exception cref="InvalidOperationException">If file size not match with chunk length</exception>
-    private void ThrowIfFileSizeNotMatchWithChunkLength()
+    /// <exception cref="DownloadException">If file size not match with chunk length</exception>
+    private async Task ThrowIfFileSizeNotMatchWithChunkLengthAsync()
     {
         _logger?.LogDebug("Compare file size with chunk length for chunk {ChunkId}", _chunk.Id);
 
-        // If the chunk has a length, the file size should be compared to the chunk length
-        // Otherwise, the file size should be compared to the chunk position
-        var chunkLength = _chunk.Length > 0 ? _chunk.Length : _chunk.Position;
-        if (_storage.GetChunkFileLength(_chunk.Id) != chunkLength)
+        var fileLength = await _storage.GetChunkFileLengthAsync(_chunk.Id);
+        var expectedLength = _chunk.Length > 0 ? _chunk.Length : _chunk.Position;
+
+        _logger?.LogInformation("Chunk {ChunkId}: FileSize={FileSize}, Expected={Expected}, Position={Position}", _chunk.Id, fileLength, expectedLength, _chunk.Position);
+
+        if (fileLength != expectedLength)
+        {
+            _logger?.LogError("File size mismatch for chunk {ChunkId}: File={FileSize}, Expected={Expected}", _chunk.Id, fileLength, expectedLength);
+            _logger?.LogDebug("Chunk details: Start={Start}, End={End}, Length={Length}, FilePosition={FilePos}", _chunk.Start, _chunk.End, _chunk.Length, _chunk.FilePosition);
+
             throw DownloadException.CreateDownloadException(DownloadException.FileSizeNotMatchWithChunkLength);
+        }
+
+        _logger?.LogInformation("File size validation passed for chunk {ChunkId}", _chunk.Id);
+    }
+
+    /// <summary>
+    /// Calculates the dynamic block size for each buffer.
+    /// </summary>
+    /// <returns>The dynamic block size in bytes.</returns>
+    private int CalculateDynamicBlockSize()
+    {
+        if (_configuration.MaximumSpeedPerChunk > _configuration.BufferBlockSize)
+            return _configuration.BufferBlockSize;
+
+        var bufferBlockSize = (int)(_configuration.MaximumSpeedPerChunk / _configuration.ActiveChunks);
+        // Ensure the block size is at least 1024 bytes
+        return Math.Max(bufferBlockSize, 1024);
     }
 
     /// <summary>
@@ -345,48 +372,29 @@ internal class ChunkDownloader
     /// <returns>The calculated timeout in milliseconds, bounded between min and max values.</returns>
     private int CalculateDynamicTimeout()
     {
-        // Minimum timeout: 5 seconds
-        // This ensures we don't timeout too quickly even on fast connections
-        const int minTimeout = 5000;
+        const int minTimeout = 5000; // 5 seconds
+        const int maxTimeout = 45000; // 45 seconds
+        const int defaultTimeout = 20000; // 20 seconds
+        const int infiniteSpeedTimeout = 30000; // 30 seconds for unlimited speed
 
-        // Maximum timeout: 30 seconds
-        // This prevents waiting too long for frozen/unresponsive servers
-        const int maxTimeout = 30000;
-
-        // Default timeout: 10 seconds
-        // Used when we can't calculate based on speed (e.g., unlimited bandwidth)
-        const int defaultTimeout = 10000;
-
-        // Check if we have bandwidth limiting enabled and can calculate based on speed
         if (_sourceStream?.BandwidthLimit > 0 && _sourceStream.BandwidthLimit != long.MaxValue)
         {
-            // Calculate expected time to read one buffer block at current speed
-            // Formula: (BufferSize / BytesPerSecond) * 1000 to convert to milliseconds
             var expectedTimeMs = (_configuration.BufferBlockSize * 1000.0) / _sourceStream.BandwidthLimit;
-
-            // Add 100% safety margin to account for:
-            // - Network latency fluctuations
-            // - TCP overhead
-            // - Temporary slowdowns
-            // - Operating system scheduling delays
             var timeoutWithMargin = expectedTimeMs * 2.0;
-
-            // Round up to nearest integer
             var calculatedTimeout = (int)Math.Ceiling(timeoutWithMargin);
-
-            // Ensure the timeout is within acceptable bounds
             return Math.Max(minTimeout, Math.Min(calculatedTimeout, maxTimeout));
         }
 
-        // If bandwidth limiting is disabled or set to infinite,
-        // check if we have a configured ReadTimeout
-        if (_chunk.ReadTimeout > 0)
+        // Fallback for unlimited speed
+        if (_sourceStream?.BandwidthLimit == long.MaxValue)
         {
-            // Use the configured timeout, but ensure it's within bounds
-            return Math.Max(minTimeout, Math.Min(_chunk.ReadTimeout, maxTimeout));
+            // Use a longer, fixed timeout when speed is not limited
+            return Math.Max(infiniteSpeedTimeout, _chunk.ReadTimeout);
         }
 
-        // Fallback to default timeout if no other value is available
+        if (_chunk.ReadTimeout > 0)
+            return Math.Max(minTimeout, Math.Min(_chunk.ReadTimeout, maxTimeout));
+
         return defaultTimeout;
     }
 }

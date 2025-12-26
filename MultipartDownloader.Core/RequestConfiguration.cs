@@ -18,7 +18,7 @@ public class RequestConfiguration
     {
         Headers = [];
         AllowAutoRedirect = true;
-        AutomaticDecompression = DecompressionMethods.None;
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
         ClientCertificates = [];
         ImpersonationLevel = TokenImpersonationLevel.Delegation;
         KeepAlive = false; // Please keep this in false. Because of an error (An existing connection was forcibly closed by the remote host)

@@ -85,8 +85,7 @@ internal class ThrottledStream : Stream
         return _baseStream.Read(buffer, offset, count);
     }
 
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count,
-        CancellationToken cancellationToken)
+    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         await ThrottleAsync(count).ConfigureAwait(false);
         return await _baseStream.ReadAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);

@@ -4,11 +4,11 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
-using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddDownloadLink;
 using CrossPlatformDownloadManager.Utils;
 using Serilog;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink;
 
 /// <summary>
 /// Represents a window for adding download links.

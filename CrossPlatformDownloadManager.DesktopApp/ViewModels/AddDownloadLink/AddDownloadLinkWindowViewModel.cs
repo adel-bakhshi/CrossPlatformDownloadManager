@@ -18,7 +18,7 @@ using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 using Serilog;
 
-namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
+namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.AddDownloadLink;
 
 /// <summary>
 /// ViewModel for the Add Download Link Window, handling the logic for adding new download links

@@ -10,7 +10,9 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.Mo
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService.Models;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddDownloadLink;
 using CrossPlatformDownloadManager.DesktopApp.Views;
+using CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink;
 using CrossPlatformDownloadManager.Utils;
 using Serilog;
 

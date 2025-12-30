@@ -258,6 +258,18 @@
           <DependentUpon>MainWindow.axaml</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Views\Main\Views\ActionButton.axaml.cs">
+          <DependentUpon>ActionButton.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddDownloadLink\AddDownloadLinkWindow.axaml.cs">
+          <DependentUpon>AddDownloadLinkWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddDownloadLink\Views\LoadingControl.axaml.cs">
+          <DependentUpon>LoadingControl.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

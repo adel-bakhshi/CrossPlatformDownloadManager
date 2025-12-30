@@ -5,7 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.Main.Views;
 
 public partial class ActionButton : UserControl
 {

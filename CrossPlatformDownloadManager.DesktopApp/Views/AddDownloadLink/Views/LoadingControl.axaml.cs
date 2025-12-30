@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 
-namespace CrossPlatformDownloadManager.DesktopApp.Views.UserControls;
+namespace CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink.Views;
 
 public partial class LoadingControl : UserControl
 {

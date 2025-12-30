@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        xmlns:views="using:CrossPlatformDownloadManager.DesktopApp.Views.Main.Views"
         mc:Ignorable="d"
         d:DesignWidth="1280"
         d:DesignHeight="720"
@@ -984,11 +984,11 @@
                             <!-- Add Url -->
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
-                                <uc:ActionButton Text="Add Url"
-                                                 IconData="{DynamicResource LinkSvgIcon}"
-                                                 IconColor="{DynamicResource SuccessColor}"
-                                                 Command="{Binding AddNewLinkCommand}"
-                                                 CommandParameter="{Binding $parent[Window]}" />
+                                <views:ActionButton Text="Add Url"
+                                                    IconData="{DynamicResource LinkSvgIcon}"
+                                                    IconColor="{DynamicResource SuccessColor}"
+                                                    Command="{Binding AddNewLinkCommand}"
+                                                    CommandParameter="{Binding $parent[Window]}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
@@ -998,22 +998,22 @@
                             <!-- Resume, Stop and Stop All -->
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
-                                <uc:ActionButton Text="Resume"
-                                                 IconData="{DynamicResource BoltSvgIcon}"
-                                                 IconColor="{DynamicResource WarningColor}"
-                                                 Command="{Binding ResumeDownloadFileCommand}"
-                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
+                                <views:ActionButton Text="Resume"
+                                                    IconData="{DynamicResource BoltSvgIcon}"
+                                                    IconColor="{DynamicResource WarningColor}"
+                                                    Command="{Binding ResumeDownloadFileCommand}"
+                                                    CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
-                                <uc:ActionButton Text="Stop"
-                                                 IconData="{DynamicResource StopSvgIcon}"
-                                                 IconColor="{DynamicResource WarningColor}"
-                                                 Command="{Binding StopDownloadFileCommand}"
-                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
+                                <views:ActionButton Text="Stop"
+                                                    IconData="{DynamicResource StopSvgIcon}"
+                                                    IconColor="{DynamicResource WarningColor}"
+                                                    Command="{Binding StopDownloadFileCommand}"
+                                                    CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
-                                <uc:ActionButton Text="Stop All"
-                                                 IconData="{DynamicResource HandSvgIcon}"
-                                                 IconColor="{DynamicResource WarningColor}"
-                                                 Command="{Binding StopAllDownloadFilesCommand}" />
+                                <views:ActionButton Text="Stop All"
+                                                    IconData="{DynamicResource HandSvgIcon}"
+                                                    IconColor="{DynamicResource WarningColor}"
+                                                    Command="{Binding StopAllDownloadFilesCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
@@ -1023,16 +1023,16 @@
                             <!-- Delete and Delete Completed -->
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
-                                <uc:ActionButton Text="Delete"
-                                                 IconData="{DynamicResource TrashSvgIcon}"
-                                                 IconColor="{DynamicResource DangerColor}"
-                                                 Command="{Binding DeleteDownloadFilesCommand}"
-                                                 CommandParameter="{Binding #DownloadFilesDataGrid}" />
+                                <views:ActionButton Text="Delete"
+                                                    IconData="{DynamicResource TrashSvgIcon}"
+                                                    IconColor="{DynamicResource DangerColor}"
+                                                    Command="{Binding DeleteDownloadFilesCommand}"
+                                                    CommandParameter="{Binding #DownloadFilesDataGrid}" />
 
-                                <uc:ActionButton Text="Delete Completed"
-                                                 IconData="{DynamicResource FolderMinusSvgIcon}"
-                                                 IconColor="{DynamicResource DangerColor}"
-                                                 Command="{Binding DeleteCompletedDownloadFilesCommand}" />
+                                <views:ActionButton Text="Delete Completed"
+                                                    IconData="{DynamicResource FolderMinusSvgIcon}"
+                                                    IconColor="{DynamicResource DangerColor}"
+                                                    Command="{Binding DeleteCompletedDownloadFilesCommand}" />
                             </StackPanel>
 
                             <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}"
@@ -1042,21 +1042,21 @@
                             <!-- Settings, Queues and Share -->
                             <StackPanel Orientation="Horizontal"
                                         Spacing="5">
-                                <uc:ActionButton Text="Settings"
-                                                 IconData="{DynamicResource GearSvgIcon}"
-                                                 IconColor="{DynamicResource InfoColor}"
-                                                 Command="{Binding OpenSettingsWindowCommand}"
-                                                 CommandParameter="{Binding $parent[Window]}" />
+                                <views:ActionButton Text="Settings"
+                                                    IconData="{DynamicResource GearSvgIcon}"
+                                                    IconColor="{DynamicResource InfoColor}"
+                                                    Command="{Binding OpenSettingsWindowCommand}"
+                                                    CommandParameter="{Binding $parent[Window]}" />
 
-                                <uc:ActionButton Text="Queues"
-                                                 IconData="{DynamicResource ListOlSvgIcon}"
-                                                 IconColor="{DynamicResource InfoColor}"
-                                                 Flyout="{StaticResource QueuesListFlyout}" />
+                                <views:ActionButton Text="Queues"
+                                                    IconData="{DynamicResource ListOlSvgIcon}"
+                                                    IconColor="{DynamicResource InfoColor}"
+                                                    Flyout="{StaticResource QueuesListFlyout}" />
 
-                                <uc:ActionButton Text="Share"
-                                                 IconData="{DynamicResource ShareSvgIcon}"
-                                                 IconColor="{DynamicResource InfoColor}"
-                                                 Command="{Binding ShareCommand}" />
+                                <views:ActionButton Text="Share"
+                                                    IconData="{DynamicResource ShareSvgIcon}"
+                                                    IconColor="{DynamicResource InfoColor}"
+                                                    Command="{Binding ShareCommand}" />
                             </StackPanel>
                         </StackPanel>
 

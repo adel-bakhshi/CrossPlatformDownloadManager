@@ -2,14 +2,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddDownloadLink"
         xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
-        xmlns:uc="using:CrossPlatformDownloadManager.DesktopApp.Views.UserControls"
         xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+        xmlns:views="using:CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink.Views"
         mc:Ignorable="d"
         d:DesignWidth="570"
         d:DesignHeight="270"
-        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLinkWindow"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink.AddDownloadLinkWindow"
         x:DataType="vm:AddDownloadLinkWindowViewModel"
         Title="CDM - Add Download Link"
         Width="570"
@@ -242,12 +242,12 @@
                         </StackPanel>
 
                         <!-- Loading -->
-                        <uc:LoadingControl IsVisible="{Binding IsLoadingUrl}"
-                                           Width="64"
-                                           Height="64"
-                                           Duration="0:0:2"
-                                           Delay="0:0:0.5"
-                                           Fill="{DynamicResource LoadingIndicatorColor}" />
+                        <views:LoadingControl IsVisible="{Binding IsLoadingUrl}"
+                                              Width="64"
+                                              Height="64"
+                                              Duration="0:0:2"
+                                              Delay="0:0:0.5"
+                                              Fill="{DynamicResource LoadingIndicatorColor}" />
                     </Grid>
                 </Border>
             </Grid>

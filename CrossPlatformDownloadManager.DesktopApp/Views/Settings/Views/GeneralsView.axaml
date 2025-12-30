@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.GeneralsView"
+             x:DataType="vm:GeneralsViewModel">
+
+    <!-- Content -->
+    <StackPanel Orientation="Vertical"
+                Spacing="15">
+        <!-- Start on system startup -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Start on system startup"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding StartOnSystemStartup}" />
+            </Grid>
+        </Border>
+
+        <!-- Use browser extension -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use browser extension"
+                           FontWeight="Bold" />
+
+                <ToggleSwitch Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding UseBrowserExtension}" />
+            </Grid>
+        </Border>
+
+        <!-- Use manager -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid RowDefinitions="Auto, Auto"
+                  ColumnDefinitions="*, Auto">
+                <!-- Use manager -->
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use manager"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 10" />
+
+                <ToggleSwitch Grid.Row="0"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0, 0, 0, 10"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding UseManager}" />
+
+                <!-- Always keep manager on top -->
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Always on top"
+                           IsEnabled="{Binding UseManager}" />
+
+                <ToggleSwitch Grid.Row="1"
+                              Grid.Column="1"
+                              OffContent="{x:Null}"
+                              OnContent="{x:Null}"
+                              Margin="0"
+                              Padding="0"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Right"
+                              HorizontalContentAlignment="Right"
+                              VerticalContentAlignment="Center"
+                              Width="40"
+                              IsChecked="{Binding AlwaysKeepManagerOnTop}"
+                              IsEnabled="{Binding UseManager}" />
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

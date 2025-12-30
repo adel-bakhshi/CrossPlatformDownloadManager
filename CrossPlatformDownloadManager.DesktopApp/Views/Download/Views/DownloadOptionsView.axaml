@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Download.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Download.Views.DownloadOptionsView"
+             x:DataType="vm:DownloadOptionsViewModel">
+
+    <!-- Main content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel Orientation="Vertical"
+                    Spacing="10">
+            <!-- Open folder after download finished -->
+            <Border Padding="15"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource MainBackgroundColor}">
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="Open folder after download finished"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Left"
+                               FontWeight="Bold" />
+
+                    <ToggleSwitch Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding OpenFolderAfterDownloadFinished}" />
+                </Grid>
+            </Border>
+
+            <!-- Separator -->
+            <Rectangle HorizontalAlignment="Stretch"
+                       Height="1"
+                       Fill="{DynamicResource AccentColor}"
+                       Margin="0, 5"
+                       RadiusX="1"
+                       RadiusY="1" />
+
+            <!-- Exit program after download finished -->
+            <Border Padding="15"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource MainBackgroundColor}">
+                <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="Exit program after download finished"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Left"
+                               FontWeight="Bold" />
+
+                    <ToggleSwitch Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding ExitProgramAfterDownloadFinished}" />
+                </Grid>
+            </Border>
+
+            <!-- Turn off computer after download finished -->
+            <Border Padding="15"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource MainBackgroundColor}">
+                <Grid ColumnDefinitions="*, Auto"
+                      RowDefinitions="Auto, Auto">
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Text="Turn off computer after download finished"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Stretch"
+                               TextAlignment="Left"
+                               FontWeight="Bold" />
+
+                    <ToggleSwitch Grid.Row="0"
+                                  Grid.Column="1"
+                                  OffContent="{x:Null}"
+                                  OnContent="{x:Null}"
+                                  Margin="0"
+                                  Padding="0"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  HorizontalContentAlignment="Right"
+                                  VerticalContentAlignment="Center"
+                                  Width="40"
+                                  IsChecked="{Binding TurnOffComputerAfterDownloadFinished}" />
+
+                    <cc:CustomComboBox Grid.Row="1"
+                                       Grid.Column="1"
+                                       MinWidth="140"
+                                       PlaceholderText="Turn Off Mode"
+                                       Background="{DynamicResource SecondaryBackgroundColor}"
+                                       ToggleIconColor="{DynamicResource AccentColor}"
+                                       OnHoverToggleIconColor="{DynamicResource MainTextColor}"
+                                       ItemsSource="{Binding TurnOffComputerModes}"
+                                       SelectedItem="{Binding SelectedTurnOffComputerMode}"
+                                       IsEnabled="{Binding TurnOffComputerAfterDownloadFinished}"
+                                       Margin="0, 10, 0, 0">
+                        <cc:CustomComboBox.ItemTemplate>
+                            <DataTemplate DataType="x:String">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomComboBox.ItemTemplate>
+                    </cc:CustomComboBox>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

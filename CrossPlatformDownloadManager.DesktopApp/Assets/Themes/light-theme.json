@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultLightTheme",
+  "name": "CDM Light",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

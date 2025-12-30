@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.DesktopApp.ViewModels.Main;
+using CrossPlatformDownloadManager.DesktopApp.Views.Main;
 using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels;
@@ -17,7 +19,7 @@ public class StartupWindowViewModel : ViewModelBase
     /// <summary>
     /// Reference to the main window instance.
     /// </summary>
-    private Views.MainWindow? _mainWindow;
+    private MainWindow? _mainWindow;
 
     #endregion
 
@@ -88,6 +90,6 @@ public class StartupWindowViewModel : ViewModelBase
             return;
 
         var viewModel = new MainWindowViewModel(AppService);
-        _mainWindow = new Views.MainWindow { DataContext = viewModel };
+        _mainWindow = new MainWindow { DataContext = viewModel };
     }
 }

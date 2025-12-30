@@ -48,6 +48,9 @@
 
                     <DoubleTransition Property="Opacity"
                                       Duration="00:00:00.3" />
+
+                    <TransformOperationsTransition Property="RenderTransform"
+                                                   Duration="00:00:00.3" />
                 </Transitions>
             </Setter.Value>
         </Setter>
@@ -144,6 +147,11 @@
                 <Setter Property="Background"
                         Value="{DynamicResource TransparentColor}" />
             </Style>
+        </Style>
+
+        <Style Selector="^:pressed">
+            <Setter Property="RenderTransform"
+                    Value="scale(0.98)" />
         </Style>
     </Style>
 

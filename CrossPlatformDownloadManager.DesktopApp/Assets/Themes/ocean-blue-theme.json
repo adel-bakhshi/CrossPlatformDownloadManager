@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultOceanBlueTheme",
+  "name": "Ocean Blue",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

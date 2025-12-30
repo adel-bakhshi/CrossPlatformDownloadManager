@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultSunsetOrangeTheme",
+  "name": "Sunset Orange",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

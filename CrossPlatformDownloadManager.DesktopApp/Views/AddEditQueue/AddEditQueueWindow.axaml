@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueue"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueue.AddEditQueueWindow"
+        x:DataType="vm:AddEditQueueWindowViewModel"
+        Title="{Binding Title}"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        CanResize="False">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Main Content -->
+    <Grid RowDefinitions="Auto, *, Auto"
+          Margin="20">
+        <!-- Tabs -->
+        <ListBox Grid.Row="0"
+                 Classes="tabsListBox"
+                 ItemsSource="{Binding TabItems}"
+                 SelectedItem="{Binding SelectedTabItem}" />
+
+        <!-- Options content -->
+        <ContentControl Grid.Row="1"
+                        IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}"
+                        Content="{Binding OptionsView}" />
+
+        <!-- Files content -->
+        <ContentControl Grid.Row="1"
+                        IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Files', FallbackValue=False, TargetNullValue=False}"
+                        Content="{Binding FilesView}" />
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 15, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button warning"
+                    Command="{Binding DeleteCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Delete"
+                    IsVisible="{Binding IsEditMode}"
+                    IsEnabled="{Binding IsDeleteButtonEnabled}" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

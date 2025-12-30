@@ -179,7 +179,6 @@
         <PackageReference Include="Serilog" Version="4.3.1-dev-02395" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-dev-02318" />
-        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
         <PackageReference Include="WindowsShortcutFactory" Version="1.2.0"/>
     </ItemGroup>
 
@@ -187,21 +186,77 @@
         <Compile Update="CustomControls\CustomTextBox.axaml.cs">
             <DependentUpon>CustomTextBox.axaml</DependentUpon>
         </Compile>
-        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadOptionsView.axaml.cs">
-            <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadSpeedLimiterView.axaml.cs">
-            <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\UserControls\DownloadWindowControls\DownloadStatusView.axaml.cs">
-            <DependentUpon>DownloadStatusView.axaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
         <Compile Update="Infrastructure\DialogBox\Views\DialogWindow.axaml.cs">
             <DependentUpon>DialogWindow.axaml</DependentUpon>
             <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\GeneralsView.axaml.cs">
+          <DependentUpon>GeneralsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\DownloadsView.axaml.cs">
+          <DependentUpon>DownloadsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\FileTypesView.axaml.cs">
+          <DependentUpon>FileTypesView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\NotificationsView.axaml.cs">
+          <DependentUpon>NotificationsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\ProxyView.axaml.cs">
+          <DependentUpon>ProxyView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\SaveLocationsView.axaml.cs">
+          <DependentUpon>SaveLocationsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\SettingsWindow.axaml.cs">
+          <DependentUpon>SettingsWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\Views\FilesView.axaml.cs">
+          <DependentUpon>FilesView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\Views\OptionsView.axaml.cs">
+          <DependentUpon>OptionsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\AddEditQueueWindow.axaml.cs">
+          <DependentUpon>AddEditQueueWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadOptionsView.axaml.cs">
+          <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadSpeedLimiterView.axaml.cs">
+          <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadStatusView.axaml.cs">
+          <DependentUpon>DownloadStatusView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\DownloadWindow.axaml.cs">
+          <DependentUpon>DownloadWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\Views\CategoriesTreeItemView.axaml.cs">
+          <DependentUpon>CategoriesTreeItemView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\Views\CategoriesTreeView.axaml.cs">
+          <DependentUpon>CategoriesTreeView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\MainWindow.axaml.cs">
+          <DependentUpon>MainWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
 

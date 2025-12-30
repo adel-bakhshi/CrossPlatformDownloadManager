@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultModernGrayTheme",
+  "name": "Modern Gray",
+  "author": "CDM",
   "isDarkTheme": true,
   "mainBackgroundColor": {
     "brushMode": 0,

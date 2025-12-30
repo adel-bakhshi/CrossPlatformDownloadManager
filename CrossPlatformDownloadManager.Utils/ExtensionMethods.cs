@@ -2,39 +2,76 @@
 using System.Net;
 using Avalonia.Media;
 using Avalonia.Platform;
-using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 
 namespace CrossPlatformDownloadManager.Utils;
 
 public static class ExtensionMethods
 {
+    /// <summary>
+    /// Checks if a string is null or empty.
+    /// </summary>
+    /// <param name="value">The string to check.</param>
+    /// <returns>True if the string is null or empty, false otherwise.</returns>
     public static bool IsStringNullOrEmpty(this string? value)
     {
         value = value?.Trim();
         return string.IsNullOrEmpty(value);
     }
 
+    /// <summary>
+    /// Converts a JSON string to an object.
+    /// </summary>
+    /// <param name="json">The JSON string to convert.</param>
+    /// <param name="jsonSerializerSettings">The serializer settings to use.</param>
+    /// <typeparam name="T">The type of the object to convert.</typeparam>
+    /// <returns>The deserialized object.</returns>
     public static T? ConvertFromJson<T>(this string? json, JsonSerializerSettings? jsonSerializerSettings)
     {
         return json.IsStringNullOrEmpty() ? default : JsonConvert.DeserializeObject<T>(json!, jsonSerializerSettings);
     }
 
+    /// <summary>
+    /// Converts a JSON string to an object.
+    /// </summary>
+    /// <param name="json">The JSON string to convert.</param>
+    /// <typeparam name="T">The type of the object to convert.</typeparam>
+    /// <returns>The deserialized object.</returns>
     public static T? ConvertFromJson<T>(this string? json)
     {
         return json.ConvertFromJson<T>(null);
     }
 
+    /// <summary>
+    /// Converts an object to JSON with the specified settings.
+    /// </summary>
+    /// <param name="value">The object to convert.</param>
+    /// <param name="serializerSettings">The serializer settings to use.</param>
+    /// <returns>The JSON string.</returns>
     public static string ConvertToJson(this object? value, JsonSerializerSettings? serializerSettings = null)
     {
         return JsonConvert.SerializeObject(value, serializerSettings);
     }
 
+    /// <summary>
+    /// Converts an IEnumerable to an ObservableCollection.
+    /// </summary>
+    /// <param name="items">The items to convert.</param>
+    /// <typeparam name="T">The type of the items.</typeparam>
+    /// <returns>The observable collection.</returns>
     public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T>? items)
     {
         return items == null ? [] : new ObservableCollection<T>(items);
     }
 
+    /// <summary>
+    /// Converts a double to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this double bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         switch (bytes)
@@ -105,34 +142,79 @@ public static class ExtensionMethods
         return $"{bytes:N2} Byte" + (bytes > 1 ? "s" : "");
     }
 
+    /// <summary>
+    /// Converts a double to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this double? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         bytes ??= 0;
         return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
+    /// <summary>
+    /// Converts a long to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this long bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         return ((double)bytes).ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
+    /// <summary>
+    /// Converts a long to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this long? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         bytes ??= 0;
         return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
+    /// <summary>
+    /// Converts a float to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this float bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         return ((double)bytes).ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
+    /// <summary>
+    /// Converts a float to a file size string.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert.</param>
+    /// <param name="roundSize">If true, the size will be rounded.</param>
+    /// <param name="roundToUpper">If true, the size will be rounded to the upper value.</param>
+    /// <param name="roundToLower">If true, the size will be rounded to the lower value.</param>
+    /// <returns>The file size string.</returns>
     public static string ToFileSize(this float? bytes, bool roundSize = false, bool roundToUpper = false, bool roundToLower = false)
     {
         bytes ??= 0;
         return bytes.Value.ToFileSize(roundSize, roundToUpper, roundToLower);
     }
 
+    /// <summary>
+    /// Checks if a URL is valid.
+    /// </summary>
+    /// <param name="url">The URL to check.</param>
+    /// <returns>True if the URL is valid, otherwise false.</returns>
     public static bool CheckUrlValidation(this string? url)
     {
         if (url.IsStringNullOrEmpty())
@@ -141,6 +223,11 @@ public static class ExtensionMethods
         return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
+    /// <summary>
+    /// Opens a text asset and returns its content as a string.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
     public static string? OpenTextAsset(this Uri? assetUri)
     {
         if (assetUri == null)
@@ -151,6 +238,26 @@ public static class ExtensionMethods
         return reader.ReadToEnd();
     }
 
+    /// <summary>
+    /// Opens a text asset and returns its content as a string.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
+    public static async Task<string?> OpenTextAssetAsync(this Uri? assetUri)
+    {
+        if (assetUri == null)
+            return null;
+
+        await using var stream = AssetLoader.Open(assetUri);
+        using var reader = new StreamReader(stream);
+        return await reader.ReadToEndAsync();
+    }
+
+    /// <summary>
+    /// Opens a text asset and returns its content as a string.
+    /// </summary>
+    /// <param name="assetPath">The asset path.</param>
+    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
     public static string? OpenTextAsset(this string? assetPath)
     {
         if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
@@ -160,12 +267,53 @@ public static class ExtensionMethods
         return assetUri.OpenTextAsset();
     }
 
+    /// <summary>
+    /// Opens a text asset and returns its content as a string.
+    /// </summary>
+    /// <param name="assetPath">The asset path.</param>
+    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
+    public static async Task<string?> OpenTextAssetAsync(this string? assetPath)
+    {
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
+            return null;
+
+        var assetUri = new Uri(assetPath);
+        return await assetUri.OpenTextAssetAsync();
+    }
+
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
     public static T? OpenJsonAsset<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
     {
         var json = assetUri.OpenTextAsset();
         return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
     }
 
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
+    public static async Task<T?> OpenJsonAssetAsync<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        var json = await assetUri.OpenTextAssetAsync();
+        return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
+    }
+
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetPath">The asset path.</param>
+    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
     public static T? OpenJsonAsset<T>(this string? assetPath, JsonSerializerSettings? jsonSerializerSettings)
     {
         if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
@@ -175,9 +323,57 @@ public static class ExtensionMethods
         return assetUri.OpenJsonAsset<T>();
     }
 
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetPath">The asset path.</param>
+    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
+    public static async Task<T?> OpenJsonAssetAsync<T>(this string? assetPath, JsonSerializerSettings? jsonSerializerSettings)
+    {
+        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
+            return default;
+
+        var assetUri = new Uri(assetPath);
+        return await assetUri.OpenJsonAssetAsync<T>(jsonSerializerSettings);
+    }
+
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
     public static T? OpenJsonAsset<T>(this Uri? assetUri)
     {
         return assetUri.OpenJsonAsset<T>(null);
+    }
+
+    /// <summary>
+    /// Opens a JSON asset and converts it to an object.
+    /// </summary>
+    /// <param name="assetUri">The asset URI.</param>
+    /// <typeparam name="T">The type of the object to convert to.</typeparam>
+    /// <returns>Returns the object if found, otherwise null.</returns>
+    public static async Task<T?> OpenJsonAssetAsync<T>(this Uri? assetUri)
+    {
+        return await assetUri.OpenJsonAssetAsync<T>(null);
+    }
+
+    /// <summary>
+    /// Gets all assets from an assets URI.
+    /// </summary>
+    /// <param name="assetsUri">The assets URI.</param>
+    /// <returns>Returns a list of all assets.</returns>
+    public static List<string> GetAllAssets(this Uri? assetsUri)
+    {
+        if (assetsUri == null)
+            return [];
+
+        return AssetLoader.GetAssets(assetsUri, null)
+            .Select(uri => uri.OriginalString)
+            .ToList();
     }
 
     /// <summary>
@@ -277,6 +473,11 @@ public static class ExtensionMethods
         return encodedFileName.IsStringNullOrEmpty() ? null : WebUtility.UrlDecode(encodedFileName);
     }
 
+    /// <summary>
+    /// Checks if a file name has an extension.
+    /// </summary>
+    /// <param name="fileName">The file name to check.</param>
+    /// <returns>Returns true if the file name has an extension, otherwise false.</returns>
     public static bool HasFileExtension(this string? fileName)
     {
         if (fileName.IsStringNullOrEmpty())
@@ -285,6 +486,11 @@ public static class ExtensionMethods
         return !Path.GetExtension(fileName!).IsStringNullOrEmpty();
     }
 
+    /// <summary>
+    /// Gets the short time from a TimeSpan in the format "HH : mm : ss".
+    /// </summary>
+    /// <param name="time">The TimeSpan to get the short time from.</param>
+    /// <returns>Returns the short time.</returns>
     public static string GetShortTime(this TimeSpan? time)
     {
         if (time == null)
@@ -296,12 +502,26 @@ public static class ExtensionMethods
         return (time.Value.Hours >= 1 ? $"{time.Value.Hours:00} : " : "") + $"{time.Value.Minutes:00} : {time.Value.Seconds:00}";
     }
 
+    /// <summary>
+    /// Creates a deep copy of an object.
+    /// </summary>
+    /// <param name="obj">The object to create a deep copy of.</param>
+    /// <param name="serializerSettings">The serializer settings to use.</param>
+    /// <typeparam name="T">The type of the object.</typeparam>
+    /// <returns>Returns the deep copy of the object.</returns>
     public static T? DeepCopy<T>(this T? obj, JsonSerializerSettings? serializerSettings = null)
     {
         var json = obj.ConvertToJson(serializerSettings);
         return json.ConvertFromJson<T>();
     }
 
+    /// <summary>
+    /// Creates a deep copy of an object.
+    /// </summary>
+    /// <param name="obj">The object to create a deep copy of.</param>
+    /// <param name="ignoreLoops">Ignore loops in the object.</param>
+    /// <typeparam name="T">The type of the object.</typeparam>
+    /// <returns>Returns the deep copy of the object.</returns>
     public static T? DeepCopy<T>(this T? obj, bool ignoreLoops)
     {
         var serializerSettings = new JsonSerializerSettings
@@ -312,6 +532,11 @@ public static class ExtensionMethods
         return DeepCopy(obj, serializerSettings);
     }
 
+    /// <summary>
+    /// Copies a file asynchronously.
+    /// </summary>
+    /// <param name="sourcePath">The source path of the file to copy.</param>
+    /// <param name="destinationPath">The destination path of the copied file.</param>
     public static async Task CopyFileAsync(this string sourcePath, string destinationPath)
     {
         // Use a buffer size that's a multiple of 4KB for optimal performance.
@@ -326,61 +551,11 @@ public static class ExtensionMethods
             await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead));
     }
 
-    public static async Task ZipDirectoryAsync(this string sourceDir, string zipFilePath)
-    {
-        await using var outputStream = File.Create(zipFilePath);
-        await using var zipStream = new ZipOutputStream(outputStream);
-        zipStream.SetLevel(9); // 0-9, 9 being the highest compression
-
-        var folderOffset = sourceDir.Length + (sourceDir.EndsWith('\\') ? 0 : 1); // Adjust offset for directory separator
-        await CompressFolderAsync(sourceDir, zipStream, folderOffset);
-        zipStream.Finish();
-    }
-
-    public static async Task UnZipFileAsync(this string zipFilePath, string destinationDir)
-    {
-        if (!Directory.Exists(destinationDir))
-            Directory.CreateDirectory(destinationDir);
-
-        await using var fileStream = File.OpenRead(zipFilePath);
-        var zipFile = new ZipFile(fileStream);
-
-        foreach (ZipEntry entry in zipFile)
-        {
-            if (entry.Size <= 0)
-                continue;
-
-            var targetFile = Path.Combine(destinationDir, entry.Name).Replace('/', '\\');
-            var directoryPath = Path.GetDirectoryName(targetFile);
-            if (directoryPath.IsStringNullOrEmpty())
-                continue;
-
-            if (!Directory.Exists(directoryPath))
-                Directory.CreateDirectory(directoryPath!);
-
-            await using var outputFile = File.Create(targetFile);
-
-            await using var zippedStream = zipFile.GetInputStream(entry);
-            var buffer = new byte[4096];
-
-            int readBytes;
-            while ((readBytes = await zippedStream.ReadAsync(buffer)) > 0)
-            {
-                await outputFile.WriteAsync(buffer.AsMemory(0, readBytes));
-                await outputFile.FlushAsync();
-            }
-        }
-    }
-
-    public static string GetDriveName(this DriveInfo driveInfo)
-    {
-        var driveName = driveInfo.Name.EndsWith('\\') ? driveInfo.Name.Substring(0, driveInfo.Name.Length - 1) : driveInfo.Name;
-        if (!driveName.EndsWith(':'))
-            driveName += ":";
-
-        return driveName;
-    }
-
+    /// <summary>
+    /// Gets the domain from a URL.
+    /// </summary>
+    /// <param name="url">The URL to get the domain from.</param>
+    /// <returns>Returns the domain.</returns>
     public static string? GetDomainFromUrl(this string? url)
     {
         if (!url.CheckUrlValidation())
@@ -390,6 +565,11 @@ public static class ExtensionMethods
         return uri.Host;
     }
 
+    /// <summary>
+    /// Converts a hexadecimal value to a color.
+    /// </summary>
+    /// <param name="hexValue">The hexadecimal value to convert.</param>
+    /// <returns>Returns the color.</returns>
     public static Color? ConvertFromHex(this string? hexValue)
     {
         if (hexValue.IsStringNullOrEmpty())
@@ -397,44 +577,4 @@ public static class ExtensionMethods
 
         return Color.TryParse(hexValue, out var color) ? color : null;
     }
-
-    #region Helpers
-
-    private static async Task CompressFolderAsync(string sourceFolder, ZipOutputStream zipStream, int folderOffset)
-    {
-        var files = Directory.GetFiles(sourceFolder);
-        foreach (var file in files)
-        {
-            var fileInfo = new FileInfo(file);
-            var entryName = file.Substring(folderOffset); // Remove the folder path
-            var entry = new ZipEntry(entryName)
-            {
-                DateTime = fileInfo.LastWriteTime,
-                Size = fileInfo.Length
-            };
-
-            await zipStream.PutNextEntryAsync(entry);
-
-            var buffer = new byte[4096];
-            await using var fileStream = File.OpenRead(file);
-
-            int sourceBytes;
-            while ((sourceBytes = await fileStream.ReadAsync(buffer)) > 0)
-            {
-                await zipStream.WriteAsync(buffer.AsMemory(0, sourceBytes));
-                await zipStream.FlushAsync();
-            }
-
-            zipStream.CloseEntry();
-        }
-
-        // Process subdirectories
-        var folders = Directory.GetDirectories(sourceFolder);
-        foreach (var folder in folders)
-        {
-            await CompressFolderAsync(folder, zipStream, folderOffset);
-        }
-    }
-
-    #endregion
 }

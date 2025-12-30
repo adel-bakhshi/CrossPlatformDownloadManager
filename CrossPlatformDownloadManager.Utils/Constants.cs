@@ -111,11 +111,21 @@ public static class Constants
     /// The file path of the light theme data.
     /// </summary>
     public const string LightThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json";
+    
+    /// <summary>
+    /// The file path of the dark theme data.
+    /// </summary>
+    public const string DarkThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/dark-theme.json";
 
     /// <summary>
     /// The lastest download url of the browser extension.
     /// </summary>
     public const string LastestDownloadUrlOfBrowserExtension = "https://github.com/adel-bakhshi/cdm-browser-extension/releases/latest/download/chromium-extension.zip";
+
+    /// <summary>
+    /// The link to the guide for creating themes.
+    /// </summary>
+    public const string CreateThemeGuideLink = "https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/MarkDown/THEME_GUIDE.md";
 
     #endregion
 

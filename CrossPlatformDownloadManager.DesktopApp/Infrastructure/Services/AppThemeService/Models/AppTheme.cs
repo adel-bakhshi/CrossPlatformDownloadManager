@@ -13,8 +13,11 @@ public class AppTheme
 {
     #region Properties
 
-    [JsonProperty("themeName")]
-    public string ThemeName { get; set; } = string.Empty;
+    [JsonProperty("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonProperty("author")]
+    public string Author { get; set; } = string.Empty;
 
     [JsonProperty("isDarkTheme")]
     public bool IsDarkTheme { get; set; }
@@ -97,6 +100,18 @@ public class AppTheme
     [JsonProperty("gridRowColor")]
     public IThemeBrush? GridRowColor { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the theme is the default app theme.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDefault { get; set; }
+
+    /// <summary>
+    /// Gets or sets the path to the theme file.
+    /// </summary>
+    [JsonIgnore]
+    public string? Path { get; set; }
+
     #endregion
 
     /// <summary>
@@ -105,7 +120,7 @@ public class AppTheme
     /// <returns>Returns true if the theme is valid, otherwise false.</returns>
     public bool Validate()
     {
-        Log.Debug("Validating app theme: {ThemeName}", ThemeName);
+        Log.Debug("Validating app theme: {Name}", Name);
 
         // Get all properties that are of type IThemeBrush
         var properties = GetType().GetProperties().Where(p => p.PropertyType == typeof(IThemeBrush)).ToList();
@@ -142,7 +157,7 @@ public class AppTheme
             }
         }
 
-        Log.Debug("App theme validation successful: {ThemeName}", ThemeName);
+        Log.Debug("App theme validation successful: {Name}", Name);
         return true;
     }
 }

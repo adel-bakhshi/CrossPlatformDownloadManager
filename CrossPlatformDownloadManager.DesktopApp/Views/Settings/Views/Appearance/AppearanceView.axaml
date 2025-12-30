@@ -1,0 +1,223 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views.Appearance"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.Appearance"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.Appearance.AppearanceView"
+             x:DataType="vm:AppearanceViewModel">
+
+    <!-- Styles -->
+    <UserControl.Styles>
+        <!-- Themes ListBox style -->
+        <Style Selector="ListBox.themesList">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                    Value="Disabled" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                    Value="Auto" />
+            <Setter Property="SelectionMode"
+                    Value="Single" />
+
+            <!-- ItemsPanel -->
+            <Setter Property="ItemsPanel">
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="15" />
+                </ItemsPanelTemplate>
+            </Setter>
+
+            <!-- Template -->
+            <Setter Property="Template">
+                <ControlTemplate TargetType="ListBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                        <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                            <ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+
+            <!-- ItemTemplate -->
+            <Setter Property="ItemTemplate">
+                <DataTemplate DataType="{x:Type local:ThemeCardView}">
+                    <ContentControl Width="180"
+                                    Height="100"
+                                    Content="{Binding}" />
+                </DataTemplate>
+            </Setter>
+
+            <!-- ListBoxItem style -->
+            <Style Selector="^ ListBoxItem">
+                <Setter Property="Margin"
+                        Value="0,0,0,10" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="BorderThickness"
+                        Value="0" />
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
+
+                <Style Selector="^ /template/ ContentPresenter">
+                    <Setter Property="Background"
+                            Value="{DynamicResource TransparentColor}" />
+                </Style>
+
+                <Style Selector="^:selected /template/ ContentPresenter">
+                    <Setter Property="Background"
+                            Value="{DynamicResource TransparentColor}" />
+                </Style>
+
+                <Style Selector="^:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background"
+                            Value="{DynamicResource TransparentColor}" />
+                </Style>
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Main content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel Orientation="Vertical"
+                    Spacing="15">
+            <!-- Theme -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryBackgroundColor}">
+                <Grid RowDefinitions="Auto, Auto, Auto">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Theme"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10" />
+
+                    <!-- Create theme and Add buttons -->
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*, Auto"
+                          Margin="0,0,0,15">
+                        <!-- Create theme button -->
+                        <Button Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Classes="button info"
+                                Content="How to create my theme?"
+                                Command="{Binding CreateThemeCommand}" />
+
+                        <!-- Add new theme button -->
+                        <Button Grid.Column="1"
+                                Classes="button success"
+                                Height="{Binding $parent[Grid].Bounds.Height}"
+                                Width="{Binding $self.Bounds.Height}"
+                                VerticalAlignment="Center"
+                                Command="{Binding AddNewThemeCommand}">
+                            <PathIcon Data="{DynamicResource PlusSvgIcon}"
+                                      Foreground="{DynamicResource ButtonTextColor}"
+                                      Width="{DynamicResource SmallIconSize}"
+                                      Height="{DynamicResource SmallIconSize}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                        </Button>
+                    </Grid>
+
+                    <!-- Themes list -->
+                    <StackPanel Grid.Row="2"
+                                Orientation="Vertical"
+                                Spacing="15">
+                        <!-- Dark themes -->
+                        <StackPanel Orientation="Vertical"
+                                    Spacing="10">
+                            <!-- Title -->
+                            <TextBlock HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Left"
+                                       Text="Dark themes" />
+
+                            <!-- Themes -->
+                            <ListBox Classes="themesList"
+                                     ItemsSource="{Binding DarkThemes}"
+                                     SelectedItem="{Binding SelectedDarkTheme}" />
+                        </StackPanel>
+
+                        <!-- Separator -->
+                        <Rectangle Height="1"
+                                   HorizontalAlignment="Stretch"
+                                   RadiusX="1"
+                                   RadiusY="1"
+                                   Fill="{DynamicResource AccentColor}" />
+
+                        <!-- Light themes -->
+                        <StackPanel Orientation="Vertical"
+                                    Spacing="10">
+                            <!-- Title -->
+                            <TextBlock HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Left"
+                                       Text="Light themes" />
+
+                            <!-- Themes -->
+                            <ListBox Classes="themesList"
+                                     ItemsSource="{Binding LightThemes}"
+                                     SelectedItem="{Binding SelectedLightTheme}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Font -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryBackgroundColor}">
+                <Grid ColumnDefinitions="*, Auto">
+                    <!-- Title -->
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Font"
+                               FontWeight="Bold" />
+
+                    <!-- Fonts -->
+                    <cc:CustomComboBox Grid.Column="1"
+                                       PlaceholderText="Font"
+                                       Background="{DynamicResource MainBackgroundColor}"
+                                       ToggleIconColor="{DynamicResource AccentColor}"
+                                       OnHoverToggleIconColor="{DynamicResource MainTextColor}"
+                                       IconData="{DynamicResource FontSvgIcon}"
+                                       IconColor="{DynamicResource IconColor}"
+                                       IconSize="{DynamicResource SmallIconSize}"
+                                       BorderThickness="0"
+                                       SelectedItem="{Binding SelectedFont}"
+                                       ItemsSource="{Binding Fonts}"
+                                       MaxDropDownHeight="300"
+                                       Width="170"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Stretch">
+                        <cc:CustomComboBox.ItemTemplate>
+                            <DataTemplate DataType="x:String">
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </cc:CustomComboBox.ItemTemplate>
+                    </cc:CustomComboBox>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

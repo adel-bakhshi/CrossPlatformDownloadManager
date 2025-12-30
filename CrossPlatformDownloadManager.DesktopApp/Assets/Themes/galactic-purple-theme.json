@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultGalacticPurpleTheme",
+  "name": "Galactic Purple",
+  "author": "CDM",
   "isDarkTheme": true,
   "mainBackgroundColor": {
     "brushMode": 0,

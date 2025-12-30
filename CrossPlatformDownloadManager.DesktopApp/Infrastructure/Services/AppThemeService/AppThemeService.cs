@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.JsonConverters;
@@ -90,14 +92,14 @@ public class AppThemeService : IAppThemeService
             throw new InvalidCastException("App theme data is null or undefined.");
         }
 
-        Log.Debug("AppTheme object created successfully. Theme name: {ThemeName}", appTheme.ThemeName);
+        Log.Debug("AppTheme object created successfully. Theme name: {Name}", appTheme.Name);
 
         // Apply theme data
         ApplyAppTheme(appTheme);
         // Set the last theme path
         _lastThemePath = themeFilePath;
         // Log information
-        Log.Information("{ThemeName} theme loaded successfully.", appTheme.ThemeName);
+        Log.Information("{Name} theme loaded successfully.", appTheme.Name);
     }
 
     public bool ValidateAppTheme(string? json)
@@ -115,6 +117,98 @@ public class AppThemeService : IAppThemeService
 
         Log.Debug("App theme validation result: {IsValid}", isValid);
         return isValid;
+    }
+
+    public async Task<List<AppTheme>> GetAllThemesAsync()
+    {
+        Log.Debug("Getting all available themes...");
+        var result = new List<AppTheme>();
+
+        // Get all themes from assets
+        var assetsUri = new Uri("avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/");
+        var assets = assetsUri.GetAllAssets();
+        Log.Debug("Found {Count} themes in assets.", assets.Count);
+
+        // Check if there are any themes
+        if (assets.Count > 0)
+        {
+            Log.Debug("Converting assets to AppTheme objects...");
+
+            // Convert assets to AppTheme objects
+            var appThemes = new List<AppTheme>();
+            foreach (var asset in assets)
+            {
+                try
+                {
+                    var json = await asset.OpenTextAssetAsync();
+                    var appTheme = ConvertJsonToAppTheme(json);
+                    if (appTheme?.Validate() != true)
+                        continue;
+
+                    appTheme.IsDefault = true;
+                    appTheme.Path = asset;
+                    appThemes.Add(appTheme);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to convert asset to AppTheme object.");
+                }
+            }
+
+            Log.Debug("Converted {Count} assets to AppTheme objects.", appThemes.Count);
+            result.AddRange(appThemes);
+        }
+
+        var themeFiles = Directory.GetFiles(Constants.ThemesDirectory, "*.json");
+        Log.Debug("Found {Count} themes in storage.", themeFiles.Length);
+
+        if (themeFiles.Length > 0)
+        {
+            Log.Debug("Loading themes from storage...");
+
+            // Convert theme files to AppTheme objects
+            var appThemes = new List<AppTheme>();
+            foreach (var file in themeFiles)
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(file);
+                    var appTheme = ConvertJsonToAppTheme(json);
+                    if (appTheme?.Validate() != true)
+                        continue;
+
+                    appTheme.Path = file;
+                    appThemes.Add(appTheme);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to convert theme file to AppTheme object.");
+                }
+            }
+
+            Log.Debug("Loaded {Count} themes from storage.", appThemes.Count);
+            result.AddRange(appThemes);
+        }
+
+        Log.Information("loaded {Count} themes successfully.", result.Count);
+        return result;
+    }
+
+    public async Task<AppTheme?> GetDefaultThemeAsync(bool isDark)
+    {
+        // Get default theme path and load theme data
+        var defaultThemeUri = new Uri(isDark ? Constants.DarkThemeFilePath : Constants.LightThemeFilePath);
+        var json = await defaultThemeUri.OpenTextAssetAsync();
+        
+        // Convert JSON data to AppTheme object and set IsDefault property to true if successful
+        var appTheme = ConvertJsonToAppTheme(json);
+        if (appTheme != null)
+        {
+            appTheme.IsDefault = true;
+            appTheme.Path = defaultThemeUri.OriginalString;
+        }
+
+        return appTheme;
     }
 
     #region Helpers
@@ -170,7 +264,7 @@ public class AppThemeService : IAppThemeService
             return null;
         }
 
-        // Json serializer settings for converting IThemeBrush
+        // JSON serializer settings for converting IThemeBrush
         var settings = new JsonSerializerSettings
         {
             Converters = [new ThemeBrushJsonConverter()],
@@ -181,7 +275,7 @@ public class AppThemeService : IAppThemeService
 
         if (appTheme != null)
         {
-            Log.Debug("JSON data converted to AppTheme successfully. Theme name: {ThemeName}", appTheme.ThemeName);
+            Log.Debug("JSON data converted to AppTheme successfully. Theme name: {Name}", appTheme.Name);
         }
         else
         {
@@ -198,7 +292,7 @@ public class AppThemeService : IAppThemeService
     /// <exception cref="InvalidOperationException">Thrown when the theme data is corrupted or invalid.</exception>
     private static void ApplyAppTheme(AppTheme appTheme)
     {
-        Log.Debug("Applying app theme: {ThemeName}", appTheme.ThemeName);
+        Log.Debug("Applying app theme: {Name}", appTheme.Name);
 
         // Get and validate resources
         var resources = Application.Current?.Resources;

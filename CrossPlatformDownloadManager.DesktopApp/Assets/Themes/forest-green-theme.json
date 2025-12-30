@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultForestGreenTheme",
+  "name": "Forest Green",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

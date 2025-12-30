@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultGoldenTheme",
+  "name": "Golden",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

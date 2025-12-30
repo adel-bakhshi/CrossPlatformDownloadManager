@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultDreamyPinkTheme",
+  "name": "Dreamy Pink",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

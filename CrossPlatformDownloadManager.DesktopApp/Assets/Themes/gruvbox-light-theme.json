@@ -1,5 +1,6 @@
 {
-  "themeName": "AppDefaultGruvboxLightTheme",
+  "name": "Gruvbox Light",
+  "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,

@@ -27,7 +27,12 @@
     "color": "#FFFFFF",
     "opacity": 1
   },
-  "categoryHoverColor": {
+  "categoryHeaderHoverColor": {
+    "brushMode": 0,
+    "color": "#25E6C9",
+    "opacity": 1
+  },
+  "categoryHeaderSelectedColor": {
     "brushMode": 0,
     "color": "#25E6C9",
     "opacity": 1
@@ -56,6 +61,42 @@
     "brushMode": 0,
     "color": "#FFFFFF",
     "opacity": 1
+  },
+  "toggleColor": {
+    "brushMode": 0,
+    "color": "#727272",
+    "opacity": 1
+  },
+  "toggleCheckedColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#007BFF",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 0.5,
+        "color": {
+          "brushMode": 0,
+          "color": "#8000FF",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#FF007F",
+          "opacity": 1
+        }
+      }
+    ]
   },
   "loadingIndicatorColor": {
     "brushMode": 0,
@@ -265,5 +306,10 @@
         }
       }
     ]
+  },
+  "linkColor": {
+    "brushMode": 0,
+    "color": "#25E6C9",
+    "opacity": 1
   }
 }

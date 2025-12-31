@@ -27,17 +27,10 @@
                                TextAlignment="Left"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding OpenFolderAfterDownloadFinished}" />
+                    <cc:CustomToggleSwitch Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding OpenFolderAfterDownloadFinished}" />
                 </Grid>
             </Border>
 
@@ -61,17 +54,10 @@
                                TextAlignment="Left"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding ExitProgramAfterDownloadFinished}" />
+                    <cc:CustomToggleSwitch Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding ExitProgramAfterDownloadFinished}" />
                 </Grid>
             </Border>
 
@@ -89,18 +75,11 @@
                                TextAlignment="Left"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Row="0"
-                                  Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding TurnOffComputerAfterDownloadFinished}" />
+                    <cc:CustomToggleSwitch Grid.Row="0"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding TurnOffComputerAfterDownloadFinished}" />
 
                     <cc:CustomComboBox Grid.Row="1"
                                        Grid.Column="1"

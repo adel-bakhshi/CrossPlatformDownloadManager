@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -38,17 +39,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding DownloadComplete}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadComplete}" />
                     </Grid>
 
                     <!-- Download stopped -->
@@ -59,17 +53,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding DownloadStopped}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadStopped}" />
                     </Grid>
 
                     <!-- Download failed -->
@@ -80,17 +67,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding DownloadFailed}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadFailed}" />
                     </Grid>
 
                     <!-- Queue started -->
@@ -101,17 +81,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding QueueStarted}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueStarted}" />
                     </Grid>
 
                     <!-- Queue stopped -->
@@ -122,17 +95,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding QueueStopped}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueStopped}" />
                     </Grid>
 
                     <!-- Queue finished -->
@@ -143,17 +109,10 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Left" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding QueueFinished}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueFinished}" />
                     </Grid>
                 </StackPanel>
             </Grid>
@@ -172,17 +131,10 @@
                            Text="Use system notifications"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding UseSystemNotifications}" />
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding UseSystemNotifications}" />
             </Grid>
         </Border>
     </StackPanel>

@@ -4,8 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Controls;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.CustomControls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
@@ -114,7 +114,7 @@ public class ProxyViewModel : ViewModelBase
 
         ChangeProxyTypeAsync().GetAwaiter();
 
-        ChangeProxyModeCommand = ReactiveCommand.Create<ToggleSwitch?>(ChangeProxyMode);
+        ChangeProxyModeCommand = ReactiveCommand.Create<CustomToggleSwitch?>(ChangeProxyMode);
         ClearProxyCommand = ReactiveCommand.Create(ClearProxy);
         DeleteProxyCommand = ReactiveCommand.CreateFromTask(DeleteProxyAsync);
         SaveProxyCommand = ReactiveCommand.CreateFromTask(SaveProxyAsync);
@@ -178,7 +178,7 @@ public class ProxyViewModel : ViewModelBase
         }
     }
 
-    private void ChangeProxyMode(ToggleSwitch? toggleSwitch)
+    private void ChangeProxyMode(CustomToggleSwitch? toggleSwitch)
     {
         if (toggleSwitch == null)
             return;

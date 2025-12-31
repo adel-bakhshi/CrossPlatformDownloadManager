@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -24,17 +25,10 @@
                            Text="Start on system startup"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding StartOnSystemStartup}" />
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding StartOnSystemStartup}" />
             </Grid>
         </Border>
 
@@ -50,17 +44,10 @@
                            Text="Use browser extension"
                            FontWeight="Bold" />
 
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding UseBrowserExtension}" />
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding UseBrowserExtension}" />
             </Grid>
         </Border>
 
@@ -80,18 +67,12 @@
                            FontWeight="Bold"
                            Margin="0, 0, 0, 10" />
 
-                <ToggleSwitch Grid.Row="0"
-                              Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0, 0, 0, 10"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding UseManager}" />
+                <cc:CustomToggleSwitch Grid.Row="0"
+                                       Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,0,10"
+                                       IsChecked="{Binding UseManager}" />
 
                 <!-- Always keep manager on top -->
                 <TextBlock Grid.Row="1"
@@ -102,19 +83,12 @@
                            Text="Always on top"
                            IsEnabled="{Binding UseManager}" />
 
-                <ToggleSwitch Grid.Row="1"
-                              Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding AlwaysKeepManagerOnTop}"
-                              IsEnabled="{Binding UseManager}" />
+                <cc:CustomToggleSwitch Grid.Row="1"
+                                       Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding AlwaysKeepManagerOnTop}"
+                                       IsEnabled="{Binding UseManager}" />
             </Grid>
         </Border>
     </StackPanel>

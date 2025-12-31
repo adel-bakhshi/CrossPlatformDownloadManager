@@ -9,26 +9,6 @@
     <Styles.Resources>
         <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
 
-        <!-- Minimal DataGrid on hover row background -->
-        <SolidColorBrush x:Key="MinimalDataGridOnHoverRowBackground"
-                         Color="{DynamicResource MenuBackgroundColor}"
-                         Opacity="0.3" />
-
-        <!-- Minimal DataGrid on selected row background -->
-        <SolidColorBrush x:Key="MinimalDataGridOnSelectedRowBackground"
-                         Color="{DynamicResource MenuBackgroundColor}"
-                         Opacity="0.5" />
-
-        <!-- Dark rows minimal DataGrid on hover row background -->
-        <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnHoverRowBackground"
-                         Color="{DynamicResource AccentColor}"
-                         Opacity="0.3" />
-
-        <!-- Dark rows minimal DataGrid on selected row background -->
-        <SolidColorBrush x:Key="DarkRowsMinimalDataGridOnSelectedRowBackground"
-                         Color="{DynamicResource AccentColor}"
-                         Opacity="0.5" />
-
         <ControlTheme x:Key="{x:Type DataGrid}"
                       TargetType="DataGrid">
             <Setter Property="RowBackground"
@@ -210,10 +190,10 @@
                 <Setter Property="CornerRadius"
                         Value="0, 8, 8, 0" />
             </Style>
-            
+
             <Style Selector="^#PART_TopRightCornerHeader">
-                    <Setter Property="CornerRadius"
-                            Value="0, 8, 8, 0" />
+                <Setter Property="CornerRadius"
+                        Value="0, 8, 8, 0" />
             </Style>
         </Style>
 
@@ -324,6 +304,9 @@
                         <Transitions>
                             <BrushTransition Property="Background"
                                              Duration="00:00:00.3" />
+
+                            <DoubleTransition Property="Opacity"
+                                              Duration="00:00:00.3" />
                         </Transitions>
                     </Setter.Value>
                 </Setter>
@@ -341,22 +324,30 @@
 
             <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnHoverRowBackground}" />
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
             </Style>
 
             <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnHoverRowBackground}" />
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
             </Style>
 
             <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnSelectedRowBackground}" />
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.95" />
             </Style>
 
             <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
                 <Setter Property="Background"
-                        Value="{DynamicResource MinimalDataGridOnSelectedRowBackground}" />
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.95" />
             </Style>
 
             <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
@@ -409,22 +400,30 @@
 
                 <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.85" />
                 </Style>
 
                 <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.85" />
                 </Style>
 
                 <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.95" />
                 </Style>
 
                 <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
                     <Setter Property="Background"
-                            Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.95" />
                 </Style>
             </Style>
 
@@ -447,22 +446,30 @@
 
                     <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.95" />
                     </Style>
 
                     <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnSelectedRowBackground}" />
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.95" />
                     </Style>
 
                     <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.85" />
                     </Style>
 
                     <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
                         <Setter Property="Background"
-                                Value="{DynamicResource DarkRowsMinimalDataGridOnHoverRowBackground}" />
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.85" />
                     </Style>
                 </Style>
             </Style>

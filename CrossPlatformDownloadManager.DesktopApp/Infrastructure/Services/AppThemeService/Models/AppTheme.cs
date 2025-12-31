@@ -37,8 +37,11 @@ public class AppTheme
     [JsonProperty("buttonTextColor")]
     public IThemeBrush? ButtonTextColor { get; set; }
 
-    [JsonProperty("categoryHoverColor")]
-    public IThemeBrush? CategoryHoverColor { get; set; }
+    [JsonProperty("categoryHeaderHoverColor")]
+    public IThemeBrush? CategoryHeaderHoverColor { get; set; }
+
+    [JsonProperty("categoryHeaderSelectedColor")]
+    public IThemeBrush? CategoryHeaderSelectedColor { get; set; }
 
     [JsonProperty("menuBackgroundColor")]
     public IThemeBrush? MenuBackgroundColor { get; set; }
@@ -54,6 +57,12 @@ public class AppTheme
 
     [JsonProperty("toggleCircleColor")]
     public IThemeBrush? ToggleCircleColor { get; set; }
+
+    [JsonProperty("toggleColor")]
+    public IThemeBrush? ToggleColor { get; set; }
+
+    [JsonProperty("toggleCheckedColor")]
+    public IThemeBrush? ToggleCheckedColor { get; set; }
 
     [JsonProperty("loadingIndicatorColor")]
     public IThemeBrush? LoadingIndicatorColor { get; set; }
@@ -99,6 +108,9 @@ public class AppTheme
 
     [JsonProperty("gridRowColor")]
     public IThemeBrush? GridRowColor { get; set; }
+
+    [JsonProperty("linkColor")]
+    public IThemeBrush? LinkColor { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the theme is the default app theme.

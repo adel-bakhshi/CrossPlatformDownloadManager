@@ -57,8 +57,8 @@
                         HorizontalAlignment="Center">
                 <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
                           Foreground="{DynamicResource ManagerTextColor}"
-                          Width="16"
-                          Height="16"
+                          Width="{DynamicResource SmallIconSize}"
+                          Height="{DynamicResource SmallIconSize}"
                           VerticalAlignment="Center" />
                 <TextBlock Text="{Binding DownloadSpeed}"
                            Foreground="{DynamicResource ManagerTextColor}"
@@ -72,8 +72,8 @@
                 <Button Classes="smallIconButton"
                         HorizontalAlignment="Right"
                         Command="{Binding ExitProgramCommand}">
-                    <PathIcon Width="16"
-                              Height="16"
+                    <PathIcon Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
                               Data="{DynamicResource CircleXMarkSvgIcon}"
                               Foreground="{DynamicResource ManagerTextColor}" />
                 </Button>

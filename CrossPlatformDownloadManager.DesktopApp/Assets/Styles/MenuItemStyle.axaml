@@ -10,17 +10,12 @@
 
     <Styles.Resources>
         <conv:PlatformKeyGestureConverter x:Key="KeyGestureConverter" />
-
-        <!-- Header menu item transparent color -->
-        <SolidColorBrush x:Key="HeaderMenuItemTransparentColor"
-                         Color="{DynamicResource SecondaryBackgroundColor}"
-                         Opacity="0" />
     </Styles.Resources>
 
     <!-- Header menu item styles -->
     <Style Selector="MenuItem.headerMenuItem">
         <Setter Property="Background"
-                Value="{DynamicResource HeaderMenuItemTransparentColor}" />
+                Value="{DynamicResource TransparentColor}" />
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="BorderThickness"

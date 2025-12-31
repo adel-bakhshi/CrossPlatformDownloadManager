@@ -33,18 +33,12 @@
                                FontWeight="Bold"
                                Margin="0, 0, 0, 10" />
 
-                    <ToggleSwitch Grid.Row="0"
-                                  Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0, 0, 0, 10"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding DisableCategories}" />
+                    <cc:CustomToggleSwitch Grid.Row="0"
+                                           Grid.Column="1"
+                                           Margin="0,0,0,10"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding DisableCategories}" />
 
                     <!-- Global save location -->
                     <Grid Grid.Row="1"

@@ -262,7 +262,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         // Check the application startup
         CheckApplicationStartup();
         // Change app theme
-        ChangeApplicationTheme();
+        await ChangeApplicationThemeAsync();
         // Set application font
         SetApplicationFont();
 
@@ -660,7 +660,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     /// <exception cref="InvalidOperationException">
     /// Thrown when the IAppThemeService cannot be found in the service provider.
     /// </exception>
-    private static void ChangeApplicationTheme()
+    private static async Task ChangeApplicationThemeAsync()
     {
         Log.Debug("Changing application theme...");
 
@@ -676,7 +676,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         Log.Debug("App theme service found, loading theme data...");
 
         // Load and apply the theme data
-        appThemeService.LoadThemeData();
+        await appThemeService.LoadThemeDataAsync();
 
         Log.Debug("Application theme changed successfully");
     }

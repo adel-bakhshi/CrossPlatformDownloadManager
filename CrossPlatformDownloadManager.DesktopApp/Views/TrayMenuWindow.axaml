@@ -147,8 +147,8 @@
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
                         <Image Grid.Column="0"
-                               Width="16"
-                               Height="16"
+                               Width="{DynamicResource SmallIconSize}"
+                               Height="{DynamicResource SmallIconSize}"
                                Stretch="Uniform"
                                Margin="0, 0, 4, 0"
                                VerticalAlignment="Center"
@@ -230,8 +230,8 @@
                                         <PathIcon Grid.Column="0"
                                                   VerticalAlignment="Center"
                                                   Margin="0, 0, 4, 0"
-                                                  Width="16"
-                                                  Height="16"
+                                                  Width="{DynamicResource SmallIconSize}"
+                                                  Height="{DynamicResource SmallIconSize}"
                                                   Data="{DynamicResource ClockRotateLeftSvgIcon}"
                                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -248,8 +248,8 @@
                                                 Classes="smallIconButton"
                                                 Command="{Binding $parent[Window].((vm:TrayMenuWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="16"
-                                                      Height="16"
+                                            <PathIcon Width="{DynamicResource SmallIconSize}"
+                                                      Height="{DynamicResource SmallIconSize}"
                                                       Classes.isRunning="{Binding IsRunning}">
                                                 <PathIcon.Styles>
                                                     <Style Selector="PathIcon">
@@ -290,8 +290,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource PlusSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -313,8 +313,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource PlusSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -342,8 +342,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource GearSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -456,8 +456,8 @@
                                         <PathIcon Grid.Column="0"
                                                   VerticalAlignment="Center"
                                                   Margin="0, 0, 4, 0"
-                                                  Width="16"
-                                                  Height="16"
+                                                  Width="{DynamicResource SmallIconSize}"
+                                                  Height="{DynamicResource SmallIconSize}"
                                                   Data="{DynamicResource ArrowsLeftRightToLineSvgIcon}"
                                                   Foreground="{Binding $parent[ListBoxItem].Foreground}" />
 
@@ -489,8 +489,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource CircleQuestionSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -512,8 +512,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource CircleInfoSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 
@@ -541,8 +541,8 @@
                         <PathIcon Grid.Column="0"
                                   VerticalAlignment="Center"
                                   Margin="0, 0, 4, 0"
-                                  Width="16"
-                                  Height="16"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
                                   Data="{DynamicResource CircleXMarkSvgIcon}"
                                   Foreground="{DynamicResource MainTextColor}" />
 

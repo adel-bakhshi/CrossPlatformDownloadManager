@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CrossPlatformDownloadManager.Data.ViewModels;
+using CrossPlatformDownloadManager.DesktopApp.CustomControls;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
@@ -239,7 +240,7 @@ public class ManageLinksWindowViewModel : ViewModelBase
 
         BrowseSaveDirectoryCommand = ReactiveCommand.CreateFromTask<Window?>(BrowseSaveDirectoryAsync);
         SelectAllRowsCommand = ReactiveCommand.Create<DataGrid?>(SelectAllRows);
-        ChangeSaveModeCommand = ReactiveCommand.Create<ToggleSwitch?>(ChangeSaveMode);
+        ChangeSaveModeCommand = ReactiveCommand.Create<CustomToggleSwitch?>(ChangeSaveMode);
         SaveCommand = ReactiveCommand.CreateFromTask<Window?>(SaveAsync);
         CancelCommand = ReactiveCommand.CreateFromTask<Window?>(CancelAsync);
 
@@ -333,7 +334,7 @@ public class ManageLinksWindowViewModel : ViewModelBase
     /// Changes the save mode based on the selected toggle switch.
     /// </summary>
     /// <param name="toggleSwitch">The toggle switch that was changed.</param>
-    private void ChangeSaveMode(ToggleSwitch? toggleSwitch)
+    private void ChangeSaveMode(CustomToggleSwitch? toggleSwitch)
     {
         if (toggleSwitch == null)
             return;

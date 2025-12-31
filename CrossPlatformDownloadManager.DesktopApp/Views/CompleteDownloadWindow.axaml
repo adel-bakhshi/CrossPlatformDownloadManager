@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -104,17 +105,10 @@
                                    Text="Don’t show this dialog again"
                                    FontWeight="Bold" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding DontShowThisDialogAgain}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DontShowThisDialogAgain}" />
                     </Grid>
                 </Border>
             </StackPanel>

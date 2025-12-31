@@ -32,7 +32,7 @@
                                   Background="{DynamicResource SecondaryBackgroundColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource LayerGroupSvgIcon}"
-                                  IconSize="16"
+                                  IconSize="{DynamicResource SmallIconSize}"
                                   IconColor="{DynamicResource IconColor}"
                                   Watermark="Category title"
                                   WatermarkForeground="{DynamicResource AccentColor}"

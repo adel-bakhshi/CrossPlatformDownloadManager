@@ -87,7 +87,7 @@ public class AppInitializer : IAppInitializer
 
             // Load theme data for application styling
             Log.Debug("Loading application theme data...");
-            _appService.AppThemeService.LoadThemeData();
+            _ = _appService.AppThemeService.LoadThemeDataAsync();
             Log.Debug("Theme data loading completed successfully.");
 
             Log.Information("Application initialization completed successfully. All services are ready.");

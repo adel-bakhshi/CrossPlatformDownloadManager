@@ -214,8 +214,8 @@
                                         <Button Classes="smallIconButton"
                                                 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="16"
-                                                      Height="16"
+                                            <PathIcon Width="{DynamicResource SmallIconSize}"
+                                                      Height="{DynamicResource SmallIconSize}"
                                                       Classes.isRunning="{Binding IsRunning}">
                                                 <PathIcon.Styles>
                                                     <Style Selector="PathIcon">
@@ -240,8 +240,8 @@
                                                 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowDownloadQueueDetailsCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                                 CommandParameter="{Binding $self}"
                                                 Tag="{Binding Id}">
-                                            <PathIcon Width="16"
-                                                      Height="16"
+                                            <PathIcon Width="{DynamicResource SmallIconSize}"
+                                                      Height="{DynamicResource SmallIconSize}"
                                                       Data="{DynamicResource EllipsisVerticalSvgIcon}"
                                                       Foreground="{DynamicResource InfoColor}" />
                                         </Button>
@@ -343,8 +343,8 @@
                                         Classes="smallIconButton"
                                         Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartStopDownloadQueueCommand, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
                                         CommandParameter="{Binding}">
-                                    <PathIcon Width="16"
-                                              Height="16"
+                                    <PathIcon Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
                                               Data="{DynamicResource PauseSvgIcon}"
                                               Foreground="{DynamicResource DangerColor}" />
                                 </Button>
@@ -1312,8 +1312,8 @@
                             IsVisible="{Binding ActiveProxyTitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                     <PathIcon Data="{DynamicResource ArrowsLeftRightToLineSvgIcon}"
                               Foreground="{DynamicResource AccentColor}"
-                              Width="16"
-                              Height="16" />
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}" />
                     <TextBlock Text="{Binding ActiveProxyTitle}"
                                Foreground="{DynamicResource AccentColor}" />
                 </StackPanel>
@@ -1359,8 +1359,8 @@
                     <!-- Button content -->
                     <PathIcon Data="{DynamicResource ClockRotateLeftSvgIcon}"
                               Foreground="{DynamicResource AccentColor}"
-                              Width="16"
-                              Height="16" />
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}" />
                 </Button>
 
                 <!-- Size -->
@@ -1370,8 +1370,8 @@
                             ToolTip.Tip="Total size of selected files">
                     <PathIcon Data="{DynamicResource CubeSvgIcon}"
                               Foreground="{DynamicResource AccentColor}"
-                              Width="16"
-                              Height="16" />
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}" />
                     <TextBlock Text="{Binding SelectedFilesTotalSize}"
                                Foreground="{DynamicResource AccentColor}" />
                 </StackPanel>
@@ -1384,8 +1384,8 @@
                             IsVisible="{Binding IsGlobalSpeedLimitVisible}">
                     <PathIcon Data="{DynamicResource GaugeHighSvgIcon}"
                               Foreground="{DynamicResource WarningColor}"
-                              Width="16"
-                              Height="16"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
                               VerticalAlignment="Center" />
                     <TextBlock Text="{Binding GlobalSpeedLimit}"
                                Foreground="{DynamicResource WarningColor}"
@@ -1399,8 +1399,8 @@
                             ToolTip.Tip="Total download speed">
                     <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
                               Foreground="{DynamicResource SuccessColor}"
-                              Width="16"
-                              Height="16"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
                               VerticalAlignment="Center" />
                     <TextBlock Text="{Binding DownloadSpeed}"
                                Foreground="{DynamicResource SuccessColor}"

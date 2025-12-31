@@ -12,7 +12,7 @@ public interface IAppThemeService
     /// <summary>
     /// Loads theme data based on the settings.
     /// </summary>
-    void LoadThemeData();
+    Task LoadThemeDataAsync();
 
     /// <summary>
     /// Validates a JSON content to be an AppTheme.

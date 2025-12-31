@@ -1,98 +1,18 @@
 {
-  "name": "Dreamy Pink",
+  "name": "Ocean Teal Light",
   "author": "CDM",
   "isDarkTheme": false,
   "mainBackgroundColor": {
     "brushMode": 0,
-    "color": "#FCE4EC",
+    "color": "#FFFFFF",
     "opacity": 1
   },
   "secondaryBackgroundColor": {
     "brushMode": 0,
-    "color": "#F8BBD0",
+    "color": "#E0F7FA",
     "opacity": 1
   },
   "accentColor": {
-    "brushMode": 0,
-    "color": "#F06292",
-    "opacity": 1
-  },
-  "mainTextColor": {
-    "brushMode": 0,
-    "color": "#4A2C3D",
-    "opacity": 1
-  },
-  "buttonTextColor": {
-    "brushMode": 0,
-    "color": "#FFFFFF",
-    "opacity": 1
-  },
-  "categoryHoverColor": {
-    "brushMode": 0,
-    "color": "#EC407A",
-    "opacity": 1
-  },
-  "menuBackgroundColor": {
-    "brushMode": 0,
-    "color": "#F48FB1",
-    "opacity": 1
-  },
-  "menuItemHoverColor": {
-    "brushMode": 0,
-    "color": "#F06292",
-    "opacity": 1
-  },
-  "iconColor": {
-    "brushMode": 0,
-    "color": "#AD1457",
-    "opacity": 1
-  },
-  "selectedProxyColor": {
-    "brushMode": 0,
-    "color": "#FFEBEE",
-    "opacity": 1
-  },
-  "toggleCircleColor": {
-    "brushMode": 0,
-    "color": "#FFFFFF",
-    "opacity": 1
-  },
-  "loadingIndicatorColor": {
-    "brushMode": 0,
-    "color": "#D32F2F",
-    "opacity": 1
-  },
-  "dialogTextColor": {
-    "brushMode": 0,
-    "color": "#FFFFFF",
-    "opacity": 1
-  },
-  "dialogOkBackgroundColor": {
-    "brushMode": 0,
-    "color": "#D81B60",
-    "opacity": 1
-  },
-  "dialogYesBackgroundColor": {
-    "brushMode": 0,
-    "color": "#10BA18",
-    "opacity": 1
-  },
-  "dialogNoBackgroundColor": {
-    "brushMode": 0,
-    "color": "#F44336",
-    "opacity": 1
-  },
-  "dialogCancelBackgroundColor": {
-    "brushMode": 0,
-    "color": "#FF9800",
-    "opacity": 1
-  },
-  "managerTextColor": {
-    "brushMode": 0,
-    "color": "#FFFFFF",
-    "opacity": 1
-  },
-  "mainColor": {
     "brushMode": 1,
     "startPoint": "0,0.5",
     "endPoint": "1,0.5",
@@ -101,15 +21,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#D81B60",
-          "opacity": 1
-        }
-      },
-      {
-        "offset": 0.5,
-        "color": {
-          "brushMode": 0,
-          "color": "#EC407A",
+          "color": "#0097A7",
           "opacity": 1
         }
       },
@@ -117,7 +29,190 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#F06292",
+          "color": "#00BCD4",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "mainTextColor": {
+    "brushMode": 0,
+    "color": "#004D56",
+    "opacity": 1
+  },
+  "buttonTextColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "categoryHeaderHoverColor": {
+    "brushMode": 0,
+    "color": "#00BCD4",
+    "opacity": 1
+  },
+  "categoryHeaderSelectedColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0097A7",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#00BCD4",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "menuBackgroundColor": {
+    "brushMode": 0,
+    "color": "#F1FAFC",
+    "opacity": 1
+  },
+  "menuItemHoverColor": {
+    "brushMode": 0,
+    "color": "#B2EBF2",
+    "opacity": 1
+  },
+  "iconColor": {
+    "brushMode": 0,
+    "color": "#0097A7",
+    "opacity": 1
+  },
+  "selectedProxyColor": {
+    "brushMode": 0,
+    "color": "#B2EBF2",
+    "opacity": 1
+  },
+  "toggleCircleColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "toggleColor": {
+    "brushMode": 0,
+    "color": "#B0BEC5",
+    "opacity": 1
+  },
+  "toggleCheckedColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0097A7",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#00BCD4",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "loadingIndicatorColor": {
+    "brushMode": 1,
+    "startPoint": "0,0.5",
+    "endPoint": "1,0.5",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0097A7",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 0.5,
+        "color": {
+          "brushMode": 0,
+          "color": "#00BCD4",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#26C6DA",
+          "opacity": 1
+        }
+      }
+    ]
+  },
+  "dialogTextColor": {
+    "brushMode": 0,
+    "color": "#004D56",
+    "opacity": 1
+  },
+  "dialogOkBackgroundColor": {
+    "brushMode": 0,
+    "color": "#00ACC1",
+    "opacity": 1
+  },
+  "dialogYesBackgroundColor": {
+    "brushMode": 0,
+    "color": "#26A69A",
+    "opacity": 1
+  },
+  "dialogNoBackgroundColor": {
+    "brushMode": 0,
+    "color": "#EF5350",
+    "opacity": 1
+  },
+  "dialogCancelBackgroundColor": {
+    "brushMode": 0,
+    "color": "#90A4AE",
+    "opacity": 1
+  },
+  "managerTextColor": {
+    "brushMode": 0,
+    "color": "#004D56",
+    "opacity": 1
+  },
+  "mainColor": {
+    "brushMode": 1,
+    "startPoint": "0,0",
+    "endPoint": "1,1",
+    "gradientStops": [
+      {
+        "offset": 0,
+        "color": {
+          "brushMode": 0,
+          "color": "#0097A7",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 0.5,
+        "color": {
+          "brushMode": 0,
+          "color": "#00BCD4",
+          "opacity": 1
+        }
+      },
+      {
+        "offset": 1,
+        "color": {
+          "brushMode": 0,
+          "color": "#26C6DA",
           "opacity": 1
         }
       }
@@ -132,7 +227,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#09A500",
+          "color": "#26A69A",
           "opacity": 1
         }
       },
@@ -140,7 +235,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#0ABA00",
+          "color": "#4DB6AC",
           "opacity": 1
         }
       }
@@ -155,7 +250,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#0A20CC",
+          "color": "#00BCD4",
           "opacity": 1
         }
       },
@@ -163,7 +258,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#2459BC",
+          "color": "#26C6DA",
           "opacity": 1
         }
       }
@@ -178,7 +273,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#CF0509",
+          "color": "#E53935",
           "opacity": 1
         }
       },
@@ -186,7 +281,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#DD0030",
+          "color": "#EF5350",
           "opacity": 1
         }
       }
@@ -201,7 +296,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#EA2F00",
+          "color": "#FFA726",
           "opacity": 1
         }
       },
@@ -209,7 +304,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#DF4812",
+          "color": "#FFB74D",
           "opacity": 1
         }
       }
@@ -224,7 +319,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#D81B60",
+          "color": "#00BCD4",
           "opacity": 1
         }
       },
@@ -232,7 +327,7 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#F06292",
+          "color": "#26C6DA",
           "opacity": 1
         }
       }
@@ -240,7 +335,7 @@
   },
   "chunkProgressBackgroundColor": {
     "brushMode": 0,
-    "color": "#F8BBD0",
+    "color": "#B2EBF2",
     "opacity": 1
   },
   "gridRowColor": {
@@ -252,7 +347,7 @@
         "offset": 0,
         "color": {
           "brushMode": 0,
-          "color": "#FCE4EC",
+          "color": "#E0F7FA",
           "opacity": 1
         }
       },
@@ -260,10 +355,15 @@
         "offset": 1,
         "color": {
           "brushMode": 0,
-          "color": "#F8BBD0",
-          "opacity": 0.17
+          "color": "#B2EBF2",
+          "opacity": 0.5
         }
       }
     ]
+  },
+  "linkColor": {
+    "brushMode": 0,
+    "color": "#0097A7",
+    "opacity": 1
   }
 }

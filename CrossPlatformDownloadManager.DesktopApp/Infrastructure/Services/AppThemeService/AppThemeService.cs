@@ -43,7 +43,7 @@ public class AppThemeService : IAppThemeService
         Log.Debug("AppThemeService initialized successfully.");
     }
 
-    public void LoadThemeData()
+    public async Task LoadThemeDataAsync()
     {
         Log.Information("Loading theme data...");
 
@@ -70,8 +70,8 @@ public class AppThemeService : IAppThemeService
         try
         {
             jsonData = themeFilePath.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
-                ? LoadThemeDataFromAssets(themeFilePath)
-                : LoadThemeDataFromStorage(themeFilePath);
+                ? await LoadThemeDataFromAssetsAsync(themeFilePath)
+                : await LoadThemeDataFromStorageAsync(themeFilePath);
 
             Log.Debug("Theme data loaded successfully from: {ThemeFilePath}", themeFilePath);
         }
@@ -81,7 +81,7 @@ public class AppThemeService : IAppThemeService
             Log.Error(ex, "Failed to load theme data from {ThemeFilePath}.", themeFilePath);
             // Load light theme
             Log.Debug("Loading default light theme as fallback.");
-            jsonData = LoadThemeDataFromAssets(Constants.LightThemeFilePath);
+            jsonData = await LoadThemeDataFromAssetsAsync(Constants.LightThemeFilePath);
         }
 
         // Convert JSON data to AppTheme object
@@ -199,7 +199,7 @@ public class AppThemeService : IAppThemeService
         // Get default theme path and load theme data
         var defaultThemeUri = new Uri(isDark ? Constants.DarkThemeFilePath : Constants.LightThemeFilePath);
         var json = await defaultThemeUri.OpenTextAssetAsync();
-        
+
         // Convert JSON data to AppTheme object and set IsDefault property to true if successful
         var appTheme = ConvertJsonToAppTheme(json);
         if (appTheme != null)
@@ -218,11 +218,11 @@ public class AppThemeService : IAppThemeService
     /// </summary>
     /// <param name="themeFilePath">Theme file path based on Avalonia path system.</param>
     /// <returns>Returns the theme data as JSON string.</returns>
-    private static string? LoadThemeDataFromAssets(string themeFilePath)
+    private static async Task<string?> LoadThemeDataFromAssetsAsync(string themeFilePath)
     {
         Log.Debug("Loading theme data from assets: {ThemeFilePath}", themeFilePath);
 
-        var data = themeFilePath.OpenTextAsset();
+        var data = await themeFilePath.OpenTextAssetAsync();
         Log.Debug("Theme data loaded from assets successfully. Length: {Length}", data?.Length ?? 0);
 
         return data;
@@ -233,7 +233,7 @@ public class AppThemeService : IAppThemeService
     /// </summary>
     /// <param name="themeFilePath">Theme file path.</param>
     /// <returns>Returns the theme data as JSON string.</returns>
-    private static string? LoadThemeDataFromStorage(string themeFilePath)
+    private static async Task<string?> LoadThemeDataFromStorageAsync(string themeFilePath)
     {
         Log.Debug("Loading theme data from storage: {ThemeFilePath}", themeFilePath);
 
@@ -243,7 +243,7 @@ public class AppThemeService : IAppThemeService
             return null;
         }
 
-        var data = File.ReadAllText(themeFilePath);
+        var data = await File.ReadAllTextAsync(themeFilePath);
         Log.Debug("Theme data loaded from storage successfully. Length: {Length}", data.Length);
 
         return data;
@@ -320,12 +320,15 @@ public class AppThemeService : IAppThemeService
         resources["AccentColor"] = appTheme.AccentColor!.GetBrush();
         resources["MainTextColor"] = appTheme.MainTextColor!.GetBrush();
         resources["ButtonTextColor"] = appTheme.ButtonTextColor!.GetBrush();
-        resources["CategoryHoverColor"] = appTheme.CategoryHoverColor!.GetBrush();
+        resources["CategoryHeaderHoverColor"] = appTheme.CategoryHeaderHoverColor!.GetBrush();
+        resources["CategoryHeaderSelectedColor"] = appTheme.CategoryHeaderSelectedColor!.GetBrush();
         resources["MenuBackgroundColor"] = appTheme.MenuBackgroundColor!.GetBrush();
         resources["MenuItemHoverColor"] = appTheme.MenuItemHoverColor!.GetBrush();
         resources["IconColor"] = appTheme.IconColor!.GetBrush();
         resources["SelectedProxyColor"] = appTheme.SelectedProxyColor!.GetBrush();
         resources["ToggleCircleColor"] = appTheme.ToggleCircleColor!.GetBrush();
+        resources["ToggleColor"] = appTheme.ToggleColor!.GetBrush();
+        resources["ToggleCheckedColor"] = appTheme.ToggleCheckedColor!.GetBrush();
         resources["LoadingIndicatorColor"] = appTheme.LoadingIndicatorColor!.GetBrush();
         resources["DialogTextColor"] = appTheme.DialogTextColor!.GetBrush();
         resources["DialogOkBackgroundColor"] = appTheme.DialogOkBackgroundColor!.GetBrush();
@@ -341,6 +344,7 @@ public class AppThemeService : IAppThemeService
         resources["WarningColor"] = appTheme.WarningColor!.GetBrush();
         resources["ChunkProgressColor"] = appTheme.ChunkProgressColor!.GetBrush();
         resources["GridRowColor"] = appTheme.GridRowColor!.GetBrush();
+        resources["LinkColor"] = appTheme.LinkColor!.GetBrush();
 
         Log.Debug("All theme resources applied successfully.");
 

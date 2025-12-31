@@ -199,7 +199,7 @@
                                   Background="{DynamicResource SecondaryBackgroundColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource ListOlSvgIcon}"
-                                  IconSize="16"
+                                  IconSize="{DynamicResource SmallIconSize}"
                                   IconColor="{DynamicResource IconColor}"
                                   Watermark="Queue title"
                                   WatermarkForeground="{DynamicResource AccentColor}"
@@ -250,17 +250,10 @@
                                Text="Start download on application startup"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding StartOnApplicationStartup}" />
+                    <cc:CustomToggleSwitch Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding StartOnApplicationStartup}" />
                 </Grid>
             </Border>
 
@@ -279,17 +272,10 @@
                                    Text="Start download schedule"
                                    FontWeight="Bold" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding StartDownloadScheduleEnabled}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding StartDownloadScheduleEnabled}" />
                     </Grid>
 
                     <!-- Start download schedule -->
@@ -414,8 +400,8 @@
                                     CommandParameter="{Binding #StartDownloadDatePicker}"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center">
-                                <PathIcon Width="16"
-                                          Height="16"
+                                <PathIcon Width="{DynamicResource SmallIconSize}"
+                                          Height="{DynamicResource SmallIconSize}"
                                           Data="{DynamicResource CalendarDaysSvgIcon}"
                                           Foreground="{DynamicResource IconColor}" />
                             </Button>
@@ -458,17 +444,10 @@
                                    Text="Stop download schedule"
                                    FontWeight="Bold" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding StopDownloadScheduleEnabled}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding StopDownloadScheduleEnabled}" />
                     </Grid>
 
                     <!-- Stop download schedule -->
@@ -547,17 +526,10 @@
                                    Text="Retry on download failed"
                                    FontWeight="Bold" />
 
-                        <ToggleSwitch Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding RetryOnDownloadingFailed}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding RetryOnDownloadingFailed}" />
                     </Grid>
 
                     <cc:CustomNumericUpDown BorderThickness="0"
@@ -589,17 +561,10 @@
                                Text="Show alarm when done"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding ShowAlarmWhenDone}" />
+                    <cc:CustomToggleSwitch Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding ShowAlarmWhenDone}" />
                 </Grid>
             </Border>
 
@@ -615,17 +580,10 @@
                                Text="Exit program when done"
                                FontWeight="Bold" />
 
-                    <ToggleSwitch Grid.Column="1"
-                                  OffContent="{x:Null}"
-                                  OnContent="{x:Null}"
-                                  Margin="0"
-                                  Padding="0"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  HorizontalContentAlignment="Right"
-                                  VerticalContentAlignment="Center"
-                                  Width="40"
-                                  IsChecked="{Binding ExitProgramWhenDone}" />
+                    <cc:CustomToggleSwitch Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding ExitProgramWhenDone}" />
                 </Grid>
             </Border>
 
@@ -643,18 +601,10 @@
                                    Text="Turn off computer when done"
                                    FontWeight="Bold" />
 
-                        <ToggleSwitch Name="TurnOffComputerWhenDoneToggleSwitch"
-                                      Grid.Column="1"
-                                      OffContent="{x:Null}"
-                                      OnContent="{x:Null}"
-                                      Margin="0"
-                                      Padding="0"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Right"
-                                      HorizontalContentAlignment="Right"
-                                      VerticalContentAlignment="Center"
-                                      Width="40"
-                                      IsChecked="{Binding TurnOffComputerWhenDone}" />
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding TurnOffComputerWhenDone}" />
                     </Grid>
 
                     <cc:CustomComboBox PlaceholderText="AM / PM"
@@ -664,7 +614,7 @@
                                        OnHoverToggleIconColor="{DynamicResource MainTextColor}"
                                        ItemsSource="{Binding TurnOffComputerModes}"
                                        SelectedItem="{Binding SelectedTurnOffComputerMode}"
-                                       IsEnabled="{Binding #TurnOffComputerWhenDoneToggleSwitch.IsChecked}"
+                                       IsEnabled="{Binding TurnOffComputerWhenDone}"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Right"
                                        Margin="10, 0, 0, 0">

@@ -68,7 +68,7 @@
             <!-- Pointer over styles -->
             <Style Selector="^:pointerover">
                 <Setter Property="Foreground"
-                        Value="{DynamicResource CategoryHoverColor}" />
+                        Value="{DynamicResource LinkColor}" />
             </Style>
         </Style>
     </UserControl.Styles>

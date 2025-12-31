@@ -121,17 +121,10 @@
                            Text="Include paused files"
                            ToolTip.Tip="By enabling this feature, if there is a file in your queue that is Paused, the queue will consider this file as part of the download process and include it in the count of simultaneous downloads." />
 
-                <ToggleSwitch Grid.Column="1"
-                              OffContent="{x:Null}"
-                              OnContent="{x:Null}"
-                              Margin="0"
-                              Padding="0"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Right"
-                              HorizontalContentAlignment="Right"
-                              VerticalContentAlignment="Center"
-                              Width="40"
-                              IsChecked="{Binding IncludePausedFiles}" />
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding IncludePausedFiles}" />
             </Grid>
         </Border>
 

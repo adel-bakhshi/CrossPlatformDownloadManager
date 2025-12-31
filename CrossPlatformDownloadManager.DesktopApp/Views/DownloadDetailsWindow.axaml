@@ -220,7 +220,7 @@
                                              Margin="0, 0, 0, 5"
                                              Padding="0"
                                              BorderThickness="0"
-                                             Foreground="{DynamicResource CategoryHoverColor}"
+                                             Foreground="{DynamicResource LinkColor}"
                                              Command="{Binding OpenLinkCommand}"
                                              CommandParameter="{Binding DownloadFile.Referer, FallbackValue='', TargetNullValue=''}">
                                 <TextBlock Text="{Binding DownloadFile.Referer, FallbackValue='No data', TargetNullValue='No data'}"
@@ -239,7 +239,7 @@
                                              Margin="0, 0, 0, 5"
                                              Padding="0"
                                              BorderThickness="0"
-                                             Foreground="{DynamicResource CategoryHoverColor}"
+                                             Foreground="{DynamicResource LinkColor}"
                                              Command="{Binding OpenLinkCommand}"
                                              CommandParameter="{Binding DownloadFile.PageAddress, FallbackValue='', TargetNullValue=''}">
                                 <TextBlock Text="{Binding DownloadFile.PageAddress, FallbackValue='No data', TargetNullValue='No data'}"

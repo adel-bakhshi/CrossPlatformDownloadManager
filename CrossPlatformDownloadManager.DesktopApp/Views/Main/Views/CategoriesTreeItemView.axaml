@@ -48,29 +48,29 @@
                 <Setter Property="Foreground"
                         Value="{DynamicResource MainTextColor}" />
 
-                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Style Selector="^:pointerover">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryHoverColor}" />
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
                 </Style>
 
-                <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Style Selector="^:selected">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryHoverColor}" />
+                            Value="{DynamicResource CategoryHeaderSelectedColor}" />
                 </Style>
 
-                <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                <Style Selector="^:selected:focus">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryHoverColor}" />
+                            Value="{DynamicResource CategoryHeaderSelectedColor}" />
                 </Style>
 
-                <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Style Selector="^:selected:pointerover">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryHoverColor}" />
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
                 </Style>
 
-                <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Style Selector="^:selected:focus:pointerover">
                     <Setter Property="Foreground"
-                            Value="{DynamicResource CategoryHoverColor}" />
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
                 </Style>
             </Style>
         </Style>
@@ -84,14 +84,30 @@
             <DataTemplate>
                 <StackPanel Orientation="Horizontal"
                             Spacing="5">
-                    <PathIcon Width="16"
-                              Height="16"
+                    <PathIcon Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
                               Data="{Binding $parent[UserControl].((vm:CategoriesTreeItemViewModel)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
-                              Foreground="{Binding $parent[Expander].Foreground}" />
+                              Foreground="{Binding $parent[Expander].Foreground}">
+                        <!-- Transitions -->
+                        <PathIcon.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Foreground"
+                                                 Duration="00:00:00.3" />
+                            </Transitions>
+                        </PathIcon.Transitions>
+                    </PathIcon>
 
                     <TextBlock Text="{Binding $parent[UserControl].((vm:CategoriesTreeItemViewModel)DataContext).Title, FallbackValue='', TargetNullValue=''}"
                                FontWeight="Bold"
-                               TextTrimming="CharacterEllipsis" />
+                               TextTrimming="CharacterEllipsis">
+                        <!-- Transitions -->
+                        <TextBlock.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Foreground"
+                                                 Duration="00:00:00.3" />
+                            </Transitions>
+                        </TextBlock.Transitions>
+                    </TextBlock>
                 </StackPanel>
             </DataTemplate>
         </Expander.HeaderTemplate>
@@ -121,11 +137,30 @@
                     <StackPanel Orientation="Horizontal"
                                 Spacing="5">
                         <PathIcon Data="{Binding Icon, FallbackValue='', TargetNullValue=''}"
-                                  Width="16"
-                                  Height="16"
-                                  Foreground="{Binding $parent[ListBoxItem].Foreground}" />
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  Foreground="{Binding $parent[ListBoxItem].Foreground}"
+                                  VerticalAlignment="Center">
+                            <!-- Transitions -->
+                            <PathIcon.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="Foreground"
+                                                     Duration="00:00:00.3" />
+                                </Transitions>
+                            </PathIcon.Transitions>
+                        </PathIcon>
 
-                        <TextBlock Text="{Binding Title, FallbackValue='', TargetNullValue=''}" />
+                        <TextBlock Text="{Binding Title, FallbackValue='', TargetNullValue=''}"
+                                   Foreground="{Binding $parent[ListBoxItem].Foreground}"
+                                   VerticalAlignment="Center">
+                            <!-- Transitions -->
+                            <TextBlock.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="Foreground"
+                                                     Duration="00:00:00.3" />
+                                </Transitions>
+                            </TextBlock.Transitions>
+                        </TextBlock>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

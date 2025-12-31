@@ -228,21 +228,6 @@ public static class ExtensionMethods
     /// </summary>
     /// <param name="assetUri">The asset URI.</param>
     /// <returns>Returns the content of the asset if found, otherwise null.</returns>
-    public static string? OpenTextAsset(this Uri? assetUri)
-    {
-        if (assetUri == null)
-            return null;
-
-        using var stream = AssetLoader.Open(assetUri);
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
-
-    /// <summary>
-    /// Opens a text asset and returns its content as a string.
-    /// </summary>
-    /// <param name="assetUri">The asset URI.</param>
-    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
     public static async Task<string?> OpenTextAssetAsync(this Uri? assetUri)
     {
         if (assetUri == null)
@@ -251,20 +236,6 @@ public static class ExtensionMethods
         await using var stream = AssetLoader.Open(assetUri);
         using var reader = new StreamReader(stream);
         return await reader.ReadToEndAsync();
-    }
-
-    /// <summary>
-    /// Opens a text asset and returns its content as a string.
-    /// </summary>
-    /// <param name="assetPath">The asset path.</param>
-    /// <returns>Returns the content of the asset if found, otherwise null.</returns>
-    public static string? OpenTextAsset(this string? assetPath)
-    {
-        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
-            return null;
-
-        var assetUri = new Uri(assetPath);
-        return assetUri.OpenTextAsset();
     }
 
     /// <summary>
@@ -288,39 +259,10 @@ public static class ExtensionMethods
     /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
     /// <typeparam name="T">The type of the object to convert to.</typeparam>
     /// <returns>Returns the object if found, otherwise null.</returns>
-    public static T? OpenJsonAsset<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
-    {
-        var json = assetUri.OpenTextAsset();
-        return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
-    }
-
-    /// <summary>
-    /// Opens a JSON asset and converts it to an object.
-    /// </summary>
-    /// <param name="assetUri">The asset URI.</param>
-    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
-    /// <typeparam name="T">The type of the object to convert to.</typeparam>
-    /// <returns>Returns the object if found, otherwise null.</returns>
     public static async Task<T?> OpenJsonAssetAsync<T>(this Uri? assetUri, JsonSerializerSettings? jsonSerializerSettings)
     {
         var json = await assetUri.OpenTextAssetAsync();
         return json.IsStringNullOrEmpty() ? default : json.ConvertFromJson<T>(jsonSerializerSettings);
-    }
-
-    /// <summary>
-    /// Opens a JSON asset and converts it to an object.
-    /// </summary>
-    /// <param name="assetPath">The asset path.</param>
-    /// <param name="jsonSerializerSettings">The JSON serializer settings.</param>
-    /// <typeparam name="T">The type of the object to convert to.</typeparam>
-    /// <returns>Returns the object if found, otherwise null.</returns>
-    public static T? OpenJsonAsset<T>(this string? assetPath, JsonSerializerSettings? jsonSerializerSettings)
-    {
-        if (assetPath.IsStringNullOrEmpty() || assetPath?.StartsWith("avares://", StringComparison.OrdinalIgnoreCase) != true)
-            return default;
-
-        var assetUri = new Uri(assetPath);
-        return assetUri.OpenJsonAsset<T>();
     }
 
     /// <summary>
@@ -337,17 +279,6 @@ public static class ExtensionMethods
 
         var assetUri = new Uri(assetPath);
         return await assetUri.OpenJsonAssetAsync<T>(jsonSerializerSettings);
-    }
-
-    /// <summary>
-    /// Opens a JSON asset and converts it to an object.
-    /// </summary>
-    /// <param name="assetUri">The asset URI.</param>
-    /// <typeparam name="T">The type of the object to convert to.</typeparam>
-    /// <returns>Returns the object if found, otherwise null.</returns>
-    public static T? OpenJsonAsset<T>(this Uri? assetUri)
-    {
-        return assetUri.OpenJsonAsset<T>(null);
     }
 
     /// <summary>

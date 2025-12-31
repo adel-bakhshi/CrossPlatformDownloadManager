@@ -24,14 +24,22 @@ public class AppViewModel : ViewModelBase
 
     public AppViewModel(IAppService appService) : base(appService)
     {
-        IsTrayIconVisible = !AppService.SettingsService.Settings.UseManager;
+        UpdateTrayIcon();
     }
 
     protected override void OnSettingsServiceDataChanged()
     {
         base.OnSettingsServiceDataChanged();
-        
-        IsTrayIconVisible = !AppService.SettingsService.Settings.UseManager;
+
+        UpdateTrayIcon();
         this.RaisePropertyChanged(nameof(IsTrayIconVisible));
+    }
+
+    /// <summary>
+    /// Updates tray icon visibility.
+    /// </summary>
+    private void UpdateTrayIcon()
+    {
+        IsTrayIconVisible = !AppService.SettingsService.Settings.UseManager;
     }
 }

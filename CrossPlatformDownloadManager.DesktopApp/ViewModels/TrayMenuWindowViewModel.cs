@@ -270,9 +270,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     private void LoadDownloadQueues()
     {
-        DownloadQueues = AppService
-            .DownloadQueueService
-            .DownloadQueues;
+        DownloadQueues = AppService.DownloadQueueService.DownloadQueues;
     }
 
     private void RefreshProxies()
@@ -290,7 +288,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
                     .Proxies
                     .ToList();
 
-                var systemProxySettings = new ProxySettingsViewModel { Id = -1, Name = SystemProxySettingsName, };
+                var systemProxySettings = new ProxySettingsViewModel { Id = -1, Name = SystemProxySettingsName };
                 proxies.Insert(0, systemProxySettings);
 
                 if (SelectedProxy != null)

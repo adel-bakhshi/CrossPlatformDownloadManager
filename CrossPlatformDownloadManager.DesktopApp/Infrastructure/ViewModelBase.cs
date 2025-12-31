@@ -28,15 +28,11 @@ public abstract class ViewModelBase : ReactiveObject
     {
         AppService = appService;
 
-        Log.Debug("ViewModelBase initialized for {ViewModelType}", GetType().Name);
-
         // Subscribe to service events
         AppService.DownloadFileService.DataChanged += DownloadFileServiceOnDataChanged;
         AppService.DownloadQueueService.DataChanged += DownloadQueueServiceOnDataChanged;
         AppService.SettingsService.DataChanged += SettingsServiceOnDataChanged;
         AppService.CategoryService.CategoriesChanged += CategoryServiceOnCategoriesChanged;
-
-        Log.Debug("Subscribed to service events for {ViewModelType}", GetType().Name);
     }
 
     #region Virtual Methods
@@ -47,7 +43,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// </summary>
     protected virtual void OnDownloadFileServiceDataChanged()
     {
-        Log.Debug("Download file service data changed handled by {ViewModelType}", GetType().Name);
     }
 
     /// <summary>
@@ -56,7 +51,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// </summary>
     protected virtual void OnDownloadQueueServiceDataChanged()
     {
-        Log.Debug("Download queue service data changed handled by {ViewModelType}", GetType().Name);
     }
 
     /// <summary>
@@ -65,7 +59,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// </summary>
     protected virtual void OnSettingsServiceDataChanged()
     {
-        Log.Debug("Settings service data changed handled by {ViewModelType}", GetType().Name);
     }
 
     /// <summary>
@@ -74,7 +67,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// </summary>
     protected virtual void OnCategoryServiceCategoriesChanged()
     {
-        Log.Debug("Category service categories changed handled by {ViewModelType}", GetType().Name);
     }
 
     #endregion
@@ -88,7 +80,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// <param name="e">The event arguments.</param>
     private void DownloadFileServiceOnDataChanged(object? sender, EventArgs e)
     {
-        Log.Debug("Download file service data change event received by {ViewModelType}", GetType().Name);
         OnDownloadFileServiceDataChanged();
     }
 
@@ -99,7 +90,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// <param name="e">The event arguments.</param>
     private void DownloadQueueServiceOnDataChanged(object? sender, EventArgs e)
     {
-        Log.Debug("Download queue service data change event received by {ViewModelType}", GetType().Name);
         OnDownloadQueueServiceDataChanged();
     }
 
@@ -110,7 +100,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// <param name="e">The event arguments.</param>
     private void SettingsServiceOnDataChanged(object? sender, EventArgs e)
     {
-        Log.Debug("Settings service data change event received by {ViewModelType}", GetType().Name);
         OnSettingsServiceDataChanged();
     }
 
@@ -121,7 +110,6 @@ public abstract class ViewModelBase : ReactiveObject
     /// <param name="e">The event arguments.</param>
     private void CategoryServiceOnCategoriesChanged(object? sender, EventArgs e)
     {
-        Log.Debug("Category service categories change event received by {ViewModelType}", GetType().Name);
         OnCategoryServiceCategoriesChanged();
     }
 

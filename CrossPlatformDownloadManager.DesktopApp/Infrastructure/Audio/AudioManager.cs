@@ -19,7 +19,8 @@ public static class AudioManager
     /// Initializes the audio manager by creating the songs directory and copying audio files from assets.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when song files are not found in assets.</exception>
-    public static void Initialize()
+    /// <returns>Task representing the asynchronous initialization process.</returns>
+    public static async Task InitializeAsync()
     {
         Log.Information("Initializing audio manager...");
 
@@ -56,9 +57,9 @@ public static class AudioManager
 
             Log.Debug("Copying song file: {SongName}", songName);
 
-            using var stream = AssetLoader.Open(songFile);
-            using var fileStream = File.Create(songPath);
-            stream.CopyTo(fileStream);
+            await using var stream = AssetLoader.Open(songFile);
+            await using var fileStream = File.Create(songPath);
+            await stream.CopyToAsync(fileStream);
 
             Log.Debug("Song file copied successfully: {SongPath}", songPath);
         }

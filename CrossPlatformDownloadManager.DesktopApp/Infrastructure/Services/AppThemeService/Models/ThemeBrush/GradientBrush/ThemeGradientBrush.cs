@@ -37,8 +37,6 @@ public class ThemeGradientBrush : IThemeBrush
     /// <returns>Returns true if the brush is valid, otherwise false.</returns>
     public bool Validate()
     {
-        Log.Debug("Validating gradient theme brush. StartPoint: {StartPoint}, EndPoint: {EndPoint}, GradientStops: {StopCount}", StartPoint, EndPoint, GradientStops.Count);
-
         if (!ValidatePoint(StartPoint) || !ValidatePoint(EndPoint) || GradientStops.Count == 0)
         {
             Log.Warning("Gradient brush validation failed - invalid points or empty gradient stops.");
@@ -46,7 +44,9 @@ public class ThemeGradientBrush : IThemeBrush
         }
 
         var allStopsValid = GradientStops.TrueForAll(gs => gs.Validate());
-        Log.Debug("Gradient brush validation result: {IsValid}", allStopsValid);
+        if (!allStopsValid)
+            Log.Debug("Gradient stop validation failed.");
+
         return allStopsValid;
     }
 
@@ -56,8 +56,6 @@ public class ThemeGradientBrush : IThemeBrush
     /// <returns>Returns the created gradient brush object.</returns>
     public object GetBrush()
     {
-        Log.Debug("Creating gradient brush with {StopCount} gradient stops.", GradientStops.Count);
-
         var startPoint = StartPoint!
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(p => double.Parse(p.Trim(), CultureInfo.InvariantCulture))
@@ -76,9 +74,6 @@ public class ThemeGradientBrush : IThemeBrush
 
         var stops = GradientStops.ConvertAll(gs => gs.CreateGradientStop());
         gradientBrush.GradientStops.AddRange(stops);
-
-        Log.Debug("Gradient brush created successfully with start point ({StartX}, {StartY}) and end point ({EndX}, {EndY})",
-            startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
 
         return gradientBrush;
     }
@@ -120,7 +115,6 @@ public class ThemeGradientBrush : IThemeBrush
             }
         }
 
-        Log.Debug("Point string validation successful: {PointString}", pointString);
         return true;
     }
 

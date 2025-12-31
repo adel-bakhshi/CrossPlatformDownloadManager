@@ -75,20 +75,20 @@ public class AppInitializer : IAppInitializer
             await _appService.DownloadQueueService.LoadDownloadQueuesAsync(addDefaultDownloadQueue: true);
             Log.Debug("Download queue service initialization completed successfully.");
 
-            // Start listening for URLs from browser extension
-            Log.Debug("Starting browser extension listener for URL capture...");
-            _ = _browserExtension.StartListeningAsync();
-            Log.Debug("Browser extension listener started successfully.");
-
             // Initialize AudioManager for notification sounds
             Log.Debug("Initializing audio manager for notification sounds...");
-            AudioManager.Initialize();
+            await AudioManager.InitializeAsync();
             Log.Debug("Audio manager initialization completed successfully.");
 
             // Load theme data for application styling
             Log.Debug("Loading application theme data...");
-            _ = _appService.AppThemeService.LoadThemeDataAsync();
+            await _appService.AppThemeService.LoadThemeDataAsync();
             Log.Debug("Theme data loading completed successfully.");
+
+            // Start listening for URLs from browser extension
+            Log.Debug("Starting browser extension listener for URL capture...");
+            _ = _browserExtension.StartListeningAsync();
+            Log.Debug("Browser extension listener started successfully.");
 
             Log.Information("Application initialization completed successfully. All services are ready.");
         }

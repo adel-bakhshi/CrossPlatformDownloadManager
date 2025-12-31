@@ -26,16 +26,16 @@ public class ThemeGradientStop
     /// <returns>Returns true if the gradient stop is valid, otherwise false.</returns>
     public bool Validate()
     {
-        Log.Debug("Validating gradient stop. Offset: {Offset}, Color: {Color}", Offset, Color?.Color);
-
         if (Offset is < 0 or > 1 || Color == null)
         {
-            Log.Warning("Gradient stop validation failed - invalid offset or null color.");
+            Log.Warning("Gradient stop validation failed - invalid offset or null color. Offset: {Offset}, Color: {Color}", Offset, Color);
             return false;
         }
 
         var colorValid = Color.Validate();
-        Log.Debug("Gradient stop validation result: {IsValid}", colorValid);
+        if (!colorValid)
+            Log.Debug("Gradient stop color validation failed. Color: {Color}, Offset: {Offset}", Color, Offset);
+
         return colorValid;
     }
 
@@ -45,12 +45,7 @@ public class ThemeGradientStop
     /// <returns>Returns the created gradient stop object.</returns>
     public GradientStop CreateGradientStop()
     {
-        Log.Debug("Creating gradient stop with offset: {Offset}", Offset);
-
         var color = Color!.GetBrush() as Color?;
-        var gradientStop = new GradientStop(color!.Value, Offset);
-
-        Log.Debug("Gradient stop created successfully.");
-        return gradientStop;
+        return new GradientStop(color!.Value, Offset);
     }
 }

@@ -260,6 +260,21 @@ public static class Constants
     }
 
     /// <summary>
+    /// Gets a value that indicates the directory that logs stored in it.
+    /// </summary>
+    public static string LogsDirectory
+    {
+        get
+        {
+            var directory = Path.Combine(ApplicationDataDirectory, "Logs");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            
+            return directory;
+        }
+    }
+
+    /// <summary>
     /// Gets  a value that indicates the available fonts in the program.
     /// </summary>
     public static List<string> AvailableFonts =>

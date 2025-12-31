@@ -31,9 +31,15 @@ public partial class StartupWindow : MyWindowBase<StartupWindowViewModel>
             // Hide startup window to show the main application window
             Hide();
 
+            // Check if view model is null
+            if (ViewModel == null)
+                return;
+
+            // Initialize application
+            await ViewModel.InitializeApplicationAsync();
+
             // Load application data
-            if (ViewModel != null)
-                await ViewModel.LoadAppAsync();
+            await ViewModel.LoadAppAsync();
         }
         catch (Exception ex)
         {

@@ -51,15 +51,8 @@ sealed class Program
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
-        const string fileName = "logs.txt";
-        var logFilePath = Path.Combine(Constants.ApplicationDataDirectory, fileName);
-
-        // Initialize logger
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .WriteTo.File(logFilePath)
-            .CreateLogger();
+        // Configure logger
+        ConfigLogger();
 
         // Check if the application is already running
         CheckApplicationProcess();
@@ -118,10 +111,26 @@ sealed class Program
 
                 // Add AppFinisher to services
                 services.AddSingleton<IAppFinisher, AppFinisher>();
-            })
-            .InitializeApp();
+            });
 
         return appBuilder;
+    }
+
+    /// <summary>
+    /// Configures the logger.
+    /// </summary>
+    private static void ConfigLogger()
+    {
+        // Get log file path
+        var logFileName = DateTime.Now.ToString("yy-MM-dd") + ".log";
+        var logFilePath = Path.Combine(Constants.LogsDirectory, logFileName);
+
+        // Initialize logger
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File(logFilePath)
+            .CreateLogger();
     }
 
     /// <summary>

@@ -30,8 +30,6 @@ public class ThemeSolidBrush : IThemeBrush
     /// <returns>Returns true if the brush is valid, otherwise false.</returns>
     public bool Validate()
     {
-        Log.Debug("Validating solid theme brush. Color: {Color}, Opacity: {Opacity}", Color, Opacity);
-
         if (Opacity is < 0 or > 1)
         {
             Log.Warning("Solid brush opacity is out of range: {Opacity}", Opacity);
@@ -39,7 +37,9 @@ public class ThemeSolidBrush : IThemeBrush
         }
 
         var isValid = Color.ConvertFromHex() != null;
-        Log.Debug("Solid brush validation result: {IsValid}", isValid);
+        if (!isValid)
+            Log.Debug("Solid brush color is invalid. Color: {Color}", Color);
+
         return isValid;
     }
 
@@ -49,13 +49,8 @@ public class ThemeSolidBrush : IThemeBrush
     /// <returns>Returns the created color object.</returns>
     public object GetBrush()
     {
-        Log.Debug("Creating solid brush from color: {Color}, opacity: {Opacity}", Color, Opacity);
-
         var color = Color.ConvertFromHex()!.Value;
         var alpha = (byte)Math.Round(Opacity * 255);
-        var result = new Color(alpha, color.R, color.G, color.B);
-
-        Log.Debug("Solid brush created successfully with alpha: {Alpha}", alpha);
-        return result;
+        return new Color(alpha, color.R, color.G, color.B);
     }
 }

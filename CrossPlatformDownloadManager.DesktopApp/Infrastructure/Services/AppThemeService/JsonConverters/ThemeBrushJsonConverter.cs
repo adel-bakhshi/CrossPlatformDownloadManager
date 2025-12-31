@@ -4,7 +4,6 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeSe
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models.ThemeBrush.SolidBrush;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Serilog;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.JsonConverters;
 
@@ -34,23 +33,13 @@ public class ThemeBrushJsonConverter : JsonConverter
     /// <returns>Returns the deserialized IThemeBrush object.</returns>
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
-        Log.Debug("Reading JSON data for theme brush conversion...");
-
         var jsonObject = JObject.Load(reader);
         var brushModeValue = jsonObject.SelectToken("brushMode");
         if (brushModeValue == null)
-        {
-            Log.Warning("brushMode property not found in JSON data.");
             return null;
-        }
 
         if (!Enum.TryParse(brushModeValue.Value<byte>().ToString(), out ThemeBrushMode brushMode))
-        {
-            Log.Warning("Invalid brush mode value: {BrushModeValue}", brushModeValue.Value<byte>());
             return null;
-        }
-
-        Log.Debug("Creating theme brush with mode: {BrushMode}", brushMode);
 
         IThemeBrush themeBrush = brushMode switch
         {
@@ -60,8 +49,6 @@ public class ThemeBrushJsonConverter : JsonConverter
         };
 
         serializer.Populate(jsonObject.CreateReader(), themeBrush);
-
-        Log.Debug("Theme brush created successfully: {BrushType}", themeBrush.GetType().Name);
         return themeBrush;
     }
 

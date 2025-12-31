@@ -103,7 +103,7 @@ public class UnitOfWork : IUnitOfWork
         Log.Debug("Loading category headers from assets...");
         var assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/category-headers.json";
         var assetsUri = new Uri(assetName);
-        var categoryHeaders = assetsUri.OpenJsonAsset<List<CategoryHeader>>();
+        var categoryHeaders = await assetsUri.OpenJsonAssetAsync<List<CategoryHeader>>();
 
         // Check if category headers are loaded successfully
         if (categoryHeaders == null || categoryHeaders.Count == 0)
@@ -131,7 +131,7 @@ public class UnitOfWork : IUnitOfWork
         Log.Debug("Loading categories from assets...");
         assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/categories.json";
         assetsUri = new Uri(assetName);
-        var categories = assetsUri.OpenJsonAsset<List<Category>>();
+        var categories = await assetsUri.OpenJsonAssetAsync<List<Category>>();
 
         // Check if categories are loaded successfully
         if (categories == null || categories.Count == 0)

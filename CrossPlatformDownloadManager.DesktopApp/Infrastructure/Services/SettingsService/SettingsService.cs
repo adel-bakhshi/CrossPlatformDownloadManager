@@ -107,7 +107,7 @@ public class SettingsService : PropertyChangedBase, ISettingsService
                 // Get default settings json content
                 const string assetName = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/settings.json";
                 var assetsUri = new Uri(assetName);
-                settings = assetsUri.OpenJsonAsset<Settings>();
+                settings = await assetsUri.OpenJsonAssetAsync<Settings>();
                 if (settings == null)
                 {
                     Log.Error("Failed to load default settings from asset: {AssetName}", assetName);

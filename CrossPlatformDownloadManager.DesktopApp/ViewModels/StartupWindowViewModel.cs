@@ -111,12 +111,13 @@ public class StartupWindowViewModel : ViewModelBase
                 _mainWindow!.Show();
             }
 
-            // Check for updates
-            if (_mainWindow!.DataContext is MainWindowViewModel viewModel)
-                await viewModel.CheckForUpdatesAsync(null);
 
             // Manage logs
             ManageLogs();
+
+            // Check for updates
+            if (_mainWindow!.DataContext is MainWindowViewModel viewModel)
+                _ = viewModel.CheckForUpdatesAsync(null);
 
             Log.Information("Application loaded successfully.");
         }

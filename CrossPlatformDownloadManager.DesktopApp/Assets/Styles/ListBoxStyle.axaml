@@ -51,13 +51,13 @@
             <Setter Property="MinHeight"
                     Value="0" />
             <Setter Property="BorderBrush"
-                    Value="{DynamicResource TransparentColor}" />
+                    Value="{DynamicResource MainBackgroundColor}" />
             <Setter Property="BorderThickness"
                     Value="0" />
             <Setter Property="CornerRadius"
                     Value="{DynamicResource DefaultCornerRadius}" />
             <Setter Property="Background"
-                    Value="{DynamicResource TransparentColor}" />
+                    Value="{DynamicResource MainBackgroundColor}" />
 
             <!-- Template -->
             <Setter Property="Template">
@@ -78,7 +78,7 @@
 
             <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background"
-                        Value="{DynamicResource TransparentColor}" />
+                        Value="{DynamicResource MainBackgroundColor}" />
 
                 <!-- Transitions -->
                 <Setter Property="Transitions">

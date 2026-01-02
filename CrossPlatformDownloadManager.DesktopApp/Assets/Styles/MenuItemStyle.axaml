@@ -15,7 +15,7 @@
     <!-- Header menu item styles -->
     <Style Selector="MenuItem.headerMenuItem">
         <Setter Property="Background"
-                Value="{DynamicResource TransparentColor}" />
+                Value="{DynamicResource MainBackgroundColor}" />
         <Setter Property="CornerRadius"
                 Value="{DynamicResource DefaultCornerRadius}" />
         <Setter Property="BorderThickness"

@@ -84,7 +84,12 @@ public class ExportImportService : IExportImportService
                 Log.Debug("Creating CDM format export data");
                 // Create export download files
                 var exportDownloadFiles = downloadFiles
-                    .Select(df => new DownloadFileData { Url = df.Url ?? string.Empty })
+                    .Select(df => new DownloadFileData
+                    {
+                        Url = df.Url ?? string.Empty,
+                        Referer = df.Referer ?? string.Empty,
+                        PageAddress = df.PageAddress ?? string.Empty
+                    })
                     .ToList();
 
                 downloadFilesContent = exportDownloadFiles.ConvertToJson();
@@ -234,7 +239,12 @@ public class ExportImportService : IExportImportService
                 // Select the urls from the list of DownloadFileData
                 downloadFiles = downloadFileDataList
                     .Where(df => !df.Url.IsStringNullOrEmpty() && df.Url.CheckUrlValidation())
-                    .Select(df => new DownloadFileViewModel { Url = df.Url })
+                    .Select(df => new DownloadFileViewModel
+                    {
+                        Url = df.Url,
+                        Referer = df.Referer,
+                        PageAddress = df.PageAddress
+                    })
                     .ToList();
 
                 Log.Debug("Filtered to {ValidFileCount} valid URLs from CDM file", downloadFiles.Count);

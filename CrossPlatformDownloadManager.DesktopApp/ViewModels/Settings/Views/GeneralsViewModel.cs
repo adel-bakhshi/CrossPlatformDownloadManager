@@ -1,5 +1,7 @@
+using System;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
+using CrossPlatformDownloadManager.Utils;
 using ReactiveUI;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views;
@@ -54,6 +56,19 @@ public class GeneralsViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _alwaysKeepManagerOnTop, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating the number of days to keep log history.
+    /// </summary>
+    public double LogHistory
+    {
+        get;
+        set
+        {
+            var longValue = (long)Math.Clamp(value, 1, 365);
+            this.RaiseAndSetIfChanged(ref field, longValue);
+        }
+    }
+
     #endregion
 
     public GeneralsViewModel(IAppService appService) : base(appService)
@@ -73,6 +88,7 @@ public class GeneralsViewModel : ViewModelBase
         UseBrowserExtension = settings.UseBrowserExtension;
         UseManager = settings.UseManager;
         AlwaysKeepManagerOnTop = settings.AlwaysKeepManagerOnTop;
+        LogHistory = settings.LogHistory ?? Constants.DefaultLogHistory;
     }
 
     #endregion

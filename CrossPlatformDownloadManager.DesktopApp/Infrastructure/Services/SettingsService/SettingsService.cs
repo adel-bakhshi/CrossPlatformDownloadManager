@@ -137,6 +137,10 @@ public class SettingsService : PropertyChangedBase, ISettingsService
             {
                 Log.Debug("Settings found, using current settings...");
                 settings = settingsList.First();
+
+                // Set default log history if not exists
+                settings.LogHistory ??= Constants.DefaultLogHistory;
+
                 Log.Debug("Using existing settings with ID: {SettingsId}", settings.Id);
             }
 

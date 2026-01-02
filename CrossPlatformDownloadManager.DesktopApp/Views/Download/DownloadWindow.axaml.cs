@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
-using Avalonia.Data;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
@@ -84,23 +82,11 @@ public partial class DownloadWindow : MyWindowBase<DownloadWindowViewModel>
         // Initialize rectangles if they haven't been created yet
         if (_chunksDataRectangles.Count == 0)
         {
-            // Create a binding for the height property
-            var heightBinding = new Binding
-            {
-                Path = "Bounds.Height",
-                Mode = BindingMode.OneWay,
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor)
-                {
-                    AncestorType = typeof(Border),
-                },
-            };
-
             // Create a rectangle for each chunk
             for (var i = 0; i < chunksData.Count; i++)
             {
                 var rect = new Rectangle();
-                rect.Bind(Rectangle.HeightProperty, heightBinding);
-                rect.Fill = this.FindResource("ChunkProgressColor") as IBrush;
+                rect.Classes.Add("chunkProgress");
 
                 // Position the rectangle on the canvas
                 Canvas.SetLeft(rect, divisionsWidth * i);

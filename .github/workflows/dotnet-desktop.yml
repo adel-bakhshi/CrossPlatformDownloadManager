@@ -37,7 +37,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.x.x
+          dotnet-version: 10.x.x
 
       - name: Install Inno Setup
         run: choco install innosetup -y
@@ -74,7 +74,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.x.x
+          dotnet-version: 10.x.x
 
       - name: Install Dependencies
         run: |
@@ -149,7 +149,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.x.x
+          dotnet-version: 10.x.x
 
       - name: Restore Dependencies
         run: dotnet restore

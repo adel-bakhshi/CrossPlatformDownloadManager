@@ -253,6 +253,12 @@ public class SettingsViewModel : PropertyChangedBase
         set => SetField(ref _dataGridColumnSettings, value);
     }
 
+    public double? LogHistory
+    {
+        get;
+        set => SetField(ref field, value);
+    }
+
     public bool HasApplicationBeenRunYet
     {
         get => _hasApplicationBeenRunYet;

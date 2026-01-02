@@ -136,6 +136,9 @@ public class Settings : DbModelBase
     [JsonProperty("dataGridColumnsSettings")]
     public string? DataGridColumnsSettings { get; set; }
 
+    [JsonProperty("logHistory")]
+    public double? LogHistory { get; set; }
+
     public bool HasApplicationBeenRunYet { get; set; }
 
     // ReSharper disable once CollectionNeverUpdated.Global
@@ -179,6 +182,7 @@ public class Settings : DbModelBase
         ManagerPoint = settings.ManagerPoint;
         ShowCategoriesPanel = settings.ShowCategoriesPanel;
         DataGridColumnsSettings = settings.DataGridColumnsSettings;
+        LogHistory = settings.LogHistory;
         HasApplicationBeenRunYet = settings.HasApplicationBeenRunYet;
     }
 }

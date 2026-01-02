@@ -22,6 +22,17 @@
         <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
     </Window.Resources>
 
+    <!-- Styles -->
+    <Window.Styles>
+        <!-- Chunk progress rectangle style -->
+        <Style Selector="Rectangle.chunkProgress">
+            <Setter Property="Height"
+                    Value="{Binding $parent[Canvas].Bounds.Height}" />
+            <Setter Property="Fill"
+                    Value="{DynamicResource ChunkProgressColor}" />
+        </Style>
+    </Window.Styles>
+
     <!-- Main content -->
     <Border Padding="20">
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
@@ -121,9 +132,10 @@
                         Background="{DynamicResource ChunkProgressBackgroundColor}"
                         ClipToBounds="True"
                         HorizontalAlignment="Stretch"
-                        Height="24"
                         Margin="0, 0, 0, 15">
-                    <Canvas Name="ChunksProgressBarsCanvas" />
+                    <Canvas Name="ChunksProgressBarsCanvas"
+                            Height="24"
+                            HorizontalAlignment="Stretch" />
                 </Border>
 
                 <!-- Chunks DataGrid -->

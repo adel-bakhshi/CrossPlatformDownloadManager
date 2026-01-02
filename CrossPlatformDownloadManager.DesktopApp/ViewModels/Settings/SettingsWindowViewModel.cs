@@ -374,6 +374,7 @@ public class SettingsWindowViewModel : ViewModelBase
             AppService.SettingsService.Settings.UseBrowserExtension = GeneralsViewModel.UseBrowserExtension;
             AppService.SettingsService.Settings.UseManager = GeneralsViewModel.UseManager;
             AppService.SettingsService.Settings.AlwaysKeepManagerOnTop = GeneralsViewModel.UseManager && GeneralsViewModel.AlwaysKeepManagerOnTop;
+            AppService.SettingsService.Settings.LogHistory = Math.Clamp(GeneralsViewModel.LogHistory, 1, 365);
 
             // Save appearance settings
             var selectedThemeCard = AppearanceViewModel.SelectedDarkTheme ?? AppearanceViewModel.SelectedLightTheme;

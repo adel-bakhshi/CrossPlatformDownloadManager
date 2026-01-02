@@ -12,5 +12,11 @@ public class DownloadFileData
     [JsonProperty("url")]
     public string Url { get; set; } = string.Empty;
 
+    [JsonProperty("referer")]
+    public string Referer { get; set; } = string.Empty;
+
+    [JsonProperty("pageAddress")]
+    public string PageAddress { get; set; } = string.Empty;
+
     #endregion
 }

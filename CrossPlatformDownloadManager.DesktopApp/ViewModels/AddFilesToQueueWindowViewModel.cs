@@ -81,7 +81,7 @@ public class AddFilesToQueueWindowViewModel : ViewModelBase
         var downloadFiles = AppService
             .DownloadFileService
             .DownloadFiles
-            .Where(df => (df.DownloadQueueId ?? 0) != DownloadQueueId && !df.IsCompleted)
+            .Where(df => (DownloadQueueId == 0 || (DownloadQueueId > 0 && (df.DownloadQueueId ?? 0) != DownloadQueueId)) && !df.IsCompleted)
             .ToObservableCollection();
 
         return downloadFiles;

@@ -111,7 +111,7 @@ public static class Constants
     /// The file path of the light theme data.
     /// </summary>
     public const string LightThemeFilePath = "avares://CrossPlatformDownloadManager.DesktopApp/Assets/Themes/light-theme.json";
-    
+
     /// <summary>
     /// The file path of the dark theme data.
     /// </summary>
@@ -126,6 +126,11 @@ public static class Constants
     /// The link to the guide for creating themes.
     /// </summary>
     public const string CreateThemeGuideLink = "https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/Assets/MarkDown/THEME_GUIDE.md";
+
+    /// <summary>
+    /// The default days to keep logs.
+    /// </summary>
+    public const long DefaultLogHistory = 7;
 
     #endregion
 
@@ -269,7 +274,7 @@ public static class Constants
             var directory = Path.Combine(ApplicationDataDirectory, "Logs");
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-            
+
             return directory;
         }
     }

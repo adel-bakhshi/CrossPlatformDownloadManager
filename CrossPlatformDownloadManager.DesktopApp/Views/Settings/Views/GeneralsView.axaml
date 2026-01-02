@@ -91,5 +91,45 @@
                                        IsEnabled="{Binding UseManager}" />
             </Grid>
         </Border>
+
+        <!-- Log history -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <StackPanel Orientation="Vertical"
+                        Spacing="5">
+                <!-- Title -->
+                <TextBlock Text="Log history"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           TextAlignment="Left"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 5" />
+
+                <!-- Speed  -->
+                <cc:CustomNumericUpDown Watermark="Number of days to keep logs..."
+                                        WatermarkForeground="{DynamicResource AccentColor}"
+                                        Padding="12, 10"
+                                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                        Background="{DynamicResource MainBackgroundColor}"
+                                        IconData="{DynamicResource AlignLeftSvgIcon}"
+                                        IconColor="{DynamicResource IconColor}"
+                                        IconSize="{DynamicResource SmallIconSize}"
+                                        BorderThickness="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Value="{Binding LogHistory}"
+                                        ShowButtonSpinner="False"
+                                        Increment="1"
+                                        Minimum="1"
+                                        Maximum="365"
+                                        ClipValueToMinMax="True" />
+
+                <!-- Speed limit info -->
+                <TextBlock Foreground="{DynamicResource AccentColor}"
+                           FontStyle="Italic"
+                           Text="Application logs will be kept for the selected number of days (1–365)" />
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

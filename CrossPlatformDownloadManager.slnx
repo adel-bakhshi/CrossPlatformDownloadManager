@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CrossPlatformDownloadManager.Data/CrossPlatformDownloadManager.Data.csproj" />
+  <Project Path="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+  <Project Path="CrossPlatformDownloadManager.Utils/CrossPlatformDownloadManager.Utils.csproj" />
+  <Project Path="MultipartDownloader.Core/MultipartDownloader.Core.csproj" />
+</Solution>

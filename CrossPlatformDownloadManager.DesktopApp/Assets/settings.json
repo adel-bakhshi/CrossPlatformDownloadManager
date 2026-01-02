@@ -15,7 +15,7 @@
   "isMergeSpeedLimitEnabled": false,
   "mergeLimitSpeed": null,
   "mergeLimitUnit": null,
-  "maximumMemoryBufferBytes": 10,
+  "maximumMemoryBufferBytes": 100,
   "maximumMemoryBufferBytesUnit": "MB",
   "proxyMode": 0,
   "proxyType": 0,
@@ -25,5 +25,6 @@
   "useQueueStartedSound": false,
   "useQueueStoppedSound": false,
   "useQueueFinishedSound": false,
-  "useSystemNotifications": false
+  "useSystemNotifications": false,
+  "logHistory": 7
 }

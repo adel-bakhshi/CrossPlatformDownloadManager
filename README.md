@@ -24,6 +24,36 @@ _"A fast, free, and open-source download manager for Windows, macOS, and Linux."
 
 ---
 
+## 📦 Built & Packaged with Netloy
+
+**CDM** leverages the power of **[Netloy](https://github.com/adel-bakhshi/Netloy)** — a cutting-edge cross-platform .NET packaging and deployment tool — to deliver professional installers across Windows, Linux, and macOS platforms with zero hassle.
+
+### Why Netloy?
+
+Netloy eliminates the complexity of creating platform-specific packages by automating the entire build and deployment pipeline. With a single configuration file, CDM generates:
+
+- **Windows:** MSI and EXE installers (WiX v3 & Inno Setup)
+- **Linux:** DEB, RPM, AppImage, Flatpak, and Pacman packages
+- **macOS:** APP bundles and DMG installers
+- **Portable:** Cross-platform ZIP/TAR.GZ archives
+
+### Automated CI/CD Integration
+
+CDM's release process is fully automated using **GitHub Actions** and Netloy. Every release automatically:
+
+- Builds the application for all target platforms
+- Generates platform-specific installers with proper metadata and icons
+- Creates desktop integration files and AppStream metadata
+- Publishes release artifacts to GitHub Releases
+
+This automation ensures consistent, reliable releases across all platforms without manual intervention. Check out our [CI/CD workflow](https://github.com/adel-bakhshi/CrossPlatformDownloadManager/blob/master/.github/workflows/dotnet-desktop.yml) to see Netloy in action!
+
+### Want to Simplify Your .NET Deployment?
+
+If you're building cross-platform .NET applications and struggling with complex packaging requirements, **[Netloy](https://github.com/adel-bakhshi/Netloy)** can help you achieve the same level of automation and professionalism. Say goodbye to manual build scripts and platform-specific headaches!
+
+---
+
 ## 📸 Screenshots
 
 Below are some screenshots showcasing the key features of CDM:
@@ -39,13 +69,13 @@ Below are some screenshots showcasing the key features of CDM:
   <tbody>
     <tr>
       <td>
-        <img src="./Assets/Screenshots/1.png" width="100%" alt="Main Interface">
+        <img src="./Assets/Screenshots/main-window.png" width="100%" alt="Main Interface">
       </td>
       <td>
-        <img src="./Assets/Screenshots/2.png" width="100%" alt="Download">
+        <img src="./Assets/Screenshots/download-window.png" width="100%" alt="Download">
       </td>
       <td>
-        <img src="./Assets/Screenshots/3.png" width="100%" alt="Settings">
+        <img src="./Assets/Screenshots/settings-window.png" width="100%" alt="Settings">
       </td>
     </tr>
   </tbody>

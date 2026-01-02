@@ -42,22 +42,25 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup -y
 
-      - name: Install Pupnet Deploy
-        run: dotnet tool install -g KuiperZone.PupNet --version 1.8.*
+      - name: Install Netloy
+        run: dotnet tool install -g Netloy
 
       - name: Restore Dependencies
         run: dotnet restore
 
-      - name: Build Windows EXE File
-        run: pupnet -k setup -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.exe"
+      - name: Build Windows EXE Package
+        run: netloy -t exe -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.exe"
+
+      - name: Build Windows MSI Package
+        run: netloy -t msi -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.msi"
 
       - name: Build Windows ZIP Portable
-        run: pupnet -k zip -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.zip"
+        run: netloy -t portable -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.zip"
 
-      - name: Upload Artifacts
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-${{ matrix.rid }}-Packages
+          name: ${{ matrix.rid }}-packages
           path: ./Deploy/bin/*
 
   build-linux:
@@ -95,44 +98,28 @@ jobs:
           chmod +x ./appimagetool-aarch64.AppImage
           echo "$PWD" >> $GITHUB_PATH
 
-      - name: Install Pupnet Deploy
-        run: dotnet tool install -g KuiperZone.PupNet --version 1.8.*
+      - name: Install Netloy
+        run: dotnet tool install -g Netloy
 
       - name: Restore Dependencies
         run: dotnet restore
 
-      - name: Build Linux DEB File
-        run: pupnet -k deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
+      - name: Build Linux DEB Package
+        run: netloy -t deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
 
-      # Building RPM package for arm64 architecture with PupNet Deploy is failing, so I couldn't build RPM package for now.
-      - name: Build Linux RPM File
-        if: matrix.rid == 'linux-x64'
-        run: pupnet -k rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
+      - name: Build Linux RPM Package
+        run: netloy -t rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
 
-      - name: Build AppImage File
-        run: pupnet -k appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
+      - name: Build Linux AppImage Pakcage
+        run: netloy -t appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
 
-      # - name: Build Linux DEB File
-      #   run: chmod +x ./Deploy/linux/deb/process.sh && ./Deploy/linux/deb/process.sh
+      - name: Build Linux TAR.GZ Portable
+        run: netloy -t portable -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.tar.gz"
 
-      # - name: Build Linux RPM File
-      #   run: chmod +x ./Deploy/linux/rpm/process-on-deb.sh && ./Deploy/linux/rpm/process-on-deb.sh
-
-      # - name: Build AppImage File
-      #   run: chmod +x ./Deploy/linux/appimage/process.sh && ./Deploy/linux/appimage/process.sh
-
-      # - name: Build Linux ZIP Portable
-      #   run: chmod +x ./Deploy/linux/tarball/process.sh && ./Deploy/linux/tarball/process.sh
-
-      - name: Build Linux ZIP Portable
-        run: |
-          chmod +x ./Deploy/linux/tarball/process.sh
-          ./Deploy/linux/tarball/process.sh ${{ matrix.rid }} ${{ needs.setup.outputs.version }}
-
-      - name: Upload Artifacts
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ matrix.rid }}-Packages
+          name: ${{ matrix.rid }}-packages
           path: ./Deploy/bin/*
 
   build-macos:
@@ -151,18 +138,22 @@ jobs:
         with:
           dotnet-version: 10.x.x
 
+      - name: Install Netloy
+        run: dotnet tool install -g Netloy
+
       - name: Restore Dependencies
         run: dotnet restore
 
       - name: Build macOS App Bundle
-        run: |
-          chmod +x ./Deploy/macos/app/process.sh
-          ./Deploy/macos/app/process.sh ${{ matrix.rid }} ${{ needs.setup.outputs.version }}
+        run: netloy -t app -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.app.zip"
 
-      - name: Upload Artifacts
+      - name: Build macOS DMG Package
+        run: netloy -t dmg -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.dmg"
+
+      - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-${{ matrix.rid }}-Packages
+          name: ${{ matrix.rid }}-packages
           path: ./Deploy/bin/*
 
   release:
@@ -172,37 +163,37 @@ jobs:
       - name: Download Windows x64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Windows-win-x64-Packages
+          name: win-x64-packages
           path: artifacts/
 
       - name: Download Windows ARM64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Windows-win-arm64-Packages
+          name: win-arm64-packages
           path: artifacts/
 
       - name: Download Linux x64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Linux-linux-x64-Packages
+          name: linux-x64-packages
           path: artifacts/
 
       - name: Download Linux ARM64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Linux-linux-arm64-Packages
+          name: linux-arm64-packages
           path: artifacts/
 
       - name: Download macOS x64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: macOS-osx-x64-Packages
+          name: osx-x64-packages
           path: artifacts/
 
       - name: Download macOS ARM64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: macOS-osx-arm64-Packages
+          name: osx-arm64-packages
           path: artifacts/
 
       - name: Create GitHub Release

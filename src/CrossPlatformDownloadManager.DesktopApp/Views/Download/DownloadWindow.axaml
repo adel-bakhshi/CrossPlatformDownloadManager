@@ -14,7 +14,8 @@
         Height="600"
         MinWidth="800"
         MinHeight="600"
-        CanResize="False">
+        CanResize="False"
+        Classes="myWindow">
 
     <!-- Resources -->
     <Window.Resources>

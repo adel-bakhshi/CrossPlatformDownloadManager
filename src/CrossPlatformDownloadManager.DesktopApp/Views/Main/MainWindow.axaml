@@ -15,7 +15,8 @@
         Width="1280"
         Height="720"
         MinWidth="1280"
-        MinHeight="720">
+        MinHeight="720"
+        Classes="myWindow">
 
     <!-- Styles -->
     <Window.Styles>

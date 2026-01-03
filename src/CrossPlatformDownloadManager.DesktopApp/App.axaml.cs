@@ -85,29 +85,6 @@ public partial class App : Application
     #region Helpers
 
     /// <summary>
-    /// Handles the click event of the tray icon.
-    /// </summary>
-    /// <param name="sender">The object that raised the event.</param>
-    /// <param name="e">The event arguments.</param>
-    private async void TrayIconOnClicked(object? sender, EventArgs e)
-    {
-        try
-        {
-            // Check if the view model exists
-            if (Desktop?.MainWindow?.DataContext is not StartupWindowViewModel viewModel)
-                return;
-
-            // Show main window
-            viewModel.ShowMainWindow();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while trying to show main window. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
-    }
-
-    /// <summary>
     /// Handles the application exit event, ensuring proper cleanup and shutdown procedures.
     /// </summary>
     /// <param name="sender">The source of the event.</param>

@@ -16,7 +16,8 @@
         MinHeight="240"
         MaxWidth="450"
         MaxHeight="240"
-        CanResize="False">
+        CanResize="False"
+        Classes="myWindow">
 
     <!-- Main content -->
     <Grid Margin="20"

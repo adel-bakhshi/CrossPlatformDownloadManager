@@ -17,7 +17,8 @@
         MaxWidth="640"
         MaxHeight="460"
         CanResize="False"
-        Topmost="True">
+        Topmost="True"
+        Classes="myWindow">
 
     <!-- Main content -->
     <Grid Margin="20"

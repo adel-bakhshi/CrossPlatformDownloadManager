@@ -5,6 +5,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFi
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.TrayMenuService;
 using MapsterMapper;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
@@ -55,6 +56,11 @@ public interface IAppService
     /// Gets a value that indicates the ExportImport service.
     /// </summary>
     IExportImportService ExportImportService { get; }
+    
+    /// <summary>
+    /// Gets a value that indicates the TrayMenu service.
+    /// </summary>
+    ITrayMenuService TrayMenuService { get; }
 
     #endregion
 }

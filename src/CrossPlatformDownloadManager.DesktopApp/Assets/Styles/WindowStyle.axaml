@@ -7,7 +7,7 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="Window">
+    <Style Selector="Window.myWindow">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="FontSize"

@@ -62,7 +62,30 @@
             <TrayIcon Icon="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/cdm-logo.ico"
                       ToolTipText="Cross platform Download Manager (CDM)"
                       IsVisible="{Binding IsTrayIconVisible}"
-                      Clicked="TrayIconOnClicked" />
+                      Command="{Binding OpenMainWindowCommand}">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Open"
+                                        Command="{Binding OpenMainWindowCommand}" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="Add new link"
+                                        Command="{Binding AddNewLinkCommand}" />
+                        <NativeMenuItem Header="Add new queue"
+                                        Command="{Binding AddNewQueueCommand}" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="Settings"
+                                        Command="{Binding OpenSettingsWindowCommand}" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="Help"
+                                        Command="{Binding OpenCdmWebPageCommand}" />
+                        <NativeMenuItem Header="About CDM"
+                                        Command="{Binding OpenAboutUsWindowCommand}" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="Exit"
+                                        Command="{Binding ExitApplicationCommand}" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
         </TrayIcons>
     </TrayIcon.Icons>
 </Application>

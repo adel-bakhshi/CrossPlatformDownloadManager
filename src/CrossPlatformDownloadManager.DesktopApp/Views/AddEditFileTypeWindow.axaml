@@ -17,7 +17,8 @@
         MinHeight="200"
         MaxWidth="450"
         MaxHeight="200"
-        CanResize="False">
+        CanResize="False"
+        Classes="myWindow">
     
     <!-- Main content -->
     <Grid RowDefinitions="*, Auto"

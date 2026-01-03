@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using CrossPlatformDownloadManager.Data.Services.UnitOfWork;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppFinisher;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.AppInitializer;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension;
@@ -15,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFi
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.TrayMenuService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,6 +90,9 @@ sealed class Program
 
                 // Add ExportImportService to services
                 services.AddSingleton<IExportImportService, ExportImportService>();
+
+                // Add TrayMenuService to services
+                services.AddSingleton<ITrayMenuService, TrayMenuService>();
 
                 // Add AppService to services
                 services.AddSingleton<IAppService, AppService>();

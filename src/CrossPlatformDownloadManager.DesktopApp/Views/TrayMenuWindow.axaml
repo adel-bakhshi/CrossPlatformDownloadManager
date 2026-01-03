@@ -27,7 +27,8 @@
         ClipToBounds="True"
         CanResize="False"
         BorderThickness="0"
-        WindowStartupLocation="Manual">
+        WindowStartupLocation="Manual"
+        Classes="myWindow">
 
     <!-- Styles -->
     <Window.Styles>
@@ -482,7 +483,7 @@
 
                 <!-- Help -->
                 <Button Classes="menuItemButton"
-                        Command="{Binding OpenHelpWindowCommand}">
+                        Command="{Binding OpenCdmWebPageCommand}">
                     <!-- Content -->
                     <Grid ColumnDefinitions="Auto, *">
                         <!-- Icon -->
@@ -519,7 +520,7 @@
 
                         <!-- Title -->
                         <TextBlock Grid.Column="1"
-                                   Text="About us"
+                                   Text="About CDM"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource MainTextColor}" />

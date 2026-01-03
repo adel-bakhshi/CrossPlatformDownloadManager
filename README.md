@@ -266,11 +266,8 @@ We're committed to making CDM better with every update. Here are some ideas we'r
 
 ### **For CDM:**
 
-- **Testing and Publishing for Mac:** Expand platform support by thoroughly testing and publishing the program for Mac operating systems, ensuring a seamless experience across all major platforms.
 - **System Notifications:** Implement native system notifications for download completions and errors.
-- **Help Section:** Develop an in-app help section to assist users with common questions and troubleshooting.
 - **Multilingual Support:** Make the program available in multiple languages to reach a global audience.
-- **Right-click menu for System Tray Icon:** Currently, due to some minor issues, the right-click menu for the System Tray Icon is temporarily unavailable. We're working to resolve this soon!
 
 ### **For the Browser Extension:**
 

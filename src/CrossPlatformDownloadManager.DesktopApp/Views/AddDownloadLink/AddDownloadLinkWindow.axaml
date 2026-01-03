@@ -17,7 +17,8 @@
         MinWidth="570"
         MinHeight="270"
         CanResize="False"
-        Topmost="True">
+        Topmost="True"
+        Classes="myWindow">
 
     <!-- Resources -->
     <Window.Resources>

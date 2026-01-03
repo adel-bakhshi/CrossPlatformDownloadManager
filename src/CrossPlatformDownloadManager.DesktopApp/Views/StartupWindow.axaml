@@ -20,6 +20,7 @@
         ExtendClientAreaTitleBarHeightHint="-1"
         TransparencyLevelHint="Transparent"
         Background="{DynamicResource TransparentColor}"
-        SystemDecorations="None">
+        SystemDecorations="None"
+        Classes="myWindow">
     <!-- There is no content here -->
 </Window>

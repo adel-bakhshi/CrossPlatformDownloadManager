@@ -7,13 +7,8 @@ using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox;
-using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
-using CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueue;
-using CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings;
 using CrossPlatformDownloadManager.DesktopApp.Views;
-using CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueue;
-using CrossPlatformDownloadManager.DesktopApp.Views.Settings;
 using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
@@ -30,20 +25,16 @@ public class TrayMenuWindowViewModel : ViewModelBase
     private bool _firstTimeRefreshProxies = true;
     private bool _canChangeProxy = true;
 
-    private ObservableCollection<DownloadQueueViewModel> _downloadQueues = [];
-    private ObservableCollection<ProxySettingsViewModel> _proxies = [];
-    private ProxySettingsViewModel? _selectedProxy;
-
     #endregion
 
     #region Properties
 
     public ObservableCollection<DownloadQueueViewModel> DownloadQueues
     {
-        get => _downloadQueues;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _downloadQueues, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             this.RaisePropertyChanged(nameof(IsDownloadQueuesEmpty));
         }
     }
@@ -52,20 +43,20 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     public ObservableCollection<ProxySettingsViewModel> Proxies
     {
-        get => _proxies;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _proxies, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             this.RaisePropertyChanged(nameof(IsProxiesEmpty));
         }
     }
 
     public ProxySettingsViewModel? SelectedProxy
     {
-        get => _selectedProxy;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedProxy, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             _ = ChangeProxyAsync();
         }
     }
@@ -87,7 +78,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     public ICommand OpenSettingsWindowCommand { get; }
 
-    public ICommand OpenHelpWindowCommand { get; }
+    public ICommand OpenCdmWebPageCommand { get; }
 
     public ICommand OpenAboutUsWindowCommand { get; }
 
@@ -97,6 +88,9 @@ public class TrayMenuWindowViewModel : ViewModelBase
 
     public TrayMenuWindowViewModel(IAppService appService) : base(appService)
     {
+        DownloadQueues = [];
+        Proxies = [];
+
         LoadDownloadQueues();
         RefreshProxies();
 
@@ -105,7 +99,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         AddNewDownloadLinkCommand = ReactiveCommand.CreateFromTask(AddNewDownloadLinkAsync);
         AddNewDownloadQueueCommand = ReactiveCommand.CreateFromTask(AddNewDownloadQueueAsync);
         OpenSettingsWindowCommand = ReactiveCommand.CreateFromTask(OpenSettingsWindowAsync);
-        OpenHelpWindowCommand = ReactiveCommand.CreateFromTask(OpenHelpWindowAsync);
+        OpenCdmWebPageCommand = ReactiveCommand.CreateFromTask(OpenCdmWebPageAsync);
         OpenAboutUsWindowCommand = ReactiveCommand.CreateFromTask(OpenAboutUsWindowAsync);
         ExitProgramCommand = ReactiveCommand.CreateFromTask(ExitProgramAsync);
     }
@@ -115,11 +109,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-
-            // Check if the startup window exists and view model is not null,
-            // If so, show the main window
-            if (App.Desktop?.MainWindow?.DataContext is StartupWindowViewModel viewModel)
-                viewModel.ShowMainWindow();
+            AppService.TrayMenuService.OpenMainWindow();
         }
         catch (Exception ex)
         {
@@ -136,19 +126,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
                 return;
 
             HideTrayMenu();
-
-            if (!downloadQueue.IsRunning)
-            {
-                await AppService
-                    .DownloadQueueService
-                    .StartDownloadQueueAsync(downloadQueue);
-            }
-            else
-            {
-                await AppService
-                    .DownloadQueueService
-                    .StopDownloadQueueAsync(downloadQueue);
-            }
+            await AppService.TrayMenuService.StartStopDownloadQueueAsync(downloadQueue);
         }
         catch (Exception ex)
         {
@@ -162,10 +140,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-
-            var vm = new CaptureUrlWindowViewModel(AppService);
-            var window = new CaptureUrlWindow { DataContext = vm };
-            window.Show();
+            AppService.TrayMenuService.AddNewDownloadLink(AppService);
         }
         catch (Exception ex)
         {
@@ -179,10 +154,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-
-            var vm = new AddEditQueueWindowViewModel(AppService, null);
-            var window = new AddEditQueueWindow { DataContext = vm };
-            window.Show();
+            AppService.TrayMenuService.AddNewDownloadQueue(AppService);
         }
         catch (Exception ex)
         {
@@ -196,10 +168,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-
-            var vm = new SettingsWindowViewModel(AppService);
-            var window = new SettingsWindow { DataContext = vm };
-            window.Show();
+            AppService.TrayMenuService.OpenSettingsWindow(AppService);
         }
         catch (Exception ex)
         {
@@ -208,10 +177,12 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
     }
 
-    private static async Task OpenHelpWindowAsync()
+    private async Task OpenCdmWebPageAsync()
     {
         try
         {
+            HideTrayMenu();
+            AppService.TrayMenuService.OpenCdmWebPage();
         }
         catch (Exception ex)
         {
@@ -220,10 +191,12 @@ public class TrayMenuWindowViewModel : ViewModelBase
         }
     }
 
-    private static async Task OpenAboutUsWindowAsync()
+    private async Task OpenAboutUsWindowAsync()
     {
         try
         {
+            HideTrayMenu();
+            AppService.TrayMenuService.OpenAboutUsWindow(AppService);
         }
         catch (Exception ex)
         {
@@ -237,15 +210,7 @@ public class TrayMenuWindowViewModel : ViewModelBase
         try
         {
             HideTrayMenu();
-
-            if (App.Desktop == null)
-                return;
-
-            var result = await DialogBoxManager.ShowInfoDialogAsync("Exit", "Are you sure you want to exit the app?", DialogButtons.YesNo);
-            if (result != DialogResult.Yes)
-                return;
-
-            App.Desktop.Shutdown();
+            await AppService.TrayMenuService.ExitProgramAsync();
         }
         catch (Exception ex)
         {

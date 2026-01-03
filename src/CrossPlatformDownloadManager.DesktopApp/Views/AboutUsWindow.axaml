@@ -15,7 +15,8 @@
         MinHeight="460"
         MaxWidth="640"
         MaxHeight="460"
-        CanResize="False">
+        CanResize="False"
+        Classes="myWindow">
 
     <!-- Main content -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"

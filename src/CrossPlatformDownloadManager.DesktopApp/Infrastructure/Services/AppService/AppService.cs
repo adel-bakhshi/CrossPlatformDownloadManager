@@ -5,6 +5,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFi
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.TrayMenuService;
 using MapsterMapper;
 
 namespace CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
@@ -24,6 +25,7 @@ public class AppService : IAppService
     public ICategoryService CategoryService { get; }
     public IAppThemeService AppThemeService { get; }
     public IExportImportService ExportImportService { get; }
+    public ITrayMenuService TrayMenuService { get; }
 
     #endregion
 
@@ -35,7 +37,8 @@ public class AppService : IAppService
         IDownloadQueueService downloadQueueService,
         ICategoryService categoryService,
         IAppThemeService appThemeService,
-        IExportImportService exportImportService)
+        IExportImportService exportImportService,
+        ITrayMenuService trayMenuService)
     {
         Mapper = mapper;
         UnitOfWork = unitOfWork;
@@ -45,5 +48,6 @@ public class AppService : IAppService
         SettingsService = settingsService;
         AppThemeService = appThemeService;
         ExportImportService = exportImportService;
+        TrayMenuService = trayMenuService;
     }
 }

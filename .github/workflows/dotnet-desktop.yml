@@ -49,19 +49,31 @@ jobs:
         run: dotnet restore
 
       - name: Build Windows EXE Package
-        run: netloy -t exe -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.exe"
+        run: |
+          cd ./Deploy
+          netloy -t exe -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.exe"
 
       - name: Build Windows MSI Package
-        run: netloy -t msi -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.msi"
+        run: |
+          cd ./Deploy
+          netloy -t msi -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.msi"
 
       - name: Build Windows ZIP Portable
-        run: netloy -t portable -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.zip"
+        run: |
+          cd ./Deploy
+          netloy -t portable -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.zip"
+
+      - name: Remove PDB Files
+        run: Remove-Item -Path "./Deploy/Output/*.pdb" -Force -ErrorAction SilentlyContinue
+        shell: pwsh
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-packages
-          path: ./Deploy/bin/*
+          path: |
+            ./Deploy/Output/*
+            !./Deploy/Output/*.pdb
 
   build-linux:
     needs: setup
@@ -89,14 +101,14 @@ jobs:
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
-          echo "$PWD" >> $GITHUB_PATH
+          sudo mv ./appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
 
       - name: Install arm64 AppImageTool
         if: matrix.rid == 'linux-arm64'
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x ./appimagetool-aarch64.AppImage
-          echo "$PWD" >> $GITHUB_PATH
+          sudo mv ./appimagetool-aarch64.AppImage /usr/local/bin/appimagetool
 
       - name: Install Netloy
         run: dotnet tool install -g Netloy
@@ -105,22 +117,30 @@ jobs:
         run: dotnet restore
 
       - name: Build Linux DEB Package
-        run: netloy -t deb -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
+        run: |
+          cd ./Deploy
+          netloy -t deb -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
 
       - name: Build Linux RPM Package
-        run: netloy -t rpm -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
+        run: |
+          cd ./Deploy
+          netloy -t rpm -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
 
       - name: Build Linux AppImage Pakcage
-        run: netloy -t appimage -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
+        run: |
+          cd ./Deploy
+          netloy -t appimage -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
 
       - name: Build Linux TAR.GZ Portable
-        run: netloy -t portable -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.tar.gz"
+        run: |
+          cd ./Deploy
+          netloy -t portable -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.tar.gz"
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-packages
-          path: ./Deploy/bin/*
+          path: ./Deploy/Output/*
 
   build-macos:
     needs: setup
@@ -145,16 +165,20 @@ jobs:
         run: dotnet restore
 
       - name: Build macOS App Bundle
-        run: netloy -t app -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.app.zip"
+        run: |
+          cd ./Deploy
+          netloy -t app -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.app.zip"
 
       - name: Build macOS DMG Package
-        run: netloy -t dmg -r ${{ matrix.rid }} -y -o "Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.dmg"
+        run: |
+          cd ./Deploy
+          netloy -t dmg -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.dmg"
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-packages
-          path: ./Deploy/bin/*
+          path: ./Deploy/Output/*
 
   release:
     needs: [setup, build-windows, build-linux, build-macos]

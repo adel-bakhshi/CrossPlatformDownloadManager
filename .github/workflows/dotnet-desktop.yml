@@ -76,6 +76,7 @@ jobs:
           path: |
             ./Deploy/Output/*
             !./Deploy/Output/*.pdb
+            !./Deploy/Output/*.wixpdb
 
   build-linux-x64:
     needs: setup

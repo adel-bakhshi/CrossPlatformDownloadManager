@@ -37,7 +37,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.x.x
+          dotnet-version: 10.x
 
       - name: Install Inno Setup
         run: choco install innosetup -y
@@ -46,7 +46,9 @@ jobs:
         run: dotnet tool install -g Netloy
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: |
+          cd ./src
+          dotnet restore
 
       - name: Build Windows EXE Package
         run: |
@@ -92,9 +94,12 @@ jobs:
           dotnet-version: 10.x.x
 
       - name: Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: l
         run: |
           sudo apt update
-          sudo apt-get install -y zip rpm zstd fuse libfuse2
+          sudo apt-get install -y zip rpm zstd libfuse2t64
 
       - name: Install x86_64 AppImageTool
         if: matrix.rid == 'linux-x64'
@@ -114,7 +119,9 @@ jobs:
         run: dotnet tool install -g Netloy
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: |
+          cd ./src
+          dotnet restore
 
       - name: Build Linux DEB Package
         run: |
@@ -126,7 +133,7 @@ jobs:
           cd ./Deploy
           netloy -t rpm -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
 
-      - name: Build Linux AppImage Pakcage
+      - name: Build Linux AppImage Package
         run: |
           cd ./Deploy
           netloy -t appimage -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
@@ -162,7 +169,9 @@ jobs:
         run: dotnet tool install -g Netloy
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: |
+          cd ./src
+          dotnet restore
 
       - name: Build macOS App Bundle
         run: |

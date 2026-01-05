@@ -77,13 +77,9 @@ jobs:
             ./Deploy/Output/*
             !./Deploy/Output/*.pdb
 
-  build-linux:
+  build-linux-x64:
     needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rid: ["linux-x64", "linux-arm64"]
-
+    runs-on: ubuntu-latest # x64 runner
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -91,7 +87,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.x.x
+          dotnet-version: 10.x
 
       - name: Install Dependencies
         env:
@@ -102,14 +98,66 @@ jobs:
           sudo apt-get install -y zip rpm zstd libfuse2t64
 
       - name: Install x86_64 AppImageTool
-        if: matrix.rid == 'linux-x64'
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ./appimagetool-x86_64.AppImage
           sudo mv ./appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
 
-      - name: Install arm64 AppImageTool
-        if: matrix.rid == 'linux-arm64'
+      - name: Install Netloy
+        run: dotnet tool install -g Netloy
+
+      - name: Restore Dependencies
+        run: |
+          cd ./src
+          dotnet restore
+
+      - name: Build Linux DEB Package
+        run: |
+          cd ./Deploy
+          netloy -t deb -r linux-x64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-x64.deb"
+
+      - name: Build Linux RPM Package
+        run: |
+          cd ./Deploy
+          netloy -t rpm -r linux-x64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-x64.rpm"
+
+      - name: Build Linux AppImage Package
+        run: |
+          cd ./Deploy
+          netloy -t appimage -r linux-x64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-x64.AppImage"
+
+      - name: Build Linux TAR.GZ Portable
+        run: |
+          cd ./Deploy
+          netloy -t portable -r linux-x64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-x64.tar.gz"
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64-packages
+          path: ./Deploy/Output/*
+
+  build-linux-arm64:
+    needs: setup
+    runs-on: ubuntu-24.04-arm # ARM64 runner
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+
+      - name: Install Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: l
+        run: |
+          sudo apt update
+          sudo apt-get install -y zip rpm zstd libfuse2t64
+
+      - name: Install ARM64 AppImageTool
         run: |
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x ./appimagetool-aarch64.AppImage
@@ -126,27 +174,27 @@ jobs:
       - name: Build Linux DEB Package
         run: |
           cd ./Deploy
-          netloy -t deb -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.deb"
+          netloy -t deb -r linux-arm64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-arm64.deb"
 
       - name: Build Linux RPM Package
         run: |
           cd ./Deploy
-          netloy -t rpm -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.rpm"
+          netloy -t rpm -r linux-arm64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-arm64.rpm"
 
       - name: Build Linux AppImage Package
         run: |
           cd ./Deploy
-          netloy -t appimage -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.AppImage"
+          netloy -t appimage -r linux-arm64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-arm64.AppImage"
 
       - name: Build Linux TAR.GZ Portable
         run: |
           cd ./Deploy
-          netloy -t portable -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.tar.gz"
+          netloy -t portable -r linux-arm64 -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.linux-arm64.tar.gz"
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.rid }}-packages
+          name: linux-arm64-packages
           path: ./Deploy/Output/*
 
   build-macos:
@@ -163,7 +211,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.x.x
+          dotnet-version: 10.x
 
       - name: Install Netloy
         run: dotnet tool install -g Netloy
@@ -190,7 +238,7 @@ jobs:
           path: ./Deploy/Output/*
 
   release:
-    needs: [setup, build-windows, build-linux, build-macos]
+    needs: [setup, build-windows, build-linux-x64, build-linux-arm64, build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows x64 Artifacts

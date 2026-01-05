@@ -1,0 +1,261 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AboutUsWindow"
+        x:DataType="vm:AboutUsWindowViewModel"
+        Title="CDM - About us"
+        Width="640"
+        Height="460"
+        MinWidth="640"
+        MinHeight="460"
+        MaxWidth="640"
+        MaxHeight="460"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Main content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  Margin="20">
+        <Grid ColumnDefinitions="Auto, *">
+            <!-- Logo -->
+            <Image Grid.Column="0"
+                   Source="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/AppIcons/icon-256.png"
+                   VerticalAlignment="Top"
+                   Width="64"
+                   Height="64"
+                   Margin="0, 0, 20, 0" />
+
+            <!-- Content -->
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Stretch"
+                        Spacing="20">
+                <!-- Header Section -->
+                <StackPanel Orientation="Vertical">
+                    <!-- Title -->
+                    <TextBlock Text="CDM"
+                               FontSize="{DynamicResource LargeFontSize}"
+                               LineHeight="{DynamicResource LargeLineHeight}"
+                               FontWeight="Bold"
+                               FontStyle="Italic"
+                               Foreground="{DynamicResource MainColor}" />
+
+                    <!-- Full name -->
+                    <TextBlock Text="Cross platform Download Manager"
+                               FontStyle="Italic"
+                               Foreground="{DynamicResource MainTextColor}" />
+                </StackPanel>
+
+                <!-- Version, author and contact -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="10">
+                    <!-- Version and author -->
+                    <Grid RowDefinitions="Auto, Auto"
+                          ColumnDefinitions="Auto, *">
+                        <!-- Version title -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Version:"
+                                   Foreground="{DynamicResource MainTextColor}"
+                                   Margin="0, 0, 10, 5" />
+
+                        <!-- Version number -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding AppVersion}"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MainTextColor}"
+                                   Margin="0, 0, 0, 5" />
+
+                        <!-- Author title -->
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="Author:"
+                                   Foreground="{DynamicResource MainTextColor}"
+                                   Margin="0, 0, 10, 0" />
+
+                        <!-- Author name -->
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Text="Adel Bakhshi"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MainTextColor}" />
+                    </Grid>
+
+                    <!-- Contact information -->
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <!-- Github -->
+                        <HyperlinkButton Classes="circleHyperLinkButton"
+                                         NavigateUri="{Binding GithubUrl}">
+                            <PathIcon Data="{DynamicResource GithubBrandsSvgIcon}"
+                                      Foreground="{DynamicResource GithubColor}"
+                                      Width="24"
+                                      Height="24" />
+                        </HyperlinkButton>
+
+                        <!-- Telegram -->
+                        <HyperlinkButton Classes="circleHyperLinkButton"
+                                         NavigateUri="{Binding TelegramUrl}">
+                            <PathIcon Data="{DynamicResource TelegramBrandsSvgIcon}"
+                                      Foreground="{DynamicResource TelegramColor}"
+                                      Width="24"
+                                      Height="24" />
+                        </HyperlinkButton>
+
+                        <!-- Email -->
+                        <HyperlinkButton Classes="circleHyperLinkButton"
+                                         NavigateUri="{Binding EmailAddress}">
+                            <PathIcon Data="{DynamicResource EnvelopeSvgIcon}"
+                                      Foreground="{DynamicResource EmailColor}"
+                                      Width="24"
+                                      Height="24" />
+                        </HyperlinkButton>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Content -->
+                <StackPanel Orientation="Vertical"
+                            Spacing="10">
+                    <!-- Welcome to Cross platform Download Manager! -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="5">
+                        <!-- Title -->
+                        <TextBlock Text="Welcome to Cross platform Download Manager!"
+                                   FontWeight="Bold" />
+
+                        <!-- Description -->
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="Thank you for using CDM. I’m Adel Bakhshi, the sole creator of this tool, and I'm thrilled to bring it to you." />
+                    </StackPanel>
+
+                    <!-- My Story -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="5">
+                        <!-- Title -->
+                        <TextBlock Text="My Story:"
+                                   FontWeight="Bold" />
+
+                        <!-- Description -->
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="I developed this download manager out of a passion for creating efficient and user-friendly software. From concept to execution, every aspect of this application has been crafted by me with careful attention to detail and usability. My goal was to provide users like you with a powerful yet simple solution for managing downloads across various platforms." />
+                    </StackPanel>
+
+                    <!-- Key Contributions -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="5">
+                        <!-- Title -->
+                        <TextBlock Text="Key Contributions:"
+                                   FontWeight="Bold" />
+
+                        <!-- Description -->
+                        <Grid RowDefinitions="Auto, Auto, Auto"
+                              ColumnDefinitions="Auto, *">
+                            <!-- Development ellipse -->
+                            <Ellipse Grid.Row="0"
+                                     Grid.Column="0"
+                                     Width="5"
+                                     Height="5"
+                                     Fill="{DynamicResource AccentColor}"
+                                     Margin="0, 5, 10, 5"
+                                     VerticalAlignment="Top" />
+
+                            <!-- Development item -->
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="1"
+                                       TextWrapping="Wrap"
+                                       Margin="0, 0, 0, 5">
+                                <Run Text="Development:"
+                                     FontWeight="Bold" />
+
+                                <Run Text="I wrote all the code using C# and Avalonia UI to ensure cross-platform compatibility." />
+                            </TextBlock>
+
+                            <!-- Design ellipse -->
+                            <Ellipse Grid.Row="1"
+                                     Grid.Column="0"
+                                     Width="5"
+                                     Height="5"
+                                     Fill="{DynamicResource AccentColor}"
+                                     Margin="0, 5, 10, 5"
+                                     VerticalAlignment="Top" />
+
+                            <!-- Design item -->
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="1"
+                                       TextWrapping="Wrap"
+                                       Margin="0, 0, 0, 5">
+                                <Run Text="Design:"
+                                     FontWeight="Bold" />
+
+                                <Run Text="The user interface was designed from scratch to offer a clean, intuitive experience." />
+                            </TextBlock>
+
+                            <!-- Testing ellipse -->
+                            <Ellipse Grid.Row="2"
+                                     Grid.Column="0"
+                                     Width="5"
+                                     Height="5"
+                                     Fill="{DynamicResource AccentColor}"
+                                     Margin="0, 5, 10, 5"
+                                     VerticalAlignment="Top" />
+
+                            <!-- Testing item -->
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="1"
+                                       TextWrapping="Wrap"
+                                       Margin="0, 0, 0, 5">
+                                <Run Text="Testing:"
+                                     FontWeight="Bold" />
+
+                                <Run Text="Extensive testing was performed to guarantee stability and performance." />
+                            </TextBlock>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Acknowledgments -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="5">
+                        <!-- Title -->
+                        <TextBlock Text="Acknowledgments:"
+                                   FontWeight="Bold" />
+
+                        <!-- Description -->
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="While I created this application independently, I would like to acknowledge the open-source community for their invaluable resources and tools that helped make this project possible. Special thanks to the creators of Avalonia UI and other libraries used in this project." />
+                    </StackPanel>
+
+                    <!-- Conclusion -->
+                    <StackPanel Orientation="Vertical"
+                                Spacing="5">
+                        <!-- Title -->
+                        <TextBlock Text="Conclusion:"
+                                   FontWeight="Bold" />
+
+                        <!-- Description -->
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="Creating this download manager has been an incredible learning experience, and I hope it serves you well. Thank you for your support!" />
+                    </StackPanel>
+
+                    <!-- Regards -->
+                    <TextBlock Text="Best regards, Adel Bakhshi" />
+
+                    <!-- Copyright -->
+                    <TextBlock HorizontalAlignment="Center"
+                               FontStyle="Italic"
+                               Foreground="{DynamicResource AccentColor}">
+                        <Run Text="©" />
+                        <Run Text="{Binding CurrentYear}" />
+                        <Run Text="Adel Bakhshi. All rights reserved." />
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Window>

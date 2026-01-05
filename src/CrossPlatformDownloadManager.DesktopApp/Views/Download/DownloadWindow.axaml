@@ -1,0 +1,161 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Download"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="600"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Download.DownloadWindow"
+        x:DataType="vm:DownloadWindowViewModel"
+        Title="{Binding Title}"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <!-- SelectedTabItemToViewVisibilityConverter -->
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Styles -->
+    <Window.Styles>
+        <!-- Chunk progress rectangle style -->
+        <Style Selector="Rectangle.chunkProgress">
+            <Setter Property="Height"
+                    Value="{Binding $parent[Canvas].Bounds.Height}" />
+            <Setter Property="Fill"
+                    Value="{DynamicResource ChunkProgressColor}" />
+        </Style>
+    </Window.Styles>
+
+    <!-- Main content -->
+    <Border Padding="20">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
+            <!-- Tabs -->
+            <ListBox Grid.Row="0"
+                     Classes="tabsListBox"
+                     ItemsSource="{Binding TabItems}"
+                     SelectedItem="{Binding SelectedTabItem}" />
+
+            <!-- Selected View -->
+            <Border Grid.Row="1"
+                    Padding="15"
+                    CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
+                    Height="254"
+                    Margin="0, 0, 0, 10"
+                    ClipToBounds="True">
+                <Grid>
+                    <!-- Download Status View -->
+                    <ContentControl Content="{Binding DownloadStatusView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Status', FallbackValue=False, TargetNullValue=False}" />
+
+                    <!-- Download Speed Limiter View  -->
+                    <ContentControl Content="{Binding DownloadSpeedLimiterView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Speed Limiter', FallbackValue=False, TargetNullValue=False}" />
+
+                    <!-- Download Options View -->
+                    <ContentControl Content="{Binding DownloadOptionsView}"
+                                    IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Options', FallbackValue=False, TargetNullValue=False}" />
+                </Grid>
+            </Border>
+
+            <!-- Download progress bar -->
+            <ProgressBar Grid.Row="2"
+                         Classes="customProgressBar"
+                         Foreground="{DynamicResource MainColor}"
+                         Value="{Binding DownloadFile.DownloadProgress, FallbackValue=0, TargetNullValue=0}"
+                         Margin="0, 0, 0, 10"
+                         IsVisible="{Binding !DownloadFile.IsMerging}" />
+
+            <!-- Merge progress bar -->
+            <ProgressBar Grid.Row="2"
+                         Classes="customProgressBar"
+                         Foreground="{DynamicResource MainColor}"
+                         Value="{Binding DownloadFile.MergeProgress, FallbackValue=0, TargetNullValue=0}"
+                         Margin="0, 0, 0, 10"
+                         IsVisible="{Binding DownloadFile.IsMerging}" />
+
+            <!-- Action buttons -->
+            <Grid Grid.Row="3"
+                  Margin="0, 0, 0, 15">
+                <!-- Details button -->
+                <Button Classes="button info"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Content="{Binding HideDetailsButtonContent}"
+                        Command="{Binding ShowHideDetailsCommand}"
+                        CommandParameter="{Binding $parent[Window]}" />
+
+                <!-- Pause and cancel buttons -->
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <!-- Pause button -->
+                    <Button Classes="button warning"
+                            Classes.paused="{Binding IsPaused}"
+                            Command="{Binding ResumePauseDownloadCommand}"
+                            IsEnabled="{Binding IsPauseResumeButtonEnabled}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Content"
+                                        Value="Pause" />
+
+                                <Style Selector="^.paused">
+                                    <Setter Property="Content"
+                                            Value="Resume" />
+                                </Style>
+                            </Style>
+                        </Button.Styles>
+                    </Button>
+
+                    <!-- Cancel button -->
+                    <Button Classes="button danger"
+                            Command="{Binding CancelDownloadCommand}"
+                            Content="Cancel" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Chunks details -->
+            <Grid Name="ChunksDetailsGrid"
+                  Grid.Row="4"
+                  RowDefinitions="Auto, *">
+                <!-- Chunks progress bars -->
+                <Border Grid.Row="0"
+                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Background="{DynamicResource ChunkProgressBackgroundColor}"
+                        ClipToBounds="True"
+                        HorizontalAlignment="Stretch"
+                        Margin="0, 0, 0, 15">
+                    <Canvas Name="ChunksProgressBarsCanvas"
+                            Height="24"
+                            HorizontalAlignment="Stretch" />
+                </Border>
+
+                <!-- Chunks DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding DownloadFile.ChunksData}"
+                          Classes="minimalDataGrid">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="#"
+                                            Binding="{Binding RowIndex}"
+                                            MinWidth="50" />
+                        <DataGridTextColumn Header="Downloaded"
+                                            Binding="{Binding DownloadedSizeAsString}"
+                                            MinWidth="180" />
+                        <DataGridTextColumn Header="Info"
+                                            Binding="{Binding Info}"
+                                            MinWidth="180" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

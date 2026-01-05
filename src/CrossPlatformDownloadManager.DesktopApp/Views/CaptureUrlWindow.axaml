@@ -1,0 +1,108 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.CaptureUrlWindow"
+        x:DataType="vm:CaptureUrlWindowViewModel"
+        Title="CDM - Capture Url"
+        Width="450"
+        Height="240"
+        MinWidth="450"
+        MinHeight="240"
+        MaxWidth="450"
+        MaxHeight="240"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Main content -->
+    <Grid Margin="20"
+          RowDefinitions="*, Auto">
+        <Grid Grid.Row="0"
+              RowDefinitions="*, Auto"
+              RowSpacing="10">
+            <!-- Download address -->
+            <cc:CustomTextBox Grid.Row="0"
+                              Background="{DynamicResource SecondaryBackgroundColor}"
+                              Watermark="Download address"
+                              WatermarkForeground="{DynamicResource AccentColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource LinkSvgIcon}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                              Text="{Binding DownloadAddress, FallbackValue='', TargetNullValue=''}"
+                              AcceptsReturn="True"
+                              TextWrapping="Wrap"
+                              VerticalIconAlignment="Top" />
+
+            <!-- Username and Password -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*, *"
+                  ColumnSpacing="10">
+                <!-- Username -->
+                <cc:CustomTextBox Grid.Column="0"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
+                                  Watermark="Username"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource UserSvgIcon}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource MainBackgroundColor}"
+                                  Text="{Binding Username}" />
+
+                <!-- Password -->
+                <cc:CustomTextBox Grid.Column="1"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
+                                  Watermark="Password"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource UnlockKeyholeSvgIcon}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  Padding="12, 10"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                  OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource MainBackgroundColor}"
+                                  Text="{Binding Password}" />
+            </Grid>
+        </Grid>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

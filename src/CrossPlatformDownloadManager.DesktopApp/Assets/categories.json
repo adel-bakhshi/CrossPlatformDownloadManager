@@ -1,0 +1,302 @@
+[
+  {
+    "title": "General",
+    "icon": "M192 64l0 64c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32zM82.7 207c-15.3 8.8-20.5 28.4-11.7 43.7l32 55.4c8.8 15.3 28.4 20.5 43.7 11.7l55.4-32c15.3-8.8 20.5-28.4 11.7-43.7l-32-55.4c-8.8-15.3-28.4-20.5-43.7-11.7L82.7 207zM288 192c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-64 0zm64 160c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-64 0zM160 384l0 64c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32zM32 352c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32l64 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-64 0z",
+    "isDefault": true,
+    "fileExtensions": []
+  },
+  {
+    "title": "Compressed",
+    "icon": "M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM96 48c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm-6.3 71.8c3.7-14 16.4-23.8 30.9-23.8l14.8 0c14.5 0 27.2 9.7 30.9 23.8l23.5 88.2c1.4 5.4 2.1 10.9 2.1 16.4c0 35.2-28.8 63.7-64 63.7s-64-28.5-64-63.7c0-5.5 .7-11.1 2.1-16.4l23.5-88.2zM112 336c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".zip",
+        "alias": "ZIP Archive"
+      },
+      {
+        "extension": ".rar",
+        "alias": "RAR Archive"
+      },
+      {
+        "extension": ".gz",
+        "alias": "GZIP Archive"
+      },
+      {
+        "extension": ".7z",
+        "alias": "7Z Archive"
+      },
+      {
+        "extension": ".s7z",
+        "alias": "S7Z Archive"
+      },
+      {
+        "extension": ".arj",
+        "alias": "ARJ Archive"
+      },
+      {
+        "extension": ".bz2",
+        "alias": "BZ2 Archive"
+      },
+      {
+        "extension": ".iso",
+        "alias": "ISO Image File"
+      }
+    ]
+  },
+  {
+    "title": "Documents",
+    "icon": "M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".doc",
+        "alias": "Microsoft Word"
+      },
+      {
+        "extension": ".docx",
+        "alias": "Microsoft Word"
+      },
+      {
+        "extension": ".pdf",
+        "alias": "PDF"
+      },
+      {
+        "extension": ".ppt",
+        "alias": "Microsoft PowerPoint"
+      },
+      {
+        "extension": ".pps",
+        "alias": "Microsoft PowerPoint"
+      },
+      {
+        "extension": ".pptx",
+        "alias": "Microsoft PowerPoint"
+      }
+    ]
+  },
+  {
+    "title": "Images",
+    "icon": "M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".png",
+        "alias": "PNG Image"
+      },
+      {
+        "extension": ".jpeg",
+        "alias": "JPEG Image"
+      },
+      {
+        "extension": ".jpg",
+        "alias": "JPG Image"
+      },
+      {
+        "extension": ".gif",
+        "alias": "GIF Image"
+      },
+      {
+        "extension": ".tiff",
+        "alias": "TIFF Image"
+      },
+      {
+        "extension": ".psd",
+        "alias": "Photoshop Document"
+      },
+      {
+        "extension": ".eps",
+        "alias": "Encapsulated Postscript"
+      },
+      {
+        "extension": ".ai",
+        "alias": "Adobe Illustrator Document"
+      },
+      {
+        "extension": ".indd",
+        "alias": "Adobe Indesign Document"
+      },
+      {
+        "extension": ".svg",
+        "alias": "SVG Image"
+      },
+      {
+        "extension": ".webp",
+        "alias": "Web Picture"
+      },
+      {
+        "extension": ".bmp",
+        "alias": "BMP Image"
+      }
+    ]
+  },
+  {
+    "title": "Musics",
+    "icon": "M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7l0 72 0 264c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L448 147 192 223.8 192 432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6L128 200l0-72c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".mp3",
+        "alias": "MP3 Audio"
+      },
+      {
+        "extension": ".wav",
+        "alias": "WAV Audio"
+      },
+      {
+        "extension": ".wma",
+        "alias": "WMA Audio"
+      },
+      {
+        "extension": ".mpa",
+        "alias": "MPA Audio"
+      },
+      {
+        "extension": ".ram",
+        "alias": "RAM Audio"
+      },
+      {
+        "extension": ".ra",
+        "alias": "RA Audio"
+      },
+      {
+        "extension": ".aac",
+        "alias": "AAC Audio"
+      },
+      {
+        "extension": ".aif",
+        "alias": "AIF Audio"
+      },
+      {
+        "extension": ".m4a",
+        "alias": "M4A Audio"
+      },
+      {
+        "extension": ".tsa",
+        "alias": "TSA Audio"
+      },
+      {
+        "extension": ".flac",
+        "alias": "FLAC Audio"
+      }
+    ]
+  },
+  {
+    "title": "Programs",
+    "icon": "M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 224L64 288 64 64l448 0z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".exe",
+        "alias": "Application"
+      },
+      {
+        "extension": ".msi",
+        "alias": "Application"
+      },
+      {
+        "extension": ".msix",
+        "alias": "Application"
+      },
+      {
+        "extension": ".apk",
+        "alias": "Android Application"
+      },
+      {
+        "extension": ".dmg",
+        "alias": "Apple Disk Image"
+      },
+      {
+        "extension": ".pkg",
+        "alias": "Package File"
+      },
+      {
+        "extension": ".deb",
+        "alias": "Debian Package"
+      },
+      {
+        "extension": ".rpm",
+        "alias": "Red Hat Package"
+      }
+    ]
+  },
+  {
+    "title": "Videos",
+    "icon": "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z",
+    "isDefault": true,
+    "fileExtensions": [
+      {
+        "extension": ".avi",
+        "alias": "AVI Video"
+      },
+      {
+        "extension": ".mpg",
+        "alias": "MPG Video"
+      },
+      {
+        "extension": ".mpe",
+        "alias": "MPE Video"
+      },
+      {
+        "extension": ".mpeg",
+        "alias": "MPEG Video"
+      },
+      {
+        "extension": ".asf",
+        "alias": "ASF Video"
+      },
+      {
+        "extension": ".wmv",
+        "alias": "WMV Video"
+      },
+      {
+        "extension": ".mov",
+        "alias": "MOV Video"
+      },
+      {
+        "extension": ".qt",
+        "alias": "QT Video"
+      },
+      {
+        "extension": ".rm",
+        "alias": "RM Video"
+      },
+      {
+        "extension": ".mp4",
+        "alias": "MP4 Video"
+      },
+      {
+        "extension": ".flv",
+        "alias": "FLV Video"
+      },
+      {
+        "extension": ".m4v",
+        "alias": "M4V Video"
+      },
+      {
+        "extension": ".webm",
+        "alias": "WEBM Video"
+      },
+      {
+        "extension": ".ogv",
+        "alias": "OGV Video"
+      },
+      {
+        "extension": ".ogg",
+        "alias": "OGG Video"
+      },
+      {
+        "extension": ".mkv",
+        "alias": "MKV Video"
+      },
+      {
+        "extension": ".ts",
+        "alias": "TS Video"
+      },
+      {
+        "extension": ".tsv",
+        "alias": "TSV Video"
+      }
+    ]
+  }
+]

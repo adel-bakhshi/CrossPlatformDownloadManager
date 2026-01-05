@@ -1,0 +1,38 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:cc="clr-namespace:CrossPlatformDownloadManager.DesktopApp.CustomControls">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Window.myWindow">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="FontSize"
+                Value="{DynamicResource DefaultFontSize}" />
+        <Setter Property="FontFamily"
+                Value="{DynamicResource PrimaryFont}" />
+        <Setter Property="Foreground"
+                Value="{DynamicResource MainTextColor}" />
+        <Setter Property="Background"
+                Value="{DynamicResource MainBackgroundColor}" />
+        <Setter Property="WindowStartupLocation"
+                Value="CenterScreen" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="Icon"
+                Value="avares://CrossPlatformDownloadManager.DesktopApp/Assets/Images/cdm-logo.ico" />
+
+        <Style Selector="^ TextBlock">
+            <Setter Property="LineHeight"
+                    Value="{DynamicResource DefaultLineHeight}" />
+        </Style>
+
+        <Style Selector="^ cc|CustomTextBox">
+            <Setter Property="LineHeight"
+                    Value="{DynamicResource DefaultLineHeight}" />
+        </Style>
+    </Style>
+</Styles>

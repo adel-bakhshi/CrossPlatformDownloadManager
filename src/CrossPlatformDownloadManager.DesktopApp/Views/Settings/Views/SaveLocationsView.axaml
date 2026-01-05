@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             xmlns:viewModels="using:CrossPlatformDownloadManager.Data.ViewModels"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.SaveLocationsView"
+             x:DataType="vm:SaveLocationsViewModel">
+
+    <!-- Content -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel Orientation="Vertical"
+                    Spacing="15">
+            <!-- Disable categories -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryBackgroundColor}">
+                <Grid RowDefinitions="Auto, Auto"
+                      ColumnDefinitions="*, Auto">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Disable categories"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 10" />
+
+                    <cc:CustomToggleSwitch Grid.Row="0"
+                                           Grid.Column="1"
+                                           Margin="0,0,0,10"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           IsChecked="{Binding DisableCategories}" />
+
+                    <!-- Global save location -->
+                    <Grid Grid.Row="1"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="2"
+                          ColumnDefinitions="*, Auto"
+                          IsEnabled="{Binding DisableCategories}">
+                        <!-- Save location -->
+                        <cc:CustomTextBox Grid.Column="0"
+                                          Background="{DynamicResource MainBackgroundColor}"
+                                          Watermark="Save location"
+                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource FolderSvgIcon}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          Margin="0, 0, 10, 0"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                          OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource MainBackgroundColor}"
+                                          Text="{Binding GlobalSaveDirectory, FallbackValue='', TargetNullValue=''}"
+                                          IsReadOnly="True" />
+
+                        <!-- Browse button -->
+                        <Button Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Classes="button success"
+                                Content="Browse"
+                                Command="{Binding BrowseGlobalSaveLocationCommand}" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Manage categories -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
+                    IsVisible="{Binding !DisableCategories}">
+                <Grid RowDefinitions="Auto, *">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Manage categories"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 10" />
+
+                    <!-- Categories and Actions -->
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*, Auto">
+                        <!-- Categories -->
+                        <cc:CustomComboBox Grid.Column="0"
+                                           PlaceholderText="Category"
+                                           Background="{DynamicResource MainBackgroundColor}"
+                                           ToggleIconColor="{DynamicResource AccentColor}"
+                                           OnHoverToggleIconColor="{DynamicResource MainTextColor}"
+                                           IconData="{DynamicResource LayerGroupSvgIcon}"
+                                           IconColor="{DynamicResource IconColor}"
+                                           IconSize="{DynamicResource SmallIconSize}"
+                                           BorderThickness="0"
+                                           SelectedItem="{Binding SelectedCategory}"
+                                           ItemsSource="{Binding Categories}"
+                                           MaxDropDownHeight="300"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Left"
+                                           Width="250">
+                            <cc:CustomComboBox.ItemTemplate>
+                                <DataTemplate DataType="viewModels:CategoryViewModel">
+                                    <TextBlock Text="{Binding Title}" />
+                                </DataTemplate>
+                            </cc:CustomComboBox.ItemTemplate>
+                        </cc:CustomComboBox>
+
+                        <!-- Action buttons -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Spacing="10"
+                                    HorizontalAlignment="Right">
+                            <Button Classes="button danger"
+                                    Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                    Width="{Binding $self.Bounds.Height}"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DeleteCategoryCommand}"
+                                    IsEnabled="{Binding SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <PathIcon Data="{DynamicResource XMarkSvgIcon}"
+                                          Foreground="{DynamicResource ButtonTextColor}"
+                                          Width="{DynamicResource SmallIconSize}"
+                                          Height="{DynamicResource SmallIconSize}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </Button>
+
+                            <Button Classes="button warning"
+                                    Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                    Width="{Binding $self.Bounds.Height}"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding EditCategoryCommand}"
+                                    CommandParameter="{Binding $parent[Window]}"
+                                    IsEnabled="{Binding SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <PathIcon Data="{DynamicResource PenSvgIcon}"
+                                          Foreground="{DynamicResource ButtonTextColor}"
+                                          Width="{DynamicResource SmallIconSize}"
+                                          Height="{DynamicResource SmallIconSize}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </Button>
+
+                            <Button Classes="button success"
+                                    Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                    Width="{Binding $self.Bounds.Height}"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding AddNewCategoryCommand}"
+                                    CommandParameter="{Binding $parent[Window]}">
+                                <PathIcon Data="{DynamicResource PlusSvgIcon}"
+                                          Foreground="{DynamicResource ButtonTextColor}"
+                                          Width="{DynamicResource SmallIconSize}"
+                                          Height="{DynamicResource SmallIconSize}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Manage file types -->
+            <local:FileTypesView DataGridHeight="200"
+                                 IsVisible="{Binding $parent[local:SaveLocationsView].((vm:SaveLocationsViewModel)DataContext).IsFileTypesViewVisible, FallbackValue=False, TargetNullValue=False}"
+                                 DataContext="{Binding $parent[local:SaveLocationsView].((vm:SaveLocationsViewModel)DataContext).FileTypesViewModel, FallbackValue={x:Null}, TargetNullValue={x:Null}}" />
+
+            <!-- Manage save location -->
+            <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                    Padding="15"
+                    Background="{DynamicResource SecondaryBackgroundColor}"
+                    IsVisible="{Binding !DisableCategories}">
+                <Grid RowDefinitions="Auto, *">
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"
+                               Text="Manage save location"
+                               FontWeight="Bold"
+                               Margin="0, 0, 0, 10" />
+
+                    <!-- Save location section -->
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*, Auto">
+                        <!-- Save location -->
+                        <cc:CustomTextBox Grid.Column="0"
+                                          Background="{DynamicResource MainBackgroundColor}"
+                                          Watermark="Save location"
+                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                          IconData="{DynamicResource FolderSvgIcon}"
+                                          IconColor="{DynamicResource IconColor}"
+                                          IconSize="{DynamicResource SmallIconSize}"
+                                          Padding="12, 10"
+                                          Margin="0, 0, 10, 0"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"
+                                          OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                          OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                          BorderThickness="1"
+                                          BorderBrush="{DynamicResource MainBackgroundColor}"
+                                          Text="{Binding SelectedCategory.CategorySaveDirectory.SaveDirectory, FallbackValue='', TargetNullValue=''}"
+                                          IsReadOnly="True" />
+
+                        <!-- Browse button -->
+                        <Button Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Classes="button success"
+                                Content="Browse"
+                                Command="{Binding BrowseSaveLocationCommand}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

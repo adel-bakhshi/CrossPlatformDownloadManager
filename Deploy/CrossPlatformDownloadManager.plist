@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Basic App Information -->
+    <key>CFBundleName</key>
+    <string>${APP_BASE_NAME}</string>
+    <key>CFBundleDisplayName</key>
+    <string>${APP_FRIENDLY_NAME}</string>
+    <key>CFBundleIdentifier</key>
+    <string>${APP_ID}</string>
+    <key>CFBundleVersion</key>
+    <string>${APP_VERSION}</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${APP_VERSION}</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.13</string>
+
+    <!-- Bundle Configuration -->
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>${APP_EXEC_NAME}</string>
+
+    <!-- App Icon -->
+    <key>CFBundleIconFile</key>
+    <string>${PRIMARY_ICON_FILE_NAME}</string>
+
+    <!-- High Resolution Support -->
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <!-- Principal Class -->
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- Carbon (legacy support) -->
+    <key>LSRequiresCarbon</key>
+    <true/>
+
+    <!-- Resource File Map -->
+    <key>CSResourcesFileMapped</key>
+    <true/>
+
+    <!-- Copyright -->
+    <key>NSHumanReadableCopyright</key>
+    <string>${PUBLISHER_COPYRIGHT}</string>
+
+    <!-- Category (macOS category id or your own string) -->
+    <key>LSApplicationCategoryType</key>
+    <string>${PRIME_CATEGORY}</string>
+
+    <!-- UI Mode (false = normal app, true = menu bar app) -->
+    <key>LSUIElement</key>
+    <false/>
+
+    <!-- Security and Permissions -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>This app needs AppleEvents permissions for system integration</string>
+
+    <!-- File System Access (used mostly for App Store / sandboxed apps) -->
+    <!-- Uncomment and adjust these if you plan to sandbox your app -->
+    <!-- <key>NSDocumentsFolderUsageDescription</key> -->
+    <!-- <string>This app needs access to your Documents folder</string> -->
+    <!-- <key>NSDownloadsFolderUsageDescription</key> -->
+    <!-- <string>This app needs access to your Downloads folder</string> -->
+    <!-- <key>NSDesktopFolderUsageDescription</key> -->
+    <!-- <string>This app needs access to your Desktop folder</string> -->
+    <!-- <key>NSFileProviderDomainUsageDescription</key> -->
+    <!-- <string>This app needs to access files</string> -->
+
+    <!-- File Associations -->
+    <!-- Uncomment this section if you want your app to handle specific file types -->
+    <!-- Replace .ext with your file extension and adjust the settings as needed -->
+    <!-- <key>CFBundleDocumentTypes</key> -->
+    <!-- <array> -->
+    <!--     <dict> -->
+    <!--         <key>CFBundleTypeExtensions</key> -->
+    <!--         <array> -->
+    <!--             <string>ext</string> -->
+    <!--         </array> -->
+    <!--         <key>CFBundleTypeName</key> -->
+    <!--         <string>${APP_FRIENDLY_NAME} File</string> -->
+    <!--         <key>CFBundleTypeIconFile</key> -->
+    <!--         <string>${PRIMARY_ICON_FILE_NAME}</string> -->
+    <!--         <key>CFBundleTypeRole</key> -->
+    <!--         <string>Editor</string> -->
+    <!--         <key>LSHandlerRank</key> -->
+    <!--         <string>Owner</string> -->
+    <!--         <key>LSTypeIsPackage</key> -->
+    <!--         <false/> -->
+    <!--     </dict> -->
+    <!-- </array> -->
+
+    <!--
+        Add your own keys here if needed, for example:
+        - NSCameraUsageDescription
+        - NSMicrophoneUsageDescription
+        - NSLocationWhenInUseUsageDescription
+        - NSContactsUsageDescription
+        - NSCalendarsUsageDescription
+        - NSPhotoLibraryUsageDescription
+        See: https://developer.apple.com/documentation/bundleresources/information_property_list
+    -->
+</dict>
+</plist>

@@ -1,0 +1,120 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.DuplicateDownloadLinkWindow"
+        x:DataType="vm:DuplicateDownloadLinkWindowViewModel"
+        Title="CDM - Duplicate download link"
+        Width="640"
+        Height="460"
+        MinWidth="640"
+        MinHeight="460"
+        MaxWidth="640"
+        MaxHeight="460"
+        CanResize="False"
+        Topmost="True"
+        Classes="myWindow">
+
+    <!-- Main content -->
+    <Grid Margin="20"
+          RowDefinitions="Auto, *, Auto">
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="How would you like to handle this duplicate link?"
+                   FontWeight="Bold"
+                   Margin="0, 0, 0, 15" />
+
+        <!-- Radio buttons -->
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical"
+                        Spacing="10">
+                <!-- Add duplicate with number -->
+                <cc:CustomRadioContentButton Title="Add the duplicate with a number after its file name"
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding DuplicateWithNumberedFile}">
+                    <!-- Info content -->
+                    <Grid RowDefinitions="Auto, Auto"
+                          ColumnDefinitions="Auto, *">
+                        <!-- Current file name -->
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Current file name:"
+                                   Margin="0, 0, 0, 5"
+                                   VerticalAlignment="Top" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="10, 0, 0, 5"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource InfoColor}"
+                                   Text="{Binding FileName}" />
+
+                        <!-- New file name -->
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="New file name:"
+                                   VerticalAlignment="Top" />
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Margin="10, 0, 0, 0"
+                                   VerticalAlignment="Top"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SuccessColor}"
+                                   Text="{Binding NewFileName}" />
+                    </Grid>
+                </cc:CustomRadioContentButton>
+
+                <!-- Add duplicate and overwrite -->
+                <cc:CustomRadioContentButton Title="Add the duplicate and overwrite existing file"
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding OverwriteExistingFile}">
+                    <!-- Info content -->
+                    <TextBlock TextWrapping="Wrap">
+                        <Run Text="Selecting this option will remove the existing" />
+
+                        <!-- File name -->
+                        <Run Text="{Binding FileName}"
+                             Foreground="{DynamicResource InfoColor}" />
+
+                        <Run Text="file information from your system and replace it with updated details." />
+                    </TextBlock>
+                </cc:CustomRadioContentButton>
+
+                <!-- Show download complete dialog when complete otherwise resume -->
+                <cc:CustomRadioContentButton Title="if download file complete, show download complete dialog. Otherwise, resume it"
+                                             GroupName="DuplicateDownloadLink"
+                                             IsChecked="{Binding ShowCompleteDialogOrResumeFile}">
+                    <!-- Info content -->
+                    <TextBlock TextWrapping="Wrap"
+                               Text="By selecting this option, a download completion window will appear if your file has finished downloading. Otherwise, the download will resume." />
+                </cc:CustomRadioContentButton>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

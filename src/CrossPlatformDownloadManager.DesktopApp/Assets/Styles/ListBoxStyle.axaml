@@ -1,0 +1,121 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- Styles for tabs ListBox -->
+    <Style Selector="ListBox.tabsListBox">
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="Margin"
+                Value="0, 0, 0, 15" />
+        <Setter Property="MinWidth"
+                Value="0" />
+        <Setter Property="MinHeight"
+                Value="0" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="0" />
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="SelectionMode"
+                Value="Single" />
+
+        <!-- ItemsPanel -->
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10" />
+            </ItemsPanelTemplate>
+        </Setter>
+
+        <!-- ItemTemplate -->
+        <Setter Property="ItemTemplate">
+            <DataTemplate DataType="x:String">
+                <TextBlock Text="{Binding}" />
+            </DataTemplate>
+        </Setter>
+
+        <!-- ListBoxItem Styles -->
+        <Style Selector="^ ListBoxItem">
+            <Setter Property="Padding"
+                    Value="10" />
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="MinWidth"
+                    Value="0" />
+            <Setter Property="MinHeight"
+                    Value="0" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource MainBackgroundColor}" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource DefaultCornerRadius}" />
+            <Setter Property="Background"
+                    Value="{DynamicResource MainBackgroundColor}" />
+
+            <!-- Template -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          CornerRadius="{TemplateBinding CornerRadius}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource MainBackgroundColor}" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <BrushTransition Duration="00:00:00.3"
+                                             Property="Background" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Pseudo classes  -->
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:selected:focus:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background"
+                        Value="{DynamicResource SecondaryBackgroundColor}" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>

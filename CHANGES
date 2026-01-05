@@ -1,3 +1,44 @@
++ Version 0.20.0; 2026-01-05
+- Technical Updates:
+- Migrated from AutoMapper to Mapster for improved performance.
+- Upgraded to .NET 10.
+- Upgraded to Avalonia 11.3.10.
+- Updated to the latest version of MultipartDownloader package.
+- Introduced AutoLaunch package for managing application startup registration across operating systems.
+- Optimized memory usage during downloads for better stability and lower resource consumption.
+- Better managing singleton app instance.
+- New Features:
+- Date-based log file management: Logs are now organized in a dedicated folder with separate daily files using the format YY-MM-DD.log (e.g., 26-01-01.log).
+- Added log retention history setting: Users can configure how many days logs should be retained (minimum 1 day, maximum 365 days) in the settings panel.
+- Added context menu to TrayIcon: Users can access additional options directly from the system tray. Manager must be enabled in settings for full functionality.
+- Added support for downloading .msix files.
+- Implemented Help section in the main DataGrid to display available keyboard shortcuts for actions like copy, delete, and open file.
+- Implemented Appearance section in settings: Theme-related and font settings have been moved to this new dedicated section.
+- Added theme color preview in the Appearance settings section for better visual customization.
+- Added more export information to .cdm files for improved data portability.
+- UI/UX Improvements:
+- Added new color palette to theme system for better management and easier theme creation.
+- Added transitions and click animations to buttons for smoother user experience.
+- Added modern and attractive new themes to the application.
+- Added transitions to categories (left panel of the application) for smoother navigation.
+- Created custom CustomToggleSwitch control and integrated it throughout the application.
+- Optimized dialogs for better performance and user interaction.
+- Improved Manager visibility handling with safer show/hide operations.
+- Fixed various styling issues across the application.
+- Performance Improvements:
+- Attempted to reduce initial application startup time.
+- Changed AppInitializer service to run asynchronously for faster application launch.
+- Converted multiple synchronous operations to asynchronous for better responsiveness.
+- Asynchronous theme loading for improved startup performance.
+- Removed excessive logging from various parts of the application to reduce overhead.
+- Bug Fixes:
+- Fixed issue where the download window was not displaying properly.
+- Fixed download issue when trying to download a new file.
+- Various minor bug fixes and overall performance enhancements.
+- Code Improvements:
+- Added logging to AppFinisher service.
+- Added logging to BrowserExtension service.
+
 + Version 0.11.1; 2025-10-26
 - Bug Fixes:
 - Fixed an issue causing the application to fail during startup on Windows.

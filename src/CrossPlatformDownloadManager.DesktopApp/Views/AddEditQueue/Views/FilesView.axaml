@@ -1,0 +1,159 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.AddEditQueue.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditQueue.Views.FilesView"
+             x:DataType="vm:FilesViewModel">
+
+    <!-- Main Content -->
+    <Grid RowDefinitions="Auto, Auto, *">
+        <!-- DataGrid Actions -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*, Auto"
+              Margin="0, 0, 0, 10">
+            <!-- Download count at the same time  -->
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Left">
+                <TextBlock Text="How many files can be downloaded at the same time?"
+                           VerticalAlignment="Center" />
+
+                <cc:CustomNumericUpDown Padding="12, 10"
+                                        Background="{DynamicResource SecondaryBackgroundColor}"
+                                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                        Watermark="Count"
+                                        WatermarkForeground="{DynamicResource AccentColor}"
+                                        BorderThickness="0"
+                                        Value="{Binding DownloadCountAtSameTime}"
+                                        VerticalAlignment="Center"
+                                        MinWidth="80"
+                                        ShowButtonSpinner="False"
+                                        Increment="1"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        ClipValueToMinMax="True" />
+            </StackPanel>
+
+            <!-- Action buttons -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Right">
+                <!-- Higher priority button -->
+                <Button Classes="button info"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
+                        Command="{Binding ChangePriorityToHigherLevelCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
+                    <PathIcon Data="{DynamicResource ArrowUpLongSvgIcon}"
+                              Foreground="{DynamicResource ButtonTextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Lower priority button -->
+                <Button Classes="button info"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
+                        Command="{Binding ChangePriorityToLowerLevelCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
+                    <PathIcon Data="{DynamicResource ArrowDownLongSvgIcon}"
+                              Foreground="{DynamicResource ButtonTextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Delete file from queue button -->
+                <Button Classes="button danger"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
+                        Command="{Binding DeleteItemFromDataGridCommand}"
+                        CommandParameter="{Binding #FilesDataGrid}">
+                    <PathIcon Data="{DynamicResource XMarkSvgIcon}"
+                              Foreground="{DynamicResource ButtonTextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Add file to queue button -->
+                <Button Classes="button success"
+                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                        Width="{Binding $self.Bounds.Height}"
+                        VerticalAlignment="Center"
+                        Command="{Binding AddItemToDataGridCommand}"
+                        CommandParameter="{Binding $parent[Window]}">
+                    <PathIcon Data="{DynamicResource PlusSvgIcon}"
+                              Foreground="{DynamicResource ButtonTextColor}"
+                              Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Include paused files -->
+        <Border Grid.Row="1"
+                CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}"
+                Margin="0, 0, 0, 10">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Include paused files"
+                           ToolTip.Tip="By enabling this feature, if there is a file in your queue that is Paused, the queue will consider this file as part of the download process and include it in the count of simultaneous downloads." />
+
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding IncludePausedFiles}" />
+            </Grid>
+        </Border>
+
+        <!-- Files DataGrid -->
+        <DataGrid Name="FilesDataGrid"
+                  Grid.Row="2"
+                  ItemsSource="{Binding DownloadFiles}"
+                  Classes="minimalDataGrid darkRows invertColors"
+                  SelectionMode="Extended"
+                  Background="{DynamicResource TransparentColor}"
+                  SelectionChanged="FilesDataGridOnSelectionChanged"
+                  PropertyChanged="FilesDataGridOnPropertyChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="File Name"
+                                    Binding="{Binding FileName}"
+                                    MinWidth="200" />
+
+                <DataGridTextColumn Header="Size"
+                                    Binding="{Binding SizeAsString}"
+                                    MinWidth="100" />
+
+                <DataGridTextColumn Header="Status"
+                                    MinWidth="150"
+                                    Binding="{Binding DownloadProgressAsString}" />
+
+                <DataGridTextColumn Header="Time Left"
+                                    Binding="{Binding TimeLeftAsString}"
+                                    MinWidth="100" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

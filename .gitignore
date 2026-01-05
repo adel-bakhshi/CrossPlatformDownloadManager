@@ -363,4 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Ignore output setup file
-Deploy/bin
+Deploy/Output

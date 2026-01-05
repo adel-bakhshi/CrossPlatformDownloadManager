@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.10" />
+        <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta2" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02395" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Avalonia.Base">
+            <HintPath>..\CrossPlatformDownloadManager.DesktopApp\bin\Debug\net8.0\Avalonia.Base.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>

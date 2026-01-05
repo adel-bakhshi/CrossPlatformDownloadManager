@@ -1,0 +1,155 @@
+{
+  "name": "Classic Blue Light",
+  "author": "CDM",
+  "isDarkTheme": false,
+  "mainBackgroundColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "secondaryBackgroundColor": {
+    "brushMode": 0,
+    "color": "#F0F2F5",
+    "opacity": 1
+  },
+  "accentColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "mainTextColor": {
+    "brushMode": 0,
+    "color": "#1C1E21",
+    "opacity": 1
+  },
+  "buttonTextColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "categoryHeaderHoverColor": {
+    "brushMode": 0,
+    "color": "#4B93FF",
+    "opacity": 1
+  },
+  "categoryHeaderSelectedColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "menuBackgroundColor": {
+    "brushMode": 0,
+    "color": "#F7F8FA",
+    "opacity": 1
+  },
+  "menuItemHoverColor": {
+    "brushMode": 0,
+    "color": "#E4E6EB",
+    "opacity": 1
+  },
+  "iconColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "selectedProxyColor": {
+    "brushMode": 0,
+    "color": "#E7F3FF",
+    "opacity": 1
+  },
+  "toggleCircleColor": {
+    "brushMode": 0,
+    "color": "#FFFFFF",
+    "opacity": 1
+  },
+  "toggleColor": {
+    "brushMode": 0,
+    "color": "#BCC0C4",
+    "opacity": 1
+  },
+  "toggleCheckedColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "loadingIndicatorColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "dialogTextColor": {
+    "brushMode": 0,
+    "color": "#1C1E21",
+    "opacity": 1
+  },
+  "dialogOkBackgroundColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "dialogYesBackgroundColor": {
+    "brushMode": 0,
+    "color": "#31A24C",
+    "opacity": 1
+  },
+  "dialogNoBackgroundColor": {
+    "brushMode": 0,
+    "color": "#E41E3F",
+    "opacity": 1
+  },
+  "dialogCancelBackgroundColor": {
+    "brushMode": 0,
+    "color": "#8A8D91",
+    "opacity": 1
+  },
+  "managerTextColor": {
+    "brushMode": 0,
+    "color": "#1C1E21",
+    "opacity": 1
+  },
+  "mainColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "successColor": {
+    "brushMode": 0,
+    "color": "#31A24C",
+    "opacity": 1
+  },
+  "infoColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "dangerColor": {
+    "brushMode": 0,
+    "color": "#E41E3F",
+    "opacity": 1
+  },
+  "warningColor": {
+    "brushMode": 0,
+    "color": "#E2902B",
+    "opacity": 1
+  },
+  "chunkProgressColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  },
+  "chunkProgressBackgroundColor": {
+    "brushMode": 0,
+    "color": "#E4E6EB",
+    "opacity": 1
+  },
+  "gridRowColor": {
+    "brushMode": 0,
+    "color": "#F0F2F5",
+    "opacity": 1
+  },
+  "linkColor": {
+    "brushMode": 0,
+    "color": "#1877F2",
+    "opacity": 1
+  }
+}

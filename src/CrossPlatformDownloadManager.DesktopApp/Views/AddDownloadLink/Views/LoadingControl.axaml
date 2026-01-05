@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="using:CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddDownloadLink.Views.LoadingControl">
+    <Ellipse HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             Fill="{Binding $parent[local:LoadingControl].Fill}">
+        <Ellipse.Styles>
+            <Style Selector="Ellipse">
+                <Setter Property="Opacity"
+                        Value="0" />
+                <Setter Property="ScaleTransform.ScaleX"
+                        Value="0" />
+                <Setter Property="ScaleTransform.ScaleY"
+                        Value="0" />
+
+                <Style.Animations>
+                    <Animation Duration="{Binding $parent[local:LoadingControl].Duration}"
+                               Delay="{Binding $parent[local:LoadingControl].Delay}"
+                               IterationCount="INFINITE">
+                        <KeyFrame Cue="0%">
+                            <Setter Property="ScaleTransform.ScaleX"
+                                    Value="0" />
+                            <Setter Property="ScaleTransform.ScaleY"
+                                    Value="0" />
+                            <Setter Property="Opacity"
+                                    Value="1" />
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="ScaleTransform.ScaleX"
+                                    Value="1" />
+                            <Setter Property="ScaleTransform.ScaleY"
+                                    Value="1" />
+                            <Setter Property="Opacity"
+                                    Value="0" />
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>
+        </Ellipse.Styles>
+    </Ellipse>
+</UserControl>

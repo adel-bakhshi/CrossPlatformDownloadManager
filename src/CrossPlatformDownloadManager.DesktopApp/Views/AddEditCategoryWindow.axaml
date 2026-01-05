@@ -1,0 +1,327 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.AddEditCategoryWindow"
+        x:DataType="vm:AddEditCategoryWindowViewModel"
+        Title="{Binding Title}"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Main content -->
+    <Grid RowDefinitions="*, Auto"
+          Margin="20">
+        <!-- Main content -->
+        <ScrollViewer Grid.Row="0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical"
+                        Spacing="15">
+                <!-- Category title -->
+                <cc:CustomTextBox Padding="12, 10"
+                                  Background="{DynamicResource SecondaryBackgroundColor}"
+                                  CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                  IconData="{DynamicResource LayerGroupSvgIcon}"
+                                  IconSize="{DynamicResource SmallIconSize}"
+                                  IconColor="{DynamicResource IconColor}"
+                                  Watermark="Category title"
+                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  Margin="0, 0, 0, 5"
+                                  HorizontalAlignment="Stretch"
+                                  OnHoverBorderColor="{DynamicResource MainColor}"
+                                  OnFocusBorderColor="{DynamicResource MainColor}"
+                                  OnErrorBorderColor="{DynamicResource DangerColor}"
+                                  BorderThickness="1"
+                                  BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                                  Text="{Binding CategoryTitle}"
+                                  IsReadOnly="{Binding IsDefaultCategory}" />
+
+                <!-- File types section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryBackgroundColor}"
+                        MaxHeight="300"
+                        IsVisible="{Binding !IsGeneralCategory}">
+                    <Grid RowDefinitions="Auto, Auto, *">
+                        <!-- Title bar -->
+                        <TextBlock Grid.Row="0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   Text="File types"
+                                   FontWeight="Bold"
+                                   Margin="0, 0, 0, 10" />
+
+                        <!-- Add/Edit extension section -->
+                        <Grid Grid.Row="1"
+                              ColumnDefinitions="*, Auto, *, Auto">
+                            <!-- Extension -->
+                            <cc:CustomTextBox Grid.Column="0"
+                                              Background="{DynamicResource MainBackgroundColor}"
+                                              Watermark="Extension"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource FileCircleQuestionSvgIcon}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                                              Text="{Binding CurrentFileExtension.Extension}"
+                                              TextChanged="ExtensionTextBlockOnTextChanged" />
+
+                            <!-- Separator -->
+                            <Viewbox Grid.Column="1"
+                                     Width="10" />
+
+                            <!-- Alias -->
+                            <cc:CustomTextBox Grid.Column="2"
+                                              Background="{DynamicResource MainBackgroundColor}"
+                                              Watermark="Alias"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource FileCircleCheckSvgIcon}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                                              Text="{Binding CurrentFileExtension.Alias}"
+                                              TextChanged="AlisTextBoxOnTextChanged" />
+
+                            <!-- Action buttons -->
+                            <StackPanel Grid.Column="3"
+                                        Orientation="Horizontal"
+                                        Spacing="10"
+                                        Margin="10, 0, 0, 0">
+                                <!-- Delete/Cancel button -->
+                                <Button Classes="button danger"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $parent[StackPanel].Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        IsEnabled="{Binding IsDeleteClearFileExtensionButtonEnabled}"
+                                        Command="{Binding DeleteClearFileExtensionCommand}">
+                                    <PathIcon Data="{DynamicResource XMarkSvgIcon}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+
+                                <!-- Save button -->
+                                <Button Classes="button success"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $parent[StackPanel].Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        IsEnabled="{Binding IsSaveFileExtensionButtonEnabled}"
+                                        Command="{Binding SaveFileExtensionCommand}">
+                                    <PathIcon Data="{DynamicResource CheckSvgIcon}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- File types DataGrid -->
+                        <DataGrid Grid.Row="2"
+                                  ItemsSource="{Binding FileExtensions}"
+                                  SelectedItem="{Binding SelectedFileExtension}"
+                                  Classes="minimalDataGrid darkRows"
+                                  SelectionMode="Single"
+                                  Background="{DynamicResource TransparentColor}"
+                                  IsVisible="{Binding IsFileTypesDataGridVisible}"
+                                  Margin="0, 10, 0, 0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Extension"
+                                                    Binding="{Binding Extension}"
+                                                    MinWidth="300" />
+
+                                <DataGridTextColumn Header="Alias"
+                                                    Binding="{Binding Alias}"
+                                                    MinWidth="300" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+
+                <!-- Auto add links to category section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryBackgroundColor}"
+                        MaxHeight="300"
+                        IsVisible="{Binding !IsGeneralCategory}">
+                    <Grid RowDefinitions="Auto, Auto, *">
+                        <!-- Title bar -->
+                        <TextBlock Grid.Row="0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   Text="Automatically add links to this category from following sites"
+                                   FontWeight="Bold"
+                                   Margin="0, 0, 0, 10" />
+
+                        <!-- Add/Edit extension section -->
+                        <Grid Grid.Row="1"
+                              ColumnDefinitions="*, Auto">
+                            <!-- Site address -->
+                            <cc:CustomTextBox Grid.Column="0"
+                                              Background="{DynamicResource MainBackgroundColor}"
+                                              Watermark="Site address"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource LinkSvgIcon}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                                              Text="{Binding SelectedSiteAddress, FallbackValue='', TargetNullValue=''}" />
+
+                            <!-- Action buttons -->
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="10"
+                                        Margin="10, 0, 0, 0">
+                                <!-- Delete/Cancel button -->
+                                <Button Classes="button danger"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $parent[StackPanel].Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        IsEnabled="{Binding SelectedSiteAddress, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        Command="{Binding DeleteClearSiteAddressCommand}">
+                                    <PathIcon Data="{DynamicResource XMarkSvgIcon}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+
+                                <!-- Save button -->
+                                <Button Classes="button success"
+                                        Height="{Binding $parent[StackPanel].Bounds.Height}"
+                                        Width="{Binding $parent[StackPanel].Bounds.Height}"
+                                        VerticalAlignment="Center"
+                                        IsEnabled="{Binding SelectedSiteAddress, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        Command="{Binding SaveSiteAddressCommand}">
+                                    <PathIcon Data="{DynamicResource CheckSvgIcon}"
+                                              Foreground="{DynamicResource ButtonTextColor}"
+                                              Width="{DynamicResource SmallIconSize}"
+                                              Height="{DynamicResource SmallIconSize}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- File types DataGrid -->
+                        <DataGrid Grid.Row="2"
+                                  ItemsSource="{Binding SiteAddresses}"
+                                  SelectedItem="{Binding SelectedSiteAddress}"
+                                  Classes="minimalDataGrid darkRows"
+                                  SelectionMode="Single"
+                                  Background="{DynamicResource TransparentColor}"
+                                  IsVisible="{Binding IsSiteAddressesDataGridVisible}"
+                                  Margin="0, 10, 0, 0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Site address"
+                                                    Binding="{Binding .}"
+                                                    MinWidth="300" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+
+                <!-- Save location section -->
+                <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                        Padding="15"
+                        Background="{DynamicResource SecondaryBackgroundColor}">
+                    <Grid RowDefinitions="Auto, *">
+                        <!-- Title -->
+                        <TextBlock Grid.Row="0"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left"
+                                   Text="Save location"
+                                   FontWeight="Bold"
+                                   Margin="0, 0, 0, 10" />
+
+                        <Grid Grid.Row="1"
+                              ColumnDefinitions="*, Auto">
+                            <!-- Save location address -->
+                            <cc:CustomTextBox Grid.Column="0"
+                                              Background="{DynamicResource MainBackgroundColor}"
+                                              Watermark="Save location"
+                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                              IconData="{DynamicResource FolderSvgIcon}"
+                                              IconColor="{DynamicResource IconColor}"
+                                              IconSize="{DynamicResource SmallIconSize}"
+                                              Padding="12, 10"
+                                              Margin="0, 0, 10, 0"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"
+                                              OnFocusBorderColor="{DynamicResource MainBackgroundColor}"
+                                              OnHoverBorderColor="{DynamicResource MainBackgroundColor}"
+                                              BorderThickness="1"
+                                              BorderBrush="{DynamicResource MainBackgroundColor}"
+                                              Text="{Binding SaveDirectory, FallbackValue='', TargetNullValue=''}"
+                                              IsReadOnly="True" />
+
+                            <!-- Select save location button -->
+                            <Button Name="BrowseButton"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Classes="button success"
+                                    Content="Browse"
+                                    Click="BrowseButtonOnClick" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

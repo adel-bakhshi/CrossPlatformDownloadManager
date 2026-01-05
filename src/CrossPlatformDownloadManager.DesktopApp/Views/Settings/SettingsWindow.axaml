@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Title="CDM - Settings"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        MaxWidth="800"
+        MaxHeight="600"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <!-- Converters -->
+        <converters:SelectedTabItemToViewVisibilityConverter x:Key="SelectedTabItemToViewVisibilityConverter" />
+    </Window.Resources>
+
+    <!-- Main content -->
+    <Grid RowDefinitions="Auto, *, Auto"
+          Margin="20">
+        <!-- Tabs -->
+        <ListBox Grid.Row="0"
+                 Classes="tabsListBox"
+                 ItemsSource="{Binding TabItems}"
+                 SelectedItem="{Binding SelectedTabItem}" />
+
+        <!-- Main content -->
+        <Grid Grid.Row="1">
+            <!-- Generals view -->
+            <ContentControl Content="{Binding GeneralsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Generals', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- Appearance view -->
+            <ContentControl Content="{Binding AppearanceView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Appearance', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- FileTypes view -->
+            <ContentControl Content="{Binding FileTypesView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='File Types', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- SaveLocations view -->
+            <ContentControl Content="{Binding SaveLocationsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Save Locations', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- Downloads view -->
+            <ContentControl Content="{Binding DownloadsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Downloads', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- Proxy view -->
+            <ContentControl Content="{Binding ProxyView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Proxy', FallbackValue=False, TargetNullValue=False}" />
+
+            <!-- Notifications view -->
+            <ContentControl Content="{Binding NotificationsView}"
+                            IsVisible="{Binding SelectedTabItem, Converter={StaticResource SelectedTabItemToViewVisibilityConverter}, ConverterParameter='Notifications', FallbackValue=False, TargetNullValue=False}" />
+        </Grid>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 15, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Save
+            </Button>
+
+            <Button Name="CancelButton"
+                    Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                Cancel
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Main.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Main.Views.CategoriesTreeItemView"
+             x:DataType="vm:CategoriesTreeItemViewModel">
+
+    <!-- Resources -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- String to geometry converter -->
+            <converters:StringToGeometryConverter x:Key="StringToGeometryConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- Styles -->
+    <UserControl.Styles>
+        <!-- Categories list style -->
+        <Style Selector="ListBox">
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="HorizontalAlignment"
+                    Value="Stretch" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                    Value="Hidden" />
+            <Setter Property="SelectionMode"
+                    Value="Single" />
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
+            </Style>
+
+            <!-- ListBoxItem styles -->
+            <Style Selector="^ ListBoxItem">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource MainTextColor}" />
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
+                </Style>
+
+                <Style Selector="^:selected">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryHeaderSelectedColor}" />
+                </Style>
+
+                <Style Selector="^:selected:focus">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryHeaderSelectedColor}" />
+                </Style>
+
+                <Style Selector="^:selected:pointerover">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
+                </Style>
+
+                <Style Selector="^:selected:focus:pointerover">
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource CategoryHeaderHoverColor}" />
+                </Style>
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Main content -->
+    <cc:CustomExpander IsExpanded="{Binding $parent[ListBoxItem].IsSelected}"
+                       Width="{Binding $parent[ListBox].Bounds.Width}"
+                       ShowChevron="{Binding ShowCategories}">
+        <Expander.HeaderTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="5">
+                    <PathIcon Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              Data="{Binding $parent[UserControl].((vm:CategoriesTreeItemViewModel)DataContext).Icon, Converter={StaticResource StringToGeometryConverter}, FallbackValue='', TargetNullValue=''}"
+                              Foreground="{Binding $parent[Expander].Foreground}">
+                        <!-- Transitions -->
+                        <PathIcon.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Foreground"
+                                                 Duration="00:00:00.3" />
+                            </Transitions>
+                        </PathIcon.Transitions>
+                    </PathIcon>
+
+                    <TextBlock Text="{Binding $parent[UserControl].((vm:CategoriesTreeItemViewModel)DataContext).Title, FallbackValue='', TargetNullValue=''}"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis">
+                        <!-- Transitions -->
+                        <TextBlock.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="Foreground"
+                                                 Duration="00:00:00.3" />
+                            </Transitions>
+                        </TextBlock.Transitions>
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+        </Expander.HeaderTemplate>
+
+        <!-- Categories -->
+        <ListBox Padding="20, 10, 20, 0"
+                 BorderThickness="0"
+                 Background="{DynamicResource TransparentColor}"
+                 ItemsSource="{Binding Categories, FallbackValue={x:Null}, TargetNullValue={x:Null}}"
+                 SelectedItem="{Binding SelectedCategory}"
+                 SelectionMode="Single"
+                 IsVisible="{Binding ShowCategories}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                 ScrollViewer.VerticalScrollBarVisibility="Hidden">
+
+            <!-- ItemsPanel -->
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"
+                                Spacing="10" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <!-- ItemTemplate -->
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="5">
+                        <PathIcon Data="{Binding Icon, FallbackValue='', TargetNullValue=''}"
+                                  Width="{DynamicResource SmallIconSize}"
+                                  Height="{DynamicResource SmallIconSize}"
+                                  Foreground="{Binding $parent[ListBoxItem].Foreground}"
+                                  VerticalAlignment="Center">
+                            <!-- Transitions -->
+                            <PathIcon.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="Foreground"
+                                                     Duration="00:00:00.3" />
+                                </Transitions>
+                            </PathIcon.Transitions>
+                        </PathIcon>
+
+                        <TextBlock Text="{Binding Title, FallbackValue='', TargetNullValue=''}"
+                                   Foreground="{Binding $parent[ListBoxItem].Foreground}"
+                                   VerticalAlignment="Center">
+                            <!-- Transitions -->
+                            <TextBlock.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="Foreground"
+                                                     Duration="00:00:00.3" />
+                                </Transitions>
+                            </TextBlock.Transitions>
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </cc:CustomExpander>
+</UserControl>

@@ -1,0 +1,286 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
+        <AssemblyVersion>0.20.0</AssemblyVersion>
+        <FileVersion>0.20.0</FileVersion>
+        <LangVersion>default</LangVersion>
+        <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+
+    <!-- Bass files for Windowx x64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <Content Include="Bass\win-x64\bass.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bass.dll</Link>
+        </Content>
+    </ItemGroup>
+
+    <!-- Bass files for Windows ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
+        <Content Include="Bass\win-arm64\bass.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bass.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassape.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassape.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basscd.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basscd.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassdsd.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassdsd.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_flac.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_flac.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_mp3.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_mp3.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_ogg.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_ogg.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassenc_opus.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassenc_opus.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassflac.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassflac.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basshls.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basshls.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassloud.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassloud.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassmidi.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassmidi.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassmix.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassmix.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\bassopus.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>bassopus.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswasapi.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswasapi.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswebm.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswebm.dll</Link>
+        </Content>
+        <Content Include="Bass\win-arm64\basswv.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>basswv.dll</Link>
+        </Content>
+    </ItemGroup>
+
+    <!-- Bass files for Linux x64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <Content Include="Bass\linux-x86_64\libbass.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.so</Link>
+        </Content>
+    </ItemGroup>
+
+    <!-- Bass files for Linux ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+        <Content Include="Bass\linux-aarch64\libbass.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.so</Link>
+        </Content>
+    </ItemGroup>
+
+    <!-- Bass files for macOS x64 and ARM64 -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
+        <Content Include="Bass\libbass.dylib">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>libbass.dylib</Link>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoLaunch" Version="1.0.1" />
+        <PackageReference Include="Avalonia" Version="11.3.10" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.10" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.10" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.10" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.10" />
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.10" />
+        <PackageReference Include="Emik.Rubbish" Version="1.1.0" />
+        <PackageReference Include="ManagedBass" Version="4.0.2" />
+        <PackageReference Include="Mapster" Version="10.0.0-pre01" />
+        <PackageReference Include="Mapster.DependencyInjection" Version="10.0.0-pre01" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.10" />
+        <PackageReference Include="Serilog" Version="4.3.1-dev-02395" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-dev-02318" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="CustomControls\CustomTextBox.axaml.cs">
+            <DependentUpon>CustomTextBox.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Infrastructure\DialogBox\Views\DialogWindow.axaml.cs">
+            <DependentUpon>DialogWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\GeneralsView.axaml.cs">
+          <DependentUpon>GeneralsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\DownloadsView.axaml.cs">
+          <DependentUpon>DownloadsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\FileTypesView.axaml.cs">
+          <DependentUpon>FileTypesView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\NotificationsView.axaml.cs">
+          <DependentUpon>NotificationsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\ProxyView.axaml.cs">
+          <DependentUpon>ProxyView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\Views\SaveLocationsView.axaml.cs">
+          <DependentUpon>SaveLocationsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Settings\SettingsWindow.axaml.cs">
+          <DependentUpon>SettingsWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\Views\FilesView.axaml.cs">
+          <DependentUpon>FilesView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\Views\OptionsView.axaml.cs">
+          <DependentUpon>OptionsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddEditQueue\AddEditQueueWindow.axaml.cs">
+          <DependentUpon>AddEditQueueWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadOptionsView.axaml.cs">
+          <DependentUpon>DownloadOptionsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadSpeedLimiterView.axaml.cs">
+          <DependentUpon>DownloadSpeedLimiterView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\Views\DownloadStatusView.axaml.cs">
+          <DependentUpon>DownloadStatusView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Download\DownloadWindow.axaml.cs">
+          <DependentUpon>DownloadWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\Views\CategoriesTreeItemView.axaml.cs">
+          <DependentUpon>CategoriesTreeItemView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\Views\CategoriesTreeView.axaml.cs">
+          <DependentUpon>CategoriesTreeView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\MainWindow.axaml.cs">
+          <DependentUpon>MainWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Main\Views\ActionButton.axaml.cs">
+          <DependentUpon>ActionButton.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddDownloadLink\AddDownloadLinkWindow.axaml.cs">
+          <DependentUpon>AddDownloadLinkWindow.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AddDownloadLink\Views\LoadingControl.axaml.cs">
+          <DependentUpon>LoadingControl.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CrossPlatformDownloadManager.Data\CrossPlatformDownloadManager.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Views\AddNewQueueWindow\FilesView.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Assets\Fonts\Ubuntu\" />
+        <Folder Include="Assets\Songs\" />
+    </ItemGroup>
+</Project>

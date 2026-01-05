@@ -1,0 +1,478 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Styles.Resources>
+        <Thickness x:Key="DataGridTextColumnCellTextBlockMargin">0</Thickness>
+
+        <ControlTheme x:Key="{x:Type DataGrid}"
+                      TargetType="DataGrid">
+            <Setter Property="RowBackground"
+                    Value="{DynamicResource ThemeAccentBrush4}" />
+            <Setter Property="Background"
+                    Value="{DynamicResource ThemeBackgroundBrush}" />
+            <Setter Property="HeadersVisibility"
+                    Value="Column" />
+            <Setter Property="HorizontalScrollBarVisibility"
+                    Value="Auto" />
+            <Setter Property="VerticalScrollBarVisibility"
+                    Value="Auto" />
+            <Setter Property="SelectionMode"
+                    Value="Extended" />
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="{DynamicResource ThemeBorderHighColor}" />
+            <Setter Property="VerticalGridLinesBrush"
+                    Value="{DynamicResource ThemeBorderHighColor}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource ThemeBorderLowColor}" />
+            <Setter Property="BorderThickness"
+                    Value="{DynamicResource ThemeBorderThickness}" />
+
+            <Setter Property="DropLocationIndicatorTemplate">
+                <Template>
+                    <Rectangle Width="2"
+                               Fill="{DynamicResource ThemeBorderHighColor}" />
+                </Template>
+            </Setter>
+
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border x:Name="DataGridBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              RowDefinitions="Auto,*,Auto,Auto"
+                              ClipToBounds="True">
+                            <DataGridColumnHeader Grid.Row="0"
+                                                  Grid.Column="0"
+                                                  Name="PART_TopLeftCornerHeader"
+                                                  Width="22" />
+
+                            <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter"
+                                                            Grid.Row="0"
+                                                            Grid.Column="1" />
+
+                            <DataGridColumnHeader Name="PART_TopRightCornerHeader"
+                                                  Grid.Row="0"
+                                                  Grid.Column="2" />
+
+                            <Rectangle Name="PART_ColumnHeadersAndRowsSeparator"
+                                       Grid.Row="0"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="3"
+                                       Height="1"
+                                       VerticalAlignment="Bottom"
+                                       Fill="{DynamicResource ThemeControlMidHighBrush}"
+                                       StrokeThickness="1" />
+
+                            <DataGridRowsPresenter Name="PART_RowsPresenter"
+                                                   Grid.Column="0"
+                                                   Grid.Row="1"
+                                                   Grid.ColumnSpan="2"
+                                                   ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+                                <DataGridRowsPresenter.GestureRecognizers>
+                                    <ScrollGestureRecognizer CanHorizontallyScroll="True"
+                                                             CanVerticallyScroll="True"
+                                                             IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_RowsPresenter}" />
+                                </DataGridRowsPresenter.GestureRecognizers>
+                            </DataGridRowsPresenter>
+
+                            <Rectangle Name="PART_BottomRightCorner"
+                                       Grid.Row="2"
+                                       Grid.Column="2"
+                                       Fill="{DynamicResource TransparentColor}" />
+
+                            <Rectangle Name="BottomLeftCorner"
+                                       Grid.Column="0"
+                                       Grid.Row="2"
+                                       Grid.ColumnSpan="2"
+                                       Fill="{DynamicResource TransparentColor}" />
+
+                            <ScrollBar Name="PART_VerticalScrollbar"
+                                       Grid.Row="1"
+                                       Grid.Column="2"
+                                       Width="{DynamicResource ScrollBarThickness}"
+                                       Orientation="Vertical" />
+
+                            <Grid Grid.Row="2"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="Auto,*">
+                                <Rectangle Name="PART_FrozenColumnScrollBarSpacer"
+                                           Grid.Column="0" />
+
+                                <ScrollBar Name="PART_HorizontalScrollbar"
+                                           Grid.Column="1"
+                                           Height="{DynamicResource ScrollBarThickness}"
+                                           Orientation="Horizontal" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </Styles.Resources>
+
+    <!-- Base styles for DataGrid -->
+    <Style Selector="DataGrid">
+        <Setter Property="AutoGenerateColumns"
+                Value="False" />
+        <Setter Property="IsReadOnly"
+                Value="True" />
+        <Setter Property="GridLinesVisibility"
+                Value="None" />
+        <Setter Property="BorderThickness"
+                Value="0" />
+        <Setter Property="HorizontalAlignment"
+                Value="Stretch" />
+        <Setter Property="VerticalAlignment"
+                Value="Stretch" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="CornerRadius"
+                Value="{DynamicResource DefaultCornerRadius}" />
+        <Setter Property="CanUserReorderColumns"
+                Value="False" />
+        <Setter Property="ClipToBounds"
+                Value="True" />
+
+        <Style Selector="^ DataGridColumnHeader">
+            <Setter Property="Foreground"
+                    Value="{DynamicResource MainTextColor}" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Left" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+            <Setter Property="AreSeparatorsVisible"
+                    Value="False" />
+            <Setter Property="SeparatorBrush"
+                    Value="{DynamicResource AccentColor}" />
+        </Style>
+
+        <Style Selector="^ /template/ Border#DataGridBorder">
+            <Setter Property="ClipToBounds"
+                    Value="{Binding $parent[DataGrid].ClipToBounds}" />
+        </Style>
+    </Style>
+
+    <!-- Style for Main DataGrid  -->
+    <Style Selector="DataGrid.mainDataGrid">
+        <Setter Property="Background"
+                Value="{DynamicResource TransparentColor}" />
+        <Setter Property="SelectionMode"
+                Value="Extended" />
+        <Setter Property="CanUserResizeColumns"
+                Value="True" />
+        <Setter Property="CanUserSortColumns"
+                Value="True" />
+
+        <Style Selector="^ DataGridColumnHeader">
+            <Setter Property="Padding"
+                    Value="10, 15" />
+            <Setter Property="Background"
+                    Value="{DynamicResource SecondaryBackgroundColor}" />
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+
+            <Style Selector="^[IsVisible=True]:nth-child(1)">
+                <Setter Property="CornerRadius"
+                        Value="8, 0, 0, 8" />
+            </Style>
+
+            <Style Selector="^[IsVisible=True]:nth-last-child(1)">
+                <Setter Property="CornerRadius"
+                        Value="0, 8, 8, 0" />
+            </Style>
+
+            <Style Selector="^#PART_TopRightCornerHeader">
+                <Setter Property="CornerRadius"
+                        Value="0, 8, 8, 0" />
+            </Style>
+        </Style>
+
+        <Style Selector="^ DataGridRow">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="0" />
+                <Setter Property="Fill"
+                        Value="{DynamicResource GridRowColor}" />
+                <Setter Property="RadiusX"
+                        Value="8" />
+                <Setter Property="RadiusY"
+                        Value="8" />
+                <Setter Property="Margin"
+                        Value="-10, -15" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <DoubleTransition Property="Opacity"
+                                              Duration="00:00:00.3" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="0.5" />
+            </Style>
+
+            <Style Selector="^:selected /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="True" />
+                <Setter Property="Opacity"
+                        Value="1" />
+            </Style>
+
+            <Style Selector="^:selected">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource MainTextColor}" />
+            </Style>
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Padding"
+                        Value="10, 15" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="MinHeight"
+                        Value="62" />
+                <Setter Property="CornerRadius"
+                        Value="{DynamicResource DefaultCornerRadius}" />
+                <Setter Property="ClipToBounds"
+                        Value="True" />
+            </Style>
+
+            <Style Selector="^ DataGridCell">
+                <Setter Property="VerticalAlignment"
+                        Value="Top" />
+
+                <Style Selector="^ /template/ Border#CellBorder">
+                    <Setter Property="Padding"
+                            Value="0, 0, 10, 0" />
+                </Style>
+            </Style>
+        </Style>
+    </Style>
+
+    <!-- Style for Minimal DataGrid  -->
+    <Style Selector="DataGrid.minimalDataGrid">
+        <Setter Property="SelectionMode"
+                Value="Single" />
+        <Setter Property="CanUserResizeColumns"
+                Value="False" />
+        <Setter Property="CanUserSortColumns"
+                Value="False" />
+        <Setter Property="VerticalScrollBarVisibility"
+                Value="Auto" />
+
+        <Style Selector="^ DataGridColumnHeader">
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+            <Setter Property="Padding"
+                    Value="10, 9" />
+            <Setter Property="Background"
+                    Value="{DynamicResource MenuItemHoverColor}" />
+        </Style>
+
+        <Style Selector="^ DataGridRow">
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource TransparentColor}" />
+
+                <!-- Transitions -->
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <BrushTransition Property="Background"
+                                             Duration="00:00:00.3" />
+
+                            <DoubleTransition Property="Opacity"
+                                              Duration="00:00:00.3" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuItemHoverColor}" />
+            </Style>
+
+            <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
+
+            <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.85" />
+            </Style>
+
+            <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.95" />
+            </Style>
+
+            <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
+                <Setter Property="Background"
+                        Value="{DynamicResource MenuBackgroundColor}" />
+                <Setter Property="Opacity"
+                        Value="0.95" />
+            </Style>
+
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="IsVisible"
+                        Value="False" />
+            </Style>
+
+            <Style Selector="^:selected">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource MainTextColor}" />
+            </Style>
+
+            <Style Selector="^ /template/ Border#RowBorder">
+                <Setter Property="Padding"
+                        Value="10, 4" />
+                <Setter Property="Margin"
+                        Value="0" />
+                <Setter Property="CornerRadius"
+                        Value="0" />
+            </Style>
+
+            <!-- Cell style -->
+            <Style Selector="^ DataGridCell">
+                <Setter Property="Margin"
+                        Value="0, 0, 10, 0" />
+
+                <Style Selector="^:nth-last-child(1)">
+                    <Setter Property="Margin"
+                            Value="0" />
+                </Style>
+            </Style>
+        </Style>
+
+        <Style Selector="^.darkRows">
+            <Style Selector="^ DataGridColumnHeader">
+                <Setter Property="Background"
+                        Value="{DynamicResource MainBackgroundColor}" />
+            </Style>
+
+            <Style Selector="^ DataGridRow">
+                <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource MainBackgroundColor}" />
+                </Style>
+
+                <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource SecondaryBackgroundColor}" />
+                </Style>
+
+                <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.85" />
+                </Style>
+
+                <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.85" />
+                </Style>
+
+                <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.95" />
+                </Style>
+
+                <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
+                    <Setter Property="Background"
+                            Value="{DynamicResource AccentColor}" />
+                    <Setter Property="Opacity"
+                            Value="0.95" />
+                </Style>
+            </Style>
+
+            <Style Selector="^.invertColors">
+                <Style Selector="^ DataGridColumnHeader">
+                    <Setter Property="Background"
+                            Value="{DynamicResource SecondaryBackgroundColor}" />
+                </Style>
+
+                <Style Selector="^ DataGridRow">
+                    <Style Selector="^:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource SecondaryBackgroundColor}" />
+                    </Style>
+
+                    <Style Selector="^:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource MainBackgroundColor}" />
+                    </Style>
+
+                    <Style Selector="^:pointerover:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.95" />
+                    </Style>
+
+                    <Style Selector="^:pointerover:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.95" />
+                    </Style>
+
+                    <Style Selector="^:selected:nth-child(2n) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.85" />
+                    </Style>
+
+                    <Style Selector="^:selected:nth-child(2n + 1) /template/ Border#RowBorder">
+                        <Setter Property="Background"
+                                Value="{DynamicResource AccentColor}" />
+                        <Setter Property="Opacity"
+                                Value="0.85" />
+                    </Style>
+                </Style>
+            </Style>
+        </Style>
+    </Style>
+</Styles>

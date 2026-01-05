@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.NotificationsView"
+             x:DataType="vm:NotificationsViewModel">
+
+    <!-- Content -->
+    <StackPanel Orientation="Vertical"
+                Spacing="15">
+        <!-- Sounds -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid RowDefinitions="Auto, *">
+                <!-- Title -->
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Sounds"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 10" />
+
+                <!-- Sounds options -->
+                <StackPanel Grid.Row="1"
+                            Orientation="Vertical"
+                            Spacing="10">
+                    <!-- Download complete -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Download complete"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadComplete}" />
+                    </Grid>
+
+                    <!-- Download stopped -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Download stopped"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadStopped}" />
+                    </Grid>
+
+                    <!-- Download failed -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Download failed"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding DownloadFailed}" />
+                    </Grid>
+
+                    <!-- Queue started -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Queue started"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueStarted}" />
+                    </Grid>
+
+                    <!-- Queue stopped -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Queue stopped"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueStopped}" />
+                    </Grid>
+
+                    <!-- Queue finished -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="Queue finished"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Left" />
+
+                        <cc:CustomToggleSwitch Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               IsChecked="{Binding QueueFinished}" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Use system notifications -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}"
+                IsVisible="False">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use system notifications"
+                           FontWeight="Bold" />
+
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding UseSystemNotifications}" />
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,186 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views.Appearance"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.Appearance.ThemeCardView"
+             x:DataType="vm:ThemeCardViewModel">
+
+    <!-- Resources -->
+    <UserControl.Resources>
+        <!-- Color palette shadow -->
+        <DropShadowEffect x:Key="ColorPaletteShadow"
+                          OffsetX="0"
+                          OffsetY="0"
+                          BlurRadius="3"
+                          Color="#000000"
+                          Opacity="0.5" />
+    </UserControl.Resources>
+
+    <!-- Styles -->
+    <UserControl.Styles>
+        <!-- Theme border style -->
+        <Style Selector="Border.themeCardBorder">
+            <Setter Property="CornerRadius"
+                    Value="{DynamicResource DefaultCornerRadius}" />
+            <Setter Property="Padding"
+                    Value="10" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="BorderBrush"
+                    Value="{Binding $self.Background}" />
+
+            <!-- Transitions -->
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush"
+                                     Duration="00:00:00.3" />
+                </Transitions>
+            </Setter>
+
+            <!-- Hover style -->
+            <Style Selector="^:pointerover">
+                <Setter Property="BorderBrush"
+                        Value="{DynamicResource SuccessColor}" />
+            </Style>
+
+            <!-- Selected style -->
+            <Style Selector="^.isSelected">
+                <Setter Property="BorderBrush"
+                        Value="{DynamicResource SuccessColor}" />
+            </Style>
+        </Style>
+
+        <!-- Color palette list style -->
+        <Style Selector="ItemsControl.colorPalette">
+            <Setter Property="Margin"
+                    Value="0" />
+            <Setter Property="Padding"
+                    Value="0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="{DynamicResource TransparentColor}" />
+            <Setter Property="HorizontalAlignment"
+                    Value="Left" />
+            <Setter Property="VerticalAlignment"
+                    Value="Bottom" />
+            <Setter Property="ClipToBounds"
+                    Value="False" />
+
+            <!-- ItemsPanel -->
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="-14" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- ItemTemplate -->
+            <Setter Property="ItemTemplate">
+                <DataTemplate DataType="{x:Type IBrush}">
+                    <Ellipse Width="24"
+                             Height="24"
+                             Fill="{Binding}"
+                             Effect="{StaticResource ColorPaletteShadow}" />
+                </DataTemplate>
+            </Setter>
+        </Style>
+
+        <!-- Selection state path icon style -->
+        <Style Selector="PathIcon.selectionState">
+            <Setter Property="IsVisible"
+                    Value="False" />
+
+            <!-- Selected style -->
+            <Style Selector="^.show">
+                <Setter Property="IsVisible"
+                        Value="True" />
+            </Style>
+        </Style>
+
+        <!-- Remove theme button style -->
+        <Style Selector="Button.removeThemeButton">
+            <Setter Property="IsVisible"
+                    Value="False" />
+
+            <!-- Hover style -->
+            <Style Selector="^.isHovered:not(.isSelected)">
+                <Setter Property="IsVisible"
+                        Value="True" />
+            </Style>
+
+            <!-- Selected style -->
+            <Style Selector="^.isSelected">
+                <Setter Property="IsVisible"
+                        Value="False" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Main content -->
+    <Grid>
+        <!-- Theme content -->
+        <Border Background="{Binding MainBackgroundColor}"
+                Classes="themeCardBorder"
+                Classes.isSelected="{Binding $parent[ListBoxItem].IsSelected}">
+            <Grid RowDefinitions="Auto, Auto, *">
+                <!-- Name -->
+                <TextBlock Grid.Row="0"
+                           Text="{Binding AppTheme.Name, TargetNullValue='Unknown', FallbackValue='Unknown'}"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{Binding MainTextColor}"
+                           Margin="0,0,0,3" />
+
+                <!-- Author -->
+                <TextBlock Grid.Row="1"
+                           Text="{Binding AppTheme.Author, TargetNullValue='Unknown', FallbackValue='Unknown'}"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{Binding AccentColor}"
+                           Margin="0,0,0,3" />
+
+                <!-- Color palette -->
+                <ItemsControl Grid.Row="2"
+                              Classes="colorPalette"
+                              ItemsSource="{Binding ColorPaletteBrushes}" />
+            </Grid>
+        </Border>
+
+        <!-- Actions -->
+        <StackPanel Orientation="Horizontal"
+                    Spacing="5"
+                    Margin="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
+            <!-- Check state icon -->
+            <PathIcon Classes="selectionState"
+                      Classes.show="{Binding  $parent[ListBoxItem].IsSelected}"
+                      Data="{DynamicResource CircleCheckSvgIcon}"
+                      Width="18"
+                      Height="18"
+                      Foreground="{Binding SuccessColor}" />
+
+            <!-- Delete button -->
+            <Button Classes="smallIconButton removeThemeButton"
+                    Classes.isHovered="{Binding $parent[ListBoxItem].IsPointerOver}"
+                    Classes.isSelected="{Binding $parent[ListBoxItem].IsSelected}"
+                    Width="18"
+                    Height="18"
+                    ToolTip.Tip="Remove theme"
+                    IsEnabled="{Binding !IsDefaultTheme}"
+                    Click="RemoveThemeButtonOnClick">
+                <PathIcon Data="{DynamicResource CircleXMarkSvgIcon}"
+                          Width="18"
+                          Height="18"
+                          Foreground="{Binding DangerColor}" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

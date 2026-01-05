@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels.Settings.Views"
+             xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CrossPlatformDownloadManager.DesktopApp.Views.Settings.Views.GeneralsView"
+             x:DataType="vm:GeneralsViewModel">
+
+    <!-- Content -->
+    <StackPanel Orientation="Vertical"
+                Spacing="15">
+        <!-- Start on system startup -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Start on system startup"
+                           FontWeight="Bold" />
+
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding StartOnSystemStartup}" />
+            </Grid>
+        </Border>
+
+        <!-- Use browser extension -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use browser extension"
+                           FontWeight="Bold" />
+
+                <cc:CustomToggleSwitch Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding UseBrowserExtension}" />
+            </Grid>
+        </Border>
+
+        <!-- Use manager -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid RowDefinitions="Auto, Auto"
+                  ColumnDefinitions="*, Auto">
+                <!-- Use manager -->
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Use manager"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 10" />
+
+                <cc:CustomToggleSwitch Grid.Row="0"
+                                       Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,0,10"
+                                       IsChecked="{Binding UseManager}" />
+
+                <!-- Always keep manager on top -->
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           TextAlignment="Left"
+                           Text="Always on top"
+                           IsEnabled="{Binding UseManager}" />
+
+                <cc:CustomToggleSwitch Grid.Row="1"
+                                       Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       IsChecked="{Binding AlwaysKeepManagerOnTop}"
+                                       IsEnabled="{Binding UseManager}" />
+            </Grid>
+        </Border>
+
+        <!-- Log history -->
+        <Border CornerRadius="{DynamicResource DefaultCornerRadius}"
+                Padding="15"
+                Background="{DynamicResource SecondaryBackgroundColor}">
+            <StackPanel Orientation="Vertical"
+                        Spacing="5">
+                <!-- Title -->
+                <TextBlock Text="Log history"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           TextAlignment="Left"
+                           FontWeight="Bold"
+                           Margin="0, 0, 0, 5" />
+
+                <!-- Speed  -->
+                <cc:CustomNumericUpDown Watermark="Number of days to keep logs..."
+                                        WatermarkForeground="{DynamicResource AccentColor}"
+                                        Padding="12, 10"
+                                        CornerRadius="{DynamicResource DefaultCornerRadius}"
+                                        Background="{DynamicResource MainBackgroundColor}"
+                                        IconData="{DynamicResource AlignLeftSvgIcon}"
+                                        IconColor="{DynamicResource IconColor}"
+                                        IconSize="{DynamicResource SmallIconSize}"
+                                        BorderThickness="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Value="{Binding LogHistory}"
+                                        ShowButtonSpinner="False"
+                                        Increment="1"
+                                        Minimum="1"
+                                        Maximum="365"
+                                        ClipValueToMinMax="True" />
+
+                <!-- Speed limit info -->
+                <TextBlock Foreground="{DynamicResource AccentColor}"
+                           FontStyle="Italic"
+                           Text="Application logs will be kept for the selected number of days (1–365)" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

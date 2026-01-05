@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:cc="using:CrossPlatformDownloadManager.DesktopApp.CustomControls"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.RefreshDownloadAddressWindow"
+        x:DataType="vm:RefreshDownloadAddressWindowViewModel"
+        Title="CDM - Refresh download address"
+        Width="450"
+        Height="200"
+        MinWidth="450"
+        MinHeight="200"
+        MaxWidth="450"
+        MaxHeight="200"
+        CanResize="False"
+        Classes="myWindow">
+
+    <!-- Main content -->
+    <Grid Margin="20"
+          RowDefinitions="*, Auto">
+        <StackPanel Grid.Row="0"
+                    Orientation="Vertical"
+                    Spacing="10">
+            <!-- Current address -->
+            <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
+                              Watermark="Current address"
+                              WatermarkForeground="{DynamicResource AccentColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource LinkSlashSvgIcon}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                              Text="{Binding CurrentAddress}"
+                              IsReadOnly="True" />
+
+            <!-- New address -->
+            <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
+                              Watermark="New address"
+                              WatermarkForeground="{DynamicResource AccentColor}"
+                              CornerRadius="{DynamicResource DefaultCornerRadius}"
+                              IconData="{DynamicResource LinkSvgIcon}"
+                              IconColor="{DynamicResource IconColor}"
+                              IconSize="{DynamicResource SmallIconSize}"
+                              Padding="12, 10"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              OnFocusBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              OnHoverBorderColor="{DynamicResource SecondaryBackgroundColor}"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource SecondaryBackgroundColor}"
+                              Text="{Binding NewAddress}" />
+        </StackPanel>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    HorizontalAlignment="Right"
+                    Margin="0, 20, 0, 0">
+            <Button Classes="button success"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Save" />
+
+            <Button Classes="button danger"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Content="Cancel" />
+        </StackPanel>
+    </Grid>
+</Window>

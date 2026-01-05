@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CrossPlatformDownloadManager.DesktopApp.ViewModels"
+        xmlns:converters="using:CrossPlatformDownloadManager.DesktopApp.Converters"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="CrossPlatformDownloadManager.DesktopApp.Views.ManagerWindow"
+        x:DataType="vm:ManagerWindowViewModel"
+        Title="CDM - Manager"
+        ShowInTaskbar="False"
+        Topmost="{Binding AlwaysKeepManagerOnTop}"
+        Width="200"
+        Height="40"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="False"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="Transparent"
+        Background="{DynamicResource TransparentColor}"
+        SystemDecorations="None"
+        CornerRadius="8"
+        ClipToBounds="True"
+        CanResize="False"
+        WindowStartupLocation="Manual"
+        PointerPressed="ManagerWindowOnPointerPressed"
+        Classes="myWindow">
+
+    <!-- Resources -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:PillCornerRadiusConverter x:Key="PillCornerRadiusConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- Main content -->
+    <Border CornerRadius="{Binding $self.Bounds.Height, Converter={StaticResource PillCornerRadiusConverter}}"
+            Background="{DynamicResource MainColor}"
+            BorderThickness="0"
+            Padding="12, 0">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <!-- Brand -->
+            <TextBlock Grid.Column="0"
+                       Text="CDM"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource ManagerTextColor}"
+                       Width="32"
+                       Cursor="Hand"
+                       PointerPressed="CDMTextBlockOnPointerPressed" />
+
+            <!-- Download speed -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="5"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <PathIcon Data="{DynamicResource CloudArrowDownSvgIcon}"
+                          Foreground="{DynamicResource ManagerTextColor}"
+                          Width="{DynamicResource SmallIconSize}"
+                          Height="{DynamicResource SmallIconSize}"
+                          VerticalAlignment="Center" />
+                <TextBlock Text="{Binding DownloadSpeed}"
+                           Foreground="{DynamicResource ManagerTextColor}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Exit button -->
+            <StackPanel Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Width="32">
+                <Button Classes="smallIconButton"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ExitProgramCommand}">
+                    <PathIcon Width="{DynamicResource SmallIconSize}"
+                              Height="{DynamicResource SmallIconSize}"
+                              Data="{DynamicResource CircleXMarkSvgIcon}"
+                              Foreground="{DynamicResource ManagerTextColor}" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

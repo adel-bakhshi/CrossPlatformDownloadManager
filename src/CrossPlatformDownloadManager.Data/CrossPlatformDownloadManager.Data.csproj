@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.10" />
-        <PackageReference Include="Mapster" Version="9.0.0-pre01" />
+        <PackageReference Include="Mapster" Version="10.0.0-pre01" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
             <PrivateAssets>all</PrivateAssets>

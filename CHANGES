@@ -1,3 +1,8 @@
++ Version 0.21.0; 2026-02-10
+- Technical Updates:
+- Upgraded to Avalonia 11.3.11.
+- Added portable build support for macOS.
+
 + Version 0.20.0; 2026-01-05
 - Technical Updates:
 - Migrated from AutoMapper to Mapster for improved performance.

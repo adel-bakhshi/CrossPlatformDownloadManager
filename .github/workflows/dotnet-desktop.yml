@@ -232,6 +232,11 @@ jobs:
           cd ./Deploy
           netloy -t dmg -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.dmg"
 
+      - name: Build macOS TAR.GZ Portable
+        run: |
+          cd ./Deploy
+          netloy -t portable -r ${{ matrix.rid }} -y -o "Output/Cross-platform.Download.Manager.${{ needs.setup.outputs.version }}.${{ matrix.rid }}.tar.gz"
+
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:

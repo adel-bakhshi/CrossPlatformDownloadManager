@@ -45,42 +45,45 @@ public class StartupWindowViewModel : ViewModelBase
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeApplicationAsync()
     {
-        try
+        await Task.Run(async () =>
         {
-            // Get app initializer from the service provider
-            var serviceProvider = Application.Current?.TryGetServiceProvider();
-            var appInitializer = serviceProvider?.GetService<IAppInitializer>();
-
-            // Check if app initializer is null
-            if (appInitializer == null)
+            try
             {
-                Log.Debug("Service provider is null. Dependency injection is not properly configured.");
+                // Get app initializer from the service provider
+                var serviceProvider = Application.Current?.TryGetServiceProvider();
+                var appInitializer = serviceProvider?.GetService<IAppInitializer>();
 
-                await DialogBoxManager.ShowDangerDialogAsync(
-                    dialogHeader: "Critical Error",
-                    dialogMessage: "An error occurred while trying to initialize the application. Please restart the application.",
-                    dialogButtons: DialogButtons.Ok);
+                // Check if app initializer is null
+                if (appInitializer == null)
+                {
+                    Log.Debug("Service provider is null. Dependency injection is not properly configured.");
 
-                Log.Debug("Shutting down application...");
+                    await DialogBoxManager.ShowDangerDialogAsync(
+                        dialogHeader: "Critical Error",
+                        dialogMessage: "An error occurred while trying to initialize the application. Please restart the application.",
+                        dialogButtons: DialogButtons.Ok);
 
-                if (App.Desktop?.TryShutdown() != true)
-                    Environment.Exit(1);
+                    Log.Debug("Shutting down application...");
 
-                return;
+                    if (App.Desktop?.TryShutdown() != true)
+                        Environment.Exit(1);
+
+                    return;
+                }
+
+                Log.Debug("Initializing application...");
+
+                // Initialize application
+                await appInitializer.InitializeAsync();
+
+                Log.Information("Application initialization completed successfully.");
             }
-
-            Log.Debug("Initializing application...");
-
-            // Initialize application
-            await appInitializer.InitializeAsync();
-
-            Log.Information("Application initialization completed successfully.");
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while trying to initialize the application. Error message: {ErrorMessage}", ex.Message);
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
-        }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to initialize the application. Error message: {ErrorMessage}", ex.Message);
+                await DialogBoxManager.ShowErrorDialogAsync(ex);
+            }
+        });
     }
 
     /// <summary>
@@ -123,8 +126,8 @@ public class StartupWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await DialogBoxManager.ShowErrorDialogAsync(ex);
             Log.Error(ex, "An error occurred while trying to load the application. Error message: {ErrorMessage}", ex.Message);
+            await DialogBoxManager.ShowErrorDialogAsync(ex);
         }
     }
 

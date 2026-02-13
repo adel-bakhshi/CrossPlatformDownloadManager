@@ -691,37 +691,40 @@ public class SettingsService : PropertyChangedBase, ISettingsService
     /// </summary>
     private void SetApplicationFont()
     {
-        Log.Debug("Changing application font...");
-
-        // Find the specified font name in available fonts, or default to the first available font if not found
-        var fontName = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
-        if (fontName.IsStringNullOrEmpty())
+        Dispatcher.UIThread.Invoke(() =>
         {
-            Log.Warning("No available fonts found");
-            return;
-        }
+            Log.Debug("Changing application font...");
 
-        Log.Debug("Selected font: {FontName}", fontName);
+            // Find the specified font name in available fonts, or default to the first available font if not found
+            var fontName = Constants.AvailableFonts.Find(f => f.Equals(Settings.ApplicationFont)) ?? Constants.AvailableFonts.FirstOrDefault();
+            if (fontName.IsStringNullOrEmpty())
+            {
+                Log.Warning("No available fonts found");
+                return;
+            }
 
-        // Try to find the font in application resources
-        if (Application.Current?.TryFindResource(fontName!, out var resource) != true || resource == null)
-        {
-            Log.Warning("Font resource '{FontName}' not found in application resources", fontName);
-            return;
-        }
+            Log.Debug("Selected font: {FontName}", fontName);
 
-        Log.Debug("Font resource found for: {FontName}", fontName);
+            // Try to find the font in application resources
+            if (Application.Current?.TryFindResource(fontName!, out var resource) != true || resource == null)
+            {
+                Log.Warning("Font resource '{FontName}' not found in application resources", fontName);
+                return;
+            }
 
-        // Check if primary font resource exists and is different from the current font resource
-        if (Application.Current.TryFindResource("PrimaryFont", out var primaryFont) && primaryFont?.Equals(resource) != true)
-        {
-            Application.Current.Resources["PrimaryFont"] = resource;
-            Log.Debug("Primary font resource updated to: {FontName}", fontName);
-        }
-        else
-        {
-            Log.Debug("Primary font resource is already set to: {FontName}", fontName);
-        }
+            Log.Debug("Font resource found for: {FontName}", fontName);
+
+            // Check if primary font resource exists and is different from the current font resource
+            if (Application.Current.TryFindResource("PrimaryFont", out var primaryFont) && primaryFont?.Equals(resource) != true)
+            {
+                Application.Current.Resources["PrimaryFont"] = resource;
+                Log.Debug("Primary font resource updated to: {FontName}", fontName);
+            }
+            else
+            {
+                Log.Debug("Primary font resource is already set to: {FontName}", fontName);
+            }
+        });
     }
 
     #endregion

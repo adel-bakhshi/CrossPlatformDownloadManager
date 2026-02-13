@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.Data.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.BrowserExtension.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppService;
@@ -305,7 +306,7 @@ public class BrowserExtension : IBrowserExtension
             if (showStartDownloadDialog)
             {
                 Log.Debug("Showing start download dialog...");
-                ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description);
+                Dispatcher.UIThread.Invoke(() => ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description));
             }
             // Otherwise, add link to database and start it
             else

@@ -115,17 +115,19 @@ public class UnitOfWork : IUnitOfWork
 
         Log.Debug("Adding category headers to the database if they don't exist...");
 
-        // Add category headers to the database if they don't exist
-        foreach (var categoryHeader in categoryHeaders)
-        {
-            var categoryHeaderInDb = await CategoryHeaderRepository
-                .GetAsync(where: ch => ch.Title.ToLower() == categoryHeader.Title.ToLower());
+        // Get all category headers from database
+        var categoryHeadersInDb = await CategoryHeaderRepository.GetAllAsync();
+        // Find category headers that don't exist in the database
+        var notExistingCategoryHeaders = categoryHeaders
+            .Where(categoryHeader => categoryHeadersInDb.Find(ch => categoryHeader.Title.Equals(ch.Title, StringComparison.CurrentCultureIgnoreCase)) == null)
+            .ToList();
 
-            if (categoryHeaderInDb == null)
-                await CategoryHeaderRepository.AddAsync(categoryHeader);
-        }
+        // Add category headers to the database
+        await CategoryHeaderRepository.AddRangeAsync(notExistingCategoryHeaders);
 
-        await SaveAsync();
+        // Check if changes need to be applied
+        if (notExistingCategoryHeaders.Count > 0)
+            await SaveAsync();
 
         // Load categories from assets
         Log.Debug("Loading categories from assets...");
@@ -143,14 +145,18 @@ public class UnitOfWork : IUnitOfWork
 
         Log.Debug("Adding categories to the database if they don't exist...");
 
+        // Get all categories from database
+        var categoriesInDb = await CategoryRepository.GetAllAsync();
+
+        // Iterate through categories and add them to the database if they don't exist
         foreach (var category in categories)
         {
+            // Clear category file extensions because we don't want to add them to the database in this section
             var fileExtensions = category.FileExtensions.ToList();
             category.FileExtensions.Clear();
 
-            var categoryInDb = await CategoryRepository
-                .GetAsync(where: c => c.Title.ToLower() == category.Title.ToLower());
-
+            // Find category in database
+            var categoryInDb = categoriesInDb.Find(c => c.Title.Equals(category.Title, StringComparison.OrdinalIgnoreCase));
             if (categoryInDb == null)
             {
                 Log.Debug("Category {CategoryTitle} doesn't exist. Creating it...", category.Title);
@@ -211,9 +217,8 @@ public class UnitOfWork : IUnitOfWork
     {
         Log.Debug("Creating or updating file extensions for category {CategoryId}...", categoryId);
 
-        var fileExtensions = await CategoryFileExtensionRepository
-            .GetAllAsync(where: fe => fe.CategoryId == categoryId);
-
+        // Get all file extensions for the specified category
+        var fileExtensions = await CategoryFileExtensionRepository.GetAllAsync(where: fe => fe.CategoryId == categoryId);
         if (fileExtensions.Count == 0)
         {
             fileExtensions = extensions
@@ -253,9 +258,8 @@ public class UnitOfWork : IUnitOfWork
     {
         Log.Debug("Creating save directory for category {CategoryTitle}", category.Title);
 
-        var saveDirectory = await CategorySaveDirectoryRepository
-            .GetAsync(where: sd => sd.CategoryId == category.Id);
-
+        // Check if save directory already exists
+        var saveDirectory = await CategorySaveDirectoryRepository.GetAsync(where: sd => sd.CategoryId == category.Id);
         if (saveDirectory != null)
         {
             Log.Debug("Save directory already exists for category {CategoryTitle}.", category.Title);
@@ -264,7 +268,9 @@ public class UnitOfWork : IUnitOfWork
 
         Log.Debug("Creating save directory for category {CategoryTitle}...", category.Title);
 
+        // Get download folder path
         var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        // Create save path
         var savePath = !category.Title.Equals(Constants.GeneralCategoryTitle, StringComparison.OrdinalIgnoreCase)
             ? Path.Combine(downloadFolderPath, "Downloads", "CDM", category.Title)
             : Path.Combine(downloadFolderPath, "Downloads", "CDM");
@@ -272,12 +278,14 @@ public class UnitOfWork : IUnitOfWork
         Log.Debug("Save directory path for category {CategoryTitle}: {SavePath}", category.Title, savePath);
         Log.Debug("Adding save directory for category {CategoryTitle}...", category.Title);
 
+        // Create save directory for category and save it to the database
         saveDirectory = new CategorySaveDirectory { CategoryId = category.Id, SaveDirectory = savePath };
         await CategorySaveDirectoryRepository.AddAsync(saveDirectory);
         await SaveAsync();
 
         Log.Debug("Updating category {CategoryTitle} with save directory...", category.Title);
 
+        // Update category with save directory
         await CategoryRepository.UpdateAsync(category);
         await SaveAsync();
 

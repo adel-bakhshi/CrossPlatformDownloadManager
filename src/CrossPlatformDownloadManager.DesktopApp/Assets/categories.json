@@ -203,6 +203,10 @@
         "alias": "Android Application"
       },
       {
+        "extension": ".app",
+        "alias": "Application"
+      },
+      {
         "extension": ".dmg",
         "alias": "Apple Disk Image"
       },
@@ -217,6 +221,14 @@
       {
         "extension": ".rpm",
         "alias": "Red Hat Package"
+      },
+      {
+        "extension": ".AppImage",
+        "alias": "Linux AppImage File"
+      },
+      {
+        "extension": ".flatpak",
+        "alias": "Flatpak Package"
       }
     ]
   },

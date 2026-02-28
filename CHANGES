@@ -1,3 +1,14 @@
++ Version 0.22.0; 2026-02-28
+- Performance Improvements:
+- Increased overall application loading speed.
+- Technical Updates:
+- Upgraded to Avalonia 11.3.12.
+- New Features:
+- Added support for new file types: .app, .AppImage, and .flatpak.
+- Bug Fixes:
+- Fixed proxy configuration issue.
+- Various minor bug fixes and overall performance enhancements.
+
 + Version 0.21.0; 2026-02-10
 - Technical Updates:
 - Upgraded to Avalonia 11.3.11.

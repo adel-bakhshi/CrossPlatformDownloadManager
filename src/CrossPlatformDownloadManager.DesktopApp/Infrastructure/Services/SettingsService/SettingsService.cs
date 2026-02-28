@@ -284,6 +284,10 @@ public class SettingsService : PropertyChangedBase, ISettingsService
         Log.Information("Adding proxy settings to database...");
         Log.Debug("Proxy name: {ProxyName}, Type: {ProxyType}", proxySettings.Name, proxySettings.Type);
 
+        // Remove settings to prevent DBContext error
+        if (proxySettings.Settings != null)
+            proxySettings.Settings = null;
+
         await _unitOfWork.ProxySettingsRepository.AddAsync(proxySettings);
         await _unitOfWork.SaveAsync();
 

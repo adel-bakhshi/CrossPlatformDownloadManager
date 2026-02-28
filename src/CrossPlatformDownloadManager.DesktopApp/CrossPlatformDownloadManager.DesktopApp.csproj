@@ -8,8 +8,8 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <ApplicationIcon>Assets\Images\cdm-logo.ico</ApplicationIcon>
-        <AssemblyVersion>0.21.0</AssemblyVersion>
-        <FileVersion>0.21.0</FileVersion>
+        <AssemblyVersion>0.22.0</AssemblyVersion>
+        <FileVersion>0.22.0</FileVersion>
         <LangVersion>default</LangVersion>
         <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     </PropertyGroup>
@@ -153,30 +153,30 @@
 
     <ItemGroup>
         <PackageReference Include="AutoLaunch" Version="1.0.1" />
-        <PackageReference Include="Avalonia" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
+        <PackageReference Include="Avalonia" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.11" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.12" />
         <PackageReference Include="Emik.Rubbish" Version="1.1.0" />
         <PackageReference Include="ManagedBass" Version="4.0.2" />
-        <PackageReference Include="Mapster" Version="10.0.0-pre01" />
-        <PackageReference Include="Mapster.DependencyInjection" Version="10.0.0-pre01" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+        <PackageReference Include="Mapster" Version="10.0.0-pre02" />
+        <PackageReference Include="Mapster.DependencyInjection" Version="10.0.0-pre02" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
-        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.11" />
-        <PackageReference Include="Serilog" Version="4.3.1-dev-02406" />
+        <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.3" />
+        <PackageReference Include="RolandK.AvaloniaExtensions.DependencyInjection" Version="11.3.12" />
+        <PackageReference Include="Serilog" Version="4.3.2-dev-02419" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-dev-02318" />
     </ItemGroup>

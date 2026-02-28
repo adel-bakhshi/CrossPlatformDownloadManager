@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.JsonConverters;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.AppThemeService.Models;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
@@ -95,7 +96,7 @@ public class AppThemeService : IAppThemeService
         Log.Debug("AppTheme object created successfully. Theme name: {Name}", appTheme.Name);
 
         // Apply theme data
-        ApplyAppTheme(appTheme);
+        Dispatcher.UIThread.Invoke(() => ApplyAppTheme(appTheme));
         // Set the last theme path
         _lastThemePath = themeFilePath;
         // Log information

@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -31,6 +22,16 @@ using CrossPlatformDownloadManager.Utils;
 using CrossPlatformDownloadManager.Utils.Enums;
 using ReactiveUI;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CrossPlatformDownloadManager.DesktopApp.ViewModels.Main;
 
@@ -1042,8 +1043,14 @@ public class MainWindowViewModel : ViewModelBase
             if (owner?.Clipboard == null)
                 return;
 
+            // Create data transfer to keep string
+            var item = new DataTransferItem();
+            item.SetText(Constants.LastestDownloadUrlOfBrowserExtension);
+            var data = new DataTransfer();
+            data.Add(item);
+
             // Copy the latest download URL of the browser extension to the clipboard
-            await owner.Clipboard.SetTextAsync(Constants.LastestDownloadUrlOfBrowserExtension);
+            await owner.Clipboard.SetDataAsync(data);
             // Add the copied URL to the download list
             await AddNewLinkAsync(owner);
         }

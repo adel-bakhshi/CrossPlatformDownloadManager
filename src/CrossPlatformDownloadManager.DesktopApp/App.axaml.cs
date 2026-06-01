@@ -47,12 +47,10 @@ public partial class App : Application
             var serviceProvider = this.TryGetServiceProvider();
             var appViewModel = serviceProvider?.GetService<AppViewModel>();
             // Set the data context or throw exception if null
-            DataContext = appViewModel ?? throw new NullReferenceException(nameof(appViewModel));
+            DataContext = appViewModel ?? throw new InvalidOperationException($"The {nameof(AppViewModel)} is null or undefined");
 
             // Get the startup window and validate it's not null
-            var startupWindow = serviceProvider?.GetService<StartupWindow>();
-            if (startupWindow == null)
-                throw new NullReferenceException(nameof(startupWindow));
+            var startupWindow = serviceProvider?.GetService<StartupWindow>() ?? throw new InvalidOperationException($"The {nameof(StartupWindow)} is null or undefined");
 
             // Check if the application is running in desktop mode
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

@@ -15,12 +15,11 @@
         CanResize="False"
         CanMaximize="False"
         CanMinimize="False"
-        ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="False"
         ExtendClientAreaTitleBarHeightHint="-1"
         TransparencyLevelHint="Transparent"
         Background="{DynamicResource TransparentColor}"
-        SystemDecorations="None"
+        WindowDecorations="None"
         Classes="myWindow">
     <!-- There is no content here -->
 </Window>

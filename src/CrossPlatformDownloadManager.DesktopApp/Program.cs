@@ -63,10 +63,7 @@ sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .UseReactiveUI(_ =>
-            {
-                // I don't know what can I do with this
-            })
+            .UseReactiveUI(_ => {})
             .RegisterReactiveUIViewsFromEntryAssembly()
             .UseDependencyInjection(services =>
             {

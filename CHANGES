@@ -1,3 +1,11 @@
++ Version 0.30.0; 2026-06-01
+- Bug Fixes:
+- Fixed issue with downloading multiple links within the application.
+- Various minor bug fixes and stability improvements.
+- Technical Updates:
+- Upgraded to Avalonia 12.
+- Upgraded all related NuGet packages to their latest versions.
+
 + Version 0.22.0; 2026-02-28
 - Performance Improvements:
 - Increased overall application loading speed.

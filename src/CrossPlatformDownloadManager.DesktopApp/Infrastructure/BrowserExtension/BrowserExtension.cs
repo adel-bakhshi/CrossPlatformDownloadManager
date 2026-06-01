@@ -99,10 +99,10 @@ public class BrowserExtension : IBrowserExtension
             _httpListener.Stop();
             Log.Information("Stop listening for requests...");
         }
-        catch (HttpListenerException)
+        catch (HttpListenerException ex)
         {
             // Ignore exceptions that occur when the listener is already stopped
-            Log.Debug("HttpListener was already stopped.");
+            Log.Error(ex, "HttpListener was already stopped.");
         }
         catch (Exception ex)
         {
@@ -135,7 +135,7 @@ public class BrowserExtension : IBrowserExtension
             if (!useBrowserExtension)
             {
                 response.Message = "Browser extension is disabled. Please enable it and try again.";
-                Log.Debug("{Message}", response.Message);
+                Log.Debug(response.Message);
 
                 await SendResponseAsync(context, response);
                 return;
@@ -156,7 +156,7 @@ public class BrowserExtension : IBrowserExtension
         {
             // Handle any exceptions that occur during request processing
             response.Message = $"An error occurred while trying to add link to CDM. Error message: {ex.Message}";
-            Log.Error(ex, "{Message}", response.Message);
+            Log.Error(ex, response.Message);
         }
 
         // Send the response back to the client
@@ -213,8 +213,6 @@ public class BrowserExtension : IBrowserExtension
     /// <returns>Returns the response object containing the result of the operation.</returns>
     private async Task<ExtensionResponse> AddDownloadFileUrlAsync(HttpListenerContext context)
     {
-        Log.Debug("Adding download file url to the application that received from browser extension...");
-
         // Create a response object
         var response = new ExtensionResponse
         {
@@ -241,7 +239,7 @@ public class BrowserExtension : IBrowserExtension
         if (json.IsStringNullOrEmpty())
         {
             const string message = "Invalid data. Please retry. If the problem remains, report it for investigation.";
-            Log.Debug("{Message}", message);
+            Log.Debug(message);
 
             response.Message = message;
             return response;
@@ -306,7 +304,7 @@ public class BrowserExtension : IBrowserExtension
             if (showStartDownloadDialog)
             {
                 Log.Debug("Showing start download dialog...");
-                Dispatcher.UIThread.Invoke(() => ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description));
+                Dispatcher.UIThread.Post(() => ShowStartDownloadDialog(data.Url!, data.Referer, data.PageAddress, data.Description));
             }
             // Otherwise, add link to database and start it
             else
@@ -339,7 +337,7 @@ public class BrowserExtension : IBrowserExtension
                 .ToList();
 
             // Show manage links window
-            Dispatcher.UIThread.Invoke(() => ShowManageLinksWindow(downloadFiles));
+            Dispatcher.UIThread.Post(() => ShowManageLinksWindow(downloadFiles));
         }
 
         // Return the response
@@ -408,7 +406,7 @@ public class BrowserExtension : IBrowserExtension
     /// Shows the start download dialog.
     /// </summary>
     /// <param name="url">The URL of the file to download.</param>
-    /// <param name="referer">The referer of the file to download.</param>
+    /// <param name="referer">The referrer of the file to download.</param>
     /// <param name="pageAddress">The web page address of the file to download.</param>
     /// <param name="description">The description of the file to download.</param>
     private void ShowStartDownloadDialog(string url, string? referer, string? pageAddress, string? description)
@@ -437,7 +435,7 @@ public class BrowserExtension : IBrowserExtension
     /// Adds a new download file to database and starts it.
     /// </summary>
     /// <param name="url">The URL of the file to download.</param>
-    /// <param name="referer">The referer of the file to download.</param>
+    /// <param name="referer">The referrer of the file to download.</param>
     /// <param name="pageAddress">The web page address of the file to download.</param>
     /// <param name="description">The description of the file to download.</param>
     private async Task AddNewDownloadFileAndStartItAsync(string url, string? referer, string? pageAddress, string? description)

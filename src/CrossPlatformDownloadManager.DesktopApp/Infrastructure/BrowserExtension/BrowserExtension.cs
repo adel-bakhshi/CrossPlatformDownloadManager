@@ -339,7 +339,7 @@ public class BrowserExtension : IBrowserExtension
                 .ToList();
 
             // Show manage links window
-            ShowManageLinksWindow(downloadFiles);
+            Dispatcher.UIThread.Invoke(() => ShowManageLinksWindow(downloadFiles));
         }
 
         // Return the response

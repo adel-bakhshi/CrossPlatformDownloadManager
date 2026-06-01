@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.DialogBox.Enums;
@@ -174,7 +175,13 @@ public class DialogWindowViewModel : ViewModelBase
             if (owner?.Clipboard == null)
                 return;
 
-            await owner.Clipboard.SetTextAsync(DialogMessage);
+            // Create data transfer to keep string
+            var item = new DataTransferItem();
+            item.SetText(DialogMessage);
+            var data = new DataTransfer();
+            data.Add(item);
+
+            await owner.Clipboard.SetDataAsync(data);
         }
         catch (Exception ex)
         {

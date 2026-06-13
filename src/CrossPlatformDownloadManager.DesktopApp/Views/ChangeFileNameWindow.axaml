@@ -28,8 +28,8 @@
                     Spacing="10">
             <!-- Current file name -->
             <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
-                              Watermark="Current file name"
-                              WatermarkForeground="{DynamicResource AccentColor}"
+                              PlaceholderText="Current file name"
+                              PlaceholderForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource FileCircleCheckSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -47,8 +47,8 @@
             <!-- New file name -->
             <cc:CustomTextBox Name="NewFileNameTextBox"
                               Background="{DynamicResource SecondaryBackgroundColor}"
-                              Watermark="Current file name"
-                              WatermarkForeground="{DynamicResource AccentColor}"
+                              PlaceholderText="Current file name"
+                              PlaceholderForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource FileCircleQuestionSvgIcon}"
                               IconColor="{DynamicResource IconColor}"

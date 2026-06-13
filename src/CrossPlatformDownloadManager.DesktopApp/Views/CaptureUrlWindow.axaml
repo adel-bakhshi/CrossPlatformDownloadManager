@@ -28,8 +28,8 @@
             <!-- Download address -->
             <cc:CustomTextBox Grid.Row="0"
                               Background="{DynamicResource SecondaryBackgroundColor}"
-                              Watermark="Download address"
-                              WatermarkForeground="{DynamicResource AccentColor}"
+                              PlaceholderText="Download address"
+                              PlaceholderForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource LinkSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -53,8 +53,8 @@
                 <!-- Username -->
                 <cc:CustomTextBox Grid.Column="0"
                                   Background="{DynamicResource SecondaryBackgroundColor}"
-                                  Watermark="Username"
-                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  PlaceholderText="Username"
+                                  PlaceholderForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource UserSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -71,8 +71,8 @@
                 <!-- Password -->
                 <cc:CustomTextBox Grid.Column="1"
                                   Background="{DynamicResource SecondaryBackgroundColor}"
-                                  Watermark="Password"
-                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  PlaceholderText="Password"
+                                  PlaceholderForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource UnlockKeyholeSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"

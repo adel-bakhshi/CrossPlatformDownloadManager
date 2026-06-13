@@ -81,15 +81,6 @@ public class CustomTextBox : TextBox
         set => SetValue(OnErrorBorderColorProperty, value);
     }
 
-    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty = AvaloniaProperty
-        .Register<CustomTextBox, IBrush?>(nameof(WatermarkForeground));
-
-    public IBrush? WatermarkForeground
-    {
-        get => GetValue(WatermarkForegroundProperty);
-        set => SetValue(WatermarkForegroundProperty, value);
-    }
-
     public static readonly StyledProperty<bool> ShowPasswordRevealButtonProperty = AvaloniaProperty
         .Register<CustomTextBox, bool>(nameof(ShowPasswordRevealButton));
 

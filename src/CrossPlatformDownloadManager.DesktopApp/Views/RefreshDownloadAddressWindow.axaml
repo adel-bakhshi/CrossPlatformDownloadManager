@@ -27,8 +27,8 @@
                     Spacing="10">
             <!-- Current address -->
             <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
-                              Watermark="Current address"
-                              WatermarkForeground="{DynamicResource AccentColor}"
+                              PlaceholderText="Current address"
+                              PlaceholderForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource LinkSlashSvgIcon}"
                               IconColor="{DynamicResource IconColor}"
@@ -45,8 +45,8 @@
 
             <!-- New address -->
             <cc:CustomTextBox Background="{DynamicResource SecondaryBackgroundColor}"
-                              Watermark="New address"
-                              WatermarkForeground="{DynamicResource AccentColor}"
+                              PlaceholderText="New address"
+                              PlaceholderForeground="{DynamicResource AccentColor}"
                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                               IconData="{DynamicResource LinkSvgIcon}"
                               IconColor="{DynamicResource IconColor}"

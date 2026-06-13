@@ -107,8 +107,8 @@
                            Margin="0, 0, 0, 5" />
 
                 <!-- Speed  -->
-                <cc:CustomNumericUpDown Watermark="Number of days to keep logs..."
-                                        WatermarkForeground="{DynamicResource AccentColor}"
+                <cc:CustomNumericUpDown PlaceholderText="Number of days to keep logs..."
+                                        PlaceholderForeground="{DynamicResource AccentColor}"
                                         Padding="12, 10"
                                         CornerRadius="{DynamicResource DefaultCornerRadius}"
                                         Background="{DynamicResource MainBackgroundColor}"

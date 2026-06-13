@@ -4,6 +4,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.CategorySe
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFileService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.LocalizationService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.TrayMenuService;
 using MapsterMapper;
@@ -26,6 +27,7 @@ public class AppService : IAppService
     public IAppThemeService AppThemeService { get; }
     public IExportImportService ExportImportService { get; }
     public ITrayMenuService TrayMenuService { get; }
+    public ILocalizationService LocalizationService { get; }
 
     #endregion
 
@@ -38,7 +40,8 @@ public class AppService : IAppService
         ICategoryService categoryService,
         IAppThemeService appThemeService,
         IExportImportService exportImportService,
-        ITrayMenuService trayMenuService)
+        ITrayMenuService trayMenuService,
+        ILocalizationService localizationService)
     {
         Mapper = mapper;
         UnitOfWork = unitOfWork;
@@ -49,5 +52,6 @@ public class AppService : IAppService
         AppThemeService = appThemeService;
         ExportImportService = exportImportService;
         TrayMenuService = trayMenuService;
+        LocalizationService = localizationService;
     }
 }

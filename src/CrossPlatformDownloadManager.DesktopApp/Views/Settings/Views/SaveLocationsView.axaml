@@ -49,8 +49,8 @@
                         <!-- Save location -->
                         <cc:CustomTextBox Grid.Column="0"
                                           Background="{DynamicResource MainBackgroundColor}"
-                                          Watermark="Save location"
-                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          PlaceholderText="Save location"
+                                          PlaceholderForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource FolderSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"
@@ -196,8 +196,8 @@
                         <!-- Save location -->
                         <cc:CustomTextBox Grid.Column="0"
                                           Background="{DynamicResource MainBackgroundColor}"
-                                          Watermark="Save location"
-                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          PlaceholderText="Save location"
+                                          PlaceholderForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource FolderSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"

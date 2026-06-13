@@ -8,6 +8,8 @@
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuFlyoutPresenterStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/MenuItemStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Assets/Styles/WindowStyle.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomNumericUpDown.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
+        <entry key="CrossPlatformDownloadManager.DesktopApp/CustomControls/CustomTextBox.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Infrastructure/DialogBox/Views/DialogWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AboutUsWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />
         <entry key="CrossPlatformDownloadManager.DesktopApp/Views/AddDownloadLink/AddDownloadLinkWindow.axaml" value="CrossPlatformDownloadManager.DesktopApp/CrossPlatformDownloadManager.DesktopApp.csproj" />

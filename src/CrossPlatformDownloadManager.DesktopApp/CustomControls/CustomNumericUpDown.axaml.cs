@@ -8,15 +8,6 @@ public class CustomNumericUpDown : NumericUpDown
 {
     #region Properties
 
-    public static readonly StyledProperty<IBrush?> WatermarkForegroundProperty =
-        AvaloniaProperty.Register<CustomNumericUpDown, IBrush?>("WatermarkForeground");
-
-    public IBrush? WatermarkForeground
-    {
-        get => GetValue(WatermarkForegroundProperty);
-        set => SetValue(WatermarkForegroundProperty, value);
-    }
-
     public static readonly StyledProperty<Geometry?> IconDataProperty =
         AvaloniaProperty.Register<CustomNumericUpDown, Geometry?>("IconData", defaultValue: null);
 
@@ -49,7 +40,7 @@ public class CustomNumericUpDown : NumericUpDown
     {
         base.OnTextChanged(oldValue, newValue);
 
-        if (!decimal.TryParse(newValue, out var result))
+        if (!decimal.TryParse(newValue, out var _))
             Text = oldValue;
     }
 }

@@ -19,7 +19,7 @@
         MaxHeight="200"
         CanResize="False"
         Classes="myWindow">
-    
+
     <!-- Main content -->
     <Grid RowDefinitions="*, Auto"
           Margin="20">
@@ -30,8 +30,8 @@
                 <!-- Extension -->
                 <cc:CustomTextBox Grid.Column="0"
                                   Background="{DynamicResource SecondaryBackgroundColor}"
-                                  Watermark="Extension"
-                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  PlaceholderText="Extension"
+                                  PlaceholderForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource FileCircleQuestionSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -52,8 +52,8 @@
                 <!-- Alias -->
                 <cc:CustomTextBox Grid.Column="2"
                                   Background="{DynamicResource SecondaryBackgroundColor}"
-                                  Watermark="Alias"
-                                  WatermarkForeground="{DynamicResource AccentColor}"
+                                  PlaceholderText="Alias"
+                                  PlaceholderForeground="{DynamicResource AccentColor}"
                                   CornerRadius="{DynamicResource DefaultCornerRadius}"
                                   IconData="{DynamicResource FileCircleCheckSvgIcon}"
                                   IconColor="{DynamicResource IconColor}"
@@ -67,7 +67,7 @@
                                   BorderBrush="{DynamicResource SecondaryBackgroundColor}"
                                   Text="{Binding Alias}" />
             </Grid>
-            
+
             <!-- Categories -->
             <cc:CustomComboBox PlaceholderText="Category"
                                Background="{DynamicResource SecondaryBackgroundColor}"
@@ -90,7 +90,7 @@
                 </cc:CustomComboBox.ItemTemplate>
             </cc:CustomComboBox>
         </StackPanel>
-        
+
         <!-- Action buttons -->
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal"

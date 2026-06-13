@@ -14,6 +14,7 @@ using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadFi
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.DownloadQueueService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.ExportImportService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.SettingsService;
+using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.LocalizationService;
 using CrossPlatformDownloadManager.DesktopApp.Infrastructure.Services.TrayMenuService;
 using CrossPlatformDownloadManager.DesktopApp.ViewModels;
 using CrossPlatformDownloadManager.DesktopApp.Views;
@@ -94,6 +95,9 @@ sealed class Program
 
                 // Add TrayMenuService to services
                 services.AddSingleton<ITrayMenuService, TrayMenuService>();
+
+                // Add LocalizationService to services
+                services.AddSingleton<ILocalizationService, LocalizationService>();
 
                 // Add AppService to services
                 services.AddSingleton<IAppService, AppService>();

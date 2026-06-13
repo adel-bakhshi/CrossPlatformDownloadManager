@@ -153,8 +153,8 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <!-- Speed  -->
                         <cc:CustomNumericUpDown Grid.Column="0"
-                                                Watermark="Maximum download speed"
-                                                WatermarkForeground="{DynamicResource AccentColor}"
+                                                PlaceholderText="Maximum download speed"
+                                                PlaceholderForeground="{DynamicResource AccentColor}"
                                                 Padding="12, 10"
                                                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                                                 Background="{DynamicResource MainBackgroundColor}"
@@ -226,8 +226,8 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <!-- Speed  -->
                         <cc:CustomNumericUpDown Grid.Column="0"
-                                                Watermark="Maximum merge speed"
-                                                WatermarkForeground="{DynamicResource AccentColor}"
+                                                PlaceholderText="Maximum merge speed"
+                                                PlaceholderForeground="{DynamicResource AccentColor}"
                                                 Padding="12, 10"
                                                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                                                 Background="{DynamicResource MainBackgroundColor}"
@@ -291,8 +291,8 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <!-- Speed  -->
                         <cc:CustomNumericUpDown Grid.Column="0"
-                                                Watermark="Maximum memory buffer"
-                                                WatermarkForeground="{DynamicResource AccentColor}"
+                                                PlaceholderText="Maximum memory buffer"
+                                                PlaceholderForeground="{DynamicResource AccentColor}"
                                                 Padding="12, 10"
                                                 CornerRadius="{DynamicResource DefaultCornerRadius}"
                                                 Background="{DynamicResource MainBackgroundColor}"
@@ -356,8 +356,8 @@
                         <!-- Save location -->
                         <cc:CustomTextBox Grid.Column="0"
                                           Background="{DynamicResource MainBackgroundColor}"
-                                          Watermark="Temporary file location"
-                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          PlaceholderText="Temporary file location"
+                                          PlaceholderForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource FolderSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"

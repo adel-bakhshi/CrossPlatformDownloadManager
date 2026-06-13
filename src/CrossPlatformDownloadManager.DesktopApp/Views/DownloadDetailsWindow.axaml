@@ -150,8 +150,8 @@
                             <!-- Save location -->
                             <cc:CustomTextBox Grid.Column="0"
                                               Background="{DynamicResource MainBackgroundColor}"
-                                              Watermark="Save location"
-                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              PlaceholderText="Save location"
+                                              PlaceholderForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource FolderSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -269,8 +269,8 @@
                             <!-- Username -->
                             <cc:CustomTextBox Grid.Column="0"
                                               Background="{DynamicResource MainBackgroundColor}"
-                                              Watermark="Username"
-                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              PlaceholderText="Username"
+                                              PlaceholderForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource UserSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -288,8 +288,8 @@
                             <!-- Password -->
                             <cc:CustomTextBox Grid.Column="2"
                                               Background="{DynamicResource MainBackgroundColor}"
-                                              Watermark="Password"
-                                              WatermarkForeground="{DynamicResource AccentColor}"
+                                              PlaceholderText="Password"
+                                              PlaceholderForeground="{DynamicResource AccentColor}"
                                               CornerRadius="{DynamicResource DefaultCornerRadius}"
                                               IconData="{DynamicResource UnlockKeyholeSvgIcon}"
                                               IconColor="{DynamicResource IconColor}"
@@ -322,8 +322,8 @@
 
                         <!-- Username -->
                         <cc:CustomTextBox Background="{DynamicResource MainBackgroundColor}"
-                                          Watermark="Description"
-                                          WatermarkForeground="{DynamicResource AccentColor}"
+                                          PlaceholderText="Description"
+                                          PlaceholderForeground="{DynamicResource AccentColor}"
                                           CornerRadius="{DynamicResource DefaultCornerRadius}"
                                           IconData="{DynamicResource QuoteLeftSvgIcon}"
                                           IconColor="{DynamicResource IconColor}"

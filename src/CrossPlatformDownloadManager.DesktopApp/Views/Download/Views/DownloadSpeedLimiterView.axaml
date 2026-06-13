@@ -40,8 +40,8 @@
                 <Grid ColumnDefinitions="*, Auto">
                     <!-- Speed  -->
                     <cc:CustomNumericUpDown Grid.Column="0"
-                                            Watermark="Speed"
-                                            WatermarkForeground="{DynamicResource AccentColor}"
+                                            PlaceholderText="Speed"
+                                            PlaceholderForeground="{DynamicResource AccentColor}"
                                             Padding="12, 10"
                                             CornerRadius="{DynamicResource DefaultCornerRadius}"
                                             Background="{DynamicResource SecondaryBackgroundColor}"

@@ -9,12 +9,15 @@
     <Style Selector="controls|CustomNumericUpDown">
         <Setter Property="Background"
                 Value="{DynamicResource ThemeBackgroundBrush}" />
+        <Setter Property="PlaceholderForeground"
+                Value="{DynamicResource ThemeForegroundLowBrush}" />
         <Setter Property="BorderBrush"
                 Value="{DynamicResource ThemeBorderMidBrush}" />
         <Setter Property="BorderThickness"
                 Value="{DynamicResource ThemeBorderThickness}" />
         <Setter Property="Padding"
                 Value="4" />
+
         <Setter Property="Template">
             <ControlTemplate>
                 <DataValidationErrors>
@@ -52,8 +55,8 @@
                                                  Text="{TemplateBinding Text}"
                                                  TextAlignment="{TemplateBinding TextAlignment}"
                                                  TextWrapping="NoWrap"
-                                                 Watermark="{TemplateBinding Watermark}"
-                                                 WatermarkForeground="{TemplateBinding WatermarkForeground}"
+                                                 PlaceholderText="{TemplateBinding PlaceholderText}"
+                                                 PlaceholderForeground="{TemplateBinding PlaceholderForeground}"
                                                  IconData="{TemplateBinding IconData}"
                                                  IconColor="{TemplateBinding IconColor}"
                                                  IconSize="{TemplateBinding IconSize}" />
